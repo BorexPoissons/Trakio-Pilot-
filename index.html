@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v3.0.7 - Gestion Complète</title>
+    <title>TRAKIO v3.0.8 - Gestion Complète</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -2086,7 +2086,7 @@
         <div class="sidebar-header">
             <div class="logo">TR</div>
             <span class="logo-text">TRAKIO</span>
-            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.0.7</span>
+            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.0.8</span>
         </div>
 
         <button class="sidebar-toggle" id="sidebarToggle">
@@ -6433,7 +6433,7 @@
                                 <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg-primary); border-radius:10px; margin-bottom:16px;">
                                     <div>
                                         <div style="font-size:12px; color:var(--text-muted);">Version installée</div>
-                                        <div style="font-weight:700; font-family:'Space Mono',monospace; color:var(--accent-primary);" id="trakio-version">v3.0.7</div>
+                                        <div style="font-weight:700; font-family:'Space Mono',monospace; color:var(--accent-primary);" id="trakio-version">v3.0.8</div>
                                     </div>
                                     <div style="text-align:right;">
                                         <div style="font-size:12px; color:var(--text-muted);">Dernière mise à jour</div>
@@ -10902,7 +10902,7 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '3.0.7';
+        const APP_VERSION = '3.0.8';
         const APP_VERSION_DATE = '2025-12-01';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
@@ -10946,6 +10946,11 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '3.0.8': [
+                '📄 Parseur PDF intelligent - sépare automatiquement les lignes fusionnées',
+                '🔍 Détection de plusieurs prix sur une même ligne',
+                '✨ Debug amélioré dans la console'
+            ],
             '3.0.7': [
                 '📄 Parseur PDF corrigé - séparation correcte des 2 colonnes',
                 '🔍 Recherche globale inclut Prix Fournisseurs',
@@ -19917,10 +19922,18 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                         
                         const allProducts = [];
                         
+                        console.log('📄 Parsing PDF:', pdf.numPages, 'pages');
+                        
                         // Extraire le texte de toutes les pages
                         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
                             const page = await pdf.getPage(pageNum);
                             const textContent = await page.getTextContent();
+                            const viewport = page.getViewport({ scale: 1 });
+                            
+                            // Point de séparation = milieu de la page
+                            const splitX = viewport.width / 2;
+                            
+                            console.log(`Page ${pageNum}: largeur=${viewport.width}, splitX=${splitX}`);
                             
                             // Collecter tous les items avec leurs positions
                             const items = textContent.items.map(item => ({
@@ -19929,45 +19942,34 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                                 y: Math.round(item.transform[5])
                             })).filter(item => item.text.trim());
                             
-                            // Trouver le point de séparation des colonnes
-                            // Chercher le plus grand gap horizontal
-                            const allX = items.map(i => i.x).sort((a, b) => a - b);
-                            let maxGap = 0;
-                            let splitX = 300; // Valeur par défaut
+                            // Debug: afficher quelques items
+                            console.log('Premiers items:', items.slice(0, 10).map(i => `[${i.x},${i.y}] "${i.text}"`));
                             
-                            for (let i = 1; i < allX.length; i++) {
-                                const gap = allX[i] - allX[i-1];
-                                if (gap > maxGap && allX[i-1] > 100 && allX[i] < 500) {
-                                    maxGap = gap;
-                                    splitX = (allX[i-1] + allX[i]) / 2;
-                                }
-                            }
-                            
-                            console.log(`Page ${pageNum}: splitX = ${splitX}, maxGap = ${maxGap}`);
-                            
-                            // Séparer en 2 colonnes
+                            // Séparer en 2 colonnes basé sur X
                             const leftItems = items.filter(i => i.x < splitX);
                             const rightItems = items.filter(i => i.x >= splitX);
                             
-                            // Parser chaque colonne séparément
-                            const leftProducts = parseColumnToProducts(leftItems);
-                            const rightProducts = parseColumnToProducts(rightItems);
+                            console.log(`Page ${pageNum}: ${leftItems.length} items gauche, ${rightItems.length} items droite`);
                             
-                            console.log(`Page ${pageNum}: ${leftProducts.length} gauche, ${rightProducts.length} droite`);
+                            // Parser chaque colonne séparément
+                            const leftProducts = parseColumnToProducts(leftItems, 'gauche');
+                            const rightProducts = parseColumnToProducts(rightItems, 'droite');
+                            
+                            console.log(`Page ${pageNum}: ${leftProducts.length} produits gauche, ${rightProducts.length} produits droite`);
                             
                             allProducts.push(...leftProducts, ...rightProducts);
                         }
                         
                         // Nettoyer et dédupliquer
                         const cleanProducts = cleanParsedProducts(allProducts, supplierId);
-                        console.log('📄 PDF parsé:', cleanProducts.length, 'produits trouvés');
+                        console.log('✅ Total:', cleanProducts.length, 'produits');
                         if (cleanProducts.length > 0) {
-                            console.log('Exemples:', cleanProducts.slice(0, 10).map(p => `${p.price} ${p.name}`));
+                            console.log('Exemples:', cleanProducts.slice(0, 5).map(p => `${p.price} - ${p.name}`));
                         }
                         resolve(cleanProducts);
                         
                     } catch (error) {
-                        console.error('Erreur parsing PDF:', error);
+                        console.error('❌ Erreur parsing PDF:', error);
                         reject(error);
                     }
                 };
@@ -19977,59 +19979,102 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
         }
 
         // Parser les items d'une colonne en produits
-        function parseColumnToProducts(items) {
+        function parseColumnToProducts(items, columnName) {
             const products = [];
             
-            // Grouper par lignes (même Y à ±5 pixels)
+            if (items.length === 0) return products;
+            
+            // Grouper par lignes (même Y à ±8 pixels)
             const lineGroups = {};
             items.forEach(item => {
-                const lineKey = Math.round(item.y / 10) * 10;
+                const lineKey = Math.round(item.y / 12) * 12;
                 if (!lineGroups[lineKey]) lineGroups[lineKey] = [];
                 lineGroups[lineKey].push(item);
             });
             
             // Traiter chaque ligne
-            Object.values(lineGroups).forEach(lineItems => {
-                // Trier par X
-                lineItems.sort((a, b) => a.x - b.x);
+            Object.keys(lineGroups).sort((a, b) => b - a).forEach(lineY => {
+                const lineItems = lineGroups[lineY].sort((a, b) => a.x - b.x);
                 
                 // Reconstruire le texte de la ligne
-                const lineText = lineItems.map(i => i.text).join(' ').trim();
+                const lineText = lineItems.map(i => i.text).join(' ').replace(/\s+/g, ' ').trim();
                 
-                // Parser le produit
-                const product = parseProductSegment(lineText);
-                if (product) {
-                    products.push(product);
+                // Parser le(s) produit(s)
+                const result = parseProductLine(lineText);
+                if (result) {
+                    // Si c'est un tableau (ligne fusionnée séparée), ajouter tous les produits
+                    if (Array.isArray(result)) {
+                        products.push(...result);
+                    } else {
+                        products.push(result);
+                    }
                 }
             });
             
             return products;
         }
 
-        // Parser un segment de texte pour extraire un produit
-        function parseProductSegment(segment) {
-            if (!segment || segment.length < 3) return null;
-            
-            // Nettoyer
-            segment = segment.replace(/\s+/g, ' ').trim();
+        // Parser une ligne pour extraire un ou plusieurs produits
+        function parseProductLine(line) {
+            if (!line || line.length < 5) return null;
             
             // Ignorer les en-têtes/footers
             const ignorePatterns = ['DELMEER', 'TEL.', 'FAX.', 'Bonjour', 'salutations', 
-                'delmeer@', 'Sisseln', 'BOREX', 'l\'att', 'voici nos cours', 'Prix des crevettes', 'Avec nos'];
-            if (ignorePatterns.some(p => segment.toLowerCase().includes(p.toLowerCase()))) return null;
+                'delmeer@', 'Sisseln', 'BOREX', 'l\'att', 'voici nos cours', 'Prix des crevettes', 
+                'Avec nos', 'meilleures', 'PAGE'];
+            if (ignorePatterns.some(p => line.toLowerCase().includes(p.toLowerCase()))) return null;
             
-            // Pattern: PRIX NOM (ex: "24.00 Court-bouillon Morvandelle")
-            const match = segment.match(/^(\d+[.,]\d{2})\s+(.+)$/);
+            // Chercher TOUS les prix dans la ligne
+            const pricePattern = /(\d+[.,]\d{2})/g;
+            const prices = [];
+            let match;
+            while ((match = pricePattern.exec(line)) !== null) {
+                prices.push({ value: match[1], index: match.index });
+            }
             
-            if (match) {
-                const price = parseFloat(match[1].replace(',', '.'));
-                const name = match[2].trim();
+            // Si pas de prix, ignorer
+            if (prices.length === 0) return null;
+            
+            // Si un seul prix au début, c'est un produit simple
+            if (prices.length === 1 && prices[0].index < 10) {
+                const priceMatch = line.match(/^(\d+[.,]\d{2})\s+(.+)$/);
+                if (priceMatch) {
+                    const price = parseFloat(priceMatch[1].replace(',', '.'));
+                    const name = priceMatch[2].trim();
+                    if (name.length >= 3) {
+                        return { name, price };
+                    }
+                }
+                return null;
+            }
+            
+            // Si plusieurs prix = ligne fusionnée, on retourne un tableau
+            // Format typique: "NOM1 PRIX1 NOM2" ou "PRIX1 NOM1 PRIX2 NOM2"
+            const products = [];
+            
+            // Essayer de séparer: on coupe avant chaque prix
+            for (let i = 0; i < prices.length; i++) {
+                const priceInfo = prices[i];
+                const price = parseFloat(priceInfo.value.replace(',', '.'));
                 
-                // Valider le nom
-                if (name.length < 2) return null;
-                if (/^\d+[.,]\d{2}/.test(name)) return null; // Éviter les doubles prix
+                // Le nom suit le prix
+                const startOfName = priceInfo.index + priceInfo.value.length;
+                const endOfName = (i + 1 < prices.length) ? prices[i + 1].index : line.length;
                 
-                return { name, price };
+                let name = line.substring(startOfName, endOfName).trim();
+                
+                // Nettoyer le nom
+                name = name.replace(/^\s+|\s+$/g, '').replace(/\s+/g, ' ');
+                
+                if (name.length >= 3 && !/^\d+[.,]\d{2}/.test(name)) {
+                    products.push({ name, price });
+                }
+            }
+            
+            if (products.length === 1) {
+                return products[0];
+            } else if (products.length > 1) {
+                return products; // Retourne un tableau
             }
             
             return null;
