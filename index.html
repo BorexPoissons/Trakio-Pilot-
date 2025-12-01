@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v3.1.4 - Gestion Complète</title>
+    <title>TRAKIO v3.1.5 - Gestion Complète</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -2083,12 +2083,12 @@
                 <div style="display:flex; justify-content:center; align-items:center; gap:16px;">
                     <div>
                         <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Actuelle</div>
-                        <div id="update-current-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--text-muted);">v3.1.4</div>
+                        <div id="update-current-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--text-muted);">v3.1.5</div>
                     </div>
                     <div style="font-size:24px;">→</div>
                     <div>
                         <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Nouvelle</div>
-                        <div id="update-new-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--accent-primary);">v3.1.4</div>
+                        <div id="update-new-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--accent-primary);">v3.1.5</div>
                     </div>
                 </div>
             </div>
@@ -2140,7 +2140,7 @@
         <div class="sidebar-header">
             <div class="logo">TR</div>
             <span class="logo-text">TRAKIO</span>
-            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.1.4</span>
+            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.1.5</span>
         </div>
 
         <button class="sidebar-toggle" id="sidebarToggle">
@@ -6500,7 +6500,7 @@
                                 <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg-primary); border-radius:10px; margin-bottom:16px;">
                                     <div>
                                         <div style="font-size:12px; color:var(--text-muted);">Version installée</div>
-                                        <div style="font-weight:700; font-family:'Space Mono',monospace; color:var(--accent-primary);" id="trakio-version">v3.1.4</div>
+                                        <div style="font-weight:700; font-family:'Space Mono',monospace; color:var(--accent-primary);" id="trakio-version">v3.1.5</div>
                                     </div>
                                     <div style="text-align:right;">
                                         <div style="font-size:12px; color:var(--text-muted);">Dernière mise à jour</div>
@@ -10977,7 +10977,7 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '3.1.4';
+        const APP_VERSION = '3.1.5';
         const APP_VERSION_DATE = '2025-12-01';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
@@ -11021,6 +11021,11 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '3.1.5': [
+                '🔇 Modal mise à jour uniquement lors de sync auto (5 min)',
+                '⏳ Si commande en cours → notification discrète',
+                '🚫 Plus de modal au démarrage de la page'
+            ],
             '3.1.4': [
                 '✅ Mise à jour ne redemande plus après installation',
                 '🔄 Cache bust forcé lors du rechargement',
@@ -18384,6 +18389,8 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             checking: false,
             updateAvailable: false,
             newVersion: null,
+            // Pages où on ne doit PAS interrompre l'utilisateur
+            protectedPages: ['quickorder', 'myfish', 'commande'],
             // Stocker la version déjà installée/vue pour ne pas redemander
             acknowledgedVersion: localStorage.getItem('trakio_acknowledged_version') || ''
         };
@@ -18413,7 +18420,22 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             }
         })();
 
-        // Vérifier si une mise à jour est disponible
+        // Vérifier si l'utilisateur est sur une page protégée (commande en cours)
+        function isUserBusy() {
+            // Vérifier la page actuelle
+            if (UpdateSystem.protectedPages.includes(currentPage)) {
+                return true;
+            }
+            
+            // Vérifier s'il y a un panier en cours
+            if (typeof QOData !== 'undefined' && QOData.cart && QOData.cart.length > 0) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        // Vérifier si une mise à jour est disponible (appelé UNIQUEMENT par sync auto)
         async function checkForUpdate() {
             if (UpdateSystem.checking) return;
             if (!DropboxConfig.isAvailable()) return;
@@ -18431,30 +18453,27 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                     const currentVersion = APP_VERSION;
                     const serverVersion = versionData.version;
                     
-                    console.log('📦 Version actuelle:', currentVersion, '| Version serveur:', serverVersion);
-                    
                     // Si on a déjà la bonne version, rien à faire
                     if (serverVersion === currentVersion) {
-                        console.log('✅ Déjà à jour');
                         UpdateSystem.updateAvailable = false;
-                        return;
-                    }
-                    
-                    // Si on a déjà reconnu cette version (mais pas encore rechargé correctement)
-                    if (serverVersion === UpdateSystem.acknowledgedVersion) {
-                        console.log('⏳ Mise à jour déjà en attente de rechargement');
-                        // Proposer un reload forcé
-                        if (confirm(`⚠️ La mise à jour v${serverVersion} n'a pas été installée correctement.\n\nVoulez-vous forcer le rechargement ?\n\n(Conseil: Videz le cache avec Ctrl+Shift+R)`)) {
-                            forceHardReload();
-                        }
+                        // Nettoyer l'acknowledged version si on est à jour
+                        localStorage.removeItem('trakio_acknowledged_version');
                         return;
                     }
                     
                     // Comparer les versions
                     if (isNewerVersion(serverVersion, currentVersion)) {
-                        console.log('🆕 Nouvelle version disponible:', serverVersion);
+                        console.log('🆕 Mise à jour disponible:', currentVersion, '→', serverVersion);
                         UpdateSystem.updateAvailable = true;
                         UpdateSystem.newVersion = serverVersion;
+                        
+                        // Si l'utilisateur est occupé (sur une commande), attendre
+                        if (isUserBusy()) {
+                            console.log('⏳ Utilisateur occupé - mise à jour reportée à la prochaine sync');
+                            // Petite notification discrète en bas
+                            showUpdateNotification(serverVersion);
+                            return;
+                        }
                         
                         // Afficher le modal de mise à jour
                         showUpdateModal(currentVersion, serverVersion, versionData.changelog || []);
@@ -18465,6 +18484,47 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             } finally {
                 UpdateSystem.checking = false;
             }
+        }
+
+        // Afficher une notification discrète (au lieu du modal bloquant)
+        function showUpdateNotification(newVersion) {
+            // Vérifier si la notification existe déjà
+            if (document.getElementById('update-notification')) return;
+            
+            const notif = document.createElement('div');
+            notif.id = 'update-notification';
+            notif.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+                color: #000;
+                padding: 16px 20px;
+                border-radius: 12px;
+                box-shadow: 0 10px 40px rgba(6,214,160,0.4);
+                z-index: 9999;
+                cursor: pointer;
+                animation: slideIn 0.3s ease;
+                max-width: 300px;
+            `;
+            notif.innerHTML = `
+                <div style="font-weight:700; margin-bottom:4px;">🆕 Mise à jour v${newVersion}</div>
+                <div style="font-size:12px; opacity:0.9;">Terminez votre commande, puis rechargez</div>
+            `;
+            notif.onclick = () => {
+                notif.remove();
+                // Si plus occupé, proposer la mise à jour
+                if (!isUserBusy()) {
+                    showUpdateModal(APP_VERSION, newVersion, []);
+                }
+            };
+            
+            document.body.appendChild(notif);
+            
+            // Auto-hide après 10 secondes
+            setTimeout(() => {
+                if (notif.parentNode) notif.remove();
+            }, 10000);
         }
 
         // Forcer un rechargement complet sans cache
@@ -18588,7 +18648,7 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             publishUpdate(APP_VERSION, changelogArray);
         }
 
-        // Forcer la sync maintenant
+        // Forcer la sync maintenant (clic manuel - ne vérifie PAS les mises à jour)
         async function forceSyncNow() {
             if (DropboxSync.isSyncing) {
                 showToast('⏳ Synchronisation déjà en cours...');
@@ -18604,34 +18664,30 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             DropboxSync.nextSyncTime = Date.now() + DropboxSync.syncFrequency;
             updateSyncCountdown();
             
-            // Vérifier les mises à jour d'abord
-            await checkForUpdate();
+            // Sync manuelle - PAS de vérification de mise à jour
+            // (les mises à jour sont vérifiées uniquement lors de la sync auto)
+            showSyncNotification('🔄 Synchronisation en cours...');
             
-            // Si pas de mise à jour, faire la sync complète
-            if (!UpdateSystem.updateAvailable) {
-                showSyncNotification('🔄 Synchronisation en cours...');
+            DropboxSync.isSyncing = true;
+            updateSyncIndicator('syncing');
+            
+            try {
+                // 1. Télécharger depuis Dropbox
+                await syncFromDropbox(true);
                 
-                DropboxSync.isSyncing = true;
-                updateSyncIndicator('syncing');
+                // 2. Envoyer les modifications locales
+                await syncToDropbox('all');
                 
-                try {
-                    // 1. Télécharger depuis Dropbox
-                    await syncFromDropbox(true);
-                    
-                    // 2. Envoyer les modifications locales
-                    await syncToDropbox('all');
-                    
-                    updateSyncIndicator('success');
-                    DropboxSync.lastSync = new Date();
-                    showSyncNotification('✅ Synchronisation terminée !');
-                } catch (error) {
-                    console.error('Erreur sync:', error);
-                    updateSyncIndicator('error');
-                    showSyncNotification('⚠️ Erreur de sync');
-                } finally {
-                    DropboxSync.isSyncing = false;
-                    updateSyncCountdown();
-                }
+                updateSyncIndicator('success');
+                DropboxSync.lastSync = new Date();
+                showSyncNotification('✅ Synchronisation terminée !');
+            } catch (error) {
+                console.error('Erreur sync:', error);
+                updateSyncIndicator('error');
+                showSyncNotification('⚠️ Erreur de sync');
+            } finally {
+                DropboxSync.isSyncing = false;
+                updateSyncCountdown();
             }
         }
 
@@ -18839,28 +18895,27 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             // Démarrer le décompte
             startSyncCountdown();
             
+            // Sync automatique toutes les 5 minutes
             DropboxSync.interval = setInterval(async () => {
                 if (DropboxConfig.canSync()) {
-                    // Vérifier d'abord les mises à jour
+                    // Reset du décompte d'abord
+                    DropboxSync.nextSyncTime = Date.now() + DropboxSync.syncFrequency;
+                    
+                    // Vérifier les mises à jour UNIQUEMENT lors de la sync auto
                     await checkForUpdate();
                     
-                    // Si pas de mise à jour en attente, faire la sync
-                    if (!UpdateSystem.updateAvailable) {
+                    // Si pas de mise à jour bloquante, faire la sync normale
+                    if (!UpdateSystem.updateAvailable || isUserBusy()) {
                         await performDropboxSync();
                     }
-                    
-                    // Reset du décompte
-                    DropboxSync.nextSyncTime = Date.now() + DropboxSync.syncFrequency;
                 }
             }, DropboxSync.syncFrequency);
 
-            // Sync immédiate au démarrage (après 5 sec pour laisser charger)
+            // Au démarrage : sync des données SANS vérifier les mises à jour
+            // Les mises à jour seront vérifiées à la prochaine sync auto (5 min)
             setTimeout(async () => {
                 if (DropboxConfig.canSync()) {
-                    await checkForUpdate();
-                    if (!UpdateSystem.updateAvailable) {
-                        await performDropboxSync();
-                    }
+                    await performDropboxSync();
                 }
             }, 5000);
 
