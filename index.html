@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v3.0.2 - Gestion Complète</title>
+    <title>TRAKIO v3.0.3 - Gestion Complète</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -5409,7 +5409,7 @@
                     </div>
                     <div style="display:flex; gap:12px; flex-wrap:wrap;">
                         <button class="btn btn-primary" onclick="showClientsForm()">➕ Nouveau client</button>
-                        <button class="btn btn-secondary" onclick="document.getElementById('clients-import-file').click()">📥 Importer</button>
+                        <button class="btn btn-secondary" onclick="showImportClientsModal()">📥 Importer</button>
                         <button class="btn btn-secondary" onclick="exportAllClientsCSV()">📤 Exporter</button>
                         <button class="btn" onclick="saveAllClientsToDropbox()" style="background:var(--accent-secondary); color:#fff; border:none;">☁️ Dropbox</button>
                         <input type="file" id="clients-import-file" accept=".csv,.xls,.xlsx" style="display:none;" onchange="importClientsFile(this)">
@@ -6596,6 +6596,55 @@
             <div style="padding:16px 24px; background:var(--bg-card); border-top:1px solid var(--border-color); display:flex; gap:12px; flex-shrink:0;">
                 <button onclick="saveUser()" class="btn btn-primary" style="flex:1; padding:14px; font-weight:600;">💾 Enregistrer</button>
                 <button onclick="closeUserModal()" class="btn btn-secondary" style="padding:14px;">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Import Clients - Choix du mode -->
+    <div id="import-clients-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:5000; justify-content:center; align-items:center; padding:20px;" onclick="if(event.target === this) closeImportClientsModal()">
+        <div style="background:var(--bg-card); border-radius:20px; max-width:450px; width:100%; overflow:hidden;">
+            <!-- Header -->
+            <div style="padding:24px; background:linear-gradient(135deg, var(--accent-secondary), var(--accent-primary)); text-align:center;">
+                <div style="font-size:50px; margin-bottom:10px;">📥</div>
+                <h2 style="color:#000; font-weight:700; margin:0;">Import Clients</h2>
+                <p style="color:#000; opacity:0.8; margin:8px 0 0;">Choisissez le mode d'import</p>
+            </div>
+            
+            <!-- Options -->
+            <div style="padding:24px;">
+                <div id="import-mode-replace" onclick="selectImportMode('replace')" style="background:var(--bg-primary); border:2px solid var(--accent-primary); border-radius:12px; padding:20px; margin-bottom:16px; cursor:pointer; transition:all 0.2s;">
+                    <div style="display:flex; align-items:center; gap:16px;">
+                        <div style="width:50px; height:50px; background:var(--accent-primary); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px;">🔄</div>
+                        <div style="flex:1;">
+                            <div style="font-weight:700; font-size:16px; color:var(--text-primary);">Remplacer tout</div>
+                            <div style="color:var(--text-muted); font-size:13px; margin-top:4px;">Supprime tous les clients existants et importe le fichier</div>
+                        </div>
+                        <div id="import-check-replace" style="width:24px; height:24px; border-radius:50%; background:var(--accent-primary); display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold;">✓</div>
+                    </div>
+                </div>
+                
+                <div id="import-mode-update" onclick="selectImportMode('update')" style="background:var(--bg-primary); border:2px solid var(--border-color); border-radius:12px; padding:20px; cursor:pointer; transition:all 0.2s;">
+                    <div style="display:flex; align-items:center; gap:16px;">
+                        <div style="width:50px; height:50px; background:var(--bg-hover); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px;">➕</div>
+                        <div style="flex:1;">
+                            <div style="font-weight:700; font-size:16px; color:var(--text-primary);">Mettre à jour / Ajouter</div>
+                            <div style="color:var(--text-muted); font-size:13px; margin-top:4px;">Met à jour les clients existants, ajoute les nouveaux</div>
+                        </div>
+                        <div id="import-check-update" style="width:24px; height:24px; border-radius:50%; background:var(--bg-hover); display:none; align-items:center; justify-content:center; color:#000; font-weight:bold;">✓</div>
+                    </div>
+                </div>
+                
+                <!-- Info clients actuels -->
+                <div style="background:var(--bg-primary); border-radius:10px; padding:14px; margin-top:20px; text-align:center;">
+                    <span style="color:var(--text-muted); font-size:13px;">Clients actuels : </span>
+                    <span id="import-current-count" style="font-weight:700; color:var(--accent-primary); font-family:'Space Mono',monospace;">0</span>
+                </div>
+            </div>
+            
+            <!-- Boutons -->
+            <div style="padding:16px 24px; border-top:1px solid var(--border-color); display:flex; gap:12px;">
+                <button onclick="closeImportClientsModal()" style="flex:1; padding:14px; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-color); border-radius:10px; font-size:14px; font-weight:600; cursor:pointer;">Annuler</button>
+                <button onclick="confirmImportClients()" style="flex:2; padding:14px; background:var(--accent-primary); color:#000; border:none; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer;">📂 Choisir fichier</button>
             </div>
         </div>
     </div>
@@ -10816,7 +10865,7 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '3.0.2';
+        const APP_VERSION = '3.0.3';
         const APP_VERSION_DATE = '2025-12-01';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
@@ -10860,6 +10909,12 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '3.0.3': [
+                '📥 Modal import clients avec choix du mode',
+                '🔄 Option "Remplacer tout" (vide + importe)',
+                '➕ Option "Mettre à jour / Ajouter" (conserve existants)',
+                '📊 Affichage du nombre de clients actuels'
+            ],
             '3.0.2': [
                 '🔄 Import clients intelligent (mise à jour au lieu de doublons)',
                 '🔍 Détection par numéro client ou nom',
@@ -14262,6 +14317,51 @@ QOData.clients = [
             link.click();
         }
 
+        // Variable pour stocker le mode d'import sélectionné
+        let clientsImportMode = 'replace';
+        
+        function showImportClientsModal() {
+            document.getElementById('import-current-count').textContent = QOData.clients.length;
+            selectImportMode('replace'); // Mode par défaut
+            document.getElementById('import-clients-modal').style.display = 'flex';
+        }
+        
+        function closeImportClientsModal() {
+            document.getElementById('import-clients-modal').style.display = 'none';
+        }
+        
+        function selectImportMode(mode) {
+            clientsImportMode = mode;
+            
+            const replaceDiv = document.getElementById('import-mode-replace');
+            const updateDiv = document.getElementById('import-mode-update');
+            const checkReplace = document.getElementById('import-check-replace');
+            const checkUpdate = document.getElementById('import-check-update');
+            
+            if (mode === 'replace') {
+                replaceDiv.style.border = '2px solid var(--accent-primary)';
+                replaceDiv.querySelector('div > div').style.background = 'var(--accent-primary)';
+                checkReplace.style.display = 'flex';
+                
+                updateDiv.style.border = '2px solid var(--border-color)';
+                updateDiv.querySelector('div > div').style.background = 'var(--bg-hover)';
+                checkUpdate.style.display = 'none';
+            } else {
+                updateDiv.style.border = '2px solid var(--accent-primary)';
+                updateDiv.querySelector('div > div').style.background = 'var(--accent-primary)';
+                checkUpdate.style.display = 'flex';
+                
+                replaceDiv.style.border = '2px solid var(--border-color)';
+                replaceDiv.querySelector('div > div').style.background = 'var(--bg-hover)';
+                checkReplace.style.display = 'none';
+            }
+        }
+        
+        function confirmImportClients() {
+            closeImportClientsModal();
+            document.getElementById('clients-import-file').click();
+        }
+
         function importClientsFile(input) {
             const file = input.files[0];
             if (!file) return;
@@ -14274,6 +14374,13 @@ QOData.clients = [
 
                 let added = 0;
                 let updated = 0;
+                let deleted = 0;
+                
+                // Mode "Remplacer tout" : vider les clients existants
+                if (clientsImportMode === 'replace') {
+                    deleted = QOData.clients.length;
+                    QOData.clients = [];
+                }
                 
                 for (let i = 1; i < lines.length; i++) {
                     const cols = lines[i].split(sep).map(c => c.replace(/"/g, '').trim());
@@ -14283,13 +14390,15 @@ QOData.clients = [
                         
                         // Chercher si le client existe déjà (par numéro ou par nom)
                         let existingIndex = -1;
-                        if (clientNum) {
-                            existingIndex = QOData.clients.findIndex(c => c.num === clientNum);
-                        }
-                        if (existingIndex === -1) {
-                            existingIndex = QOData.clients.findIndex(c => 
-                                c.name.toLowerCase().trim() === clientName.toLowerCase().trim()
-                            );
+                        if (clientsImportMode === 'update') {
+                            if (clientNum) {
+                                existingIndex = QOData.clients.findIndex(c => c.num === clientNum);
+                            }
+                            if (existingIndex === -1) {
+                                existingIndex = QOData.clients.findIndex(c => 
+                                    c.name.toLowerCase().trim() === clientName.toLowerCase().trim()
+                                );
+                            }
                         }
                         
                         const clientData = {
@@ -14330,7 +14439,17 @@ QOData.clients = [
 
                 saveQOData('clients');
                 renderClientsTable();
-                alert(`✅ Import terminé !\n\n📥 ${added} clients ajoutés\n🔄 ${updated} clients mis à jour`);
+                
+                // Message selon le mode
+                let message = '✅ Import terminé !\n\n';
+                if (clientsImportMode === 'replace') {
+                    message += `🗑️ ${deleted} anciens clients supprimés\n`;
+                    message += `📥 ${added} clients importés`;
+                } else {
+                    message += `📥 ${added} clients ajoutés\n`;
+                    message += `🔄 ${updated} clients mis à jour`;
+                }
+                alert(message);
             };
             reader.readAsText(file, 'ISO-8859-1');
             input.value = '';
