@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v3.1.6 - Gestion Complète</title>
+    <title>TRAKIO v3.1.7 - Gestion Complète</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -2083,12 +2083,12 @@
                 <div style="display:flex; justify-content:center; align-items:center; gap:16px;">
                     <div>
                         <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Actuelle</div>
-                        <div id="update-current-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--text-muted);">v3.1.6</div>
+                        <div id="update-current-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--text-muted);">v3.1.7</div>
                     </div>
                     <div style="font-size:24px;">→</div>
                     <div>
                         <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Nouvelle</div>
-                        <div id="update-new-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--accent-primary);">v3.1.6</div>
+                        <div id="update-new-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--accent-primary);">v3.1.7</div>
                     </div>
                 </div>
             </div>
@@ -2139,7 +2139,7 @@
         <div class="sidebar-header">
             <div class="logo">TR</div>
             <span class="logo-text">TRAKIO</span>
-            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.1.6</span>
+            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.1.7</span>
         </div>
 
         <button class="sidebar-toggle" id="sidebarToggle">
@@ -6499,7 +6499,7 @@
                                 <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg-primary); border-radius:10px; margin-bottom:16px;">
                                     <div>
                                         <div style="font-size:12px; color:var(--text-muted);">Version installée</div>
-                                        <div style="font-weight:700; font-family:'Space Mono',monospace; color:var(--accent-primary);" id="trakio-version">v3.1.6</div>
+                                        <div style="font-weight:700; font-family:'Space Mono',monospace; color:var(--accent-primary);" id="trakio-version">v3.1.7</div>
                                     </div>
                                     <div style="text-align:right;">
                                         <div style="font-size:12px; color:var(--text-muted);">Dernière mise à jour</div>
@@ -10976,7 +10976,7 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '3.1.6';
+        const APP_VERSION = '3.1.7';
         const APP_VERSION_DATE = '2025-12-01';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
@@ -11020,6 +11020,11 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '3.1.7': [
+                '🚫 Modal mise à jour supprimé au chargement/rafraîchissement',
+                '✅ Modal uniquement lors de la sync auto (5 min)',
+                '🔧 Ne bloque plus l\'utilisateur au démarrage'
+            ],
             '3.1.6': [
                 '🐛 Correction bug CSS affiché en texte sur la page',
                 '✅ Modal mise à jour uniquement lors sync auto',
@@ -11124,6 +11129,7 @@
         };
 
         // Vérifier si une mise à jour est nécessaire
+        // NOTE: Ne PAS afficher de modal ici ! Le modal n'apparaît que lors de la sync auto Dropbox
         function checkVersionUpdate() {
             const savedVersion = localStorage.getItem('trakio_version');
 
@@ -11134,8 +11140,10 @@
             }
 
             if (savedVersion !== APP_VERSION) {
-                // Nouvelle version détectée
-                showUpdateModal(savedVersion, APP_VERSION);
+                // Nouvelle version détectée - juste mettre à jour localStorage
+                // PAS de modal ici - le modal n'apparaît que lors de la sync auto
+                console.log(`📦 Version mise à jour: ${savedVersion} → ${APP_VERSION}`);
+                localStorage.setItem('trakio_version', APP_VERSION);
             }
         }
 
