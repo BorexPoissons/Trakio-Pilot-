@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v3.2.1 - Gestion Complète</title>
+    <title>TRAKIO v3.2.2 - Gestion Complète</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -2083,12 +2083,12 @@
                 <div style="display:flex; justify-content:center; align-items:center; gap:16px;">
                     <div>
                         <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Actuelle</div>
-                        <div id="update-current-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--text-muted);">v3.2.1</div>
+                        <div id="update-current-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--text-muted);">v3.2.2</div>
                     </div>
                     <div style="font-size:24px;">→</div>
                     <div>
                         <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Nouvelle</div>
-                        <div id="update-new-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--accent-primary);">v3.2.1</div>
+                        <div id="update-new-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--accent-primary);">v3.2.2</div>
                     </div>
                 </div>
             </div>
@@ -2139,7 +2139,7 @@
         <div class="sidebar-header">
             <div class="logo">TR</div>
             <span class="logo-text">TRAKIO</span>
-            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.2.1</span>
+            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.2.2</span>
         </div>
 
         <button class="sidebar-toggle" id="sidebarToggle">
@@ -2325,6 +2325,7 @@
                 <div class="sync-status" onclick="forceSyncNow()" title="Cliquez pour synchroniser maintenant" style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:20px; cursor:pointer; margin-right:8px;">
                     <span id="sync-indicator" style="font-size:14px;">⚪</span>
                     <span id="sync-countdown" style="font-size:11px; color:var(--text-muted); font-family:'Space Mono',monospace; min-width:45px;">Sync</span>
+                    <span id="sync-update-badge" onclick="event.stopPropagation(); if(UpdateSystem.newVersion) showUpdateModal(APP_VERSION, UpdateSystem.newVersion, VERSION_CHANGELOG[UpdateSystem.newVersion] || []);" style="display:none; font-size:10px; color:#000; background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); padding:2px 6px; border-radius:10px; font-weight:700; margin-left:4px; cursor:pointer;">🆕 v0.0.0</span>
                 </div>
                 <button class="header-btn" id="themeToggle">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -6499,7 +6500,7 @@
                                 <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg-primary); border-radius:10px; margin-bottom:16px;">
                                     <div>
                                         <div style="font-size:12px; color:var(--text-muted);">Version installée</div>
-                                        <div style="font-weight:700; font-family:'Space Mono',monospace; color:var(--accent-primary);" id="trakio-version">v3.2.1</div>
+                                        <div style="font-weight:700; font-family:'Space Mono',monospace; color:var(--accent-primary);" id="trakio-version">v3.2.2</div>
                                     </div>
                                     <div style="text-align:right;">
                                         <div style="font-size:12px; color:var(--text-muted);">Dernière mise à jour</div>
@@ -10976,7 +10977,7 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '3.2.1';
+        const APP_VERSION = '3.2.2';
         const APP_VERSION_DATE = '2025-12-01';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
@@ -11020,6 +11021,11 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '3.2.2': [
+                '🆕 Badge version en attente visible à côté du décompte',
+                '👁️ Affiche "🟢 4:32 🆕 v3.2.3" quand une MAJ est disponible',
+                '🖱️ Clic sur le badge → ouvre directement le modal de mise à jour'
+            ],
             '3.2.1': [
                 '📢 Publication automatique de la version par l\'admin',
                 '🔄 version.json créé/mis à jour automatiquement sur Dropbox',
@@ -18418,7 +18424,19 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
 
         function updateSyncCountdown() {
             const countdownEl = document.getElementById('sync-countdown');
+            const updateBadge = document.getElementById('sync-update-badge');
             if (!countdownEl) return;
+            
+            // Gérer le badge de mise à jour en attente
+            if (updateBadge) {
+                if (UpdateSystem.updateAvailable && UpdateSystem.newVersion) {
+                    updateBadge.textContent = '🆕 v' + UpdateSystem.newVersion;
+                    updateBadge.style.display = 'inline';
+                    updateBadge.title = 'Mise à jour disponible ! Cliquez pour recharger.';
+                } else {
+                    updateBadge.style.display = 'none';
+                }
+            }
             
             if (!DropboxConfig.canSync()) {
                 countdownEl.textContent = 'Off';
@@ -18517,8 +18535,11 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                     // Si on a déjà la bonne version, rien à faire
                     if (serverVersion === currentVersion) {
                         UpdateSystem.updateAvailable = false;
+                        UpdateSystem.newVersion = null;
                         // Nettoyer l'acknowledged version si on est à jour
                         localStorage.removeItem('trakio_acknowledged_version');
+                        // Mettre à jour le badge (le cacher)
+                        updateSyncCountdown();
                         return;
                     }
                     
@@ -18527,6 +18548,9 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                         console.log('🆕 Mise à jour disponible:', currentVersion, '→', serverVersion);
                         UpdateSystem.updateAvailable = true;
                         UpdateSystem.newVersion = serverVersion;
+                        
+                        // Mettre à jour le badge dans la barre de sync
+                        updateSyncCountdown();
                         
                         // Si l'utilisateur est occupé (sur une commande), attendre
                         if (isUserBusy()) {
