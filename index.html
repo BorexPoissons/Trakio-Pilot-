@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v3.0.3 - Gestion Complète</title>
+    <title>TRAKIO v3.0.5 - Gestion Complète</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -15,6 +15,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Configurer PDF.js worker
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+    </script>
     <style>
         :root {
             --bg-primary: #0a0e17;
@@ -2079,7 +2086,7 @@
         <div class="sidebar-header">
             <div class="logo">TR</div>
             <span class="logo-text">TRAKIO</span>
-            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.0.0</span>
+            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.0.5</span>
         </div>
 
         <button class="sidebar-toggle" id="sidebarToggle">
@@ -6426,7 +6433,7 @@
                                 <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg-primary); border-radius:10px; margin-bottom:16px;">
                                     <div>
                                         <div style="font-size:12px; color:var(--text-muted);">Version installée</div>
-                                        <div style="font-weight:700; font-family:'Space Mono',monospace;" id="trakio-version">2.8.6</div>
+                                        <div style="font-weight:700; font-family:'Space Mono',monospace; color:var(--accent-primary);" id="trakio-version">v3.0.5</div>
                                     </div>
                                     <div style="text-align:right;">
                                         <div style="font-size:12px; color:var(--text-muted);">Dernière mise à jour</div>
@@ -10865,7 +10872,7 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '3.0.3';
+        const APP_VERSION = '3.0.5';
         const APP_VERSION_DATE = '2025-12-01';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
@@ -10909,6 +10916,17 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '3.0.5': [
+                '📄 VRAI parseur PDF pour Prix Fournisseurs',
+                '🔍 Extraction automatique des produits et prix',
+                '📥 Support PDF, CSV, Excel (tous les produits !)',
+                '🔄 Mise à jour des prix existants + historique'
+            ],
+            '3.0.4': [
+                '🔢 Numéro de version affiché à côté du logo',
+                '📋 Version synchronisée dans Paramètres > Mise à jour',
+                '🔄 Toutes les versions utilisent APP_VERSION'
+            ],
             '3.0.3': [
                 '📥 Modal import clients avec choix du mode',
                 '🔄 Option "Remplacer tout" (vide + importe)',
@@ -18084,15 +18102,16 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
         // SYSTÈME DE MISE À JOUR TRAKIO - Sauvegarde complète
         // =====================================================
 
-        const TRAKIO_VERSION = '2.9.3';
-        const TRAKIO_BUILD_DATE = '2025-11-29';
+        // Utiliser les mêmes constantes que APP_VERSION
+        const TRAKIO_VERSION = APP_VERSION;
+        const TRAKIO_BUILD_DATE = APP_VERSION_DATE;
 
         function initTrakioVersionInfo() {
             const versionEl = document.getElementById('trakio-version');
             const dateEl = document.getElementById('trakio-update-date');
             const navVersionEl = document.getElementById('nav-version');
 
-            if (versionEl) versionEl.textContent = TRAKIO_VERSION;
+            if (versionEl) versionEl.textContent = 'v' + TRAKIO_VERSION;
             if (dateEl) dateEl.textContent = TRAKIO_BUILD_DATE;
             if (navVersionEl) navVersionEl.textContent = 'v' + TRAKIO_VERSION;
 
@@ -19705,21 +19724,318 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
         function closePFProductModal() { document.getElementById('pf-product-modal').style.display = 'none'; }
 
         // Import process
-        function processPFImport() {
+        async function processPFImport() {
             const supplierId = document.getElementById('pf-import-supplier').value;
             const date = document.getElementById('pf-import-date').value;
+            const fileInput = document.getElementById('pf-import-file');
+            const file = fileInput.files[0];
 
             if (!supplierId) { alert('Sélectionnez un fournisseur'); return; }
             if (!date) { alert('Sélectionnez une date'); return; }
+            if (!file) { alert('Sélectionnez un fichier à importer'); return; }
 
-            // Pour l'instant, on utilise les données Delmeer pré-chargées
-            // En production, on parserait le fichier uploadé
+            const fileName = file.name.toLowerCase();
+            
+            try {
+                let products = [];
+                
+                if (fileName.endsWith('.pdf')) {
+                    // Parser le PDF
+                    products = await parsePDFFile(file, supplierId);
+                } else if (fileName.endsWith('.csv')) {
+                    // Parser CSV
+                    products = await parseCSVFile(file, supplierId);
+                } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+                    // Parser Excel
+                    products = await parseExcelFile(file, supplierId);
+                } else {
+                    alert('Format de fichier non supporté. Utilisez PDF, CSV ou Excel.');
+                    return;
+                }
 
-            alert('✅ Import simulé avec succès!\n\nEn production, le fichier serait parsé automatiquement.');
-            closePFImportModal();
+                if (products.length === 0) {
+                    alert('Aucun produit trouvé dans le fichier.');
+                    return;
+                }
 
-            // Charger les données Delmeer de démo
-            loadDelmeerData();
+                // Ajouter/mettre à jour les produits
+                let added = 0;
+                let updated = 0;
+                
+                products.forEach(p => {
+                    // Chercher si le produit existe déjà (par nom similaire)
+                    const existingIndex = PFData.products.findIndex(ep => 
+                        ep.supplierId === supplierId && 
+                        (ep.name.toLowerCase() === p.name.toLowerCase() || 
+                         ep.nameShort?.toLowerCase() === p.nameShort?.toLowerCase())
+                    );
+                    
+                    if (existingIndex !== -1) {
+                        // Mettre à jour le prix
+                        const oldPrice = PFData.products[existingIndex].price;
+                        PFData.products[existingIndex].price = p.price;
+                        PFData.products[existingIndex].lastUpdate = date;
+                        
+                        // Ajouter à l'historique si le prix a changé
+                        if (oldPrice !== p.price) {
+                            PFData.priceHistory.push({
+                                productId: PFData.products[existingIndex].id,
+                                price: p.price,
+                                oldPrice: oldPrice,
+                                date: date,
+                                supplierId: supplierId
+                            });
+                        }
+                        updated++;
+                    } else {
+                        // Nouveau produit
+                        const newId = 'PF' + Date.now() + '_' + added;
+                        const newProduct = {
+                            id: newId,
+                            name: p.name,
+                            nameShort: p.nameShort || p.name.substring(0, 25),
+                            price: p.price,
+                            unit: p.unit || 'kg',
+                            origin: p.origin || '',
+                            supplierId: supplierId,
+                            boxSize: p.boxSize || 5,
+                            lastUpdate: date
+                        };
+                        PFData.products.push(newProduct);
+                        
+                        // Ajouter à l'historique
+                        PFData.priceHistory.push({
+                            productId: newId,
+                            price: p.price,
+                            date: date,
+                            supplierId: supplierId
+                        });
+                        added++;
+                    }
+                });
+
+                savePFData();
+                renderPFCatalogue();
+                updatePFStats();
+                closePFImportModal();
+                
+                alert(`✅ Import terminé !\n\n📥 ${added} nouveaux produits\n🔄 ${updated} produits mis à jour\n📊 Total: ${PFData.products.filter(p => p.supplierId === supplierId).length} produits ${supplierId}`);
+                
+            } catch (error) {
+                console.error('Erreur import:', error);
+                alert('❌ Erreur lors de l\'import: ' + error.message);
+            }
+        }
+
+        // Parser un fichier PDF (format Delmeer)
+        async function parsePDFFile(file, supplierId) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        const typedArray = new Uint8Array(e.target.result);
+                        const pdf = await pdfjsLib.getDocument(typedArray).promise;
+                        
+                        let allText = '';
+                        
+                        // Extraire le texte de toutes les pages
+                        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                            const page = await pdf.getPage(pageNum);
+                            const textContent = await page.getTextContent();
+                            
+                            // Trier les éléments par position Y puis X pour reconstituer les lignes
+                            const items = textContent.items.map(item => ({
+                                text: item.str,
+                                x: item.transform[4],
+                                y: item.transform[5]
+                            }));
+                            
+                            // Grouper par lignes (même Y approximativement)
+                            const lines = {};
+                            items.forEach(item => {
+                                const lineY = Math.round(item.y / 10) * 10; // Arrondir à 10px près
+                                if (!lines[lineY]) lines[lineY] = [];
+                                lines[lineY].push(item);
+                            });
+                            
+                            // Trier chaque ligne par X et reconstituer le texte
+                            Object.keys(lines).sort((a, b) => b - a).forEach(y => {
+                                const lineItems = lines[y].sort((a, b) => a.x - b.x);
+                                const lineText = lineItems.map(i => i.text).join(' ');
+                                allText += lineText + '\n';
+                            });
+                        }
+                        
+                        // Parser le texte pour extraire les produits
+                        const products = parseDelmerText(allText, supplierId);
+                        resolve(products);
+                        
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = () => reject(new Error('Erreur lecture fichier'));
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // Parser le texte extrait du PDF Delmeer
+        function parseDelmerText(text, supplierId) {
+            const products = [];
+            const lines = text.split('\n');
+            
+            // Regex pour capturer: prix (nombre) suivi du nom du produit
+            // Format Delmeer: "31.80 Fil de Black Cod IQF MSC" ou "0.00 Fil de maigre a/p"
+            const priceProductRegex = /^(\d+[.,]\d{2})\s+(.+)$/;
+            
+            // Regex alternative: nom du produit suivi du prix
+            const productPriceRegex = /^(.+?)\s+(\d+[.,]\d{2})$/;
+            
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line || line.length < 5) return;
+                
+                // Ignorer les lignes d'en-tête
+                if (line.includes('DELMEER') || line.includes('TEL.') || line.includes('FAX.') || 
+                    line.includes('Bonjour') || line.includes('salutations') || line.includes('@') ||
+                    line.includes('Sisseln') || line.includes('BOREX') || line.includes('l\'att.')) {
+                    return;
+                }
+                
+                let match = line.match(priceProductRegex);
+                let price, name;
+                
+                if (match) {
+                    price = parseFloat(match[1].replace(',', '.'));
+                    name = match[2].trim();
+                } else {
+                    match = line.match(productPriceRegex);
+                    if (match) {
+                        name = match[1].trim();
+                        price = parseFloat(match[2].replace(',', '.'));
+                    }
+                }
+                
+                // Si on a trouvé un produit valide
+                if (name && !isNaN(price)) {
+                    // Ignorer les produits à prix 0 (rupture) - optionnel
+                    // if (price === 0) return;
+                    
+                    // Nettoyer le nom
+                    name = name.replace(/\s+/g, ' ').trim();
+                    
+                    // Extraire l'origine si présente (2-3 lettres à la fin)
+                    let origin = '';
+                    const originMatch = name.match(/\s([A-Z]{2,3})$/);
+                    if (originMatch) {
+                        origin = originMatch[1];
+                    }
+                    
+                    // Créer un nom court
+                    let nameShort = name;
+                    if (name.length > 30) {
+                        nameShort = name.substring(0, 27) + '...';
+                    }
+                    
+                    products.push({
+                        name: name,
+                        nameShort: nameShort,
+                        price: price,
+                        unit: 'kg',
+                        origin: origin,
+                        supplierId: supplierId,
+                        boxSize: 5
+                    });
+                }
+            });
+            
+            return products;
+        }
+
+        // Parser un fichier CSV
+        async function parseCSVFile(file, supplierId) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const content = e.target.result;
+                        const sep = content.includes(';') ? ';' : ',';
+                        const lines = content.split('\n').filter(l => l.trim());
+                        
+                        const products = [];
+                        for (let i = 1; i < lines.length; i++) {
+                            const cols = lines[i].split(sep).map(c => c.replace(/"/g, '').trim());
+                            if (cols.length >= 2) {
+                                const name = cols[0];
+                                const price = parseFloat(cols[1].replace(',', '.')) || 0;
+                                const unit = cols[2] || 'kg';
+                                const origin = cols[3] || '';
+                                
+                                if (name) {
+                                    products.push({
+                                        name: name,
+                                        nameShort: name.substring(0, 25),
+                                        price: price,
+                                        unit: unit,
+                                        origin: origin,
+                                        supplierId: supplierId,
+                                        boxSize: 5
+                                    });
+                                }
+                            }
+                        }
+                        resolve(products);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = () => reject(new Error('Erreur lecture fichier'));
+                reader.readAsText(file, 'UTF-8');
+            });
+        }
+
+        // Parser un fichier Excel
+        async function parseExcelFile(file, supplierId) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const sheetName = workbook.SheetNames[0];
+                        const sheet = workbook.Sheets[sheetName];
+                        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                        
+                        const products = [];
+                        for (let i = 1; i < rows.length; i++) {
+                            const row = rows[i];
+                            if (row && row.length >= 2) {
+                                const name = String(row[0] || '').trim();
+                                const price = parseFloat(String(row[1] || '0').replace(',', '.')) || 0;
+                                const unit = String(row[2] || 'kg').trim();
+                                const origin = String(row[3] || '').trim();
+                                
+                                if (name) {
+                                    products.push({
+                                        name: name,
+                                        nameShort: name.substring(0, 25),
+                                        price: price,
+                                        unit: unit,
+                                        origin: origin,
+                                        supplierId: supplierId,
+                                        boxSize: 5
+                                    });
+                                }
+                            }
+                        }
+                        resolve(products);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = () => reject(new Error('Erreur lecture fichier'));
+                reader.readAsArrayBuffer(file);
+            });
         }
 
         // Charger données Delmeer
