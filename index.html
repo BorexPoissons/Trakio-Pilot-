@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v3.1.2 - Gestion Complète</title>
+    <title>TRAKIO v3.1.3 - Gestion Complète</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -2062,7 +2062,61 @@
         </div>
     </div>
     
+    <!-- Modal de mise à jour bloquant -->
+    <div id="update-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); z-index:100000; display:none; align-items:center; justify-content:center;">
+        <div style="background:var(--bg-card); border:2px solid var(--accent-primary); border-radius:24px; padding:48px; max-width:450px; text-align:center; box-shadow:0 30px 100px rgba(6,214,160,0.4);">
+            <!-- Animation de chargement -->
+            <div id="update-loader" style="margin-bottom:24px;">
+                <div style="width:80px; height:80px; margin:0 auto; border:4px solid var(--border-color); border-top-color:var(--accent-primary); border-radius:50%; animation:spin 1s linear infinite;"></div>
+            </div>
+            
+            <h2 style="font-size:24px; font-weight:800; margin-bottom:12px; color:var(--accent-primary);">
+                <span id="update-icon">🔄</span> Mise à jour en cours
+            </h2>
+            
+            <p id="update-message" style="color:var(--text-secondary); font-size:15px; line-height:1.6; margin-bottom:24px;">
+                Une nouvelle version de TRAKIO est disponible.<br>
+                Veuillez patienter pendant la mise à jour...
+            </p>
+            
+            <div id="update-version-info" style="background:var(--bg-primary); border-radius:12px; padding:16px; margin-bottom:24px;">
+                <div style="display:flex; justify-content:center; align-items:center; gap:16px;">
+                    <div>
+                        <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Actuelle</div>
+                        <div id="update-current-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--text-muted);">v3.1.3</div>
+                    </div>
+                    <div style="font-size:24px;">→</div>
+                    <div>
+                        <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Nouvelle</div>
+                        <div id="update-new-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--accent-primary);">v3.1.3</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="update-progress" style="background:var(--bg-primary); border-radius:10px; height:8px; overflow:hidden; margin-bottom:20px;">
+                <div id="update-progress-bar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); transition:width 0.5s; animation:progress-pulse 2s ease-in-out infinite;"></div>
+            </div>
+            
+            <p style="font-size:12px; color:var(--text-muted);">
+                ⏳ Ne fermez pas cette fenêtre
+            </p>
+            
+            <!-- Bouton de rechargement (apparaît quand prêt) -->
+            <button id="update-reload-btn" onclick="location.reload(true)" style="display:none; margin-top:20px; width:100%; padding:16px; background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border:none; border-radius:12px; color:white; font-size:16px; font-weight:700; cursor:pointer;">
+                🚀 Recharger maintenant
+            </button>
+        </div>
+    </div>
+    
     <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes progress-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(5deg); }
@@ -2086,7 +2140,7 @@
         <div class="sidebar-header">
             <div class="logo">TR</div>
             <span class="logo-text">TRAKIO</span>
-            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.1.2</span>
+            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.1.3</span>
         </div>
 
         <button class="sidebar-toggle" id="sidebarToggle">
@@ -2268,10 +2322,10 @@
                 </div>
             </div>
             <div class="header-right">
-                <!-- Indicateur de synchronisation Dropbox -->
-                <div class="sync-status" onclick="forceSyncNow()" title="Cliquez pour synchroniser" style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:20px; cursor:pointer; margin-right:8px;">
+                <!-- Indicateur de synchronisation Dropbox avec décompte -->
+                <div class="sync-status" onclick="forceSyncNow()" title="Cliquez pour synchroniser maintenant" style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:20px; cursor:pointer; margin-right:8px;">
                     <span id="sync-indicator" style="font-size:14px;">⚪</span>
-                    <span style="font-size:11px; color:var(--text-muted);">Sync</span>
+                    <span id="sync-countdown" style="font-size:11px; color:var(--text-muted); font-family:'Space Mono',monospace; min-width:45px;">Sync</span>
                 </div>
                 <button class="header-btn" id="themeToggle">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -6446,7 +6500,7 @@
                                 <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg-primary); border-radius:10px; margin-bottom:16px;">
                                     <div>
                                         <div style="font-size:12px; color:var(--text-muted);">Version installée</div>
-                                        <div style="font-weight:700; font-family:'Space Mono',monospace; color:var(--accent-primary);" id="trakio-version">v3.1.2</div>
+                                        <div style="font-weight:700; font-family:'Space Mono',monospace; color:var(--accent-primary);" id="trakio-version">v3.1.3</div>
                                     </div>
                                     <div style="text-align:right;">
                                         <div style="font-size:12px; color:var(--text-muted);">Dernière mise à jour</div>
@@ -6463,6 +6517,14 @@
                                         📥 Restaurer depuis une sauvegarde
                                     </button>
                                     <input type="file" id="restore-backup-file" accept=".json" onchange="restoreTrakioBackup(this)" style="display:none;">
+                                    
+                                    <!-- Publier une mise à jour -->
+                                    <div style="border-top:1px solid var(--border-color); margin-top:10px; padding-top:16px;">
+                                        <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">📢 Publier une mise à jour (notifie tous les utilisateurs)</div>
+                                        <button onclick="showPublishUpdateModal()" class="btn" style="width:100%; padding:14px; background:linear-gradient(135deg, #e74c3c, #c0392b); color:#fff; border:none; font-weight:700; border-radius:10px;">
+                                            🚀 Publier cette version aux utilisateurs
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <!-- Historique des sauvegardes -->
@@ -10915,7 +10977,7 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '3.1.2';
+        const APP_VERSION = '3.1.3';
         const APP_VERSION_DATE = '2025-12-01';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
@@ -10959,6 +11021,12 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '3.1.3': [
+                '⏱️ Décompte visible avant prochaine sync (ex: 4:32)',
+                '🔄 Système de mise à jour automatique',
+                '🚀 Bouton pour publier une mise à jour (admin)',
+                '🔒 Bloque les utilisateurs pendant une mise à jour'
+            ],
             '3.1.2': [
                 '⏱️ Sync Dropbox passée de 30 sec à 5 min',
                 '📊 Respecte les limites API Dropbox (300 appels/h)',
@@ -18250,10 +18318,248 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
         const DropboxSync = {
             enabled: false,
             interval: null,
+            countdownInterval: null,
             syncFrequency: 300000, // 5 minutes (respecte les limites Dropbox)
             lastSync: null,
+            nextSyncTime: null,
             isSyncing: false
         };
+
+        // =====================================================
+        // SYSTÈME DE DÉCOMPTE SYNC
+        // =====================================================
+
+        function startSyncCountdown() {
+            // Définir le prochain sync
+            DropboxSync.nextSyncTime = Date.now() + DropboxSync.syncFrequency;
+            
+            // Mettre à jour le décompte toutes les secondes
+            if (DropboxSync.countdownInterval) {
+                clearInterval(DropboxSync.countdownInterval);
+            }
+            
+            DropboxSync.countdownInterval = setInterval(() => {
+                updateSyncCountdown();
+            }, 1000);
+            
+            updateSyncCountdown();
+        }
+
+        function updateSyncCountdown() {
+            const countdownEl = document.getElementById('sync-countdown');
+            if (!countdownEl) return;
+            
+            if (!DropboxConfig.canSync()) {
+                countdownEl.textContent = 'Off';
+                return;
+            }
+            
+            if (DropboxSync.isSyncing) {
+                countdownEl.textContent = 'Sync...';
+                return;
+            }
+            
+            if (!DropboxSync.nextSyncTime) {
+                countdownEl.textContent = 'Sync';
+                return;
+            }
+            
+            const remaining = Math.max(0, DropboxSync.nextSyncTime - Date.now());
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            
+            countdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // =====================================================
+        // SYSTÈME DE MISE À JOUR AUTOMATIQUE
+        // =====================================================
+
+        const UpdateSystem = {
+            checking: false,
+            updateAvailable: false,
+            newVersion: null
+        };
+
+        // Vérifier si une mise à jour est disponible
+        async function checkForUpdate() {
+            if (UpdateSystem.checking) return;
+            if (!DropboxConfig.isAvailable()) return;
+            
+            UpdateSystem.checking = true;
+            
+            try {
+                const token = await getValidDropboxToken();
+                if (!token) return;
+                
+                // Télécharger le fichier version.json depuis Dropbox
+                const versionData = await downloadFromDropbox(DropboxConfig.basePath + '/System/version.json');
+                
+                if (versionData && versionData.version) {
+                    const currentVersion = APP_VERSION;
+                    const serverVersion = versionData.version;
+                    
+                    // Comparer les versions
+                    if (serverVersion !== currentVersion && isNewerVersion(serverVersion, currentVersion)) {
+                        console.log('🆕 Nouvelle version disponible:', serverVersion);
+                        UpdateSystem.updateAvailable = true;
+                        UpdateSystem.newVersion = serverVersion;
+                        
+                        // Afficher le modal de mise à jour
+                        showUpdateModal(currentVersion, serverVersion, versionData.changelog || []);
+                    }
+                }
+            } catch (error) {
+                console.log('Erreur vérification mise à jour:', error);
+            } finally {
+                UpdateSystem.checking = false;
+            }
+        }
+
+        // Comparer les versions (ex: "3.1.3" > "3.1.2")
+        function isNewerVersion(newV, currentV) {
+            const newParts = newV.split('.').map(n => parseInt(n) || 0);
+            const currentParts = currentV.split('.').map(n => parseInt(n) || 0);
+            
+            for (let i = 0; i < Math.max(newParts.length, currentParts.length); i++) {
+                const a = newParts[i] || 0;
+                const b = currentParts[i] || 0;
+                if (a > b) return true;
+                if (a < b) return false;
+            }
+            return false;
+        }
+
+        // Afficher le modal de mise à jour bloquant
+        function showUpdateModal(currentVersion, newVersion, changelog) {
+            const modal = document.getElementById('update-modal');
+            if (!modal) return;
+            
+            document.getElementById('update-current-version').textContent = 'v' + currentVersion;
+            document.getElementById('update-new-version').textContent = 'v' + newVersion;
+            
+            modal.style.display = 'flex';
+            
+            // Simuler le chargement
+            let progress = 0;
+            const progressBar = document.getElementById('update-progress-bar');
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                progressBar.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    
+                    // Mise à jour terminée
+                    document.getElementById('update-loader').innerHTML = '<div style="font-size:60px;">✅</div>';
+                    document.getElementById('update-icon').textContent = '✅';
+                    document.getElementById('update-message').innerHTML = 'Mise à jour prête !<br>Cliquez sur le bouton pour recharger.';
+                    document.getElementById('update-reload-btn').style.display = 'block';
+                }
+            }, 200);
+        }
+
+        // Publier une mise à jour (pour admin)
+        async function publishUpdate(version, changelog) {
+            if (!DropboxConfig.isAvailable()) {
+                alert('❌ Dropbox non configuré');
+                return false;
+            }
+            
+            const token = await getValidDropboxToken();
+            if (!token) {
+                alert('❌ Token Dropbox invalide');
+                return false;
+            }
+            
+            const versionData = {
+                version: version,
+                publishedAt: new Date().toISOString(),
+                changelog: changelog || [],
+                publishedBy: currentUser?.name || 'Admin'
+            };
+            
+            try {
+                const result = await uploadToDropboxDirect(
+                    DropboxConfig.basePath + '/System/version.json',
+                    JSON.stringify(versionData, null, 2)
+                );
+                
+                if (result) {
+                    alert(`✅ Mise à jour v${version} publiée !\n\nTous les utilisateurs recevront la notification lors de leur prochaine synchronisation (max 5 min).`);
+                    return true;
+                } else {
+                    alert('❌ Erreur lors de la publication');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Erreur publication:', error);
+                alert('❌ Erreur: ' + error.message);
+                return false;
+            }
+        }
+
+        // Afficher le modal de publication
+        function showPublishUpdateModal() {
+            if (!confirm(`📢 Publier la version ${APP_VERSION} ?\n\nCette action va notifier TOUS les utilisateurs connectés qu'une mise à jour est disponible.\n\nIls devront recharger leur page pour obtenir la nouvelle version.\n\nContinuer ?`)) {
+                return;
+            }
+            
+            // Demander les notes de version
+            const changelog = prompt('Notes de version (optionnel):\nExemple: Correction bug sync, Nouvelle fonction X', '');
+            
+            const changelogArray = changelog ? changelog.split(',').map(s => s.trim()) : [];
+            
+            publishUpdate(APP_VERSION, changelogArray);
+        }
+
+        // Forcer la sync maintenant
+        async function forceSyncNow() {
+            if (DropboxSync.isSyncing) {
+                showToast('⏳ Synchronisation déjà en cours...');
+                return;
+            }
+            
+            if (!DropboxConfig.isAvailable()) {
+                showToast('⚠️ Dropbox non configuré');
+                return;
+            }
+            
+            // Reset du décompte
+            DropboxSync.nextSyncTime = Date.now() + DropboxSync.syncFrequency;
+            updateSyncCountdown();
+            
+            // Vérifier les mises à jour d'abord
+            await checkForUpdate();
+            
+            // Si pas de mise à jour, faire la sync complète
+            if (!UpdateSystem.updateAvailable) {
+                showSyncNotification('🔄 Synchronisation en cours...');
+                
+                DropboxSync.isSyncing = true;
+                updateSyncIndicator('syncing');
+                
+                try {
+                    // 1. Télécharger depuis Dropbox
+                    await syncFromDropbox(true);
+                    
+                    // 2. Envoyer les modifications locales
+                    await syncToDropbox('all');
+                    
+                    updateSyncIndicator('success');
+                    DropboxSync.lastSync = new Date();
+                    showSyncNotification('✅ Synchronisation terminée !');
+                } catch (error) {
+                    console.error('Erreur sync:', error);
+                    updateSyncIndicator('error');
+                    showSyncNotification('⚠️ Erreur de sync');
+                } finally {
+                    DropboxSync.isSyncing = false;
+                    updateSyncCountdown();
+                }
+            }
+        }
 
         // Télécharger un fichier depuis Dropbox
         async function downloadFromDropbox(path) {
@@ -18455,18 +18761,57 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             }
 
             DropboxSync.enabled = true;
+            
+            // Démarrer le décompte
+            startSyncCountdown();
+            
             DropboxSync.interval = setInterval(async () => {
-                if (DropboxConfig.connected && DropboxConfig.autoSync) {
-                    await syncFromDropbox(true);
+                if (DropboxConfig.canSync()) {
+                    // Vérifier d'abord les mises à jour
+                    await checkForUpdate();
+                    
+                    // Si pas de mise à jour en attente, faire la sync
+                    if (!UpdateSystem.updateAvailable) {
+                        await performDropboxSync();
+                    }
+                    
+                    // Reset du décompte
+                    DropboxSync.nextSyncTime = Date.now() + DropboxSync.syncFrequency;
                 }
             }, DropboxSync.syncFrequency);
 
-            // Sync immédiate au démarrage
-            if (DropboxConfig.connected) {
-                syncFromDropbox(true);
-            }
+            // Sync immédiate au démarrage (après 5 sec pour laisser charger)
+            setTimeout(async () => {
+                if (DropboxConfig.canSync()) {
+                    await checkForUpdate();
+                    if (!UpdateSystem.updateAvailable) {
+                        await performDropboxSync();
+                    }
+                }
+            }, 5000);
 
-            console.log('🔄 Dropbox sync started (every ' + (DropboxSync.syncFrequency / 1000) + 's)');
+            console.log('🔄 Dropbox sync started (every ' + (DropboxSync.syncFrequency / 60000) + ' min)');
+        }
+
+        // Effectuer la synchronisation Dropbox
+        async function performDropboxSync() {
+            if (DropboxSync.isSyncing) return;
+            
+            DropboxSync.isSyncing = true;
+            updateSyncIndicator('syncing');
+            updateSyncCountdown();
+            
+            try {
+                await syncFromDropbox(true);
+                updateSyncIndicator('success');
+                DropboxSync.lastSync = new Date();
+            } catch (error) {
+                console.error('Erreur sync:', error);
+                updateSyncIndicator('error');
+            } finally {
+                DropboxSync.isSyncing = false;
+                updateSyncCountdown();
+            }
         }
 
         // Arrêter la synchronisation automatique
@@ -18475,7 +18820,13 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                 clearInterval(DropboxSync.interval);
                 DropboxSync.interval = null;
             }
+            if (DropboxSync.countdownInterval) {
+                clearInterval(DropboxSync.countdownInterval);
+                DropboxSync.countdownInterval = null;
+            }
             DropboxSync.enabled = false;
+            DropboxSync.nextSyncTime = null;
+            updateSyncCountdown();
             console.log('⏹️ Dropbox sync stopped');
         }
 
@@ -18513,31 +18864,7 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             setTimeout(() => notif.remove(), 3000);
         }
 
-        // Forcer une synchronisation manuelle
-        async function forceSyncNow() {
-            if (!DropboxConfig.connected) {
-                alert('❌ Dropbox non connecté');
-                return;
-            }
-
-            showSyncNotification('🔄 Synchronisation complète en cours...');
-
-            try {
-                // 1. D'abord télécharger depuis Dropbox
-                await syncFromDropbox(true);
-
-                // 2. Puis envoyer les modifications locales
-                await syncToDropbox('all');
-
-                // 3. Créer et envoyer une sauvegarde complète (en mode silencieux)
-                await createTrakioBackup(true);
-
-                showSyncNotification('✅ Sync complète + Backup Dropbox !');
-            } catch (error) {
-                console.error('Erreur sync:', error);
-                showSyncNotification('⚠️ Sync partielle - voir console');
-            }
-        }
+        // forceSyncNow est définie plus haut avec le système de mise à jour
 
         // Initialiser la sync au chargement si Dropbox est configuré
         document.addEventListener('DOMContentLoaded', function() {
