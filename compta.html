@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAKIO - Module COMPTA v1.0.0</title>
+    <title>TRAKIO - Module COMPTA v1.1.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1133,7 +1133,7 @@
                     <i class="fas fa-chart-pie"></i>
                     TRAKIO COMPTA
                 </div>
-                <span class="module-badge">v1.0.1</span>
+                <span class="module-badge">v1.1.0</span>
             </div>
             <div class="header-right">
                 <div class="sync-status" id="syncStatus">
@@ -1156,6 +1156,10 @@
             <div class="nav-tab active" data-tab="dashboard">
                 <i class="fas fa-tachometer-alt"></i>
                 Dashboard
+            </div>
+            <div class="nav-tab" data-tab="caisse">
+                <i class="fas fa-cash-register"></i>
+                Caisse
             </div>
             <div class="nav-tab" data-tab="charges">
                 <i class="fas fa-file-invoice-dollar"></i>
@@ -1314,6 +1318,213 @@
                             </tr>
                         </thead>
                         <tbody id="recentChargesTable">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Caisse Tab -->
+            <div class="tab-content" id="tab-caisse">
+                <!-- Sélection de date -->
+                <div class="chart-card" style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <h3 class="chart-title" style="margin: 0;">
+                                <i class="fas fa-cash-register" style="color: var(--success);"></i>
+                                Saisie CA du jour
+                            </h3>
+                            <input type="date" class="form-input" id="caisseDate" style="width: auto;" onchange="loadCaisseDay()">
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-secondary" onclick="caisseNavigate(-1)">
+                                <i class="fas fa-chevron-left"></i> Veille
+                            </button>
+                            <button class="btn btn-primary" onclick="caisseTodayBtn()">
+                                <i class="fas fa-calendar-day"></i> Aujourd'hui
+                            </button>
+                            <button class="btn btn-secondary" onclick="caisseNavigate(1)">
+                                Lendemain <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Saisie rapide par emplacement -->
+                <div class="dashboard-grid" style="margin-bottom: 1.5rem;">
+                    <!-- Livraison Pro -->
+                    <div class="kpi-card" style="border-left: 4px solid #3b82f6;">
+                        <div class="kpi-header">
+                            <div class="kpi-icon" style="background: #dbeafe; color: #3b82f6;">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-label" style="margin-bottom: 0.5rem; font-weight: 600;">🚚 Livraison Pro</div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span style="color: var(--gray-500);">CHF</span>
+                            <input type="number" step="0.01" class="form-input caisse-input" id="caisse-livraison" 
+                                placeholder="0.00" style="font-size: 1.25rem; font-weight: 600; text-align: right;"
+                                onchange="saveCaisseEntry('livraison', this.value)">
+                        </div>
+                    </div>
+
+                    <!-- Facture Pro -->
+                    <div class="kpi-card" style="border-left: 4px solid #8b5cf6;">
+                        <div class="kpi-header">
+                            <div class="kpi-icon" style="background: #ede9fe; color: #8b5cf6;">
+                                <i class="fas fa-file-invoice"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-label" style="margin-bottom: 0.5rem; font-weight: 600;">📄 Facture Pro</div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span style="color: var(--gray-500);">CHF</span>
+                            <input type="number" step="0.01" class="form-input caisse-input" id="caisse-facture" 
+                                placeholder="0.00" style="font-size: 1.25rem; font-weight: 600; text-align: right;"
+                                onchange="saveCaisseEntry('facture', this.value)">
+                        </div>
+                    </div>
+
+                    <!-- Lightspeed Magasin -->
+                    <div class="kpi-card" style="border-left: 4px solid #10b981;">
+                        <div class="kpi-header">
+                            <div class="kpi-icon" style="background: #d1fae5; color: #10b981;">
+                                <i class="fas fa-store"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-label" style="margin-bottom: 0.5rem; font-weight: 600;">🏪 Lightspeed Magasin</div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span style="color: var(--gray-500);">CHF</span>
+                            <input type="number" step="0.01" class="form-input caisse-input" id="caisse-magasin" 
+                                placeholder="0.00" style="font-size: 1.25rem; font-weight: 600; text-align: right;"
+                                onchange="saveCaisseEntry('magasin', this.value)">
+                        </div>
+                    </div>
+
+                    <!-- Lightspeed Coinsins -->
+                    <div class="kpi-card" style="border-left: 4px solid #f59e0b;">
+                        <div class="kpi-header">
+                            <div class="kpi-icon" style="background: #fef3c7; color: #f59e0b;">
+                                <i class="fas fa-mountain"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-label" style="margin-bottom: 0.5rem; font-weight: 600;">🏔️ Lightspeed Coinsins</div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span style="color: var(--gray-500);">CHF</span>
+                            <input type="number" step="0.01" class="form-input caisse-input" id="caisse-coinsins" 
+                                placeholder="0.00" style="font-size: 1.25rem; font-weight: 600; text-align: right;"
+                                onchange="saveCaisseEntry('coinsins', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total du jour -->
+                <div class="chart-card" style="background: linear-gradient(135deg, var(--success) 0%, #059669 100%); color: white; margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <div style="font-size: 0.875rem; opacity: 0.9;">Total du jour</div>
+                            <div style="font-size: 2.5rem; font-weight: 700;" id="caisseTotalJour">CHF 0.00</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.875rem; opacity: 0.9;" id="caisseDateDisplay">-</div>
+                            <div style="font-size: 1rem; opacity: 0.8;" id="caisseJourSemaine">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPIs Période -->
+                <div class="dashboard-grid" style="margin-bottom: 1.5rem;">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon blue"><i class="fas fa-calendar-day"></i></div>
+                            <span class="kpi-trend neutral" id="caisseTrendJour">-</span>
+                        </div>
+                        <div class="kpi-value" id="caisseKpiJour">CHF 0.00</div>
+                        <div class="kpi-label">Aujourd'hui</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon" style="background: #ede9fe; color: #8b5cf6;"><i class="fas fa-calendar-week"></i></div>
+                            <span class="kpi-trend neutral" id="caisseTrendSemaine">-</span>
+                        </div>
+                        <div class="kpi-value" id="caisseKpiSemaine">CHF 0.00</div>
+                        <div class="kpi-label">Cette semaine</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon green"><i class="fas fa-calendar-alt"></i></div>
+                            <span class="kpi-trend neutral" id="caisseTrendMois">-</span>
+                        </div>
+                        <div class="kpi-value" id="caisseKpiMois">CHF 0.00</div>
+                        <div class="kpi-label">Ce mois</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon orange"><i class="fas fa-chart-bar"></i></div>
+                            <span class="kpi-trend neutral" id="caisseTrendAnnee">-</span>
+                        </div>
+                        <div class="kpi-value" id="caisseKpiAnnee">CHF 0.00</div>
+                        <div class="kpi-label">Cette année</div>
+                    </div>
+                </div>
+
+                <!-- Résultat Net -->
+                <div class="dashboard-grid" style="margin-bottom: 1.5rem;">
+                    <div class="kpi-card" style="border-left: 4px solid var(--success);" id="caisseResultatCard">
+                        <div class="kpi-header">
+                            <div class="kpi-icon green"><i class="fas fa-piggy-bank"></i></div>
+                        </div>
+                        <div class="kpi-value" id="caisseResultatMois" style="color: var(--success);">CHF 0.00</div>
+                        <div class="kpi-label">Résultat net ce mois (CA - Charges)</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon blue"><i class="fas fa-percentage"></i></div>
+                        </div>
+                        <div class="kpi-value" id="caisseMargeMois">0%</div>
+                        <div class="kpi-label">Marge nette</div>
+                    </div>
+                </div>
+
+                <!-- Graphiques -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Évolution CA (7 derniers jours)</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="caisseEvolutionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Répartition par emplacement (ce mois)</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="caisseRepartitionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historique récent -->
+                <div class="table-card" style="margin-top: 1.5rem;">
+                    <div class="table-header">
+                        <h3 class="table-title">Historique des 7 derniers jours</h3>
+                        <button class="btn btn-secondary" onclick="exportCaisse()">
+                            <i class="fas fa-download"></i> Exporter
+                        </button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>🚚 Livraison</th>
+                                <th>📄 Facture</th>
+                                <th>🏪 Magasin</th>
+                                <th>🏔️ Coinsins</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="caisseHistoriqueTable">
                             <!-- Populated by JS -->
                         </tbody>
                     </table>
@@ -1751,7 +1962,7 @@
             DROPBOX_PATH: '/TRAKIO/Compta/',
             DROPBOX_FACTURES_PATH: '/TRAKIO/Compta/Factures/',
             SYNC_INTERVAL: 5 * 60 * 1000, // 5 minutes
-            VERSION: '1.0.1'
+            VERSION: '1.1.0'
         };
 
         // Dropbox Configuration
@@ -1768,6 +1979,7 @@
             charges: '/TRAKIO/Compta/charges.json',
             postes: '/TRAKIO/Compta/postes.json',
             fournisseurs: '/TRAKIO/Compta/fournisseurs.json',
+            caisse: '/TRAKIO/Compta/caisse.json',
             config: '/TRAKIO/Compta/config.json'
         };
 
@@ -1777,6 +1989,7 @@
             postes: [],
             fournisseurs: [],
             budgets: {},
+            caisse: [], // Données CA par jour/emplacement
             isAuthenticated: false,
             lastSync: null
         };
@@ -1785,6 +1998,16 @@
         let evolutionChart = null;
         let repartitionChart = null;
         let comparaisonChart = null;
+        let caisseEvolutionChart = null;
+        let caisseRepartitionChart = null;
+
+        // Emplacements caisse
+        const CAISSE_EMPLACEMENTS = [
+            { id: 'livraison', nom: '🚚 Livraison Pro', color: '#3b82f6' },
+            { id: 'facture', nom: '📄 Facture Pro', color: '#8b5cf6' },
+            { id: 'magasin', nom: '🏪 Lightspeed Magasin', color: '#10b981' },
+            { id: 'coinsins', nom: '🏔️ Lightspeed Coinsins', color: '#f59e0b' }
+        ];
 
         // ============================================
         // INITIALISATION
@@ -1855,6 +2078,7 @@
             initDefaultPostes();
             renderAll();
             initCharts();
+            initCaisse();
             startSync();
         }
 
@@ -2763,6 +2987,348 @@
         }
 
         // ============================================
+        // CAISSE - GESTION CA PAR EMPLACEMENT
+        // ============================================
+
+        function initCaisse() {
+            // Initialiser la date du jour
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('caisseDate').value = today;
+            loadCaisseDay();
+            updateCaisseKPIs();
+            initCaisseCharts();
+            renderCaisseHistorique();
+        }
+
+        function caisseTodayBtn() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('caisseDate').value = today;
+            loadCaisseDay();
+        }
+
+        function caisseNavigate(days) {
+            const dateInput = document.getElementById('caisseDate');
+            const current = new Date(dateInput.value);
+            current.setDate(current.getDate() + days);
+            dateInput.value = current.toISOString().split('T')[0];
+            loadCaisseDay();
+        }
+
+        function loadCaisseDay() {
+            const date = document.getElementById('caisseDate').value;
+            const dayData = getCaisseDay(date);
+            
+            // Remplir les champs
+            document.getElementById('caisse-livraison').value = dayData.livraison || '';
+            document.getElementById('caisse-facture').value = dayData.facture || '';
+            document.getElementById('caisse-magasin').value = dayData.magasin || '';
+            document.getElementById('caisse-coinsins').value = dayData.coinsins || '';
+            
+            // Mettre à jour le total et l'affichage
+            updateCaisseTotalJour();
+            
+            // Afficher la date
+            const d = new Date(date);
+            const joursSemaine = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+            document.getElementById('caisseDateDisplay').textContent = d.toLocaleDateString('fr-CH');
+            document.getElementById('caisseJourSemaine').textContent = joursSemaine[d.getDay()];
+        }
+
+        function getCaisseDay(date) {
+            const entry = state.caisse.find(c => c.date === date);
+            return entry || { date, livraison: 0, facture: 0, magasin: 0, coinsins: 0 };
+        }
+
+        function saveCaisseEntry(emplacement, value) {
+            const date = document.getElementById('caisseDate').value;
+            const amount = parseFloat(value) || 0;
+            
+            let entry = state.caisse.find(c => c.date === date);
+            if (!entry) {
+                entry = { date, livraison: 0, facture: 0, magasin: 0, coinsins: 0 };
+                state.caisse.push(entry);
+            }
+            
+            entry[emplacement] = amount;
+            entry.updatedAt = new Date().toISOString();
+            
+            saveToLocalStorage();
+            updateCaisseTotalJour();
+            updateCaisseKPIs();
+            updateCaisseCharts();
+            renderCaisseHistorique();
+            
+            // Feedback visuel
+            const input = document.getElementById(`caisse-${emplacement}`);
+            input.style.borderColor = 'var(--success)';
+            setTimeout(() => input.style.borderColor = '', 1000);
+        }
+
+        function updateCaisseTotalJour() {
+            const date = document.getElementById('caisseDate').value;
+            const total = getCaisseTotalDay(date);
+            document.getElementById('caisseTotalJour').textContent = `CHF ${formatNumber(total)}`;
+            document.getElementById('caisseKpiJour').textContent = `CHF ${formatNumber(total)}`;
+        }
+
+        function getCaisseTotalDay(date) {
+            const entry = getCaisseDay(date);
+            return (entry.livraison || 0) + (entry.facture || 0) + (entry.magasin || 0) + (entry.coinsins || 0);
+        }
+
+        function getCaisseTotalPeriod(startDate, endDate) {
+            return state.caisse
+                .filter(c => c.date >= startDate && c.date <= endDate)
+                .reduce((sum, c) => sum + (c.livraison || 0) + (c.facture || 0) + (c.magasin || 0) + (c.coinsins || 0), 0);
+        }
+
+        function getCaisseByEmplacement(emplacement, startDate, endDate) {
+            return state.caisse
+                .filter(c => c.date >= startDate && c.date <= endDate)
+                .reduce((sum, c) => sum + (c[emplacement] || 0), 0);
+        }
+
+        function updateCaisseKPIs() {
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            
+            // Cette semaine (lundi à dimanche)
+            const dayOfWeek = today.getDay() || 7; // Dimanche = 7
+            const monday = new Date(today);
+            monday.setDate(today.getDate() - dayOfWeek + 1);
+            const mondayStr = monday.toISOString().split('T')[0];
+            
+            // Ce mois
+            const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const firstOfMonthStr = firstOfMonth.toISOString().split('T')[0];
+            
+            // Cette année
+            const firstOfYear = new Date(today.getFullYear(), 0, 1);
+            const firstOfYearStr = firstOfYear.toISOString().split('T')[0];
+            
+            // Calculer les totaux
+            const totalJour = getCaisseTotalDay(todayStr);
+            const totalSemaine = getCaisseTotalPeriod(mondayStr, todayStr);
+            const totalMois = getCaisseTotalPeriod(firstOfMonthStr, todayStr);
+            const totalAnnee = getCaisseTotalPeriod(firstOfYearStr, todayStr);
+            
+            // Afficher
+            document.getElementById('caisseKpiJour').textContent = `CHF ${formatNumber(totalJour)}`;
+            document.getElementById('caisseKpiSemaine').textContent = `CHF ${formatNumber(totalSemaine)}`;
+            document.getElementById('caisseKpiMois').textContent = `CHF ${formatNumber(totalMois)}`;
+            document.getElementById('caisseKpiAnnee').textContent = `CHF ${formatNumber(totalAnnee)}`;
+            
+            // Calculer le résultat net (CA - Charges)
+            const chargesMois = getChargesTotal('month');
+            const resultat = totalMois - chargesMois;
+            const marge = totalMois > 0 ? (resultat / totalMois) * 100 : 0;
+            
+            document.getElementById('caisseResultatMois').textContent = `CHF ${formatNumber(resultat)}`;
+            document.getElementById('caisseMargeMois').textContent = `${marge.toFixed(1)}%`;
+            
+            // Couleur selon résultat
+            const resultatCard = document.getElementById('caisseResultatCard');
+            const resultatValue = document.getElementById('caisseResultatMois');
+            if (resultat >= 0) {
+                resultatCard.style.borderLeftColor = 'var(--success)';
+                resultatValue.style.color = 'var(--success)';
+            } else {
+                resultatCard.style.borderLeftColor = 'var(--danger)';
+                resultatValue.style.color = 'var(--danger)';
+            }
+            
+            // Tendances (vs période précédente)
+            updateCaisseTrends(today);
+        }
+
+        function updateCaisseTrends(today) {
+            // Hier vs avant-hier
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+            
+            const beforeYesterday = new Date(today);
+            beforeYesterday.setDate(today.getDate() - 2);
+            const beforeYesterdayStr = beforeYesterday.toISOString().split('T')[0];
+            
+            const todayTotal = getCaisseTotalDay(today.toISOString().split('T')[0]);
+            const yesterdayTotal = getCaisseTotalDay(yesterdayStr);
+            
+            if (yesterdayTotal > 0) {
+                const diff = ((todayTotal - yesterdayTotal) / yesterdayTotal * 100).toFixed(0);
+                const trend = document.getElementById('caisseTrendJour');
+                if (diff > 0) {
+                    trend.className = 'kpi-trend up';
+                    trend.innerHTML = `<i class="fas fa-arrow-up"></i> +${diff}%`;
+                } else if (diff < 0) {
+                    trend.className = 'kpi-trend down';
+                    trend.innerHTML = `<i class="fas fa-arrow-down"></i> ${diff}%`;
+                } else {
+                    trend.className = 'kpi-trend neutral';
+                    trend.textContent = '= 0%';
+                }
+            }
+        }
+
+        function initCaisseCharts() {
+            // Graphique évolution 7 jours
+            const ctxEvolution = document.getElementById('caisseEvolutionChart');
+            if (!ctxEvolution) return;
+            
+            caisseEvolutionChart = new Chart(ctxEvolution.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: CAISSE_EMPLACEMENTS.map(emp => ({
+                        label: emp.nom,
+                        data: [],
+                        backgroundColor: emp.color,
+                        borderRadius: 4
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: { 
+                            stacked: true,
+                            ticks: {
+                                callback: value => 'CHF ' + value.toLocaleString()
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Graphique répartition
+            const ctxRepartition = document.getElementById('caisseRepartitionChart');
+            if (!ctxRepartition) return;
+            
+            caisseRepartitionChart = new Chart(ctxRepartition.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: CAISSE_EMPLACEMENTS.map(e => e.nom),
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: CAISSE_EMPLACEMENTS.map(e => e.color)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+
+            updateCaisseCharts();
+        }
+
+        function updateCaisseCharts() {
+            if (!caisseEvolutionChart || !caisseRepartitionChart) return;
+            
+            const today = new Date();
+            const labels = [];
+            const dataByEmp = {
+                livraison: [],
+                facture: [],
+                magasin: [],
+                coinsins: []
+            };
+            
+            // 7 derniers jours
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(today.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                const dayData = getCaisseDay(dateStr);
+                
+                const jourCourt = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'][d.getDay()];
+                labels.push(`${jourCourt} ${d.getDate()}`);
+                
+                dataByEmp.livraison.push(dayData.livraison || 0);
+                dataByEmp.facture.push(dayData.facture || 0);
+                dataByEmp.magasin.push(dayData.magasin || 0);
+                dataByEmp.coinsins.push(dayData.coinsins || 0);
+            }
+            
+            caisseEvolutionChart.data.labels = labels;
+            caisseEvolutionChart.data.datasets[0].data = dataByEmp.livraison;
+            caisseEvolutionChart.data.datasets[1].data = dataByEmp.facture;
+            caisseEvolutionChart.data.datasets[2].data = dataByEmp.magasin;
+            caisseEvolutionChart.data.datasets[3].data = dataByEmp.coinsins;
+            caisseEvolutionChart.update();
+            
+            // Répartition ce mois
+            const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+            const todayStr = today.toISOString().split('T')[0];
+            
+            caisseRepartitionChart.data.datasets[0].data = [
+                getCaisseByEmplacement('livraison', firstOfMonth, todayStr),
+                getCaisseByEmplacement('facture', firstOfMonth, todayStr),
+                getCaisseByEmplacement('magasin', firstOfMonth, todayStr),
+                getCaisseByEmplacement('coinsins', firstOfMonth, todayStr)
+            ];
+            caisseRepartitionChart.update();
+        }
+
+        function renderCaisseHistorique() {
+            const tbody = document.getElementById('caisseHistoriqueTable');
+            if (!tbody) return;
+            
+            const today = new Date();
+            const rows = [];
+            
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                const dayData = getCaisseDay(dateStr);
+                const total = (dayData.livraison || 0) + (dayData.facture || 0) + (dayData.magasin || 0) + (dayData.coinsins || 0);
+                
+                const isToday = i === 0;
+                rows.push(`
+                    <tr style="${isToday ? 'background: var(--primary-light);' : ''}">
+                        <td><strong>${d.toLocaleDateString('fr-CH')}</strong></td>
+                        <td style="text-align: right;">${formatNumber(dayData.livraison || 0)}</td>
+                        <td style="text-align: right;">${formatNumber(dayData.facture || 0)}</td>
+                        <td style="text-align: right;">${formatNumber(dayData.magasin || 0)}</td>
+                        <td style="text-align: right;">${formatNumber(dayData.coinsins || 0)}</td>
+                        <td style="text-align: right;"><strong>CHF ${formatNumber(total)}</strong></td>
+                    </tr>
+                `);
+            }
+            
+            tbody.innerHTML = rows.join('');
+        }
+
+        function exportCaisse() {
+            const headers = ['Date', 'Livraison Pro', 'Facture Pro', 'Lightspeed Magasin', 'Lightspeed Coinsins', 'Total'];
+            const rows = state.caisse
+                .sort((a, b) => b.date.localeCompare(a.date))
+                .map(c => {
+                    const total = (c.livraison || 0) + (c.facture || 0) + (c.magasin || 0) + (c.coinsins || 0);
+                    return [c.date, c.livraison || 0, c.facture || 0, c.magasin || 0, c.coinsins || 0, total].join(';');
+                });
+            
+            const csv = [headers.join(';'), ...rows].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `caisse_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('Export terminé', 'success');
+        }
+
+        // ============================================
         // GRAPHIQUES
         // ============================================
 
@@ -3133,6 +3699,7 @@
                 postes: state.postes,
                 fournisseurs: state.fournisseurs,
                 budgets: state.budgets,
+                caisse: state.caisse,
                 lastSync: state.lastSync
             }));
         }
@@ -3145,6 +3712,7 @@
                 state.postes = parsed.postes || [];
                 state.fournisseurs = parsed.fournisseurs || [];
                 state.budgets = parsed.budgets || {};
+                state.caisse = parsed.caisse || [];
                 state.lastSync = parsed.lastSync;
             }
         }
@@ -3392,10 +3960,11 @@
 
             try {
                 // 1. PULL - Télécharger les données depuis Dropbox
-                const [remoteCharges, remotePostes, remoteFournisseurs] = await Promise.all([
+                const [remoteCharges, remotePostes, remoteFournisseurs, remoteCaisse] = await Promise.all([
                     dropboxDownload(DROPBOX_FILES.charges),
                     dropboxDownload(DROPBOX_FILES.postes),
-                    dropboxDownload(DROPBOX_FILES.fournisseurs)
+                    dropboxDownload(DROPBOX_FILES.fournisseurs),
+                    dropboxDownload(DROPBOX_FILES.caisse)
                 ]);
 
                 // Fusionner les données (priorité au plus récent)
@@ -3408,17 +3977,24 @@
                 if (remoteFournisseurs) {
                     state.fournisseurs = mergeData(state.fournisseurs, remoteFournisseurs, 'id');
                 }
+                if (remoteCaisse) {
+                    state.caisse = mergeData(state.caisse, remoteCaisse, 'date');
+                }
 
                 // 2. PUSH - Envoyer les données locales vers Dropbox
                 await Promise.all([
                     dropboxUpload(DROPBOX_FILES.charges, state.charges),
                     dropboxUpload(DROPBOX_FILES.postes, state.postes),
-                    dropboxUpload(DROPBOX_FILES.fournisseurs, state.fournisseurs)
+                    dropboxUpload(DROPBOX_FILES.fournisseurs, state.fournisseurs),
+                    dropboxUpload(DROPBOX_FILES.caisse, state.caisse)
                 ]);
 
                 state.lastSync = new Date().toISOString();
                 saveToLocalStorage();
                 renderAll();
+                updateCaisseKPIs();
+                updateCaisseCharts();
+                renderCaisseHistorique();
 
                 status.classList.remove('syncing');
                 status.innerHTML = '<i class="fas fa-cloud-upload-alt"></i><span>Synchronisé</span>';
