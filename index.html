@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v3.2.4 - Gestion Complète</title>
+    <title>TRAKIO v3.2.6 - Gestion Complète</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -2083,12 +2083,12 @@
                 <div style="display:flex; justify-content:center; align-items:center; gap:16px;">
                     <div>
                         <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Actuelle</div>
-                        <div id="update-current-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--text-muted);">v3.2.4</div>
+                        <div id="update-current-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--text-muted);">v3.2.3</div>
                     </div>
                     <div style="font-size:24px;">→</div>
                     <div>
                         <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Nouvelle</div>
-                        <div id="update-new-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--accent-primary);">v3.2.4</div>
+                        <div id="update-new-version" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--accent-primary);">v3.2.3</div>
                     </div>
                 </div>
             </div>
@@ -2139,7 +2139,7 @@
         <div class="sidebar-header">
             <div class="logo">TR</div>
             <span class="logo-text">TRAKIO</span>
-            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.2.4</span>
+            <span id="nav-version" style="font-size:10px; color:var(--text-muted); margin-left:6px; font-family:'Space Mono',monospace;">v3.2.3</span>
         </div>
 
         <button class="sidebar-toggle" id="sidebarToggle">
@@ -2246,7 +2246,7 @@
                     </svg>
                     <span class="nav-text">⚡ Prise cmd</span>
                 </div>
-                <div class="nav-item" data-page="clients">
+                <div class="nav-item" onclick="window.location.href='clients.html'" style="cursor:pointer;">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
                         <circle cx="9" cy="7" r="4"/>
@@ -2254,7 +2254,7 @@
                     </svg>
                     <span class="nav-text">👥 Clients</span>
                 </div>
-                <div class="nav-item" data-page="articles">
+                <div class="nav-item" onclick="window.location.href='articles.html'" style="cursor:pointer;">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
@@ -2281,16 +2281,6 @@
                         <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
                     </svg>
                     <span class="nav-text">RH Personnel</span>
-                </div>
-                <div class="nav-item" data-permission="admin" onclick="window.location.href='compta.html'" style="cursor:pointer;">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                        <polyline points="17 8 12 3 7 8"/>
-                        <line x1="12" y1="3" x2="12" y2="15"/>
-                        <path d="M3 12h4l2 4 4-8 2 4h6"/>
-                    </svg>
-                    <span class="nav-text">📊 Compta</span>
-                    <span class="nav-badge compta-badge" id="compta-overdue-badge" style="display:none; background:var(--accent-danger);">0</span>
                 </div>
                 <div class="nav-item" data-page="settings">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2483,7 +2473,7 @@
                         </div>
                         
                         <!-- Articles -->
-                        <div onclick="navigateTo('articles')" style="cursor:pointer; background:linear-gradient(145deg, rgba(255,107,107,0.12), rgba(255,159,67,0.08)); border:2px solid #ff6b6b; border-radius:16px; padding:18px 12px; text-align:center; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(255,107,107,0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                        <div onclick="window.location.href='articles.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(255,107,107,0.12), rgba(255,159,67,0.08)); border:2px solid #ff6b6b; border-radius:16px; padding:18px 12px; text-align:center; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(255,107,107,0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
                             <div style="width:52px; height:52px; background:linear-gradient(135deg, #ff6b6b, #ff9f43); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; box-shadow:0 6px 18px rgba(255,107,107,0.35);">
                                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                             </div>
@@ -2492,7 +2482,7 @@
                         </div>
                         
                         <!-- Clients -->
-                        <div onclick="navigateTo('clients')" style="cursor:pointer; background:linear-gradient(145deg, rgba(255,183,77,0.12), rgba(255,152,0,0.08)); border:2px solid #ffb74d; border-radius:16px; padding:18px 12px; text-align:center; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(255,183,77,0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                        <div onclick="window.location.href='clients.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(255,183,77,0.12), rgba(255,152,0,0.08)); border:2px solid #ffb74d; border-radius:16px; padding:18px 12px; text-align:center; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(255,183,77,0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
                             <div style="width:52px; height:52px; background:linear-gradient(135deg, #ffb74d, #ff9800); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; box-shadow:0 6px 18px rgba(255,183,77,0.35);">
                                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
                             </div>
@@ -4421,7 +4411,7 @@
                             <select id="mf-view-articles-cat-filter" onchange="filterMFViewArticlesTable()" style="padding:10px 16px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary);">
                                 <option value="">Toutes catégories</option>
                             </select>
-                            <a href="#" onclick="navigateTo('articles'); closeMFArticlesViewModal(); return false;" class="btn btn-secondary" style="text-decoration:none;">⚙️ Gérer dans Outils</a>
+                            <a href="articles.html" class="btn btn-secondary" style="text-decoration:none;">⚙️ Gérer dans Outils</a>
                         </div>
                         <div style="flex:1; overflow-y:auto; padding:16px;">
                             <table style="width:100%;">
@@ -5464,367 +5454,6 @@
                 </div>
             </div>
 
-            <!-- Clients Page -->
-            <div class="module-page" id="page-clients">
-                <!-- Breadcrumb subtil -->
-                <div style="margin-bottom:20px;">
-                    <span onclick="navigateTo('dashboard')" style="cursor:pointer; color:var(--text-muted); font-size:13px; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px; transition:all 0.2s;" onmouseover="this.style.background='var(--bg-hover)'; this.style.color='var(--accent-primary)'" onmouseout="this.style.background=''; this.style.color='var(--text-muted)'">
-                        ← Accueil
-                    </span>
-                </div>
-
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
-                    <div>
-                        <h2 style="font-size:24px; font-weight:700; margin-bottom:4px;">👥 Gestion des Clients</h2>
-                        <p style="color:var(--text-muted);">Clients professionnels (B2B) et particuliers (B2C)</p>
-                    </div>
-                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                        <button class="btn btn-primary" onclick="showClientsForm()">➕ Nouveau client</button>
-                        <button class="btn btn-secondary" onclick="showImportClientsModal()">📥 Importer</button>
-                        <button class="btn btn-secondary" onclick="exportAllClientsCSV()">📤 Exporter</button>
-                        <button class="btn" onclick="saveAllClientsToDropbox()" style="background:var(--accent-secondary); color:#fff; border:none;">☁️ Dropbox</button>
-                        <input type="file" id="clients-import-file" accept=".csv,.xls,.xlsx" style="display:none;" onchange="importClientsFile(this)">
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:16px; margin-bottom:24px;">
-                    <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; padding:20px; text-align:center;">
-                        <div style="font-size:32px; font-weight:700; color:var(--accent-primary);" id="clients-total">0</div>
-                        <div style="color:var(--text-muted); font-size:13px;">Total clients</div>
-                    </div>
-                    <div style="background:linear-gradient(135deg, rgba(17,138,178,0.1), rgba(17,138,178,0.05)); border:2px solid var(--accent-secondary); border-radius:12px; padding:20px; text-align:center;">
-                        <div style="font-size:32px; font-weight:700; color:var(--accent-secondary);" id="clients-b2b-count">0</div>
-                        <div style="color:var(--text-muted); font-size:13px;">🏢 Professionnels</div>
-                    </div>
-                    <div style="background:linear-gradient(135deg, rgba(255,183,77,0.1), rgba(255,183,77,0.05)); border:2px solid var(--accent-warning); border-radius:12px; padding:20px; text-align:center;">
-                        <div style="font-size:32px; font-weight:700; color:var(--accent-warning);" id="clients-b2c-count">0</div>
-                        <div style="color:var(--text-muted); font-size:13px;">🏠 Particuliers</div>
-                    </div>
-                    <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; padding:20px; text-align:center;">
-                        <div style="font-size:32px; font-weight:700; color:var(--accent-primary);" id="clients-active">0</div>
-                        <div style="color:var(--text-muted); font-size:13px;">Actifs ce mois</div>
-                    </div>
-                </div>
-
-                <!-- Filtres -->
-                <div style="display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
-                    <input type="text" id="clients-search" placeholder="🔍 Rechercher par nom, ville, téléphone..."
-                        style="flex:1; min-width:250px; padding:12px 16px; background:var(--bg-card); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);"
-                        oninput="filterClientsPage(this.value)">
-                    <select id="clients-type-filter" onchange="filterClientsPage(document.getElementById('clients-search').value)" style="padding:12px 16px; background:var(--bg-card); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);">
-                        <option value="">Tous les types</option>
-                        <option value="b2b">🏢 Professionnels (B2B)</option>
-                        <option value="b2c">🏠 Particuliers (B2C)</option>
-                    </select>
-                </div>
-
-                <!-- Formulaire client -->
-                <div id="clients-form" style="display:none; margin-bottom:24px; padding:24px; background:var(--bg-card); border:2px solid var(--accent-primary); border-radius:12px;">
-                    <h3 style="color:var(--accent-primary); margin-bottom:20px;">📝 Fiche Client</h3>
-                    <input type="hidden" id="clients-edit-id">
-                    <div style="display:grid; grid-template-columns:100px 1fr 1fr 180px; gap:12px; margin-bottom:12px;">
-                        <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">N° Client</label><input type="text" id="clients-num" style="width:100%; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                        <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Nom / Société *</label><input type="text" id="clients-name" style="width:100%; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                        <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Contact</label><input type="text" id="clients-contact" style="width:100%; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                        <div><label style="display:block; font-size:12px; font-weight:600; color:var(--accent-primary); margin-bottom:4px;">Type *</label><select id="clients-type" style="width:100%; padding:10px; background:var(--bg-primary); border:2px solid var(--accent-primary); border-radius:6px; color:var(--text-primary); font-weight:600;"><option value="b2b">🏢 Professionnel (B2B)</option><option value="b2c">🏠 Particulier (B2C)</option></select></div>
-                    </div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-                        <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Adresse</label><input type="text" id="clients-address" style="width:100%; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                        <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Adresse 2</label><input type="text" id="clients-address2" style="width:100%; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                    </div>
-                    <div style="display:grid; grid-template-columns:100px 1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
-                        <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Code postal</label><input type="text" id="clients-zip" style="width:100%; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                        <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Ville</label><input type="text" id="clients-city" style="width:100%; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                        <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Téléphone</label><input type="tel" id="clients-phone" style="width:100%; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                        <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Mobile</label><input type="tel" id="clients-mobile" style="width:100%; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                    </div>
-                    <div style="display:grid; grid-template-columns:1fr 120px 150px 180px; gap:12px; margin-bottom:16px;">
-                        <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Email</label><input type="email" id="clients-email" style="width:100%; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                        <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Limite crédit</label><input type="number" id="clients-credit" style="width:100%; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                        <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Échéance</label><select id="clients-payment" style="width:100%; padding:10px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"><option value="30 jours fin de mois">30j fin mois</option><option value="Comptant">Comptant</option><option value="15 jours">15 jours</option><option value="60 jours">60 jours</option></select></div>
-                        <div><label style="display:block; font-size:12px; color:var(--accent-warning); margin-bottom:4px; font-weight:600;">💰 Liste de prix</label><select id="clients-pricelist" style="width:100%; padding:10px; background:var(--bg-primary); border:2px solid var(--accent-warning); border-radius:6px; color:var(--text-primary);"></select></div>
-                    </div>
-                    <div style="display:flex; gap:12px;">
-                        <button class="btn btn-primary" onclick="saveClientForm()">💾 Enregistrer</button>
-                        <button class="btn btn-secondary" onclick="hideClientsForm()">Annuler</button>
-                    </div>
-                </div>
-
-                <!-- Table clients -->
-                <div class="card">
-                    <div class="table-container" style="max-height:500px; overflow-y:auto;">
-                        <table>
-                            <thead style="position:sticky; top:0; background:var(--bg-card); z-index:10;">
-                                <tr>
-                                    <th>N°</th>
-                                    <th>Type</th>
-                                    <th>Nom / Société</th>
-                                    <th>Contact</th>
-                                    <th>Ville</th>
-                                    <th>Liste prix</th>
-                                    <th>Téléphone</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="clients-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Articles Page -->
-            <div class="module-page" id="page-articles">
-                <div style="margin-bottom:16px;"><span onclick="navigateTo('dashboard')" style="cursor:pointer; color:var(--text-muted); font-size:13px; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px; transition:all 0.2s;" onmouseover="this.style.background='var(--bg-hover)'; this.style.color='var(--accent-primary)'" onmouseout="this.style.background=''; this.style.color='var(--text-muted)'">← Accueil</span></div>
-
-                <!-- Tabs Navigation -->
-                <div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; border-bottom:2px solid var(--border-color); padding-bottom:16px;">
-                    <button class="art-tab active" onclick="switchArtTab('articles')" style="padding:10px 20px; background:var(--accent-primary); color:#000; border:none; border-radius:8px; font-weight:600; cursor:pointer;">📦 Articles</button>
-                    <button class="art-tab" onclick="switchArtTab('categories')" style="padding:10px 20px; background:var(--bg-card); color:var(--text-primary); border:1px solid var(--border-color); border-radius:8px; font-weight:600; cursor:pointer;">🏷️ Catégories</button>
-                    <button class="art-tab" onclick="switchArtTab('pricelists')" style="padding:10px 20px; background:var(--bg-card); color:var(--text-primary); border:1px solid var(--border-color); border-radius:8px; font-weight:600; cursor:pointer;">💰 Listes de Prix</button>
-                    <button class="art-tab" onclick="switchArtTab('discounts')" style="padding:10px 20px; background:var(--bg-card); color:var(--text-primary); border:1px solid var(--border-color); border-radius:8px; font-weight:600; cursor:pointer;">🏷️ Rabais</button>
-                </div>
-
-                <!-- Tab: Articles -->
-                <div id="art-tab-articles" class="art-tab-content">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-                        <h2 style="font-size:22px; font-weight:700;">📦 Gestion des Articles</h2>
-                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                            <button class="btn btn-primary" onclick="showArticleForm()">➕ Nouvel article</button>
-                            <button class="btn btn-secondary" onclick="document.getElementById('art-import-file').click()">📥 Importer</button>
-                            <button class="btn btn-secondary" onclick="exportArticlesCSV()">📤 Exporter</button>
-                            <button class="btn" onclick="saveAllArticlesToDropbox()" style="background:var(--accent-secondary); color:#fff; border:none;">☁️ Dropbox</button>
-                            <input type="file" id="art-import-file" accept=".csv" style="display:none;" onchange="importArticlesFile(this)">
-                        </div>
-                    </div>
-
-                    <!-- Stats Articles -->
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:20px;">
-                        <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:10px; padding:16px; text-align:center;">
-                            <div style="font-size:28px; font-weight:700; color:var(--accent-primary);" id="art-total">0</div>
-                            <div style="color:var(--text-muted); font-size:12px;">Total articles</div>
-                        </div>
-                        <div style="background:linear-gradient(135deg, rgba(17,138,178,0.1), rgba(17,138,178,0.05)); border:2px solid var(--accent-secondary); border-radius:10px; padding:16px; text-align:center;">
-                            <div style="font-size:28px; font-weight:700; color:var(--accent-secondary);" id="art-categories-count">0</div>
-                            <div style="color:var(--text-muted); font-size:12px;">Catégories</div>
-                        </div>
-                        <div style="background:linear-gradient(135deg, rgba(255,183,77,0.1), rgba(255,183,77,0.05)); border:2px solid var(--accent-warning); border-radius:10px; padding:16px; text-align:center;">
-                            <div style="font-size:28px; font-weight:700; color:var(--accent-warning);" id="art-pricelists-count">0</div>
-                            <div style="color:var(--text-muted); font-size:12px;">Listes de prix</div>
-                        </div>
-                        <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:10px; padding:16px; text-align:center;">
-                            <div style="font-size:28px; font-weight:700; color:#ff6b6b;" id="art-discounts-count">0</div>
-                            <div style="color:var(--text-muted); font-size:12px;">Règles rabais</div>
-                        </div>
-                    </div>
-
-                    <!-- Filtres -->
-                    <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
-                        <input type="text" id="art-search" placeholder="🔍 Rechercher N°, désignation, origine..." style="flex:1; min-width:200px; padding:10px 14px; background:var(--bg-card); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);" oninput="filterArticles()">
-                        <select id="art-cat-filter" onchange="filterArticles()" style="padding:10px 14px; background:var(--bg-card); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);">
-                            <option value="">Toutes catégories</option>
-                        </select>
-                    </div>
-
-                    <!-- Formulaire Article -->
-                    <div id="art-form" style="display:none; margin-bottom:20px; padding:20px; background:var(--bg-card); border:2px solid #ff6b6b; border-radius:12px;">
-                        <h3 style="color:#ff6b6b; margin-bottom:16px;">📝 Fiche Article</h3>
-                        <input type="hidden" id="art-edit-id">
-                        <div style="display:grid; grid-template-columns:100px 1fr 1fr; gap:12px; margin-bottom:12px;">
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">N° Article *</label><input type="text" id="art-num" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Désignation *</label><input type="text" id="art-name" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Nom latin</label><input type="text" id="art-latin" placeholder="Ex: Salmo trutta" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-style:italic;"></div>
-                        </div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr 100px 100px; gap:12px; margin-bottom:12px;">
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Catégorie</label><select id="art-category" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></select></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Origine</label><input type="text" id="art-origin" placeholder="FAO27, Suisse..." style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">N° Lot</label><input type="text" id="art-lot" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Nbre pce/colis</label><input type="number" id="art-pcs" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                        </div>
-                        <div style="display:grid; grid-template-columns:120px 120px 120px 120px 100px; gap:12px; margin-bottom:12px;">
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Unité</label><select id="art-unit" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"><option value="kg">Kilo (kg)</option><option value="pce">Pièce (pce)</option><option value="l">Litre (l)</option><option value="h">Heure (h)</option><option value="pers">Par pers.</option><option value="lot">Lot</option><option value="dz">Douzaine (dz)</option></select></div>
-                            <div><label style="display:block; font-size:11px; color:var(--accent-warning); margin-bottom:4px; font-weight:600;">💰 Prix B2C HT</label><input type="number" step="0.01" id="art-price-b2c" style="width:100%; padding:8px; background:var(--bg-primary); border:2px solid var(--accent-warning); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--accent-secondary); margin-bottom:4px; font-weight:600;">💼 Prix B2B HT</label><input type="number" step="0.01" id="art-price-b2b" style="width:100%; padding:8px; background:var(--bg-primary); border:2px solid var(--accent-secondary); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Prix achat HT</label><input type="number" step="0.01" id="art-cost" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">TVA %</label><input type="number" step="0.1" id="art-tva" value="2.6" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                        </div>
-                        <div style="display:grid; grid-template-columns:120px 120px 150px 1fr; gap:12px; margin-bottom:12px;">
-                            <div><label style="display:block; font-size:11px; color:var(--accent-primary); margin-bottom:4px; font-weight:600;">📦 Stock actuel</label><input type="number" step="0.01" id="art-stock" style="width:100%; padding:8px; background:var(--bg-primary); border:2px solid var(--accent-primary); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Stock défaut</label><input type="number" step="0.01" id="art-stock-default" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Code TVA</label><input type="text" id="art-tva-code" placeholder="VTE81, TVA77..." style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Code barre (EAN)</label><input type="text" id="art-barcode" placeholder="7640178760004" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-family:monospace;"></div>
-                        </div>
-                        <div style="display:flex; gap:12px; align-items:center;">
-                            <button class="btn btn-primary" onclick="saveArticle()">💾 Enregistrer</button>
-                            <button class="btn btn-secondary" onclick="hideArticleForm()">Annuler</button>
-                            <label style="display:flex; align-items:center; gap:6px; margin-left:auto; cursor:pointer;"><input type="checkbox" id="art-active" checked> Actif</label>
-                        </div>
-                    </div>
-
-                    <!-- Table Articles -->
-                    <div class="card">
-                        <div class="table-container" style="max-height:450px; overflow-y:auto;">
-                            <table style="font-size:13px;">
-                                <thead style="position:sticky; top:0; background:var(--bg-card); z-index:10;">
-                                    <tr>
-                                        <th>N°</th>
-                                        <th>Désignation</th>
-                                        <th>Origine</th>
-                                        <th>Unité</th>
-                                        <th style="color:var(--accent-warning);">PV HT</th>
-                                        <th>PA HT</th>
-                                        <th style="color:var(--accent-primary);">Stock</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="art-tbody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tab: Catégories -->
-                <div id="art-tab-categories" class="art-tab-content" style="display:none;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <h2 style="font-size:22px; font-weight:700;">🏷️ Catégories d'articles</h2>
-                        <button class="btn btn-primary" onclick="showCategoryForm()">➕ Nouvelle catégorie</button>
-                    </div>
-
-                    <!-- Formulaire Catégorie -->
-                    <div id="cat-form" style="display:none; margin-bottom:20px; padding:20px; background:var(--bg-card); border:2px solid var(--accent-secondary); border-radius:12px;">
-                        <h3 style="color:var(--accent-secondary); margin-bottom:16px;">📝 Catégorie</h3>
-                        <input type="hidden" id="cat-edit-id">
-                        <div style="display:grid; grid-template-columns:100px 1fr 150px; gap:12px; margin-bottom:12px;">
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Code</label><input type="text" id="cat-code" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Nom *</label><input type="text" id="cat-name" placeholder="Ex: Poissons frais, Épicerie..." style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Icône</label><select id="cat-icon" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"><option value="🐟">🐟 Poisson</option><option value="🦐">🦐 Crustacé</option><option value="🦪">🦪 Coquillage</option><option value="🔥">🔥 Fumé</option><option value="🥫">🥫 Conserve</option><option value="🍽️">🍽️ Préparation</option><option value="❄️">❄️ Surgelé</option><option value="🛒">🛒 Épicerie</option><option value="📦">📦 Autre</option></select></div>
-                        </div>
-                        <div style="display:flex; gap:12px;">
-                            <button class="btn btn-primary" onclick="saveCategory()">💾 Enregistrer</button>
-                            <button class="btn btn-secondary" onclick="hideCategoryForm()">Annuler</button>
-                        </div>
-                    </div>
-
-                    <!-- Liste Catégories -->
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;" id="categories-grid"></div>
-                </div>
-
-                <!-- Tab: Listes de Prix -->
-                <div id="art-tab-pricelists" class="art-tab-content" style="display:none;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <div>
-                            <h2 style="font-size:22px; font-weight:700;">💰 Listes de Prix</h2>
-                            <p style="color:var(--text-muted); font-size:13px;">Tarifs personnalisés par type de client</p>
-                        </div>
-                        <button class="btn btn-primary" onclick="showPricelistForm()">➕ Nouvelle liste</button>
-                    </div>
-
-                    <!-- Formulaire Liste de prix -->
-                    <div id="pricelist-form" style="display:none; margin-bottom:20px; padding:20px; background:var(--bg-card); border:2px solid var(--accent-warning); border-radius:12px;">
-                        <h3 style="color:var(--accent-warning); margin-bottom:16px;">📝 Liste de prix</h3>
-                        <input type="hidden" id="pl-edit-id">
-                        <div style="display:grid; grid-template-columns:100px 1fr 150px; gap:12px; margin-bottom:12px;">
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Code</label><input type="text" id="pl-code" placeholder="GMS, REST..." style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Nom *</label><input type="text" id="pl-name" placeholder="Ex: Restaurateurs, Grande distribution..." style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Remise globale %</label><input type="number" step="0.1" id="pl-discount" value="0" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                        </div>
-                        <div style="margin-bottom:12px;">
-                            <label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Description / Conditions</label>
-                            <textarea id="pl-desc" rows="2" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); resize:vertical;"></textarea>
-                        </div>
-                        <div style="display:flex; gap:12px;">
-                            <button class="btn btn-primary" onclick="savePricelist()">💾 Enregistrer</button>
-                            <button class="btn btn-secondary" onclick="hidePricelistForm()">Annuler</button>
-                        </div>
-                    </div>
-
-                    <!-- Liste des listes de prix -->
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px;" id="pricelists-grid"></div>
-                </div>
-
-                <!-- Tab: Rabais -->
-                <div id="art-tab-discounts" class="art-tab-content" style="display:none;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <div>
-                            <h2 style="font-size:22px; font-weight:700;">🏷️ Règles de Rabais</h2>
-                            <p style="color:var(--text-muted); font-size:13px;">Remises par quantité et catégorie</p>
-                        </div>
-                        <button class="btn btn-primary" onclick="showDiscountForm()">➕ Nouvelle règle</button>
-                    </div>
-
-                    <!-- Formulaire Rabais -->
-                    <div id="discount-form" style="display:none; margin-bottom:20px; padding:20px; background:var(--bg-card); border:2px solid #ff6b6b; border-radius:12px;">
-                        <h3 style="color:#ff6b6b; margin-bottom:16px;">📝 Règle de rabais</h3>
-                        <input type="hidden" id="disc-edit-id">
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Catégorie concernée *</label><select id="disc-category" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></select></div>
-                            <div><label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Liste de prix (optionnel)</label><select id="disc-pricelist" style="width:100%; padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"><option value="">Toutes les listes</option></select></div>
-                        </div>
-                        <div style="margin-bottom:12px;">
-                            <label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:8px;">Paliers de quantité</label>
-                            <div id="disc-tiers" style="display:flex; flex-direction:column; gap:8px;">
-                                <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:center;">
-                                    <input type="number" placeholder="Dès X pièces" class="disc-qty" style="padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);">
-                                    <input type="number" step="0.1" placeholder="% rabais" class="disc-pct" style="padding:8px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);">
-                                    <button type="button" onclick="removeDiscountTier(this)" style="padding:8px 12px; background:var(--accent-danger); color:#fff; border:none; border-radius:6px; cursor:pointer;">✕</button>
-                                </div>
-                            </div>
-                            <button type="button" onclick="addDiscountTier()" style="margin-top:8px; padding:6px 12px; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-color); border-radius:6px; cursor:pointer; font-size:12px;">➕ Ajouter un palier</button>
-                        </div>
-                        <div style="display:flex; gap:12px;">
-                            <button class="btn btn-primary" onclick="saveDiscount()">💾 Enregistrer</button>
-                            <button class="btn btn-secondary" onclick="hideDiscountForm()">Annuler</button>
-                        </div>
-                    </div>
-
-                    <!-- Exemple -->
-                    <div style="background:var(--bg-hover); border-radius:10px; padding:16px; margin-bottom:20px;">
-                        <h4 style="color:var(--accent-primary); margin-bottom:8px;">💡 Exemple de configuration</h4>
-                        <p style="color:var(--text-muted); font-size:13px;">Catégorie <strong>Épicerie</strong> : Dès 10 pièces → 5% | Dès 20 pièces → 10% | Dès 50 pièces → 15%</p>
-                    </div>
-
-                    <!-- Liste des règles -->
-                    <div id="discounts-grid"></div>
-                </div>
-            </div>
-
-            <!-- Modal Détails Articles/Clients -->
-            <div id="art-detail-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center; padding:20px;">
-                <div style="background:var(--bg-card); border-radius:16px; max-width:800px; width:100%; max-height:85vh; overflow:hidden; display:flex; flex-direction:column;">
-                    <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <h2 id="art-detail-title" style="font-size:22px; font-weight:700; margin-bottom:4px;"></h2>
-                            <p id="art-detail-subtitle" style="color:var(--text-muted); font-size:13px;"></p>
-                        </div>
-                        <button onclick="closeArtDetailModal()" style="width:40px; height:40px; border-radius:50%; background:var(--bg-hover); border:none; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center;">✕</button>
-                    </div>
-                    <div id="art-detail-content" style="padding:20px; overflow-y:auto; flex:1;"></div>
-                </div>
-            </div>
-
-            <!-- Modal Action Client -->
-            <div id="client-action-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center; padding:20px;" onclick="if(event.target === this) closeClientActionModal()">
-                <div style="background:var(--bg-card); border-radius:16px; max-width:450px; width:100%; overflow:hidden;">
-                    <div style="padding:24px; border-bottom:1px solid var(--border-color); text-align:center;">
-                        <div style="font-size:50px; margin-bottom:12px;">👤</div>
-                        <h2 id="client-action-name" style="font-size:24px; font-weight:700; margin-bottom:8px;"></h2>
-                        <div id="client-action-info" style="margin-bottom:12px;"></div>
-                        <div id="client-action-details"></div>
-                    </div>
-                    <div style="padding:20px; display:flex; flex-direction:column; gap:12px;">
-                        <button onclick="startOrderFromClient(parseInt(document.getElementById('client-action-modal').dataset.clientId))" style="width:100%; padding:16px; background:var(--accent-primary); color:#000; border:none; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:all 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform=''">
-                            ⚡ Créer une commande
-                        </button>
-                        <button onclick="editClientFromModal()" style="width:100%; padding:14px; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-color); border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;">
-                            ✏️ Modifier la fiche
-                        </button>
-                        <button onclick="closeClientActionModal()" style="width:100%; padding:12px; background:transparent; color:var(--text-muted); border:none; border-radius:10px; font-size:13px; cursor:pointer;">
-                            Annuler
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <!-- Reports Page -->
             <div class="module-page" id="page-reports">
                 <div style="margin-bottom:16px;"><span onclick="navigateTo('dashboard')" style="cursor:pointer; color:var(--text-muted); font-size:13px; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px; transition:all 0.2s;" onmouseover="this.style.background='var(--bg-hover)'; this.style.color='var(--accent-primary)'" onmouseout="this.style.background=''; this.style.color='var(--text-muted)'">← Accueil</span></div>
@@ -6510,7 +6139,7 @@
                                 <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg-primary); border-radius:10px; margin-bottom:16px;">
                                     <div>
                                         <div style="font-size:12px; color:var(--text-muted);">Version installée</div>
-                                        <div style="font-weight:700; font-family:'Space Mono',monospace; color:var(--accent-primary);" id="trakio-version">v3.2.4</div>
+                                        <div style="font-weight:700; font-family:'Space Mono',monospace; color:var(--accent-primary);" id="trakio-version">v3.2.3</div>
                                     </div>
                                     <div style="text-align:right;">
                                         <div style="font-size:12px; color:var(--text-muted);">Dernière mise à jour</div>
@@ -6692,54 +6321,6 @@
         </div>
     </div>
 
-    <!-- Modal Import Clients - Choix du mode -->
-    <div id="import-clients-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:5000; justify-content:center; align-items:center; padding:20px;" onclick="if(event.target === this) closeImportClientsModal()">
-        <div style="background:var(--bg-card); border-radius:20px; max-width:450px; width:100%; overflow:hidden;">
-            <!-- Header -->
-            <div style="padding:24px; background:linear-gradient(135deg, var(--accent-secondary), var(--accent-primary)); text-align:center;">
-                <div style="font-size:50px; margin-bottom:10px;">📥</div>
-                <h2 style="color:#000; font-weight:700; margin:0;">Import Clients</h2>
-                <p style="color:#000; opacity:0.8; margin:8px 0 0;">Choisissez le mode d'import</p>
-            </div>
-            
-            <!-- Options -->
-            <div style="padding:24px;">
-                <div id="import-mode-replace" onclick="selectImportMode('replace')" style="background:var(--bg-primary); border:2px solid var(--accent-primary); border-radius:12px; padding:20px; margin-bottom:16px; cursor:pointer; transition:all 0.2s;">
-                    <div style="display:flex; align-items:center; gap:16px;">
-                        <div style="width:50px; height:50px; background:var(--accent-primary); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px;">🔄</div>
-                        <div style="flex:1;">
-                            <div style="font-weight:700; font-size:16px; color:var(--text-primary);">Remplacer tout</div>
-                            <div style="color:var(--text-muted); font-size:13px; margin-top:4px;">Supprime tous les clients existants et importe le fichier</div>
-                        </div>
-                        <div id="import-check-replace" style="width:24px; height:24px; border-radius:50%; background:var(--accent-primary); display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold;">✓</div>
-                    </div>
-                </div>
-                
-                <div id="import-mode-update" onclick="selectImportMode('update')" style="background:var(--bg-primary); border:2px solid var(--border-color); border-radius:12px; padding:20px; cursor:pointer; transition:all 0.2s;">
-                    <div style="display:flex; align-items:center; gap:16px;">
-                        <div style="width:50px; height:50px; background:var(--bg-hover); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px;">➕</div>
-                        <div style="flex:1;">
-                            <div style="font-weight:700; font-size:16px; color:var(--text-primary);">Mettre à jour / Ajouter</div>
-                            <div style="color:var(--text-muted); font-size:13px; margin-top:4px;">Met à jour les clients existants, ajoute les nouveaux</div>
-                        </div>
-                        <div id="import-check-update" style="width:24px; height:24px; border-radius:50%; background:var(--bg-hover); display:none; align-items:center; justify-content:center; color:#000; font-weight:bold;">✓</div>
-                    </div>
-                </div>
-                
-                <!-- Info clients actuels -->
-                <div style="background:var(--bg-primary); border-radius:10px; padding:14px; margin-top:20px; text-align:center;">
-                    <span style="color:var(--text-muted); font-size:13px;">Clients actuels : </span>
-                    <span id="import-current-count" style="font-weight:700; color:var(--accent-primary); font-family:'Space Mono',monospace;">0</span>
-                </div>
-            </div>
-            
-            <!-- Boutons -->
-            <div style="padding:16px 24px; border-top:1px solid var(--border-color); display:flex; gap:12px;">
-                <button onclick="closeImportClientsModal()" style="flex:1; padding:14px; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-color); border-radius:10px; font-size:14px; font-weight:600; cursor:pointer;">Annuler</button>
-                <button onclick="confirmImportClients()" style="flex:2; padding:14px; background:var(--accent-primary); color:#000; border:none; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer;">📂 Choisir fichier</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal Connexion / Changement utilisateur -->
     <div id="login-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); z-index:3000; align-items:center; justify-content:center;">
@@ -6860,7 +6441,7 @@
                     icon: type === 'b2c' ? '🏠' : '🏢',
                     title: displayName,
                     subtitle: `${type.toUpperCase()} • ${c.city || '-'} • ${c.mobile || c.phone || '-'}`,
-                    action: () => { navigateTo('clients'); setTimeout(() => { document.getElementById('clients-search').value = displayName; filterClientsPage(displayName); }, 200); }
+                    action: () => { window.location.href = 'clients.html'; }
                 });
             });
 
@@ -6878,7 +6459,7 @@
                     icon: '🏷️',
                     title: a.name || a.code,
                     subtitle: `${a.code || '-'} • ${a.category || '-'} • ${a.priceB2C ? a.priceB2C.toFixed(2) + ' CHF' : '-'}`,
-                    action: () => { navigateTo('articles'); setTimeout(() => { document.getElementById('art-search').value = a.name || a.code; filterArticlesTable(); }, 200); }
+                    action: () => { window.location.href = 'articles.html'; }
                 });
             });
 
@@ -10987,7 +10568,7 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '3.2.4';
+        const APP_VERSION = '3.2.6';
         const APP_VERSION_DATE = '2025-12-02';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
@@ -11031,15 +10612,25 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '3.2.6': [
+                '👥 Module Clients séparé (clients.html)',
+                '⚡ index.html encore allégé (~180 lignes en moins)',
+                '🔗 Navigation vers clients.html au lieu de page interne',
+                '📂 Refactoring continue: 3 modules séparés (articles, clients, compta)'
+            ],
+            '3.2.5': [
+                '📦 Module Articles séparé (articles.html)',
+                '⚡ index.html allégé (~230 lignes en moins)',
+                '🔗 Navigation vers articles.html au lieu de page interne',
+                '📂 Début refactoring: modules séparés pour meilleures performances'
+            ],
             '3.2.4': [
-                '📊 Nouveau module COMPTA - Gestion des charges entreprise (Admin only)',
-                '💰 Dashboard charges: KPIs mois/année, tendances, alertes',
-                '📁 Postes de charges personnalisables (icône, couleur, budget)',
-                '🏢 Gestion fournisseurs avec historique',
-                '📎 Upload factures vers Dropbox (/TRAKIO/Compta/Factures/)',
-                '📈 Analyses: seuil rentabilité, marge nécessaire, N vs N-1',
-                '🔗 Lien avec module Commandes pour calcul marge réelle',
-                '🔴 Badge alertes factures en retard dans la navigation'
+                '📊 Nouveau module COMPTA (compta.html) - Admin only',
+                '💰 Gestion charges entreprise avec postes personnalisables',
+                '💵 Onglet Caisse: saisie CA par emplacement (4 points de vente)',
+                '📈 KPIs jour/semaine/mois/année avec résultat net',
+                '📎 Upload factures vers Dropbox avec liens partagés',
+                '🔔 Badge alertes factures en retard dans la navigation'
             ],
             '3.2.3': [
                 '🔄 Correction sync auto: fait maintenant PULL + PUSH à chaque cycle',
@@ -14445,11 +14036,7 @@ QOData.clients = [
 
         // Naviguer vers la liste de prix depuis Clients
         function goToPricelistFromClient(pricelistId) {
-            navigateTo('articles');
-            setTimeout(() => {
-                switchArtTab('pricelists');
-                setTimeout(() => showPricelistClients(pricelistId), 200);
-            }, 100);
+            window.location.href = 'articles.html';
         }
 
         function filterClientsPage(query) {
@@ -15428,7 +15015,7 @@ QOData.clients = [
                                     <td><strong>${c.name}</strong></td>
                                     <td>${c.city || '-'}</td>
                                     <td>
-                                        <button onclick="closeArtDetailModal(); navigateTo('clients'); setTimeout(() => editClientPage(${c.id}), 200)" style="padding:4px 8px; background:var(--accent-primary); color:#000; border:none; border-radius:4px; cursor:pointer; font-size:11px;">Voir →</button>
+                                        <button onclick="closeArtDetailModal(); window.location.href='clients.html'" style="padding:4px 8px; background:var(--accent-primary); color:#000; border:none; border-radius:4px; cursor:pointer; font-size:11px;">Voir →</button>
                                     </td>
                                 </tr>
                             `}).join('')}
@@ -23129,47 +22716,5 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             </div>
         </div>
     </div>
-
-    <!-- Script Badge COMPTA (factures en retard) -->
-    <script>
-        // Vérifier les factures en retard du module COMPTA
-        function updateComptaBadge() {
-            try {
-                const comptaData = localStorage.getItem('trakio_compta');
-                if (!comptaData) return;
-                
-                const data = JSON.parse(comptaData);
-                const charges = data.charges || [];
-                const today = new Date();
-                
-                // Compter les factures en retard (non payées + échéance dépassée)
-                const overdue = charges.filter(c => {
-                    if (c.status === 'paid') return false;
-                    if (!c.dateEcheance) return false;
-                    return new Date(c.dateEcheance) < today;
-                }).length;
-                
-                const badge = document.getElementById('compta-overdue-badge');
-                if (badge) {
-                    if (overdue > 0) {
-                        badge.textContent = overdue;
-                        badge.style.display = 'inline-flex';
-                        badge.title = `${overdue} facture(s) en retard`;
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                }
-            } catch (e) {
-                console.warn('Erreur lecture données COMPTA:', e);
-            }
-        }
-        
-        // Vérifier au chargement et périodiquement
-        document.addEventListener('DOMContentLoaded', () => {
-            updateComptaBadge();
-            // Vérifier toutes les 5 minutes
-            setInterval(updateComptaBadge, 5 * 60 * 1000);
-        });
-    </script>
 </body>
 </html>
