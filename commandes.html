@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRAKIO - Prise de Commandes v1.0.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-hover: #1a1a25;
+            --border-color: #2a2a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #ccccdd;
+            --text-muted: #8888aa;
+            --accent-primary: #06d6a0;
+            --accent-secondary: #118ab2;
+            --accent-warning: #ffd166;
+            --accent-danger: #ef476f;
+            --accent-orange: #ff9f43;
+            --radius: 12px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .back-btn {
+            padding: 10px 16px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        
+        .back-btn:hover {
+            background: var(--accent-primary);
+            color: #000;
+            border-color: var(--accent-primary);
+        }
+        
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .version-badge {
+            font-size: 11px;
+            padding: 4px 10px;
+            background: var(--accent-primary);
+            color: #000;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: var(--accent-primary);
+            color: #000;
+        }
+        
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Step container */
+        .qo-step {
+            display: none;
+        }
+        
+        .qo-step.active {
+            display: block;
+        }
+        
+        /* Search input */
+        .search-input {
+            width: 100%;
+            padding: 20px 24px;
+            font-size: 18px;
+            background: var(--bg-primary);
+            border: 3px solid var(--border-color);
+            border-radius: 16px;
+            color: var(--text-primary);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+        
+        .search-results {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            margin-top: 4px;
+        }
+        
+        .search-result-item {
+            padding: 14px 18px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s;
+        }
+        
+        .search-result-item:hover {
+            background: var(--bg-hover);
+        }
+        
+        /* Selected client */
+        .selected-client {
+            display: none;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(6,214,160,0.1), rgba(17,138,178,0.1));
+            border: 2px solid var(--accent-primary);
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .selected-client.visible {
+            display: block;
+        }
+        
+        /* New client form */
+        .new-client-form {
+            display: none;
+            margin-top: 24px;
+            padding: 20px;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            border: 2px dashed var(--accent-primary);
+        }
+        
+        .new-client-form.visible {
+            display: block;
+        }
+        
+        .form-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .form-grid-2 { grid-template-columns: 1fr 1fr; }
+        .form-grid-3 { grid-template-columns: 100px 1fr 150px; }
+        
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+        
+        .form-group input.required, .form-group select.required {
+            border: 2px solid var(--border-color);
+        }
+        
+        /* Type selector */
+        .type-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .type-option {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .type-option.b2b {
+            background: var(--accent-secondary);
+            color: #fff;
+        }
+        
+        .type-option.b2c {
+            background: var(--bg-card);
+            color: var(--text-muted);
+            border: 2px solid var(--border-color);
+        }
+        
+        .type-option.active.b2b {
+            background: var(--accent-secondary);
+            color: #fff;
+        }
+        
+        .type-option.active.b2c {
+            background: var(--accent-warning);
+            color: #000;
+        }
+        
+        /* Order grid */
+        .order-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .order-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Category filter */
+        .category-filter {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .category-btn {
+            padding: 8px 14px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-primary);
+        }
+        
+        .category-btn:hover, .category-btn.active {
+            background: var(--accent-primary);
+            color: #000;
+            border-color: var(--accent-primary);
+        }
+        
+        /* Product list */
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .product-item:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }
+        
+        .product-code {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            color: var(--accent-orange);
+            margin-right: 12px;
+        }
+        
+        .product-name {
+            font-weight: 600;
+        }
+        
+        .product-price {
+            font-family: 'Space Mono', monospace;
+            color: var(--accent-primary);
+            font-weight: 700;
+        }
+        
+        /* Cart */
+        .cart-container {
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+        
+        .cart-item {
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .cart-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .cart-item-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .cart-item-code {
+            font-size: 11px;
+            color: var(--accent-orange);
+            font-family: 'Space Mono', monospace;
+        }
+        
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .qty-btn:hover {
+            background: var(--accent-primary);
+            color: #000;
+        }
+        
+        .qty-input {
+            width: 60px;
+            text-align: center;
+            padding: 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+        }
+        
+        .cart-item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+        
+        .cart-item-price {
+            color: var(--text-muted);
+        }
+        
+        .cart-item-total {
+            font-weight: 700;
+            color: var(--accent-primary);
+            font-family: 'Space Mono', monospace;
+        }
+        
+        .cart-item-edit {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 4px 8px;
+            font-size: 11px;
+            background: var(--bg-hover);
+            border: none;
+            border-radius: 4px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        
+        .cart-item-edit:hover {
+            color: var(--accent-primary);
+        }
+        
+        /* Caisse */
+        .caisse-bar {
+            padding: 14px 16px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .caisse-total {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 22px;
+            color: #000;
+        }
+        
+        .caisse-details {
+            display: none;
+            padding: 16px;
+            background: var(--bg-hover);
+        }
+        
+        .caisse-details.visible {
+            display: block;
+        }
+        
+        .caisse-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .caisse-label {
+            color: var(--text-muted);
+        }
+        
+        .caisse-value {
+            font-weight: 600;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        /* Modals */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay.visible {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid var(--border-color);
+        }
+        
+        .modal-large {
+            max-width: 1100px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .modal-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+        
+        tr:hover {
+            background: var(--bg-hover);
+        }
+        
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        
+        .toast {
+            padding: 14px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--accent-primary);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Discount info */
+        .discount-info {
+            display: none;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #ffd16610, #06d6a008);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .discount-info.visible {
+            display: block;
+        }
+        
+        /* Floating menu */
+        .floating-menu {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+        
+        .float-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .float-btn:hover {
+            background: var(--accent-primary);
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <a href="index.html" class="back-btn">← Retour TRAKIO</a>
+            <h1>⚡ Prise de Commandes <span class="version-badge">v1.0.0</span></h1>
+        </div>
+        <div id="header-actions" style="display:none;">
+            <button class="btn btn-primary" onclick="showFinalizeModal()">✅ Valider la commande</button>
+        </div>
+    </div>
+    
+    <!-- Étape 1: Sélection Client -->
+    <div id="step-client" class="qo-step active">
+        <div class="card" style="max-width:800px; margin:0 auto;">
+            <div class="card-header">
+                <h3 class="card-title">⚡ Nouvelle Commande - Sélection Client</h3>
+            </div>
+            <div class="card-body">
+                <div style="position:relative; margin-bottom:24px;">
+                    <input type="text" id="client-search" class="search-input" 
+                        placeholder="🔍 Rechercher client (nom, téléphone, ville...)"
+                        oninput="searchClients(this.value)" autocomplete="off">
+                    <div id="client-results" class="search-results"></div>
+                </div>
+                
+                <div id="selected-client" class="selected-client">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h3 id="client-name" style="font-size:20px; margin-bottom:4px;"></h3>
+                            <p style="color:var(--text-muted);">
+                                <span id="client-phone"></span> • <span id="client-email"></span>
+                            </p>
+                            <p id="client-type-badge" style="margin-top:8px;"></p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="clearClient()">✕ Changer</button>
+                    </div>
+                </div>
+                
+                <div style="display:flex; gap:12px; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                    <button class="btn btn-secondary" onclick="showNewClientForm()">➕ Nouveau client</button>
+                    <button class="btn btn-primary" id="btn-next-step" style="padding:16px 32px; font-size:16px; display:none;" onclick="goToStep2()">
+                        Continuer → Commande
+                    </button>
+                </div>
+                
+                <!-- Formulaire nouveau client -->
+                <div id="new-client-form" class="new-client-form">
+                    <h4 style="color:var(--accent-primary); margin-bottom:16px;">➕ Nouveau client</h4>
+                    
+                    <div class="type-selector">
+                        <div id="type-b2b" class="type-option b2b active" onclick="selectClientType('b2b')">
+                            🏢 Professionnel (B2B)
+                        </div>
+                        <div id="type-b2c" class="type-option b2c" onclick="selectClientType('b2c')">
+                            🏠 Particulier (B2C)
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid form-grid-2">
+                        <div class="form-group">
+                            <label>Nom / Société *</label>
+                            <input type="text" id="new-name" class="required" placeholder="Nom">
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom</label>
+                            <input type="text" id="new-firstname" placeholder="Prénom">
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid form-grid-2">
+                        <div class="form-group">
+                            <label>Téléphone *</label>
+                            <input type="tel" id="new-phone" class="required" placeholder="+41 21 xxx xx xx">
+                        </div>
+                        <div class="form-group">
+                            <label>Mobile</label>
+                            <input type="tel" id="new-mobile" placeholder="+41 79 xxx xx xx">
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid form-grid-2">
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="new-email" class="required" placeholder="email@exemple.ch">
+                        </div>
+                        <div class="form-group">
+                            <label>Entreprise</label>
+                            <input type="text" id="new-company" placeholder="Nom de l'entreprise">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label>Adresse *</label>
+                        <input type="text" id="new-address" class="required" placeholder="Rue et numéro">
+                    </div>
+                    
+                    <div class="form-grid form-grid-3">
+                        <div class="form-group">
+                            <label>NPA *</label>
+                            <input type="text" id="new-zip" class="required" placeholder="1000" maxlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label>Ville *</label>
+                            <input type="text" id="new-city" class="required" placeholder="Lausanne">
+                        </div>
+                        <div class="form-group">
+                            <label>Canton</label>
+                            <select id="new-canton">
+                                <option value="">--</option>
+                                <option value="VD" selected>VD</option>
+                                <option value="GE">GE</option>
+                                <option value="VS">VS</option>
+                                <option value="NE">NE</option>
+                                <option value="FR">FR</option>
+                                <option value="BE">BE</option>
+                                <option value="ZH">ZH</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid form-grid-2" style="margin-bottom:16px;">
+                        <div class="form-group">
+                            <label>Pays</label>
+                            <select id="new-country">
+                                <option value="Suisse" selected>🇨🇭 Suisse</option>
+                                <option value="France">🇫🇷 France</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="color:var(--accent-warning); font-weight:600;">💰 Liste de prix</label>
+                            <select id="new-pricelist" style="border-color:var(--accent-warning);"></select>
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex; gap:12px;">
+                        <button class="btn btn-primary" onclick="saveNewClient()">✓ Créer et sélectionner</button>
+                        <button class="btn btn-secondary" onclick="hideNewClientForm()">Annuler</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Étape 2: Prise de commande -->
+    <div id="step-order" class="qo-step">
+        <div style="display:flex; gap:12px; margin-bottom:20px; align-items:center; flex-wrap:wrap;">
+            <button class="btn btn-secondary" onclick="goBackToStep1()">← Retour client</button>
+            <div style="flex:1; text-align:center;">
+                <span style="font-size:14px; color:var(--text-muted);">Client:</span>
+                <strong id="header-client" style="color:var(--accent-primary); margin-left:8px;"></strong>
+            </div>
+            <button class="btn btn-primary" onclick="validateOrder()" style="padding:14px 28px; font-size:16px;">
+                ✅ Valider la commande
+            </button>
+        </div>
+        
+        <div class="order-grid">
+            <!-- Colonne gauche -->
+            <div>
+                <!-- Recherche produit -->
+                <div class="card" style="margin-bottom:20px;">
+                    <div class="card-header">
+                        <h3 class="card-title">🔍 Recherche Produit</h3>
+                    </div>
+                    <div class="card-body">
+                        <input type="text" id="product-search" class="search-input" style="padding:14px 18px; font-size:16px;"
+                            placeholder="Cliquez ou tapez pour rechercher..."
+                            onfocus="showProductsByCategory()"
+                            oninput="searchProducts(this.value)">
+                        <div id="category-filter" class="category-filter"></div>
+                        <div id="product-results" style="margin-top:12px; max-height:350px; overflow-y:auto;"></div>
+                    </div>
+                </div>
+                
+                <!-- Historique client -->
+                <div class="card" style="margin-bottom:20px;">
+                    <div class="card-header">
+                        <h3 class="card-title">📋 Déjà commandé</h3>
+                    </div>
+                    <div class="card-body" style="max-height:200px; overflow-y:auto;">
+                        <div id="client-history">Aucun historique</div>
+                    </div>
+                </div>
+                
+                <!-- Suggestions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">💡 Suggestions</h3>
+                        <button class="btn btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="refreshSuggestions()">🔄</button>
+                    </div>
+                    <div class="card-body" style="max-height:200px; overflow-y:auto;">
+                        <div id="suggestions">Chargement...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Colonne droite: Panier -->
+            <div class="card cart-container">
+                <div class="card-header">
+                    <h3 class="card-title">🛒 Commande en cours</h3>
+                    <span id="cart-count" style="color:var(--text-muted);">0 article(s)</span>
+                </div>
+                <div class="cart-items" id="cart-items">
+                    <div style="text-align:center; color:var(--text-muted); padding:40px;">
+                        Ajoutez des produits
+                    </div>
+                </div>
+                
+                <!-- Caisse -->
+                <div id="caisse" style="border-top:2px solid var(--accent-primary);">
+                    <div id="discount-info" class="discount-info">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span>🏷️</span>
+                                <span style="font-weight:600; color:#ffd166; font-size:12px;">Rabais appliqués</span>
+                            </div>
+                            <span id="pricelist-badge" style="display:none; padding:3px 10px; background:#ffd16620; color:#ffd166; border-radius:12px; font-size:11px; font-weight:600;"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="caisse-bar" onclick="toggleCaisse()">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:20px;">💳</span>
+                            <span style="font-weight:700; color:#000;">TOTAL</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span id="total-ttc-compact" class="caisse-total">0.00 CHF</span>
+                            <span id="caisse-arrow" style="font-size:16px; color:#000;">▲</span>
+                        </div>
+                    </div>
+                    
+                    <div id="caisse-details" class="caisse-details">
+                        <div class="caisse-row">
+                            <span class="caisse-label">📦 Articles</span>
+                            <span id="total-items" class="caisse-value">0</span>
+                        </div>
+                        <div class="caisse-row">
+                            <span class="caisse-label">⚖️ Poids total</span>
+                            <span id="total-weight" class="caisse-value">0.00 kg</span>
+                        </div>
+                        <div style="border-top:1px dashed var(--border-color); padding-top:10px; margin-top:10px;">
+                            <div class="caisse-row">
+                                <span>Total HT</span>
+                                <span id="total-ht" class="caisse-value">0.00 CHF</span>
+                            </div>
+                            <div class="caisse-row" style="color:var(--text-muted);">
+                                <span>TVA (2.6%)</span>
+                                <span id="total-tva" class="caisse-value">0.00 CHF</span>
+                            </div>
+                        </div>
+                        <div style="border-top:2px solid var(--accent-primary); padding-top:12px; margin-top:8px;" class="caisse-row">
+                            <span style="font-weight:700; font-size:16px; color:var(--accent-primary);">TOTAL TTC</span>
+                            <span id="total-ttc" style="font-size:24px; color:var(--accent-primary);" class="caisse-value">0.00 CHF</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Modifier ligne -->
+    <div id="edit-modal" class="modal-overlay" onclick="if(event.target === this) closeEditModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>✏️ Modifier article</h3>
+                <button class="modal-close" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-index">
+                <div style="margin-bottom:16px; padding:16px; background:var(--bg-primary); border-radius:8px;">
+                    <strong id="edit-product-name" style="font-size:18px;"></strong>
+                    <div id="edit-product-code" style="font-size:13px; color:var(--text-muted); margin-top:4px;"></div>
+                </div>
+                <div class="form-grid form-grid-2" style="margin-bottom:16px;">
+                    <div class="form-group">
+                        <label>Origine</label>
+                        <input type="text" id="edit-origin">
+                    </div>
+                    <div class="form-group">
+                        <label>Nom latin</label>
+                        <input type="text" id="edit-latin">
+                    </div>
+                </div>
+                <div class="form-grid form-grid-3" style="margin-bottom:16px;">
+                    <div class="form-group">
+                        <label>N° Lot</label>
+                        <input type="text" id="edit-lot">
+                    </div>
+                    <div class="form-group">
+                        <label>Prix unitaire (CHF)</label>
+                        <input type="number" step="0.05" id="edit-price">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantité</label>
+                        <input type="number" step="0.1" id="edit-qty">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" style="color:var(--accent-danger);" onclick="removeCartItem()">🗑️ Supprimer</button>
+                <div style="display:flex; gap:12px;">
+                    <button class="btn btn-secondary" onclick="closeEditModal()">Annuler</button>
+                    <button class="btn btn-primary" onclick="saveEditLine()">💾 Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div class="toast-container" id="toast-container"></div>
+    
+    <!-- Floating menu -->
+    <div class="floating-menu" id="floating-menu" style="display:none;">
+        <div id="float-expanded" style="display:flex; flex-direction:column; gap:8px; margin-bottom:8px; opacity:0; pointer-events:none;">
+            <button class="float-btn" onclick="openClientsModal()" title="Gérer les clients">👥</button>
+            <button class="float-btn" onclick="openProductsModal()" title="Gérer les produits">📦</button>
+        </div>
+        <button class="float-btn" onclick="toggleFloatMenu()" title="Outils">⚙️</button>
+    </div>
+    
+    <script>
+        // ===== DONNÉES =====
+        const QOData = {
+            clients: [],
+            products: [],
+            orders: [],
+            selectedClient: null,
+            cart: [],
+            editingOrderId: null
+        };
+        
+        let ArticlesData = {
+            articles: [],
+            categories: [
+                { id: 1, code: 'POISSON', name: 'Poissons frais', icon: '🐟' },
+                { id: 2, code: 'CRUSTACE', name: 'Crustacés', icon: '🦐' },
+                { id: 3, code: 'COQUILLAGE', name: 'Coquillages', icon: '🦪' },
+                { id: 4, code: 'FUME', name: 'Produits fumés', icon: '🔥' },
+                { id: 5, code: 'CONSERVE', name: 'Conserves', icon: '🥫' },
+                { id: 6, code: 'PREPA', name: 'Préparations', icon: '🍽️' },
+                { id: 7, code: 'SURGELE', name: 'Surgelés', icon: '❄️' },
+                { id: 8, code: 'EPICERIE', name: 'Épicerie', icon: '🛒' }
+            ],
+            pricelists: [
+                { id: 1, code: 'STD', name: 'Standard B2C', discount: 0 },
+                { id: 2, code: 'PRO', name: 'Professionnels', discount: 15 },
+                { id: 3, code: 'GMS', name: 'Grande distribution', discount: 20 }
+            ],
+            discounts: []
+        };
+        
+        let newClientType = 'b2b';
+        let selectedCategory = null;
+        let caisseExpanded = false;
+        let floatExpanded = false;
+        
+        // ===== INITIALISATION =====
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllData();
+            initPricelistSelect();
+            initCategoryFilter();
+        });
+        
+        function loadAllData() {
+            // Charger QOData
+            const qoClients = localStorage.getItem('trakio_quickorder');
+            if (qoClients) {
+                const parsed = JSON.parse(qoClients);
+                QOData.clients = parsed.clients || [];
+                QOData.products = parsed.products || [];
+                QOData.orders = parsed.orders || [];
+            }
+            
+            // Charger ArticlesData
+            const artData = localStorage.getItem('trakio_articles');
+            if (artData) {
+                const parsed = JSON.parse(artData);
+                ArticlesData = { ...ArticlesData, ...parsed };
+            }
+            
+            // Charger produits par défaut si vide
+            if (QOData.products.length === 0) {
+                loadDefaultProducts();
+            }
+            
+            // Charger clients par défaut si vide
+            if (QOData.clients.length === 0) {
+                loadDefaultClients();
+            }
+        }
+        
+        function loadDefaultProducts() {
+            QOData.products = [
+                { id: 1, code: '27', name: 'Ailes de raie sans peau FAO27', category: 'poisson', priceB2C: 36.9, priceB2B: 28.50, unit: 'kg', active: true },
+                { id: 2, code: '36', name: 'Bar de ligne entier sauvage', category: 'poisson', priceB2C: 65.0, priceB2B: 52.00, unit: 'kg', active: true },
+                { id: 3, code: '39', name: 'Bars 400/600 élevage', category: 'poisson', priceB2C: 22.2, priceB2B: 17.80, unit: 'kg', active: true },
+                { id: 4, code: '44', name: 'Cabillaud filet sans peau', category: 'poisson', priceB2C: 42.5, priceB2B: 34.00, unit: 'kg', active: true },
+                { id: 5, code: '52', name: 'Crevettes roses cuites 60/80', category: 'crustace', priceB2C: 28.9, priceB2B: 23.00, unit: 'kg', active: true },
+                { id: 6, code: '61', name: 'Dorade royale élevage 400/600', category: 'poisson', priceB2C: 24.5, priceB2B: 19.60, unit: 'kg', active: true },
+                { id: 7, code: '75', name: 'Filet de perche du Léman', category: 'poisson', priceB2C: 85.0, priceB2B: 68.00, unit: 'kg', active: true },
+                { id: 8, code: '89', name: 'Homard bleu vivant', category: 'crustace', priceB2C: 75.0, priceB2B: 60.00, unit: 'kg', active: true },
+                { id: 9, code: '92', name: 'Huîtres creuses N°3 Normandie', category: 'coquillage', priceB2C: 18.5, priceB2B: 14.80, unit: 'dz', active: true },
+                { id: 10, code: '105', name: 'Moules de bouchot', category: 'coquillage', priceB2C: 9.5, priceB2B: 7.60, unit: 'kg', active: true },
+                { id: 11, code: '118', name: 'Saumon fumé artisanal', category: 'fume', priceB2C: 65.0, priceB2B: 52.00, unit: 'kg', active: true },
+                { id: 12, code: '125', name: 'Sole portion 250/350', category: 'poisson', priceB2C: 45.0, priceB2B: 36.00, unit: 'kg', active: true },
+                { id: 13, code: '138', name: 'Thon rouge sashimi', category: 'poisson', priceB2C: 95.0, priceB2B: 76.00, unit: 'kg', active: true },
+                { id: 14, code: '145', name: 'Turbot entier sauvage', category: 'poisson', priceB2C: 55.0, priceB2B: 44.00, unit: 'kg', active: true },
+                { id: 15, code: '152', name: 'Saint-Jacques avec corail', category: 'coquillage', priceB2C: 48.0, priceB2B: 38.40, unit: 'kg', active: true }
+            ];
+            saveData('products');
+        }
+        
+        function loadDefaultClients() {
+            QOData.clients = [
+                { id: 1, num: '100001', name: 'Restaurant Le Léman', contact: 'Jean Dupont', clientType: 'b2b', address: 'Rue du Lac 12', zip: '1000', city: 'Lausanne', phone: '+41 21 312 45 67', email: 'contact@leleman.ch', pricelistId: 2, ordersCount: 0, history: [] },
+                { id: 2, num: '100002', name: 'Brasserie du Port', contact: 'Marie Martin', clientType: 'b2b', address: 'Quai Perdonnet 8', zip: '1800', city: 'Vevey', phone: '+41 21 921 33 44', email: 'info@brasserieport.ch', pricelistId: 2, ordersCount: 0, history: [] },
+                { id: 3, num: '100003', name: 'Traiteur Excellence', contact: 'Pierre Blanc', clientType: 'b2b', address: 'Avenue de la Gare 25', zip: '1003', city: 'Lausanne', phone: '+41 21 311 22 33', email: 'commandes@excellence.ch', pricelistId: 3, ordersCount: 0, history: [] },
+                { id: 4, num: '200001', name: 'Famille Rochat', contact: '', clientType: 'b2c', address: 'Chemin des Vignes 5', zip: '1095', city: 'Lutry', phone: '+41 79 456 78 90', email: 'rochat@gmail.com', ordersCount: 0, history: [] }
+            ];
+            saveData('clients');
+        }
+        
+        function saveData(type) {
+            const data = {
+                clients: QOData.clients,
+                products: QOData.products,
+                orders: QOData.orders
+            };
+            localStorage.setItem('trakio_quickorder', JSON.stringify(data));
+        }
+        
+        function initPricelistSelect() {
+            const select = document.getElementById('new-pricelist');
+            select.innerHTML = '<option value="">Standard (pas de remise)</option>' +
+                ArticlesData.pricelists.map(p => `<option value="${p.id}">${p.name} (-${p.discount}%)</option>`).join('');
+        }
+        
+        function initCategoryFilter() {
+            const categories = [
+                { id: 'all', name: 'Tous', icon: '📦' },
+                { id: 'poisson', name: 'Poissons', icon: '🐟' },
+                { id: 'crustace', name: 'Crustacés', icon: '🦐' },
+                { id: 'coquillage', name: 'Coquillages', icon: '🦪' },
+                { id: 'fume', name: 'Fumés', icon: '🔥' },
+                { id: 'conserve', name: 'Conserves', icon: '🥫' }
+            ];
+            
+            document.getElementById('category-filter').innerHTML = categories.map(c =>
+                `<button class="category-btn ${c.id === 'all' ? 'active' : ''}" onclick="filterByCategory('${c.id}')">${c.icon} ${c.name}</button>`
+            ).join('');
+        }
+        
+        // ===== RECHERCHE CLIENTS =====
+        function searchClients(query) {
+            const resultsDiv = document.getElementById('client-results');
+            
+            if (!query || query.length < 2) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+            
+            const q = query.toLowerCase();
+            const matches = QOData.clients.filter(c =>
+                (c.name && c.name.toLowerCase().includes(q)) ||
+                (c.contact && c.contact.toLowerCase().includes(q)) ||
+                (c.city && c.city.toLowerCase().includes(q)) ||
+                (c.phone && c.phone.includes(q)) ||
+                (c.num && c.num.includes(q))
+            ).slice(0, 10);
+            
+            if (matches.length === 0) {
+                resultsDiv.innerHTML = '<div class="search-result-item" style="color:var(--text-muted);">Aucun client trouvé</div>';
+            } else {
+                resultsDiv.innerHTML = matches.map(c => {
+                    const type = c.clientType || 'b2b';
+                    const icon = type === 'b2c' ? '🏠' : '🏢';
+                    return `
+                        <div class="search-result-item" onclick="selectClient(${c.id})">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <strong>${icon} ${c.name}</strong>
+                                    <div style="font-size:12px; color:var(--text-muted);">${c.city || ''} • ${c.phone || ''}</div>
+                                </div>
+                                <span style="font-size:11px; color:var(--accent-orange);">#${c.num}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            resultsDiv.style.display = 'block';
+        }
+        
+        function selectClient(id) {
+            const client = QOData.clients.find(c => c.id === id);
+            if (!client) return;
+            
+            QOData.selectedClient = client;
+            
+            document.getElementById('client-results').style.display = 'none';
+            document.getElementById('client-search').value = '';
+            
+            const type = client.clientType || 'b2b';
+            const icon = type === 'b2c' ? '🏠' : '🏢';
+            const typeLabel = type === 'b2c' ? 'Particulier' : 'Professionnel';
+            const typeColor = type === 'b2c' ? 'var(--accent-warning)' : 'var(--accent-secondary)';
+            
+            document.getElementById('client-name').textContent = icon + ' ' + client.name;
+            document.getElementById('client-phone').textContent = client.phone || '-';
+            document.getElementById('client-email').textContent = client.email || '-';
+            document.getElementById('client-type-badge').innerHTML = `
+                <span style="padding:4px 12px; background:${typeColor}20; color:${typeColor}; border-radius:20px; font-size:12px;">${typeLabel}</span>
+            `;
+            
+            document.getElementById('selected-client').classList.add('visible');
+            document.getElementById('btn-next-step').style.display = 'inline-flex';
+            
+            hideNewClientForm();
+        }
+        
+        function clearClient() {
+            QOData.selectedClient = null;
+            document.getElementById('selected-client').classList.remove('visible');
+            document.getElementById('btn-next-step').style.display = 'none';
+        }
+        
+        // ===== NOUVEAU CLIENT =====
+        function showNewClientForm() {
+            document.getElementById('new-client-form').classList.add('visible');
+        }
+        
+        function hideNewClientForm() {
+            document.getElementById('new-client-form').classList.remove('visible');
+        }
+        
+        function selectClientType(type) {
+            newClientType = type;
+            
+            const b2bDiv = document.getElementById('type-b2b');
+            const b2cDiv = document.getElementById('type-b2c');
+            
+            if (type === 'b2b') {
+                b2bDiv.style.background = 'var(--accent-secondary)';
+                b2bDiv.style.color = '#fff';
+                b2cDiv.style.background = 'var(--bg-card)';
+                b2cDiv.style.color = 'var(--text-muted)';
+            } else {
+                b2cDiv.style.background = 'var(--accent-warning)';
+                b2cDiv.style.color = '#000';
+                b2bDiv.style.background = 'var(--bg-card)';
+                b2bDiv.style.color = 'var(--text-muted)';
+            }
+        }
+        
+        function saveNewClient() {
+            const name = document.getElementById('new-name').value.trim();
+            const phone = document.getElementById('new-phone').value.trim();
+            const email = document.getElementById('new-email').value.trim();
+            const address = document.getElementById('new-address').value.trim();
+            const zip = document.getElementById('new-zip').value.trim();
+            const city = document.getElementById('new-city').value.trim();
+            
+            if (!name || !phone || !email || !address || !zip || !city) {
+                showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                return;
+            }
+            
+            const newClient = {
+                id: Date.now(),
+                num: String(Date.now()).slice(-6),
+                name: name,
+                firstname: document.getElementById('new-firstname').value.trim(),
+                contact: document.getElementById('new-company').value.trim(),
+                clientType: newClientType,
+                address: address,
+                zip: zip,
+                city: city,
+                canton: document.getElementById('new-canton').value,
+                country: document.getElementById('new-country').value,
+                phone: phone,
+                mobile: document.getElementById('new-mobile').value.trim(),
+                email: email,
+                pricelistId: parseInt(document.getElementById('new-pricelist').value) || null,
+                ordersCount: 0,
+                history: []
+            };
+            
+            QOData.clients.push(newClient);
+            saveData('clients');
+            
+            selectClient(newClient.id);
+            hideNewClientForm();
+            
+            // Reset form
+            document.querySelectorAll('#new-client-form input').forEach(i => i.value = '');
+            
+            showToast('Client créé avec succès !', 'success');
+        }
+        
+        // ===== NAVIGATION ÉTAPES =====
+        function goToStep2() {
+            if (!QOData.selectedClient) {
+                showToast('Veuillez sélectionner un client', 'error');
+                return;
+            }
+            
+            document.getElementById('step-client').classList.remove('active');
+            document.getElementById('step-order').classList.add('active');
+            document.getElementById('header-client').textContent = QOData.selectedClient.name;
+            document.getElementById('floating-menu').style.display = 'block';
+            
+            loadClientHistory();
+            refreshSuggestions();
+            recalculateCartPrices();
+        }
+        
+        function goBackToStep1() {
+            document.getElementById('step-order').classList.remove('active');
+            document.getElementById('step-client').classList.add('active');
+            document.getElementById('floating-menu').style.display = 'none';
+        }
+        
+        // ===== RECHERCHE PRODUITS =====
+        function showProductsByCategory() {
+            renderProducts(QOData.products.filter(p => p.active !== false).slice(0, 20));
+        }
+        
+        function searchProducts(query) {
+            if (!query || query.length < 2) {
+                showProductsByCategory();
+                return;
+            }
+            
+            const q = query.toLowerCase();
+            const matches = QOData.products.filter(p =>
+                p.active !== false && (
+                    (p.code && p.code.toLowerCase().includes(q)) ||
+                    (p.name && p.name.toLowerCase().includes(q))
+                )
+            ).slice(0, 30);
+            
+            renderProducts(matches);
+        }
+        
+        function filterByCategory(categoryId) {
+            selectedCategory = categoryId === 'all' ? null : categoryId;
+            
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            let products = QOData.products.filter(p => p.active !== false);
+            if (selectedCategory) {
+                products = products.filter(p => p.category === selectedCategory);
+            }
+            
+            renderProducts(products.slice(0, 30));
+        }
+        
+        function renderProducts(products) {
+            const clientType = QOData.selectedClient?.clientType || 'b2b';
+            
+            document.getElementById('product-results').innerHTML = products.length === 0 
+                ? '<div style="text-align:center; color:var(--text-muted); padding:20px;">Aucun produit trouvé</div>'
+                : products.map(p => {
+                    const price = getProductPrice(p, clientType);
+                    return `
+                        <div class="product-item" onclick="addToCart(${p.id})">
+                            <div>
+                                <span class="product-code">${p.code}</span>
+                                <span class="product-name">${p.name}</span>
+                            </div>
+                            <span class="product-price">${price.toFixed(2)} CHF/${p.unit || 'kg'}</span>
+                        </div>
+                    `;
+                }).join('');
+        }
+        
+        function getProductPrice(product, clientType) {
+            if (clientType === 'b2c') {
+                return product.priceB2C || product.price || 0;
+            }
+            return product.priceB2B || product.price || 0;
+        }
+        
+        // ===== PANIER =====
+        function addToCart(productId) {
+            const product = QOData.products.find(p => p.id === productId);
+            if (!product) return;
+            
+            const clientType = QOData.selectedClient?.clientType || 'b2b';
+            const price = getProductPrice(product, clientType);
+            
+            // Vérifier si déjà dans le panier
+            const existingIndex = QOData.cart.findIndex(item => item.productId === productId);
+            
+            if (existingIndex >= 0) {
+                QOData.cart[existingIndex].qty += 1;
+                QOData.cart[existingIndex].total = QOData.cart[existingIndex].qty * QOData.cart[existingIndex].price;
+            } else {
+                QOData.cart.push({
+                    productId: product.id,
+                    code: product.code,
+                    name: product.name,
+                    category: product.category,
+                    unit: product.unit || 'kg',
+                    price: price,
+                    qty: 1,
+                    total: price,
+                    origin: '',
+                    latin: '',
+                    lot: ''
+                });
+            }
+            
+            updateCart();
+            showToast(`${product.name} ajouté au panier`, 'success');
+        }
+        
+        function updateCart() {
+            const cartDiv = document.getElementById('cart-items');
+            
+            if (QOData.cart.length === 0) {
+                cartDiv.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:40px;">Ajoutez des produits</div>';
+            } else {
+                cartDiv.innerHTML = QOData.cart.map((item, index) => `
+                    <div class="cart-item">
+                        <button class="cart-item-edit" onclick="openEditModal(${index})">✏️</button>
+                        <div class="cart-item-header">
+                            <div>
+                                <div class="cart-item-name">${item.name}</div>
+                                <div class="cart-item-code">${item.code}</div>
+                            </div>
+                        </div>
+                        <div class="cart-item-controls">
+                            <button class="qty-btn" onclick="changeQty(${index}, -1)">−</button>
+                            <input type="number" class="qty-input" value="${item.qty}" step="0.1" 
+                                onchange="setQty(${index}, this.value)">
+                            <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
+                        </div>
+                        <div class="cart-item-footer">
+                            <span class="cart-item-price">${item.price.toFixed(2)} CHF/${item.unit}</span>
+                            <span class="cart-item-total">${item.total.toFixed(2)} CHF</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            updateTotals();
+        }
+        
+        function changeQty(index, delta) {
+            const item = QOData.cart[index];
+            if (!item) return;
+            
+            const step = item.unit === 'kg' ? 0.5 : 1;
+            item.qty = Math.max(step, item.qty + (delta * step));
+            item.total = item.qty * item.price;
+            
+            updateCart();
+        }
+        
+        function setQty(index, value) {
+            const item = QOData.cart[index];
+            if (!item) return;
+            
+            const qty = parseFloat(value) || 1;
+            item.qty = Math.max(0.1, qty);
+            item.total = item.qty * item.price;
+            
+            updateCart();
+        }
+        
+        function recalculateCartPrices() {
+            const clientType = QOData.selectedClient?.clientType || 'b2b';
+            
+            QOData.cart.forEach(item => {
+                const product = QOData.products.find(p => p.id === item.productId);
+                if (product) {
+                    item.price = getProductPrice(product, clientType);
+                    item.total = item.qty * item.price;
+                }
+            });
+            
+            updateCart();
+        }
+        
+        function updateTotals() {
+            let totalHT = 0;
+            let totalItems = 0;
+            let totalWeight = 0;
+            
+            QOData.cart.forEach(item => {
+                totalHT += item.total;
+                totalItems += item.qty;
+                if (item.unit === 'kg') {
+                    totalWeight += item.qty;
+                }
+            });
+            
+            const tva = totalHT * 0.026;
+            const totalTTC = totalHT + tva;
+            
+            document.getElementById('cart-count').textContent = QOData.cart.length + ' article(s)';
+            document.getElementById('total-items').textContent = totalItems.toFixed(1);
+            document.getElementById('total-weight').textContent = totalWeight.toFixed(2) + ' kg';
+            document.getElementById('total-ht').textContent = totalHT.toFixed(2) + ' CHF';
+            document.getElementById('total-tva').textContent = tva.toFixed(2) + ' CHF';
+            document.getElementById('total-ttc').textContent = totalTTC.toFixed(2) + ' CHF';
+            document.getElementById('total-ttc-compact').textContent = totalTTC.toFixed(2) + ' CHF';
+        }
+        
+        // ===== CAISSE =====
+        function toggleCaisse() {
+            caisseExpanded = !caisseExpanded;
+            document.getElementById('caisse-details').classList.toggle('visible', caisseExpanded);
+            document.getElementById('caisse-arrow').textContent = caisseExpanded ? '▼' : '▲';
+        }
+        
+        // ===== MODAL EDIT =====
+        function openEditModal(index) {
+            const item = QOData.cart[index];
+            if (!item) return;
+            
+            document.getElementById('edit-index').value = index;
+            document.getElementById('edit-product-name').textContent = item.name;
+            document.getElementById('edit-product-code').textContent = 'Code: ' + item.code;
+            document.getElementById('edit-origin').value = item.origin || '';
+            document.getElementById('edit-latin').value = item.latin || '';
+            document.getElementById('edit-lot').value = item.lot || '';
+            document.getElementById('edit-price').value = item.price;
+            document.getElementById('edit-qty').value = item.qty;
+            
+            document.getElementById('edit-modal').classList.add('visible');
+        }
+        
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('visible');
+        }
+        
+        function saveEditLine() {
+            const index = parseInt(document.getElementById('edit-index').value);
+            const item = QOData.cart[index];
+            if (!item) return;
+            
+            item.origin = document.getElementById('edit-origin').value.trim();
+            item.latin = document.getElementById('edit-latin').value.trim();
+            item.lot = document.getElementById('edit-lot').value.trim();
+            item.price = parseFloat(document.getElementById('edit-price').value) || item.price;
+            item.qty = parseFloat(document.getElementById('edit-qty').value) || item.qty;
+            item.total = item.qty * item.price;
+            
+            closeEditModal();
+            updateCart();
+            showToast('Article modifié', 'success');
+        }
+        
+        function removeCartItem() {
+            const index = parseInt(document.getElementById('edit-index').value);
+            QOData.cart.splice(index, 1);
+            closeEditModal();
+            updateCart();
+            showToast('Article supprimé', 'success');
+        }
+        
+        // ===== HISTORIQUE & SUGGESTIONS =====
+        function loadClientHistory() {
+            const historyDiv = document.getElementById('client-history');
+            const client = QOData.selectedClient;
+            
+            if (!client || !client.history || client.history.length === 0) {
+                historyDiv.innerHTML = '<div style="color:var(--text-muted);">Aucun historique</div>';
+                return;
+            }
+            
+            const historyProducts = client.history
+                .map(productId => QOData.products.find(p => p.id === productId))
+                .filter(p => p && p.active !== false)
+                .slice(0, 10);
+            
+            if (historyProducts.length === 0) {
+                historyDiv.innerHTML = '<div style="color:var(--text-muted);">Aucun historique</div>';
+                return;
+            }
+            
+            const clientType = client.clientType || 'b2b';
+            historyDiv.innerHTML = historyProducts.map(p => {
+                const price = getProductPrice(p, clientType);
+                return `
+                    <div class="product-item" onclick="addToCart(${p.id})" style="margin-bottom:6px;">
+                        <div>
+                            <span class="product-code">${p.code}</span>
+                            <span class="product-name">${p.name}</span>
+                        </div>
+                        <span class="product-price">${price.toFixed(2)} CHF</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function refreshSuggestions() {
+            const suggestionsDiv = document.getElementById('suggestions');
+            const client = QOData.selectedClient;
+            const clientHistory = client?.history || [];
+            
+            const suggestions = QOData.products
+                .filter(p => p.active !== false && !clientHistory.includes(p.id))
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 5);
+            
+            if (suggestions.length === 0) {
+                suggestionsDiv.innerHTML = '<div style="color:var(--text-muted);">Aucune suggestion</div>';
+                return;
+            }
+            
+            const clientType = client?.clientType || 'b2b';
+            suggestionsDiv.innerHTML = suggestions.map(p => {
+                const price = getProductPrice(p, clientType);
+                return `
+                    <div class="product-item" onclick="addToCart(${p.id})" style="margin-bottom:6px;">
+                        <div>
+                            <span class="product-code">${p.code}</span>
+                            <span class="product-name">${p.name}</span>
+                        </div>
+                        <span class="product-price">${price.toFixed(2)} CHF</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // ===== VALIDATION COMMANDE =====
+        function validateOrder() {
+            if (!QOData.selectedClient) {
+                showToast('Aucun client sélectionné', 'error');
+                return;
+            }
+            
+            if (QOData.cart.length === 0) {
+                showToast('Le panier est vide', 'error');
+                return;
+            }
+            
+            let totalHT = 0;
+            QOData.cart.forEach(item => totalHT += item.total);
+            const tva = totalHT * 0.026;
+            const totalTTC = totalHT + tva;
+            
+            const now = new Date();
+            const orderNum = 'CMD-' + now.getFullYear() + 
+                String(now.getMonth() + 1).padStart(2, '0') + 
+                String(now.getDate()).padStart(2, '0') + '-' +
+                String(now.getHours()).padStart(2, '0') +
+                String(now.getMinutes()).padStart(2, '0') +
+                String(now.getSeconds()).padStart(2, '0');
+            
+            const order = {
+                id: orderNum,
+                clientId: QOData.selectedClient.id,
+                clientName: QOData.selectedClient.name,
+                clientType: QOData.selectedClient.clientType || 'b2b',
+                clientAddress: QOData.selectedClient.address || '',
+                clientCity: QOData.selectedClient.city || '',
+                clientPhone: QOData.selectedClient.phone || '',
+                items: [...QOData.cart],
+                totalHT: totalHT,
+                tva: tva,
+                totalTTC: totalTTC,
+                date: now.toISOString(),
+                status: 'pending',
+                statusLabel: 'En attente'
+            };
+            
+            // Mettre à jour l'historique client
+            const client = QOData.clients.find(c => c.id === QOData.selectedClient.id);
+            if (client) {
+                client.ordersCount = (client.ordersCount || 0) + 1;
+                client.lastOrderDate = now.toISOString();
+                QOData.cart.forEach(item => {
+                    if (!client.history) client.history = [];
+                    if (!client.history.includes(item.productId)) {
+                        client.history.push(item.productId);
+                    }
+                });
+                saveData('clients');
+            }
+            
+            QOData.orders.push(order);
+            saveData('orders');
+            
+            // Générer PDF
+            generatePDF(order);
+            
+            // Reset
+            QOData.cart = [];
+            QOData.selectedClient = null;
+            updateCart();
+            
+            showToast('✅ Commande ' + order.id + ' enregistrée !', 'success');
+            
+            // Retour à l'étape 1
+            goBackToStep1();
+            document.getElementById('selected-client').classList.remove('visible');
+            document.getElementById('btn-next-step').style.display = 'none';
+        }
+        
+        // ===== GÉNÉRATION PDF =====
+        function generatePDF(order) {
+            if (typeof window.jspdf === 'undefined') {
+                console.log('jsPDF non chargé');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Header
+            doc.setFillColor(10, 14, 23);
+            doc.rect(0, 0, 210, 45, 'F');
+            
+            doc.setTextColor(6, 214, 160);
+            doc.setFontSize(28);
+            doc.setFont('helvetica', 'bold');
+            doc.text('COMMANDE', 20, 25);
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(14);
+            doc.text(order.id, 20, 35);
+            
+            doc.setFontSize(11);
+            const dateStr = new Date(order.date).toLocaleDateString('fr-CH') + ' ' + 
+                new Date(order.date).toLocaleTimeString('fr-CH', {hour:'2-digit', minute:'2-digit'});
+            doc.text(dateStr, 150, 25);
+            
+            // Client info
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('CLIENT', 20, 60);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(14);
+            doc.text(order.clientName, 20, 68);
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(order.clientPhone || '', 20, 75);
+            
+            // Table
+            const tableData = order.items.map(item => [
+                item.code,
+                item.name,
+                item.price.toFixed(2) + ' CHF/' + item.unit,
+                item.qty.toString(),
+                item.total.toFixed(2) + ' CHF'
+            ]);
+            
+            doc.autoTable({
+                startY: 85,
+                head: [['Code', 'Désignation', 'Prix unit.', 'Qté', 'Total']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [6, 214, 160], textColor: [0, 0, 0], fontStyle: 'bold' },
+                styles: { fontSize: 10 }
+            });
+            
+            // Totaux
+            const finalY = doc.lastAutoTable.finalY + 10;
+            doc.setFontSize(11);
+            doc.text('Total HT:', 140, finalY);
+            doc.text(order.totalHT.toFixed(2) + ' CHF', 175, finalY, { align: 'right' });
+            doc.text('TVA (2.6%):', 140, finalY + 7);
+            doc.text(order.tva.toFixed(2) + ' CHF', 175, finalY + 7, { align: 'right' });
+            
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(6, 214, 160);
+            doc.text('TOTAL TTC:', 140, finalY + 18);
+            doc.text(order.totalTTC.toFixed(2) + ' CHF', 175, finalY + 18, { align: 'right' });
+            
+            // Sauvegarder
+            doc.save('commande_' + order.id + '.pdf');
+        }
+        
+        // ===== FLOATING MENU =====
+        function toggleFloatMenu() {
+            floatExpanded = !floatExpanded;
+            const expanded = document.getElementById('float-expanded');
+            expanded.style.opacity = floatExpanded ? '1' : '0';
+            expanded.style.pointerEvents = floatExpanded ? 'auto' : 'none';
+        }
+        
+        function openClientsModal() {
+            window.location.href = 'clients.html';
+        }
+        
+        function openProductsModal() {
+            showToast('Gestion produits - À venir', 'warning');
+        }
+        
+        // ===== TOAST =====
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.borderColor = type === 'error' ? 'var(--accent-danger)' : 
+                type === 'warning' ? 'var(--accent-warning)' : 'var(--accent-primary)';
+            toast.innerHTML = `${type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️'} ${message}`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

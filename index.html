@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v3.2.6 - Gestion Complète</title>
+    <title>TRAKIO v3.2.7 - Gestion Complète</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -2239,7 +2239,7 @@
                     </svg>
                     <span class="nav-text">🛍️ Shop Hub</span>
                 </div>
-                <div class="nav-item" data-page="quickorder">
+                <div class="nav-item" onclick="window.location.href='commandes.html'" style="cursor:pointer;">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                         <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
@@ -2463,7 +2463,7 @@
                     <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;">
                         
                         <!-- Prise de Commande - PRINCIPAL -->
-                        <div onclick="navigateTo('quickorder')" class="dash-tile-main" style="cursor:pointer; background:linear-gradient(145deg, rgba(6,214,160,0.15), rgba(17,138,178,0.1)); border:2px solid var(--accent-primary); border-radius:16px; padding:18px 12px; text-align:center; transition:all 0.25s; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(6,214,160,0.35)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                        <div onclick="window.location.href='commandes.html'" class="dash-tile-main" style="cursor:pointer; background:linear-gradient(145deg, rgba(6,214,160,0.15), rgba(17,138,178,0.1)); border:2px solid var(--accent-primary); border-radius:16px; padding:18px 12px; text-align:center; transition:all 0.25s; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(6,214,160,0.35)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
                             <div style="position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));"></div>
                             <div style="width:52px; height:52px; background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; box-shadow:0 6px 18px rgba(6,214,160,0.4);">
                                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
@@ -2839,7 +2839,7 @@
                                 <option value="ready">✅ Prête</option>
                                 <option value="delivered">📦 Livrée</option>
                             </select>
-                            <button class="btn btn-primary" onclick="navigateTo('quickorder')">
+                            <button class="btn btn-primary" onclick="window.location.href='commandes.html'">
                                 ⚡ Nouvelle commande
                             </button>
                         </div>
@@ -5076,384 +5076,6 @@
             <!-- =============================================
                  QUICKORDER MODULE - Prise de Commandes Rapide
                  ============================================= -->
-            <div class="module-page" id="page-quickorder">
-                <div style="margin-bottom:16px;"><span onclick="navigateTo('dashboard')" style="cursor:pointer; color:var(--text-muted); font-size:13px; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px; transition:all 0.2s;" onmouseover="this.style.background='var(--bg-hover)'; this.style.color='var(--accent-primary)'" onmouseout="this.style.background=''; this.style.color='var(--text-muted)'">← Accueil</span></div>
-                <!-- Étape 1: Sélection Client -->
-                <div id="qo-step-client" class="qo-step active">
-                    <div class="card" style="max-width:800px; margin:0 auto;">
-                        <div class="card-header">
-                            <h3 class="card-title">⚡ Nouvelle Commande - Sélection Client</h3>
-                        </div>
-                        <div class="card-body">
-                            <div style="position:relative; margin-bottom:24px;">
-                                <input type="text" id="qo-client-search" placeholder="🔍 Rechercher client B2B (nom, téléphone, ville...)"
-                                    style="width:100%; padding:20px 24px; font-size:18px; background:var(--bg-primary); border:3px solid var(--border-color); border-radius:16px; color:var(--text-primary);"
-                                    oninput="searchQOClients(this.value)" autocomplete="off">
-                                <div id="qo-client-results" style="display:none; position:absolute; top:100%; left:0; right:0; background:var(--bg-card); border:2px solid var(--border-color); border-radius:12px; max-height:300px; overflow-y:auto; z-index:100; margin-top:4px;"></div>
-                            </div>
-                            <div id="qo-selected-client" style="display:none; padding:20px; background:linear-gradient(135deg, rgba(6,214,160,0.1), rgba(17,138,178,0.1)); border:2px solid var(--accent-primary); border-radius:16px; margin-bottom:24px;">
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <div>
-                                        <h3 id="qo-client-name" style="font-size:20px; margin-bottom:4px;"></h3>
-                                        <p style="color:var(--text-muted);"><span id="qo-client-phone"></span> • <span id="qo-client-email"></span></p>
-                                        <p onclick="showClientOrders()" style="font-size:13px; color:var(--accent-primary); margin-top:8px; cursor:pointer; text-decoration:underline;" title="Cliquez pour voir les commandes">📋 <span id="qo-client-orders-count">0</span> commandes précédentes</p>
-                                    </div>
-                                    <button class="btn btn-secondary" onclick="clearQOClient()">✕ Changer</button>
-                                </div>
-                            </div>
-                            <div style="display:flex; gap:12px; justify-content:space-between; align-items:center; flex-wrap:wrap;">
-                                <button class="btn btn-secondary" onclick="showQONewClientForm()">➕ Nouveau client</button>
-                                <button class="btn btn-primary" id="qo-btn-next-step" style="padding:16px 32px; font-size:16px; display:none;" onclick="goToQOStep2()">Continuer → Commande</button>
-                            </div>
-                            <!-- Formulaire nouveau client -->
-                            <div id="qo-new-client-form" style="display:none; margin-top:24px; padding:20px; background:var(--bg-primary); border-radius:12px; border:2px dashed var(--accent-primary);">
-                                <h4 style="color:var(--accent-primary); margin-bottom:16px;">➕ Nouveau client</h4>
-
-                                <!-- Type client B2B/B2C -->
-                                <div style="display:flex; gap:12px; margin-bottom:20px;">
-                                    <label style="flex:1; cursor:pointer;">
-                                        <input type="radio" name="qo-new-type" value="b2b" checked style="display:none;">
-                                        <div id="qo-type-b2b" onclick="selectQOClientType('b2b')" style="padding:14px; background:var(--accent-secondary); color:#fff; border-radius:10px; text-align:center; font-weight:600; transition:all 0.2s;">
-                                            🏢 Professionnel (B2B)
-                                        </div>
-                                    </label>
-                                    <label style="flex:1; cursor:pointer;">
-                                        <input type="radio" name="qo-new-type" value="b2c" style="display:none;">
-                                        <div id="qo-type-b2c" onclick="selectQOClientType('b2c')" style="padding:14px; background:var(--bg-card); color:var(--text-muted); border:2px solid var(--border-color); border-radius:10px; text-align:center; font-weight:600; transition:all 0.2s;">
-                                            🏠 Particulier (B2C)
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <!-- Infos personnelles -->
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-                                    <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Nom *</label><input type="text" id="qo-new-name" placeholder="Nom de famille" style="width:100%; padding:10px; background:var(--bg-card); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Prénom</label><input type="text" id="qo-new-firstname" placeholder="Prénom" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary);"></div>
-                                </div>
-
-                                <!-- Téléphones -->
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-                                    <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Téléphone fixe *</label><input type="tel" id="qo-new-phone" placeholder="+41 21 xxx xx xx" style="width:100%; padding:10px; background:var(--bg-card); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Téléphone portable</label><input type="tel" id="qo-new-mobile" placeholder="+41 79 xxx xx xx" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary);"></div>
-                                </div>
-
-                                <!-- Email & Entreprise -->
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-                                    <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Email *</label><input type="email" id="qo-new-email" placeholder="email@exemple.ch" style="width:100%; padding:10px; background:var(--bg-card); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Entreprise</label><input type="text" id="qo-new-company" placeholder="Nom de l'entreprise" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary);"></div>
-                                </div>
-
-                                <!-- Adresse -->
-                                <div style="margin-bottom:12px;">
-                                    <label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Adresse *</label>
-                                    <input type="text" id="qo-new-address" placeholder="Rue et numéro" style="width:100%; padding:10px; background:var(--bg-card); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);">
-                                </div>
-
-                                <!-- NPA, Ville, Canton -->
-                                <div style="display:grid; grid-template-columns:100px 1fr 150px; gap:12px; margin-bottom:12px;">
-                                    <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">NPA *</label><input type="text" id="qo-new-zip" placeholder="1000" maxlength="6" style="width:100%; padding:10px; background:var(--bg-card); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Ville *</label><input type="text" id="qo-new-city" placeholder="Lausanne" style="width:100%; padding:10px; background:var(--bg-card); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Canton</label><select id="qo-new-canton" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary);"><option value="">--</option><option value="AG">AG</option><option value="AI">AI</option><option value="AR">AR</option><option value="BE">BE</option><option value="BL">BL</option><option value="BS">BS</option><option value="FR">FR</option><option value="GE">GE</option><option value="GL">GL</option><option value="GR">GR</option><option value="JU">JU</option><option value="LU">LU</option><option value="NE">NE</option><option value="NW">NW</option><option value="OW">OW</option><option value="SG">SG</option><option value="SH">SH</option><option value="SO">SO</option><option value="SZ">SZ</option><option value="TG">TG</option><option value="TI">TI</option><option value="UR">UR</option><option value="VD" selected>VD</option><option value="VS">VS</option><option value="ZG">ZG</option><option value="ZH">ZH</option></select></div>
-                                </div>
-
-                                <!-- Pays -->
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
-                                    <div><label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:4px;">Pays</label><select id="qo-new-country" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary);"><option value="Suisse" selected>🇨🇭 Suisse</option><option value="France">🇫🇷 France</option><option value="Allemagne">🇩🇪 Allemagne</option><option value="Italie">🇮🇹 Italie</option><option value="Autriche">🇦🇹 Autriche</option><option value="Autre">Autre</option></select></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--accent-warning); margin-bottom:4px; font-weight:600;">💰 Liste de prix</label><select id="qo-new-pricelist" style="width:100%; padding:10px; background:var(--bg-card); border:2px solid var(--accent-warning); border-radius:8px; color:var(--text-primary);"></select></div>
-                                </div>
-
-                                <div style="display:flex; gap:12px;">
-                                    <button class="btn btn-primary" onclick="saveQONewClient()">✓ Créer et sélectionner</button>
-                                    <button class="btn btn-secondary" onclick="hideQONewClientForm()">Annuler</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Étape 2: Prise de commande -->
-                <div id="qo-step-order" class="qo-step" style="display:none;">
-                    <div style="display:flex; gap:12px; margin-bottom:20px; align-items:center; flex-wrap:wrap;">
-                        <button class="btn btn-secondary" onclick="goBackToQOStep1()">← Retour client</button>
-                        <div style="flex:1; text-align:center;">
-                            <span style="font-size:14px; color:var(--text-muted);">Client:</span>
-                            <strong id="qo-header-client" style="color:var(--accent-primary); margin-left:8px;"></strong>
-                        </div>
-                        <button id="qo-btn-validate" class="btn btn-primary" onclick="showFinalizeModal()" style="padding:14px 28px; font-size:16px;">✅ Valider la commande</button>
-                    </div>
-
-                    <div style="display:grid; grid-template-columns:1fr 400px; gap:20px;">
-                        <!-- Colonne gauche: Recherche & Suggestions -->
-                        <div>
-                            <!-- Recherche produit -->
-                            <div class="card" style="margin-bottom:20px;">
-                                <div class="card-header"><h3 class="card-title">🔍 Recherche Produit</h3></div>
-                                <div class="card-body">
-                                    <input type="text" id="qo-product-search" placeholder="Cliquez ou tapez pour rechercher..."
-                                        style="width:100%; padding:14px 18px; font-size:16px; background:var(--bg-primary); border:2px solid var(--border-color); border-radius:10px; color:var(--text-primary);"
-                                        onfocus="showQOProductsByCategory()"
-                                        oninput="searchQOProducts(this.value)">
-                                    <!-- Filtre par catégorie -->
-                                    <div id="qo-category-filter" style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;"></div>
-                                    <div id="qo-product-results" style="margin-top:12px; max-height:350px; overflow-y:auto;"></div>
-                                </div>
-                            </div>
-
-                            <!-- Historique client -->
-                            <div class="card" style="margin-bottom:20px;">
-                                <div class="card-header"><h3 class="card-title">📋 Déjà commandé par ce client</h3></div>
-                                <div class="card-body" style="max-height:200px; overflow-y:auto;">
-                                    <div id="qo-client-history">Aucun historique</div>
-                                </div>
-                            </div>
-
-                            <!-- Suggestions -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">💡 Suggestions (jamais commandé)</h3>
-                                    <button class="btn btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="refreshQOSuggestions()">🔄</button>
-                                </div>
-                                <div class="card-body" style="max-height:200px; overflow-y:auto;">
-                                    <div id="qo-suggestions">Chargement...</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Colonne droite: Panier -->
-                        <div class="card" style="position:sticky; top:20px; max-height:calc(100vh - 200px); display:flex; flex-direction:column;">
-                            <div class="card-header"><h3 class="card-title">🛒 Commande en cours</h3><span id="qo-cart-count" style="color:var(--text-muted);">0 article(s)</span></div>
-                            <div class="card-body" style="flex:1; overflow-y:auto; padding:12px;">
-                                <div id="qo-cart-items">
-                                    <div style="text-align:center; color:var(--text-muted); padding:40px;">Ajoutez des produits</div>
-                                </div>
-                            </div>
-
-                            <!-- Section Caisse repliable -->
-                            <div id="qo-caisse" style="border-top:2px solid var(--accent-primary);">
-                                <!-- Info rabais client (visible si client sélectionné) -->
-                                <div id="qo-discount-info" style="display:none; padding:12px 16px; background:linear-gradient(135deg, #ffd16610, #06d6a008); border-bottom:1px solid var(--border-color);">
-                                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-                                        <div style="display:flex; align-items:center; gap:8px;">
-                                            <span style="font-size:14px;">🏷️</span>
-                                            <span style="font-weight:600; color:#ffd166; font-size:12px;">Rabais appliqués</span>
-                                        </div>
-                                        <span id="qo-pricelist-badge" style="display:none; padding:3px 10px; background:#ffd16620; color:#ffd166; border-radius:12px; font-size:11px; font-weight:600;"></span>
-                                    </div>
-                                    <!-- Simulation des paliers -->
-                                    <div id="qo-discount-simulation" style="font-size:12px;">
-                                        <!-- Généré dynamiquement -->
-                                    </div>
-                                </div>
-
-                                <!-- Barre compacte (toujours visible) -->
-                                <div onclick="toggleQOCaisse()" style="padding:14px 16px; background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:all 0.3s;">
-                                    <div style="display:flex; align-items:center; gap:10px;">
-                                        <span style="font-size:20px;">💳</span>
-                                        <span style="font-weight:700; color:#000;">TOTAL</span>
-                                    </div>
-                                    <div style="display:flex; align-items:center; gap:12px;">
-                                        <span id="qo-total-ttc-compact" style="font-family:'Space Mono',monospace; font-weight:700; font-size:22px; color:#000;">0.00 CHF</span>
-                                        <span id="qo-caisse-arrow" style="font-size:16px; color:#000; transition:transform 0.3s;">▲</span>
-                                    </div>
-                                </div>
-
-                                <!-- Détails (repliés par défaut) -->
-                                <div id="qo-caisse-details" style="display:none; padding:16px; background:var(--bg-hover);">
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
-                                        <span style="color:var(--text-muted);">📦 Articles</span>
-                                        <span id="qo-total-items" style="font-weight:600;">0</span>
-                                    </div>
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px;">
-                                        <span style="color:var(--text-muted);">⚖️ Poids total</span>
-                                        <span id="qo-total-weight" style="font-weight:600;">0.00 kg</span>
-                                    </div>
-                                    <div style="border-top:1px dashed var(--border-color); padding-top:10px; margin-top:10px;">
-                                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
-                                            <span>Total HT</span>
-                                            <span id="qo-total-price" style="font-family:'Space Mono',monospace;">0.00 CHF</span>
-                                        </div>
-                                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; color:var(--text-muted);">
-                                            <span>TVA (2.6%)</span>
-                                            <span id="qo-total-tva" style="font-family:'Space Mono',monospace;">0.00 CHF</span>
-                                        </div>
-                                    </div>
-                                    <div style="border-top:2px solid var(--accent-primary); padding-top:12px; margin-top:8px; display:flex; justify-content:space-between; align-items:center;">
-                                        <span style="font-weight:700; font-size:16px; color:var(--accent-primary);">TOTAL TTC</span>
-                                        <span id="qo-total-ttc" style="font-family:'Space Mono',monospace; font-weight:700; font-size:24px; color:var(--accent-primary);">0.00 CHF</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal: Modifier ligne commande -->
-                <div id="qo-edit-line-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center; padding:20px;">
-                    <div style="background:var(--bg-card); border-radius:var(--radius); max-width:600px; width:100%; border:1px solid var(--border-color);">
-                        <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between;">
-                            <h3>✏️ Modifier article</h3>
-                            <button onclick="closeQOEditModal()" style="background:none; border:none; color:var(--text-muted); font-size:24px; cursor:pointer;">&times;</button>
-                        </div>
-                        <div style="padding:20px;">
-                            <input type="hidden" id="qo-edit-index">
-                            <div style="margin-bottom:16px; padding:16px; background:var(--bg-primary); border-radius:8px;">
-                                <strong id="qo-edit-product-name" style="font-size:18px;"></strong>
-                                <div style="font-size:13px; color:var(--text-muted); margin-top:4px;" id="qo-edit-product-code"></div>
-                            </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
-                                <div><label style="display:block; font-size:13px; color:var(--text-secondary); margin-bottom:6px;">Origine</label><input type="text" id="qo-edit-origin" style="width:100%; padding:12px; background:var(--bg-primary); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);"></div>
-                                <div><label style="display:block; font-size:13px; color:var(--text-secondary); margin-bottom:6px;">Nom latin</label><input type="text" id="qo-edit-latin" style="width:100%; padding:12px; background:var(--bg-primary); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);"></div>
-                            </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px;">
-                                <div><label style="display:block; font-size:13px; color:var(--text-secondary); margin-bottom:6px;">N° Lot</label><input type="text" id="qo-edit-lot" style="width:100%; padding:12px; background:var(--bg-primary); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);"></div>
-                                <div><label style="display:block; font-size:13px; color:var(--text-secondary); margin-bottom:6px;">Prix unitaire (CHF)</label><input type="number" step="0.05" id="qo-edit-price" style="width:100%; padding:12px; background:var(--bg-primary); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);"></div>
-                                <div><label style="display:block; font-size:13px; color:var(--text-secondary); margin-bottom:6px;">Quantité</label><input type="number" step="0.1" id="qo-edit-qty" style="width:100%; padding:12px; background:var(--bg-primary); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);"></div>
-                            </div>
-                        </div>
-                        <div style="padding:16px 20px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between;">
-                            <button class="btn btn-secondary" style="color:var(--accent-danger);" onclick="removeQOCartItem()">🗑️ Supprimer</button>
-                            <div style="display:flex; gap:12px;">
-                                <button class="btn btn-secondary" onclick="closeQOEditModal()">Annuler</button>
-                                <button class="btn btn-primary" onclick="saveQOEditLine()">💾 Enregistrer</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal: Gestion Produits -->
-                <div id="qo-products-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center; padding:20px;">
-                    <div style="background:var(--bg-card); border-radius:var(--radius); max-width:1100px; width:100%; max-height:90vh; overflow:hidden; border:1px solid var(--border-color); display:flex; flex-direction:column;">
-                        <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-                            <h3>📦 Gestion des Produits <span id="qo-products-count" style="font-size:14px; color:var(--text-muted);"></span></h3>
-                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                                <button class="btn btn-primary" onclick="showQOProductForm()">➕ Nouveau</button>
-                                <button class="btn btn-secondary" onclick="document.getElementById('qo-import-lightspeed').click()" style="color:var(--accent-warning);">📥 Lightspeed B2C</button>
-                                <button class="btn btn-secondary" onclick="document.getElementById('qo-import-infoniqa').click()" style="color:var(--accent-secondary);">📥 Infoniqa B2B</button>
-                                <button class="btn btn-secondary" onclick="exportQOProductsCSV()">📤 Export CSV</button>
-                                <button class="btn btn-secondary" onclick="resetQOProductsToDefault()" style="color:var(--accent-warning);">🔄 Réinit.</button>
-                                <button onclick="closeQOProductsModal()" style="background:none; border:none; color:var(--text-muted); font-size:24px; cursor:pointer;">&times;</button>
-                            </div>
-                            <input type="file" id="qo-import-lightspeed" accept=".csv" style="display:none;" onchange="importQOLightspeed(this)">
-                            <input type="file" id="qo-import-infoniqa" accept=".csv,.xls,.xlsx" style="display:none;" onchange="importQOInfoniqa(this)">
-                        </div>
-                        <!-- Filtres -->
-                        <div style="padding:12px 20px; background:var(--bg-primary); display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-                            <input type="text" id="qo-prod-search-filter" placeholder="🔍 Rechercher..." oninput="filterQOProductsTable(this.value)" style="flex:1; min-width:200px; padding:8px 12px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);">
-                            <select id="qo-prod-cat-filter" onchange="filterQOProductsTable(document.getElementById('qo-prod-search-filter').value)" style="padding:8px 12px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);">
-                                <option value="">Toutes catégories</option>
-                                <option value="poisson">🐟 Poissons</option>
-                                <option value="crustace">🦐 Crustacés</option>
-                                <option value="coquillage">🦪 Coquillages</option>
-                                <option value="fume">🔥 Fumés</option>
-                                <option value="conserve">🥫 Conserves</option>
-                                <option value="preparation">🍽️ Préparations</option>
-                                <option value="surgele">❄️ Surgelés</option>
-                            </select>
-                        </div>
-                        <div style="padding:20px; flex:1; overflow-y:auto;">
-                            <div id="qo-product-form" style="display:none; margin-bottom:20px; padding:20px; background:var(--bg-primary); border-radius:12px; border:2px solid var(--accent-primary);">
-                                <input type="hidden" id="qo-prod-edit-id">
-                                <div style="display:grid; grid-template-columns:120px 1fr 1fr; gap:12px; margin-bottom:12px;">
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Code/SKU *</label><input type="text" id="qo-prod-code" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                    <div style="grid-column:span 2;"><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Désignation *</label><input type="text" id="qo-prod-name" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                </div>
-                                <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; margin-bottom:12px;">
-                                    <div><label style="display:block; font-size:12px; color:var(--accent-warning); margin-bottom:4px;">💰 Prix B2C (CHF)</label><input type="number" step="0.05" id="qo-prod-price-b2c" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--accent-warning); border-radius:6px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--accent-secondary); margin-bottom:4px;">💼 Prix B2B (CHF)</label><input type="number" step="0.05" id="qo-prod-price-b2b" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--accent-secondary); border-radius:6px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Coût achat</label><input type="number" step="0.01" id="qo-prod-cost" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Unité</label><select id="qo-prod-unit" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"><option value="kg">Au kg</option><option value="pce">À la pièce</option><option value="lot">Au lot</option></select></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Catégorie</label><select id="qo-prod-cat" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"><option value="poisson">🐟 Poisson</option><option value="crustace">🦐 Crustacé</option><option value="coquillage">🦪 Coquillage</option><option value="fume">🔥 Fumé</option><option value="conserve">🥫 Conserve</option><option value="preparation">🍽️ Préparation</option><option value="surgele">❄️ Surgelé</option><option value="autre">📦 Autre</option></select></div>
-                                </div>
-                                <div style="display:flex; gap:12px; align-items:center;">
-                                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><input type="checkbox" id="qo-prod-active" checked> Actif</label>
-                                    <div style="flex:1;"></div>
-                                    <button class="btn btn-primary" onclick="saveQOProduct()">💾 Enregistrer</button>
-                                    <button class="btn btn-secondary" onclick="hideQOProductForm()">Annuler</button>
-                                </div>
-                            </div>
-                            <div class="table-container"><table><thead><tr><th>Code</th><th>Désignation</th><th>Cat.</th><th style="color:var(--accent-warning);">B2C</th><th style="color:var(--accent-secondary);">B2B</th><th>Unité</th><th>Actif</th><th>Actions</th></tr></thead><tbody id="qo-products-tbody"></tbody></table></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal: Gestion Clients -->
-                <div id="qo-clients-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center; padding:20px;">
-                    <div style="background:var(--bg-card); border-radius:var(--radius); max-width:1000px; width:100%; max-height:90vh; overflow:hidden; border:1px solid var(--border-color); display:flex; flex-direction:column;">
-                        <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-                            <h3>👥 Gestion des Clients</h3>
-                            <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                                <button class="btn btn-secondary" onclick="showQOClientForm()">➕ Nouveau</button>
-                                <button class="btn btn-secondary" onclick="document.getElementById('qo-import-file').click()">📥 Importer CSV/XLS</button>
-                                <button class="btn btn-secondary" onclick="exportQOClientsCSV()">📤 Exporter CSV</button>
-                                <button class="btn" onclick="saveAllClientsToDropbox()" style="background:var(--accent-secondary); color:#fff; border:none;">☁️ Dropbox</button>
-                                <button class="btn btn-secondary" onclick="downloadQOImportTemplate()">📋 Modèle import</button>
-                                <button class="btn btn-secondary" onclick="resetQOClientsToDefault()" style="color:var(--accent-warning);">🔄 Réinitialiser base</button>
-                                <button onclick="closeQOClientsModal()" style="background:none; border:none; color:var(--text-muted); font-size:24px; cursor:pointer;">&times;</button>
-                            </div>
-                            <input type="file" id="qo-import-file" accept=".csv,.xls,.xlsx" style="display:none;" onchange="importQOClientsFile(this)">
-                        </div>
-                        <div style="padding:20px; flex:1; overflow-y:auto;">
-                            <!-- Formulaire client -->
-                            <div id="qo-client-form" style="display:none; margin-bottom:20px; padding:20px; background:var(--bg-primary); border-radius:12px; border:2px solid var(--accent-primary);">
-                                <h4 style="color:var(--accent-primary); margin-bottom:16px;">📝 Fiche Client</h4>
-                                <input type="hidden" id="qo-client-edit-id">
-                                <div style="display:grid; grid-template-columns:100px 1fr 1fr 150px; gap:12px; margin-bottom:12px;">
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">N° Client</label><input type="text" id="qo-client-num" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Nom / Société *</label><input type="text" id="qo-client-company" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Contact / Prénom</label><input type="text" id="qo-client-contact" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; font-weight:600; color:var(--accent-primary); margin-bottom:4px;">Type client</label><select id="qo-client-type" style="width:100%; padding:10px; background:var(--bg-card); border:2px solid var(--accent-primary); border-radius:6px; color:var(--text-primary); font-weight:600;"><option value="b2b">🏢 Professionnel (B2B)</option><option value="b2c">🏠 Particulier (B2C)</option></select></div>
-                                </div>
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Adresse</label><input type="text" id="qo-client-address" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Adresse 2</label><input type="text" id="qo-client-address2" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                </div>
-                                <div style="display:grid; grid-template-columns:100px 1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Code postal</label><input type="text" id="qo-client-zip" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Ville</label><input type="text" id="qo-client-city" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Téléphone</label><input type="tel" id="qo-client-tel" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Portable</label><input type="tel" id="qo-client-mobile" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                </div>
-                                <div style="display:grid; grid-template-columns:1fr 120px 150px; gap:12px; margin-bottom:12px;">
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Email</label><input type="email" id="qo-client-email2" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Limite crédit</label><input type="number" id="qo-client-credit" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"></div>
-                                    <div><label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">Échéance</label><select id="qo-client-payment" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary);"><option value="30 jours fin de mois">30j fin mois</option><option value="Comptant">Comptant</option><option value="15 jours">15 jours</option><option value="60 jours">60 jours</option></select></div>
-                                </div>
-                                <div style="display:flex; gap:12px;">
-                                    <button class="btn btn-primary" onclick="saveQOClient()">💾 Enregistrer</button>
-                                    <button class="btn btn-secondary" onclick="hideQOClientForm()">Annuler</button>
-                                </div>
-                            </div>
-                            <!-- Barre de recherche -->
-                            <div style="margin-bottom:16px;">
-                                <input type="text" id="qo-clients-filter" placeholder="🔍 Rechercher par nom, téléphone, ville..."
-                                    style="width:100%; padding:12px 16px; background:var(--bg-primary); border:2px solid var(--border-color); border-radius:8px; color:var(--text-primary);"
-                                    oninput="filterQOClientsTable(this.value)">
-                            </div>
-                            <!-- Stats -->
-                            <div style="display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap;">
-                                <div style="background:var(--bg-primary); padding:12px 20px; border-radius:8px;"><strong id="qo-clients-count">0</strong> <span style="color:var(--text-muted);">clients</span></div>
-                                <div style="background:rgba(17,138,178,0.2); padding:12px 20px; border-radius:8px;"><strong id="qo-clients-b2b">0</strong> <span style="color:var(--accent-secondary);">B2B</span></div>
-                                <div style="background:rgba(255,183,77,0.2); padding:12px 20px; border-radius:8px;"><strong id="qo-clients-b2c">0</strong> <span style="color:var(--accent-warning);">B2C</span></div>
-                            </div>
-                            <!-- Table -->
-                            <div class="table-container" style="max-height:400px; overflow-y:auto;">
-                                <table><thead><tr><th>N°</th><th>Type</th><th>Nom / Société</th><th>Contact</th><th>Ville</th><th>Téléphone</th><th>Cmd</th><th>Actions</th></tr></thead><tbody id="qo-clients-tbody"></tbody></table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Boutons flottants subtils -->
-                <div id="qo-floating-menu" style="position:fixed; bottom:20px; right:20px; z-index:100;">
-                    <!-- Bouton principal qui ouvre le menu -->
-                    <div id="qo-float-expanded" style="display:flex; flex-direction:column; gap:8px; margin-bottom:8px; opacity:0; transform:translateY(10px); transition:all 0.3s; pointer-events:none;">
-                        <button onclick="openQOClientsModal()" style="width:44px; height:44px; border-radius:10px; background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-secondary); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;" onmouseover="this.style.background='var(--accent-secondary)'; this.style.color='#fff'; this.style.borderColor='var(--accent-secondary)'" onmouseout="this.style.background='var(--bg-card)'; this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border-color)'" title="Gérer les clients">👥</button>
-                        <button onclick="openQOProductsModal()" style="width:44px; height:44px; border-radius:10px; background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-secondary); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;" onmouseover="this.style.background='var(--accent-primary)'; this.style.color='#000'; this.style.borderColor='var(--accent-primary)'" onmouseout="this.style.background='var(--bg-card)'; this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border-color)'" title="Gérer les produits">📦</button>
-                    </div>
-                    <button onclick="toggleQOFloatMenu()" id="qo-float-toggle" style="width:44px; height:44px; border-radius:10px; background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-muted); font-size:16px; cursor:pointer; transition:all 0.3s;" title="Outils">⚙️</button>
-                </div>
-            </div>
-
             <!-- Reports Page -->
             <div class="module-page" id="page-reports">
                 <div style="margin-bottom:16px;"><span onclick="navigateTo('dashboard')" style="cursor:pointer; color:var(--text-muted); font-size:13px; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px; transition:all 0.2s;" onmouseover="this.style.background='var(--bg-hover)'; this.style.color='var(--accent-primary)'" onmouseout="this.style.background=''; this.style.color='var(--text-muted)'">← Accueil</span></div>
@@ -10568,7 +10190,7 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '3.2.6';
+        const APP_VERSION = '3.2.7';
         const APP_VERSION_DATE = '2025-12-02';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
@@ -10612,6 +10234,12 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '3.2.7': [
+                '⚡ Module Commandes séparé (commandes.html)',
+                '🚀 index.html allégé de ~378 lignes',
+                '📦 4 modules séparés: articles, clients, commandes, compta',
+                '🔗 Navigation unifiée vers les modules externes'
+            ],
             '3.2.6': [
                 '👥 Module Clients séparé (clients.html)',
                 '⚡ index.html encore allégé (~180 lignes en moins)',
@@ -13324,7 +12952,7 @@ QOData.clients = [
             console.log('📝 Édition commande:', orderId, 'Articles:', QOData.cart.length);
 
             // Aller à l'étape commande
-            navigateTo('quickorder');
+            window.location.href='commandes.html';
 
             // Attendre que la page soit chargée puis afficher les données
             setTimeout(() => {
@@ -14022,7 +13650,7 @@ QOData.clients = [
 
         function startOrderFromClient(clientId) {
             closeClientActionModal();
-            navigateTo('quickorder');
+            window.location.href='commandes.html';
             setTimeout(() => {
                 selectQOClient(clientId);
             }, 200);
@@ -15648,7 +15276,7 @@ QOData.clients = [
 
         function goToCurrentOrder() {
             closeFinalizeModal();
-            navigateTo('quickorder');
+            window.location.href='commandes.html';
         }
 
         function hideFloatingOrderBar() {
