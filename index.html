@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v3.2.8 - Gestion Complète</title>
+    <title>TRAKIO v3.2.9 - Gestion Complète</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -3681,8 +3681,8 @@
                                 <p style="margin:0; font-size:12px; color:var(--text-muted);">Import commandes CSV, suivi et traitement</p>
                             </div>
                         </div>
-                        <button onclick="navigateTo('shopify')" style="width:100%; padding:16px; background:linear-gradient(135deg, #96bf48, #5c8e24); color:#fff; border:none; border-radius:10px; font-weight:700; font-size:15px; cursor:pointer;">
-                            Ouvrir Shopify Sync →
+                        <button onclick="window.location.href='shopify.html'" style="width:100%; padding:16px; background:linear-gradient(135deg, #96bf48, #5c8e24); color:#fff; border:none; border-radius:10px; font-weight:700; font-size:15px; cursor:pointer;">
+                            Ouvrir Shopify Orders →
                         </button>
                     </div>
                 </div>
@@ -3884,159 +3884,17 @@
             </div>
 
             <!-- =============================================
-                 SHOPIFY MODULE - Intégration Shopify
+                 SHOPIFY MODULE - Redirige vers module externe
                  ============================================= -->
             <div class="module-page" id="page-shopify">
                 <div style="margin-bottom:16px;"><span onclick="navigateTo('shop')" style="cursor:pointer; color:var(--text-muted); font-size:13px; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px; transition:all 0.2s;" onmouseover="this.style.background='var(--bg-hover)'; this.style.color='var(--accent-primary)'" onmouseout="this.style.background=''; this.style.color='var(--text-muted)'">← Shop Hub</span></div>
-
-                <div class="card" style="margin-bottom:20px; border:2px solid #96bf48;">
-                    <div class="card-header" style="background:linear-gradient(135deg, #96bf48, #5c8e24);">
-                        <h3 class="card-title" style="color:#fff;">🛍️ Shopify - Gestion des Commandes</h3>
-                    </div>
-                    <div class="card-body">
-                        <!-- Import CSV -->
-                        <div style="margin-bottom:24px; padding:20px; background:linear-gradient(135deg, rgba(150,191,72,0.1), rgba(92,142,36,0.1)); border:2px dashed #96bf48; border-radius:12px; text-align:center;">
-                            <div style="font-size:36px; margin-bottom:12px;">📄</div>
-                            <div style="font-weight:600; color:#96bf48; margin-bottom:8px;">Importer les commandes Shopify</div>
-                            <div style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">
-                                Dans Shopify : Commandes → Exporter → CSV<br>
-                                Puis importez le fichier ici
-                            </div>
-                            <input type="file" id="shopify-csv-input" accept=".csv" onchange="importShopifyCSV(this)" style="display:none;">
-                            <button onclick="document.getElementById('shopify-csv-input').click()" class="btn btn-primary" style="padding:14px 28px; background:#96bf48;">
-                                📥 Importer un fichier CSV
-                            </button>
-                            <span id="shopify-import-status" style="display:block; margin-top:12px; font-size:13px;"></span>
-                        </div>
-
-                        <!-- Alertes commandes urgentes -->
-                        <div id="shopify-alerts" style="display:none; margin-bottom:20px;">
-                            <div id="shopify-alert-urgent" style="display:none; padding:16px; background:linear-gradient(135deg, var(--accent-danger), #c0392b); color:#fff; border-radius:12px; margin-bottom:12px;">
-                                <div style="display:flex; align-items:center; justify-content:space-between;">
-                                    <div>
-                                        <strong>🚨 Commandes payées non traitées !</strong>
-                                        <span id="shopify-urgent-count" style="background:rgba(255,255,255,0.3); padding:2px 10px; border-radius:20px; margin-left:10px;">0</span>
-                                    </div>
-                                    <button onclick="filterShopifyByUrgent()" style="padding:8px 16px; background:rgba(255,255,255,0.2); border:none; color:#fff; border-radius:6px; cursor:pointer;">Voir →</button>
-                                </div>
-                            </div>
-                            <div id="shopify-alert-today" style="display:none; padding:16px; background:linear-gradient(135deg, var(--accent-warning), var(--accent-orange)); color:#000; border-radius:12px;">
-                                <div style="display:flex; align-items:center; justify-content:space-between;">
-                                    <div>
-                                        <strong>📅 Retraits aujourd'hui</strong>
-                                        <span id="shopify-today-count" style="background:rgba(0,0,0,0.2); padding:2px 10px; border-radius:20px; margin-left:10px;">0</span>
-                                    </div>
-                                    <button onclick="filterShopifyByToday()" style="padding:8px 16px; background:rgba(0,0,0,0.1); border:none; color:#000; border-radius:6px; cursor:pointer;">Voir →</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Stats -->
-                        <div id="shopify-stats" style="display:none; display:grid; grid-template-columns:repeat(6, 1fr); gap:12px; margin-bottom:20px;">
-                            <div onclick="filterShopifyOrders('all')" style="background:var(--bg-primary); padding:16px; border-radius:10px; text-align:center; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                                <div style="font-size:24px; font-weight:700; color:#96bf48;" id="shopify-stat-total">0</div>
-                                <div style="font-size:11px; color:var(--text-muted);">Total</div>
-                            </div>
-                            <div onclick="filterShopifyByUrgent()" style="background:var(--bg-primary); padding:16px; border-radius:10px; text-align:center; cursor:pointer; border:2px solid transparent; transition:all 0.2s;" id="shopify-stat-urgent-box" onmouseover="this.style.borderColor='var(--accent-danger)'" onmouseout="this.style.borderColor='transparent'">
-                                <div style="font-size:24px; font-weight:700; color:var(--accent-danger);" id="shopify-stat-urgent">0</div>
-                                <div style="font-size:11px; color:var(--text-muted);">🚨 À traiter</div>
-                            </div>
-                            <div onclick="filterShopifyOrders('pending')" style="background:var(--bg-primary); padding:16px; border-radius:10px; text-align:center; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                                <div style="font-size:24px; font-weight:700; color:var(--accent-warning);" id="shopify-stat-pending">0</div>
-                                <div style="font-size:11px; color:var(--text-muted);">⏳ En attente</div>
-                            </div>
-                            <div onclick="filterShopifyOrders('fulfilled')" style="background:var(--bg-primary); padding:16px; border-radius:10px; text-align:center; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                                <div style="font-size:24px; font-weight:700; color:var(--accent-secondary);" id="shopify-stat-fulfilled">0</div>
-                                <div style="font-size:11px; color:var(--text-muted);">✅ Traitées</div>
-                            </div>
-                            <div style="background:var(--bg-primary); padding:16px; border-radius:10px; text-align:center;">
-                                <div style="font-size:24px; font-weight:700; color:var(--accent-primary);" id="shopify-stat-pickup">0</div>
-                                <div style="font-size:11px; color:var(--text-muted);">🏪 Retrait</div>
-                            </div>
-                            <div style="background:var(--bg-primary); padding:16px; border-radius:10px; text-align:center;">
-                                <div style="font-size:24px; font-weight:700; color:var(--text-primary);" id="shopify-stat-revenue">0</div>
-                                <div style="font-size:11px; color:var(--text-muted);">CHF Total</div>
-                            </div>
-                        </div>
-
-                        <!-- Filtres -->
-                        <div id="shopify-filters" style="display:none; display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px; padding:16px; background:var(--bg-primary); border-radius:12px;">
-                            <select id="shopify-filter-status" onchange="applyShopifyFilters()" style="padding:10px 16px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary);">
-                                <option value="">Tous les statuts</option>
-                                <option value="urgent">🚨 Payées non traitées</option>
-                                <option value="pending">⏳ En attente paiement</option>
-                                <option value="fulfilled">✅ Traitées</option>
-                                <option value="refunded">↩️ Remboursées</option>
-                            </select>
-                            <select id="shopify-filter-location" onchange="applyShopifyFilters()" style="padding:10px 16px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary);">
-                                <option value="">Tous les lieux</option>
-                                <option value="Laboratoire">🔬 Laboratoire Coinsins</option>
-                                <option value="Magasin">🏪 Magasin Nyon</option>
-                                <option value="Shipping">📦 Livraison</option>
-                            </select>
-                            <select id="shopify-filter-pickup-date" onchange="applyShopifyFilters()" style="padding:10px 16px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary);">
-                                <option value="">Toutes les dates</option>
-                                <!-- Rempli dynamiquement -->
-                            </select>
-                            <input type="text" id="shopify-search" placeholder="🔍 Rechercher client, commande..." oninput="applyShopifyFilters()" style="flex:1; min-width:200px; padding:10px 16px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary);">
-                            <button onclick="resetShopifyFilters()" class="btn btn-secondary" style="padding:10px 16px;">
-                                ✕ Reset
-                            </button>
-                            <button onclick="exportShopifyFiltered()" class="btn btn-secondary" style="padding:10px 16px;">
-                                📤 Exporter
-                            </button>
-                        </div>
-
-                        <!-- Liste des commandes -->
-                        <div id="shopify-table-container" style="display:none;" class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width:40px;"><input type="checkbox" id="shopify-select-all" onchange="toggleSelectAllShopify()"></th>
-                                        <th>N° Cmd</th>
-                                        <th>📆 Commandé</th>
-                                        <th>Client</th>
-                                        <th>📅 Retrait</th>
-                                        <th>📍 Lieu</th>
-                                        <th>Articles</th>
-                                        <th>Total</th>
-                                        <th>Statut</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="shopify-orders-tbody">
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Message vide -->
-                        <div id="shopify-empty" style="text-align:center; padding:40px; color:var(--text-muted);">
-                            <div style="font-size:48px; margin-bottom:16px;">📄</div>
-                            <div>Importez un fichier CSV Shopify pour commencer</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal Détail Commande Shopify -->
-            <div id="shopify-order-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; padding:20px;" onclick="if(event.target === this) closeShopifyOrderModal()">
-                <div style="background:var(--bg-card); border-radius:20px; max-width:900px; width:100%; max-height:90vh; overflow:hidden; display:flex; flex-direction:column;">
-                    <div id="shopify-modal-header" style="padding:20px 24px; background:linear-gradient(135deg, #96bf48, #5c8e24); color:#fff;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <div style="font-size:12px; opacity:0.8;">COMMANDE SHOPIFY</div>
-                                <h2 id="shopify-modal-order-id" style="font-size:22px; font-weight:700; margin:0;">#0000</h2>
-                            </div>
-                            <button onclick="closeShopifyOrderModal()" style="background:rgba(255,255,255,0.2); border:none; color:#fff; width:36px; height:36px; border-radius:50%; font-size:20px; cursor:pointer;">×</button>
-                        </div>
-                    </div>
-                    <div id="shopify-modal-content" style="flex:1; overflow-y:auto; padding:24px;">
-                        <!-- Contenu dynamique -->
-                    </div>
-                    <div style="padding:16px 24px; background:var(--bg-primary); border-top:1px solid var(--border-color); display:flex; gap:12px; justify-content:flex-end;">
-                        <button onclick="printShopifyOrder()" class="btn btn-secondary" style="padding:12px 24px;">🖨️ Imprimer</button>
-                        <button onclick="markAsProcessed()" class="btn btn-primary" style="padding:12px 24px; background:var(--accent-primary);">✅ Marquer traitée</button>
-                    </div>
+                <div style="text-align:center; padding:60px 20px;">
+                    <div style="font-size:64px; margin-bottom:20px;">🛍️</div>
+                    <h2 style="margin-bottom:12px;">Module Shopify Orders</h2>
+                    <p style="color:var(--text-muted); margin-bottom:24px;">Le module Shopify a été déplacé vers une page dédiée avec le nouveau Dashboard Préparation.</p>
+                    <button onclick="window.location.href='shopify.html'" class="btn btn-primary" style="padding:16px 32px; background:linear-gradient(135deg, #96bf48, #5c8e24); font-size:16px;">
+                        🚀 Ouvrir Shopify Orders
+                    </button>
                 </div>
             </div>
 
@@ -6897,7 +6755,7 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '3.2.8';
+        const APP_VERSION = '3.2.9';
         const APP_VERSION_DATE = '2025-12-02';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
@@ -6941,6 +6799,13 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '3.2.9': [
+                '🛍️ Nouveau module Shopify séparé (shopify.html)',
+                '🎯 Dashboard Préparation avec agrégation intelligente',
+                '🦪 Calcul automatique bourriches huîtres (12/24/48/96)',
+                '🫕 Cumul personnes fondues automatique',
+                '⚙️ Configuration personnalisable des règles'
+            ],
             '3.2.8': [
                 '🐟 Module MyFish séparé (myfish.html)',
                 '🚀 index.html allégé de ~3300 lignes',
