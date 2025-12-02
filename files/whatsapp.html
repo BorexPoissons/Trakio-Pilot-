@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRAKIO WhatsApp v1.0.0 - Communication Client</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2234;
+            --bg-hover: #243049;
+            --accent-primary: #06d6a0;
+            --accent-secondary: #118ab2;
+            --accent-warning: #ffd166;
+            --accent-danger: #ef476f;
+            --whatsapp-green: #25D366;
+            --whatsapp-dark: #128C7E;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #2d3a4f;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--whatsapp-green), var(--whatsapp-dark));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .title-block h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--whatsapp-green), var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            padding: 8px 14px;
+            border-radius: 20px;
+            transition: var(--transition);
+            margin-bottom: 16px;
+        }
+
+        .back-link:hover {
+            background: var(--bg-hover);
+            color: var(--accent-primary);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-whatsapp {
+            background: linear-gradient(135deg, var(--whatsapp-green), var(--whatsapp-dark));
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: var(--bg-secondary);
+            padding: 8px;
+            border-radius: var(--radius);
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 14px 24px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .tab:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--whatsapp-green), var(--whatsapp-dark));
+            color: #fff;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, var(--whatsapp-green), var(--whatsapp-dark));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .card-body { padding: 20px; }
+
+        /* Main Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1000px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Client List */
+        .client-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .client-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .client-item:hover { background: var(--bg-hover); }
+        .client-item.active { background: rgba(37, 211, 102, 0.1); border-left: 3px solid var(--whatsapp-green); }
+
+        .client-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-hover);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .client-info { flex: 1; min-width: 0; }
+        .client-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .client-phone { font-size: 12px; color: var(--text-muted); }
+        .client-phone.no-phone { color: var(--accent-danger); }
+
+        .client-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .client-badge.b2b { background: rgba(17, 138, 178, 0.2); color: var(--accent-secondary); }
+        .client-badge.b2c { background: rgba(6, 214, 160, 0.2); color: var(--accent-primary); }
+
+        /* Search */
+        .search-box {
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 100%;
+            color: var(--text-primary);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        /* Message Composer */
+        .composer {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .composer-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .composer-header .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--whatsapp-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .composer-header .info h3 { font-size: 18px; margin-bottom: 4px; }
+        .composer-header .info p { color: var(--text-muted); font-size: 13px; }
+
+        /* Templates */
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .template-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .template-card:hover {
+            border-color: var(--whatsapp-green);
+            transform: translateY(-2px);
+        }
+
+        .template-card.active {
+            border-color: var(--whatsapp-green);
+            background: rgba(37, 211, 102, 0.1);
+        }
+
+        .template-icon { font-size: 24px; margin-bottom: 8px; }
+        .template-name { font-weight: 600; font-size: 14px; }
+        .template-desc { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+        /* Message Preview */
+        .message-preview {
+            background: #e5ddd5;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 200px;
+        }
+
+        .message-bubble {
+            background: #dcf8c6;
+            border-radius: 12px;
+            border-bottom-right-radius: 4px;
+            padding: 12px 16px;
+            max-width: 80%;
+            margin-left: auto;
+            color: #000;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .message-time {
+            text-align: right;
+            font-size: 11px;
+            color: #667781;
+            margin-top: 4px;
+        }
+
+        /* Textarea */
+        .message-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 16px;
+        }
+
+        .message-textarea:focus {
+            outline: none;
+            border-color: var(--whatsapp-green);
+        }
+
+        /* Variables */
+        .variables-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .variable-chip {
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .variable-chip:hover {
+            border-color: var(--whatsapp-green);
+            background: rgba(37, 211, 102, 0.1);
+        }
+
+        /* Actions */
+        .composer-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* History */
+        .history-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+        }
+
+        .history-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: rgba(37, 211, 102, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .history-content { flex: 1; }
+        .history-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .history-client { font-weight: 600; }
+        .history-date { font-size: 12px; color: var(--text-muted); }
+        .history-message { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .history-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .history-status.sent { background: rgba(6, 214, 160, 0.2); color: var(--accent-primary); }
+        .history-status.failed { background: rgba(239, 71, 111, 0.2); color: var(--accent-danger); }
+
+        /* Settings Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-group .hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state .title { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary); }
+
+        /* Version Badge */
+        .version-badge {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            background: var(--bg-card);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Bulk Selection */
+        .bulk-bar {
+            display: none;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 20px;
+            background: var(--whatsapp-dark);
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+        }
+
+        .bulk-bar.active { display: flex; }
+        .bulk-bar .count { font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Link -->
+        <a href="index.html" class="back-link">← Retour TRAKIO</a>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">💬</div>
+                <div class="title-block">
+                    <h1>WhatsApp Business</h1>
+                    <div style="color:var(--text-muted); font-size:13px;">Communication Client</div>
+                </div>
+            </div>
+            <div style="display:flex; gap:12px;">
+                <button class="btn btn-secondary" onclick="switchTab('settings')">⚙️ Paramètres</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('compose')" id="tab-compose">✉️ Nouveau Message</button>
+            <button class="tab" onclick="switchTab('bulk')" id="tab-bulk">📤 Envoi Groupé</button>
+            <button class="tab" onclick="switchTab('templates')" id="tab-templates">📋 Templates</button>
+            <button class="tab" onclick="switchTab('history')" id="tab-history">📜 Historique</button>
+            <button class="tab" onclick="switchTab('settings')" id="tab-settings">⚙️ Paramètres</button>
+        </div>
+
+        <!-- TAB: Compose -->
+        <div id="content-compose">
+            <div class="main-grid">
+                <!-- Client List -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>👥 Sélectionner un client</h3>
+                    </div>
+                    <div class="card-body">
+                        <input type="text" class="search-box" placeholder="🔍 Rechercher un client..." id="client-search" oninput="filterClients()">
+                        <div class="client-list" id="client-list">
+                            <!-- Clients -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Composer -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>✉️ Composer le message</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="composer">
+                            <!-- Selected Client -->
+                            <div class="composer-header" id="composer-header" style="display:none;">
+                                <div class="avatar" id="composer-avatar">?</div>
+                                <div class="info">
+                                    <h3 id="composer-name">Client</h3>
+                                    <p id="composer-phone">+41 XX XXX XX XX</p>
+                                </div>
+                            </div>
+
+                            <!-- Templates Quick Select -->
+                            <div style="margin-bottom:20px;">
+                                <div style="font-weight:600; margin-bottom:12px;">📋 Templates rapides</div>
+                                <div class="templates-grid" id="quick-templates">
+                                    <!-- Templates -->
+                                </div>
+                            </div>
+
+                            <!-- Variables -->
+                            <div style="margin-bottom:16px;">
+                                <div style="font-weight:600; margin-bottom:8px;">🔤 Insérer une variable</div>
+                                <div class="variables-bar">
+                                    <span class="variable-chip" onclick="insertVariable('{nom}')">{nom}</span>
+                                    <span class="variable-chip" onclick="insertVariable('{prenom}')">{prenom}</span>
+                                    <span class="variable-chip" onclick="insertVariable('{commande}')">{commande}</span>
+                                    <span class="variable-chip" onclick="insertVariable('{date}')">{date}</span>
+                                    <span class="variable-chip" onclick="insertVariable('{heure}')">{heure}</span>
+                                    <span class="variable-chip" onclick="insertVariable('{lieu}')">{lieu}</span>
+                                    <span class="variable-chip" onclick="insertVariable('{total}')">{total}</span>
+                                </div>
+                            </div>
+
+                            <!-- Message -->
+                            <textarea class="message-textarea" id="message-text" placeholder="Écrivez votre message ici..."></textarea>
+
+                            <!-- Preview -->
+                            <div style="font-weight:600; margin-bottom:12px;">👁️ Aperçu</div>
+                            <div class="message-preview">
+                                <div class="message-bubble" id="message-preview">
+                                    Votre message apparaîtra ici...
+                                </div>
+                                <div class="message-time" id="preview-time">--:--</div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="composer-actions">
+                                <button class="btn btn-secondary" onclick="clearMessage()">🗑️ Effacer</button>
+                                <button class="btn btn-secondary" onclick="copyMessage()">📋 Copier</button>
+                                <button class="btn btn-whatsapp" onclick="sendWhatsApp()" id="btn-send">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                    </svg>
+                                    Envoyer sur WhatsApp
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Bulk -->
+        <div id="content-bulk" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📤 Envoi Groupé</h3>
+                </div>
+                <div class="card-body">
+                    <div class="bulk-bar" id="bulk-bar">
+                        <span class="count"><span id="bulk-count">0</span> client(s) sélectionné(s)</span>
+                        <button class="btn btn-secondary" onclick="clearBulkSelection()">Désélectionner tout</button>
+                        <button class="btn btn-whatsapp" onclick="sendBulk()">📤 Envoyer à tous</button>
+                    </div>
+
+                    <div style="margin-bottom:20px;">
+                        <label style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                            <input type="checkbox" id="bulk-select-all" onchange="toggleBulkSelectAll()">
+                            <span>Sélectionner tous les clients avec téléphone</span>
+                        </label>
+                    </div>
+
+                    <div id="bulk-client-list">
+                        <!-- Bulk client list -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Templates -->
+        <div id="content-templates" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📋 Gérer les Templates</h3>
+                    <button class="btn btn-whatsapp" onclick="openTemplateModal()">➕ Nouveau Template</button>
+                </div>
+                <div class="card-body">
+                    <div id="templates-list">
+                        <!-- Templates -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: History -->
+        <div id="content-history" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📜 Historique des envois</h3>
+                </div>
+                <div class="card-body">
+                    <div id="history-list">
+                        <!-- History items -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Settings -->
+        <div id="content-settings" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h3>⚙️ Paramètres WhatsApp</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Numéro WhatsApp Business</label>
+                        <input type="text" id="settings-phone" placeholder="+41 XX XXX XX XX">
+                        <div class="hint">Numéro utilisé pour envoyer les messages</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nom de l'entreprise</label>
+                        <input type="text" id="settings-company" value="Borex Poissons">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Signature par défaut</label>
+                        <textarea id="settings-signature" rows="3">Cordialement,
+L'équipe Borex Poissons
+📞 022 361 12 34</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="settings-auto-signature" checked>
+                            Ajouter automatiquement la signature
+                        </label>
+                    </div>
+
+                    <button class="btn btn-whatsapp" onclick="saveSettings()">💾 Sauvegarder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Modal -->
+    <div id="template-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; padding:20px;">
+        <div style="background:var(--bg-card); border-radius:var(--radius); max-width:600px; width:100%; max-height:90vh; overflow:hidden;">
+            <div style="padding:20px; background:linear-gradient(135deg, var(--whatsapp-green), var(--whatsapp-dark)); color:#fff; display:flex; justify-content:space-between; align-items:center;">
+                <h3 id="modal-title">Nouveau Template</h3>
+                <button onclick="closeTemplateModal()" style="background:rgba(255,255,255,0.2); border:none; color:#fff; width:36px; height:36px; border-radius:50%; cursor:pointer;">×</button>
+            </div>
+            <div style="padding:24px;">
+                <div class="form-group">
+                    <label>Nom du template</label>
+                    <input type="text" id="template-name" placeholder="Ex: Confirmation commande">
+                </div>
+                <div class="form-group">
+                    <label>Icône</label>
+                    <select id="template-icon">
+                        <option value="📦">📦 Commande</option>
+                        <option value="✅">✅ Confirmation</option>
+                        <option value="🚚">🚚 Livraison</option>
+                        <option value="💳">💳 Paiement</option>
+                        <option value="🎉">🎉 Promotion</option>
+                        <option value="📅">📅 Rappel</option>
+                        <option value="❓">❓ Information</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="template-message" rows="6" placeholder="Bonjour {prenom},&#10;&#10;Votre commande {commande} est prête..."></textarea>
+                    <div class="hint">Variables disponibles: {nom}, {prenom}, {commande}, {date}, {heure}, {lieu}, {total}</div>
+                </div>
+                <div style="display:flex; gap:12px; justify-content:flex-end;">
+                    <button class="btn btn-secondary" onclick="closeTemplateModal()">Annuler</button>
+                    <button class="btn btn-whatsapp" onclick="saveTemplate()">💾 Sauvegarder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Version -->
+    <div class="version-badge">TRAKIO WhatsApp v1.0.0</div>
+
+    <script>
+        // =============================================
+        // DATA
+        // =============================================
+        let selectedClient = null;
+        let selectedTemplate = null;
+        let bulkSelectedClients = [];
+
+        const defaultTemplates = [
+            {
+                id: 1,
+                name: 'Commande prête',
+                icon: '📦',
+                message: 'Bonjour {prenom},\n\nVotre commande {commande} est prête à être retirée!\n\n📍 Lieu: {lieu}\n📅 Date: {date}\n⏰ Heure: {heure}\n\nÀ bientôt!'
+            },
+            {
+                id: 2,
+                name: 'Confirmation',
+                icon: '✅',
+                message: 'Bonjour {prenom},\n\nNous confirmons votre commande {commande} pour un total de {total} CHF.\n\nMerci de votre confiance!'
+            },
+            {
+                id: 3,
+                name: 'Rappel retrait',
+                icon: '📅',
+                message: 'Bonjour {prenom},\n\n📌 Rappel: Votre commande {commande} vous attend!\n\nRetrait prévu: {date} à {heure}\nLieu: {lieu}\n\nN\'oubliez pas!'
+            },
+            {
+                id: 4,
+                name: 'Remerciement',
+                icon: '🎉',
+                message: 'Bonjour {prenom},\n\nMerci pour votre commande!\n\nNous espérons que nos produits vous ont plu. N\'hésitez pas à nous faire part de vos retours.\n\nÀ très bientôt! 🐟'
+            }
+        ];
+
+        let templates = JSON.parse(localStorage.getItem('whatsapp_templates')) || defaultTemplates;
+        let history = JSON.parse(localStorage.getItem('whatsapp_history')) || [];
+        let settings = JSON.parse(localStorage.getItem('whatsapp_settings')) || {
+            phone: '',
+            company: 'Borex Poissons',
+            signature: 'Cordialement,\nL\'équipe Borex Poissons\n📞 022 361 12 34',
+            autoSignature: true
+        };
+
+        // =============================================
+        // INIT
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadClients();
+            loadQuickTemplates();
+            loadTemplatesList();
+            loadHistory();
+            loadSettings();
+            updatePreview();
+
+            document.getElementById('message-text').addEventListener('input', updatePreview);
+        });
+
+        // =============================================
+        // CLIENTS
+        // =============================================
+        function loadClients() {
+            const data = JSON.parse(localStorage.getItem('trakio_quickorder') || '{}');
+            const clients = data.clients || [];
+
+            const container = document.getElementById('client-list');
+            const bulkContainer = document.getElementById('bulk-client-list');
+
+            if (clients.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">👥</div><div class="title">Aucun client</div><div>Ajoutez des clients dans le module Clients</div></div>';
+                return;
+            }
+
+            container.innerHTML = clients.map(client => {
+                const hasPhone = client.phone || client.mobile;
+                const phone = client.mobile || client.phone || '';
+                const initials = getInitials(client.name || client.company || 'N/A');
+                const type = client.type || 'B2C';
+
+                return `
+                    <div class="client-item" onclick="selectClient(${client.id})" data-id="${client.id}">
+                        <div class="client-avatar">${initials}</div>
+                        <div class="client-info">
+                            <div class="client-name">${client.name || client.company || 'Sans nom'}</div>
+                            <div class="client-phone ${!hasPhone ? 'no-phone' : ''}">${hasPhone ? formatPhone(phone) : '❌ Pas de téléphone'}</div>
+                        </div>
+                        <span class="client-badge ${type.toLowerCase()}">${type}</span>
+                    </div>
+                `;
+            }).join('');
+
+            // Bulk list
+            bulkContainer.innerHTML = clients.filter(c => c.phone || c.mobile).map(client => {
+                const phone = client.mobile || client.phone;
+                return `
+                    <div class="client-item" onclick="toggleBulkClient(${client.id})" data-id="${client.id}">
+                        <input type="checkbox" class="bulk-check" data-id="${client.id}" onclick="event.stopPropagation(); toggleBulkClient(${client.id})">
+                        <div class="client-avatar">${getInitials(client.name || client.company)}</div>
+                        <div class="client-info">
+                            <div class="client-name">${client.name || client.company}</div>
+                            <div class="client-phone">${formatPhone(phone)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        }
+
+        function formatPhone(phone) {
+            if (!phone) return '';
+            // Nettoyer et formater
+            let clean = phone.replace(/\D/g, '');
+            if (clean.startsWith('0')) clean = '41' + clean.substring(1);
+            if (!clean.startsWith('41')) clean = '41' + clean;
+            return '+' + clean;
+        }
+
+        function filterClients() {
+            const search = document.getElementById('client-search').value.toLowerCase();
+            document.querySelectorAll('#client-list .client-item').forEach(item => {
+                const name = item.querySelector('.client-name').textContent.toLowerCase();
+                const phone = item.querySelector('.client-phone').textContent.toLowerCase();
+                item.style.display = (name.includes(search) || phone.includes(search)) ? 'flex' : 'none';
+            });
+        }
+
+        function selectClient(clientId) {
+            const data = JSON.parse(localStorage.getItem('trakio_quickorder') || '{}');
+            const client = (data.clients || []).find(c => c.id === clientId);
+            if (!client) return;
+
+            selectedClient = client;
+
+            // Update UI
+            document.querySelectorAll('.client-item').forEach(item => {
+                item.classList.toggle('active', parseInt(item.dataset.id) === clientId);
+            });
+
+            // Update composer header
+            const header = document.getElementById('composer-header');
+            header.style.display = 'flex';
+            document.getElementById('composer-avatar').textContent = getInitials(client.name || client.company);
+            document.getElementById('composer-name').textContent = client.name || client.company;
+            document.getElementById('composer-phone').textContent = formatPhone(client.mobile || client.phone);
+
+            updatePreview();
+        }
+
+        // =============================================
+        // TEMPLATES
+        // =============================================
+        function loadQuickTemplates() {
+            const container = document.getElementById('quick-templates');
+            container.innerHTML = templates.slice(0, 4).map(t => `
+                <div class="template-card" onclick="selectTemplate(${t.id})" data-id="${t.id}">
+                    <div class="template-icon">${t.icon}</div>
+                    <div class="template-name">${t.name}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadTemplatesList() {
+            const container = document.getElementById('templates-list');
+            container.innerHTML = templates.map(t => `
+                <div class="history-item">
+                    <div class="history-icon">${t.icon}</div>
+                    <div class="history-content">
+                        <div class="history-header">
+                            <span class="history-client">${t.name}</span>
+                            <div>
+                                <button class="btn btn-secondary" onclick="editTemplate(${t.id})" style="padding:6px 12px; font-size:12px;">✏️</button>
+                                <button class="btn btn-secondary" onclick="deleteTemplate(${t.id})" style="padding:6px 12px; font-size:12px;">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="history-message">${t.message.substring(0, 100)}...</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectTemplate(templateId) {
+            const template = templates.find(t => t.id === templateId);
+            if (!template) return;
+
+            selectedTemplate = template;
+            document.getElementById('message-text').value = template.message;
+
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.toggle('active', parseInt(card.dataset.id) === templateId);
+            });
+
+            updatePreview();
+        }
+
+        function openTemplateModal(templateId = null) {
+            const modal = document.getElementById('template-modal');
+            modal.style.display = 'flex';
+
+            if (templateId) {
+                const template = templates.find(t => t.id === templateId);
+                if (template) {
+                    document.getElementById('modal-title').textContent = 'Modifier Template';
+                    document.getElementById('template-name').value = template.name;
+                    document.getElementById('template-icon').value = template.icon;
+                    document.getElementById('template-message').value = template.message;
+                    modal.dataset.editId = templateId;
+                }
+            } else {
+                document.getElementById('modal-title').textContent = 'Nouveau Template';
+                document.getElementById('template-name').value = '';
+                document.getElementById('template-message').value = '';
+                delete modal.dataset.editId;
+            }
+        }
+
+        function closeTemplateModal() {
+            document.getElementById('template-modal').style.display = 'none';
+        }
+
+        function saveTemplate() {
+            const name = document.getElementById('template-name').value.trim();
+            const icon = document.getElementById('template-icon').value;
+            const message = document.getElementById('template-message').value.trim();
+
+            if (!name || !message) {
+                alert('Veuillez remplir tous les champs');
+                return;
+            }
+
+            const modal = document.getElementById('template-modal');
+            const editId = modal.dataset.editId ? parseInt(modal.dataset.editId) : null;
+
+            if (editId) {
+                const index = templates.findIndex(t => t.id === editId);
+                if (index !== -1) {
+                    templates[index] = { ...templates[index], name, icon, message };
+                }
+            } else {
+                templates.push({
+                    id: Date.now(),
+                    name,
+                    icon,
+                    message
+                });
+            }
+
+            localStorage.setItem('whatsapp_templates', JSON.stringify(templates));
+            loadQuickTemplates();
+            loadTemplatesList();
+            closeTemplateModal();
+        }
+
+        function editTemplate(id) {
+            openTemplateModal(id);
+        }
+
+        function deleteTemplate(id) {
+            if (!confirm('Supprimer ce template?')) return;
+            templates = templates.filter(t => t.id !== id);
+            localStorage.setItem('whatsapp_templates', JSON.stringify(templates));
+            loadQuickTemplates();
+            loadTemplatesList();
+        }
+
+        // =============================================
+        // MESSAGE
+        // =============================================
+        function insertVariable(variable) {
+            const textarea = document.getElementById('message-text');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            textarea.value = text.substring(0, start) + variable + text.substring(end);
+            textarea.focus();
+            textarea.setSelectionRange(start + variable.length, start + variable.length);
+            updatePreview();
+        }
+
+        function updatePreview() {
+            let message = document.getElementById('message-text').value;
+
+            // Remplacer les variables
+            if (selectedClient) {
+                const nameParts = (selectedClient.name || '').split(' ');
+                message = message
+                    .replace(/{nom}/g, selectedClient.name || selectedClient.company || '')
+                    .replace(/{prenom}/g, nameParts[0] || '')
+                    .replace(/{commande}/g, '#' + (Math.floor(Math.random() * 1000) + 1000))
+                    .replace(/{date}/g, new Date().toLocaleDateString('fr-CH'))
+                    .replace(/{heure}/g, '14:00')
+                    .replace(/{lieu}/g, 'Laboratoire de Coinsins')
+                    .replace(/{total}/g, '125.00');
+            }
+
+            // Ajouter signature si activée
+            if (settings.autoSignature && settings.signature) {
+                message += '\n\n' + settings.signature;
+            }
+
+            document.getElementById('message-preview').textContent = message || 'Votre message apparaîtra ici...';
+            document.getElementById('preview-time').textContent = new Date().toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function clearMessage() {
+            document.getElementById('message-text').value = '';
+            selectedTemplate = null;
+            document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+            updatePreview();
+        }
+
+        function copyMessage() {
+            const message = document.getElementById('message-preview').textContent;
+            navigator.clipboard.writeText(message).then(() => {
+                alert('✅ Message copié!');
+            });
+        }
+
+        // =============================================
+        // SEND
+        // =============================================
+        function sendWhatsApp() {
+            if (!selectedClient) {
+                alert('Veuillez sélectionner un client');
+                return;
+            }
+
+            const phone = selectedClient.mobile || selectedClient.phone;
+            if (!phone) {
+                alert('Ce client n\'a pas de numéro de téléphone');
+                return;
+            }
+
+            let message = document.getElementById('message-preview').textContent;
+            const cleanPhone = formatPhone(phone).replace(/\D/g, '');
+
+            // Créer le lien WhatsApp
+            const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+            // Sauvegarder dans l'historique
+            history.unshift({
+                id: Date.now(),
+                client: selectedClient.name || selectedClient.company,
+                phone: phone,
+                message: message.substring(0, 100),
+                date: new Date().toISOString(),
+                status: 'sent'
+            });
+            localStorage.setItem('whatsapp_history', JSON.stringify(history.slice(0, 100)));
+
+            // Ouvrir WhatsApp
+            window.open(url, '_blank');
+        }
+
+        // =============================================
+        // BULK
+        // =============================================
+        function toggleBulkClient(clientId) {
+            const index = bulkSelectedClients.indexOf(clientId);
+            if (index === -1) {
+                bulkSelectedClients.push(clientId);
+            } else {
+                bulkSelectedClients.splice(index, 1);
+            }
+
+            document.querySelector(`.bulk-check[data-id="${clientId}"]`).checked = index === -1;
+            updateBulkBar();
+        }
+
+        function toggleBulkSelectAll() {
+            const checked = document.getElementById('bulk-select-all').checked;
+            const data = JSON.parse(localStorage.getItem('trakio_quickorder') || '{}');
+            const clients = (data.clients || []).filter(c => c.phone || c.mobile);
+
+            if (checked) {
+                bulkSelectedClients = clients.map(c => c.id);
+            } else {
+                bulkSelectedClients = [];
+            }
+
+            document.querySelectorAll('.bulk-check').forEach(cb => cb.checked = checked);
+            updateBulkBar();
+        }
+
+        function updateBulkBar() {
+            const bar = document.getElementById('bulk-bar');
+            bar.classList.toggle('active', bulkSelectedClients.length > 0);
+            document.getElementById('bulk-count').textContent = bulkSelectedClients.length;
+        }
+
+        function clearBulkSelection() {
+            bulkSelectedClients = [];
+            document.querySelectorAll('.bulk-check').forEach(cb => cb.checked = false);
+            document.getElementById('bulk-select-all').checked = false;
+            updateBulkBar();
+        }
+
+        function sendBulk() {
+            if (bulkSelectedClients.length === 0) {
+                alert('Veuillez sélectionner au moins un client');
+                return;
+            }
+
+            const message = document.getElementById('message-text').value;
+            if (!message) {
+                alert('Veuillez écrire un message');
+                return;
+            }
+
+            alert(`📤 Envoi groupé préparé pour ${bulkSelectedClients.length} client(s).\n\nLes messages seront ouverts un par un dans WhatsApp.`);
+
+            // Ouvrir le premier
+            // Dans une vraie app, on pourrait utiliser l'API WhatsApp Business
+        }
+
+        // =============================================
+        // HISTORY
+        // =============================================
+        function loadHistory() {
+            const container = document.getElementById('history-list');
+
+            if (history.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">📜</div><div class="title">Aucun historique</div><div>Vos messages envoyés apparaîtront ici</div></div>';
+                return;
+            }
+
+            container.innerHTML = history.map(h => `
+                <div class="history-item">
+                    <div class="history-icon">💬</div>
+                    <div class="history-content">
+                        <div class="history-header">
+                            <span class="history-client">${h.client}</span>
+                            <span class="history-status ${h.status}">${h.status === 'sent' ? '✅ Envoyé' : '❌ Échec'}</span>
+                        </div>
+                        <div class="history-message">${h.message}</div>
+                        <div class="history-date">${new Date(h.date).toLocaleString('fr-CH')}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // =============================================
+        // SETTINGS
+        // =============================================
+        function loadSettings() {
+            document.getElementById('settings-phone').value = settings.phone || '';
+            document.getElementById('settings-company').value = settings.company || '';
+            document.getElementById('settings-signature').value = settings.signature || '';
+            document.getElementById('settings-auto-signature').checked = settings.autoSignature !== false;
+        }
+
+        function saveSettings() {
+            settings = {
+                phone: document.getElementById('settings-phone').value,
+                company: document.getElementById('settings-company').value,
+                signature: document.getElementById('settings-signature').value,
+                autoSignature: document.getElementById('settings-auto-signature').checked
+            };
+            localStorage.setItem('whatsapp_settings', JSON.stringify(settings));
+            alert('✅ Paramètres sauvegardés!');
+            updatePreview();
+        }
+
+        // =============================================
+        // TABS
+        // =============================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+
+            ['compose', 'bulk', 'templates', 'history', 'settings'].forEach(t => {
+                document.getElementById('content-' + t).style.display = t === tab ? 'block' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

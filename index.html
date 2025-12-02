@@ -6,7 +6,15 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v3.2.9 - Gestion Complète</title>
+    <title>TRAKIO v4.0.0 - Gestion Complète</title>
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#06d6a0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TRAKIO">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="description" content="TRAKIO - Système de gestion complet pour Borex Poissons">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -586,6 +594,11 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
+        }
+
+        @keyframes pulse-live {
+            0%, 100% { box-shadow: 0 4px 15px rgba(239,71,111,0.4); }
+            50% { box-shadow: 0 4px 25px rgba(239,71,111,0.7), 0 0 0 8px rgba(239,71,111,0.1); }
         }
 
         /* Stats Grid */
@@ -2191,6 +2204,40 @@
                 </div>
             </div>
 
+            <!-- TRAKIO 4.0 - Nouveaux Modules -->
+            <div class="nav-section">
+                <div class="nav-section-title" style="color:#06d6a0;">🚀 TRAKIO 4.0</div>
+                <div class="nav-item" onclick="window.location.href='live.html'" style="cursor:pointer;">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                    </svg>
+                    <span class="nav-text">🔴 Live Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='whatsapp.html'" style="cursor:pointer;">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+                    </svg>
+                    <span class="nav-text">💬 WhatsApp</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='tracabilite.html'" style="cursor:pointer;">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <rect x="7" y="7" width="3" height="3"/>
+                        <rect x="14" y="7" width="3" height="3"/>
+                        <rect x="7" y="14" width="3" height="3"/>
+                        <rect x="14" y="14" width="3" height="3"/>
+                    </svg>
+                    <span class="nav-text">📊 Traçabilité</span>
+                </div>
+                <div class="nav-item" onclick="window.location.href='cloud.html'" style="cursor:pointer;">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/>
+                    </svg>
+                    <span class="nav-text">☁️ Cloud</span>
+                </div>
+            </div>
+
             <div class="nav-section">
                 <div class="nav-section-title">Système</div>
                 <div class="nav-item" onclick="window.location.href='compta.html'" style="cursor:pointer;" data-permission="admin">
@@ -2441,6 +2488,58 @@
                             </div>
                             <div style="font-size:13px; font-weight:700; color:#9c88ff;">Analyses</div>
                             <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Statistiques</div>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════════
+                     🚀 TRAKIO 4.0 - Nouveaux Modules
+                     ═══════════════════════════════════════════════════════════════ -->
+                <div style="background:linear-gradient(145deg, rgba(6,214,160,0.08), rgba(59,130,246,0.05)); border:2px solid var(--accent-primary); border-radius:16px; padding:14px; margin-bottom:20px;">
+                    
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                        <span style="font-size:14px;">🚀</span>
+                        <span style="font-size:13px; font-weight:700; background:linear-gradient(90deg, var(--accent-primary), #3b82f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">TRAKIO 4.0</span>
+                        <span style="font-size:10px; padding:2px 8px; background:var(--accent-primary); color:#000; border-radius:10px; font-weight:600;">NOUVEAU</span>
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;">
+                        
+                        <!-- Live Dashboard -->
+                        <div onclick="window.location.href='live.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(239,71,111,0.15), rgba(255,107,53,0.1)); border:2px solid #ef476f; border-radius:12px; padding:14px 8px; text-align:center; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(239,71,111,0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="width:42px; height:42px; background:linear-gradient(135deg, #ef476f, #ff6b35); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; box-shadow:0 4px 15px rgba(239,71,111,0.4);">
+                                <span style="font-size:20px;">📡</span>
+                            </div>
+                            <div style="font-size:12px; font-weight:700; color:#ef476f;">Live</div>
+                            <div style="font-size:9px; color:var(--text-muted);">Temps réel</div>
+                        </div>
+                        
+                        <!-- WhatsApp -->
+                        <div onclick="window.location.href='whatsapp.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(37,211,102,0.15), rgba(18,140,126,0.1)); border:2px solid #25D366; border-radius:12px; padding:14px 8px; text-align:center; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(37,211,102,0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="width:42px; height:42px; background:linear-gradient(135deg, #25D366, #128C7E); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; box-shadow:0 4px 15px rgba(37,211,102,0.4);">
+                                <span style="font-size:20px;">💬</span>
+                            </div>
+                            <div style="font-size:12px; font-weight:700; color:#25D366;">WhatsApp</div>
+                            <div style="font-size:9px; color:var(--text-muted);">Messages</div>
+                        </div>
+                        
+                        <!-- Traçabilité -->
+                        <div onclick="window.location.href='tracabilite.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(157,78,221,0.15), rgba(123,44,191,0.1)); border:2px solid #9d4edd; border-radius:12px; padding:14px 8px; text-align:center; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(157,78,221,0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="width:42px; height:42px; background:linear-gradient(135deg, #9d4edd, #7b2cbf); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; box-shadow:0 4px 15px rgba(157,78,221,0.4);">
+                                <span style="font-size:20px;">📊</span>
+                            </div>
+                            <div style="font-size:12px; font-weight:700; color:#9d4edd;">Traçabilité</div>
+                            <div style="font-size:9px; color:var(--text-muted);">QR Codes</div>
+                        </div>
+                        
+                        <!-- Cloud -->
+                        <div onclick="window.location.href='cloud.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(59,130,246,0.15), rgba(29,78,216,0.1)); border:2px solid #3b82f6; border-radius:12px; padding:14px 8px; text-align:center; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(59,130,246,0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="width:42px; height:42px; background:linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; box-shadow:0 4px 15px rgba(59,130,246,0.4);">
+                                <span style="font-size:20px;">☁️</span>
+                            </div>
+                            <div style="font-size:12px; font-weight:700; color:#3b82f6;">Cloud</div>
+                            <div style="font-size:9px; color:var(--text-muted);">Base données</div>
                         </div>
                         
                     </div>
@@ -6755,7 +6854,7 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '3.2.9';
+        const APP_VERSION = '4.0.0';
         const APP_VERSION_DATE = '2025-12-02';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
@@ -6799,6 +6898,15 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '4.0.0': [
+                '📱 PWA: Application installable sur mobile/tablette',
+                '📡 Mode hors-ligne complet avec cache',
+                '🔴 TRAKIO Live: Dashboard temps réel',
+                '💬 WhatsApp: Communication client intégrée',
+                '📊 Traçabilité: QR Codes & gestion des lots',
+                '☁️ Cloud: Configuration base de données',
+                '🔔 Notifications push disponibles'
+            ],
             '3.2.9': [
                 '🛍️ Nouveau module Shopify séparé (shopify.html)',
                 '🎯 Dashboard Préparation avec agrégation intelligente',
@@ -18922,5 +19030,49 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             </div>
         </div>
     </div>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // Register Service Worker for PWA (only if file exists)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Check if service worker file exists first
+                fetch('/service-worker.js', { method: 'HEAD' })
+                    .then(function(response) {
+                        if (response.ok) {
+                            navigator.serviceWorker.register('/service-worker.js')
+                                .then(function(registration) {
+                                    console.log('🐟 TRAKIO PWA: Service Worker enregistré!');
+                                    
+                                    registration.addEventListener('updatefound', function() {
+                                        const newWorker = registration.installing;
+                                        newWorker.addEventListener('statechange', function() {
+                                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                                if (confirm('🆕 Nouvelle version de TRAKIO disponible! Recharger?')) {
+                                                    window.location.reload();
+                                                }
+                                            }
+                                        });
+                                    });
+                                })
+                                .catch(function() {});
+                        }
+                    })
+                    .catch(function() {});
+            });
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        window.addEventListener('appinstalled', function() {
+            console.log('🐟 TRAKIO: App installée!');
+            deferredPrompt = null;
+        });
+    </script>
 </body>
 </html>
