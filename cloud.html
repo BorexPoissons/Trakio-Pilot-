@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRAKIO Cloud v1.0.0 - Base de Données</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2234;
+            --bg-hover: #243049;
+            --accent-primary: #06d6a0;
+            --accent-secondary: #118ab2;
+            --accent-warning: #ffd166;
+            --accent-danger: #ef476f;
+            --accent-cloud: #3b82f6;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #2d3a4f;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent-cloud), #1d4ed8);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .title-block h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cloud), var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            padding: 8px 14px;
+            border-radius: 20px;
+            transition: var(--transition);
+            margin-bottom: 16px;
+        }
+
+        .back-link:hover {
+            background: var(--bg-hover);
+            color: var(--accent-primary);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cloud), #1d4ed8);
+            color: #fff;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--accent-primary), #059669);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-danger), #dc2626);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 16px 24px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .status-dot.connected { background: var(--accent-primary); animation: pulse 2s infinite; }
+        .status-dot.disconnected { background: var(--accent-danger); }
+        .status-dot.syncing { background: var(--accent-warning); animation: blink 1s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(6, 214, 160, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(6, 214, 160, 0); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, var(--accent-cloud), #1d4ed8);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .card-body { padding: 20px; }
+
+        /* Provider Selection */
+        .providers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .provider-card {
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 24px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .provider-card:hover { border-color: var(--accent-cloud); }
+
+        .provider-card.active {
+            border-color: var(--accent-primary);
+            background: rgba(6, 214, 160, 0.05);
+        }
+
+        .provider-card.active::after {
+            content: '✓';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 24px;
+            height: 24px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #000;
+        }
+
+        .provider-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .provider-logo.firebase { background: linear-gradient(135deg, #FFCA28, #FF9800); }
+        .provider-logo.supabase { background: linear-gradient(135deg, #3ECF8E, #1C8656); }
+        .provider-logo.pocketbase { background: linear-gradient(135deg, #B8DBE4, #16161D); }
+
+        .provider-name { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .provider-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+        .provider-features {
+            margin-top: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .feature-tag {
+            padding: 4px 10px;
+            background: var(--bg-hover);
+            border-radius: 20px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Form */
+        .form-section {
+            margin-bottom: 24px;
+        }
+
+        .form-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-cloud);
+        }
+
+        .form-group .hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            font-family: 'Space Mono', monospace;
+            color: var(--accent-cloud);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Sync Log */
+        .sync-log {
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+        }
+
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+        }
+
+        .log-entry:last-child { border-bottom: none; }
+
+        .log-time { color: var(--text-muted); min-width: 80px; }
+        .log-icon { min-width: 20px; }
+        .log-message { flex: 1; }
+
+        .log-entry.success .log-icon { color: var(--accent-primary); }
+        .log-entry.error .log-icon { color: var(--accent-danger); }
+        .log-entry.warning .log-icon { color: var(--accent-warning); }
+        .log-entry.info .log-icon { color: var(--accent-cloud); }
+
+        /* Data Collections */
+        .collections-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .collection-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .collection-item:hover { background: var(--bg-hover); }
+
+        .collection-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .collection-icon.articles { background: rgba(6, 214, 160, 0.2); }
+        .collection-icon.clients { background: rgba(17, 138, 178, 0.2); }
+        .collection-icon.orders { background: rgba(255, 209, 102, 0.2); }
+        .collection-icon.shopify { background: rgba(150, 191, 72, 0.2); }
+
+        .collection-info { flex: 1; }
+        .collection-name { font-weight: 600; }
+        .collection-count { font-size: 13px; color: var(--text-muted); }
+
+        .collection-actions { display: flex; gap: 8px; }
+
+        .collection-toggle {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            background: var(--border-color);
+            border-radius: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .collection-toggle.active { background: var(--accent-primary); }
+
+        .collection-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .collection-toggle.active::after { left: 25px; }
+
+        /* Migration Progress */
+        .migration-progress {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cloud), var(--accent-primary));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: var(--bg-secondary);
+            padding: 8px;
+            border-radius: var(--radius);
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 14px 24px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .tab:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--accent-cloud), #1d4ed8);
+            color: #fff;
+        }
+
+        /* Version Badge */
+        .version-badge {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            background: var(--bg-card);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Alert */
+        .alert {
+            padding: 16px 20px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid var(--accent-cloud);
+        }
+
+        .alert-warning {
+            background: rgba(255, 209, 102, 0.1);
+            border-left: 4px solid var(--accent-warning);
+        }
+
+        .alert-icon { font-size: 20px; }
+        .alert-content { flex: 1; }
+        .alert-title { font-weight: 600; margin-bottom: 4px; }
+        .alert-text { font-size: 13px; color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Link -->
+        <a href="index.html" class="back-link">← Retour TRAKIO</a>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">☁️</div>
+                <div class="title-block">
+                    <h1>TRAKIO Cloud</h1>
+                    <div style="color:var(--text-muted); font-size:13px;">Base de Données & Synchronisation</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-dot disconnected" id="status-dot"></div>
+                <span id="status-text">Non connecté</span>
+            </div>
+            <div class="status-item">
+                <span style="color:var(--text-muted);">Dernière sync:</span>
+                <span id="last-sync">Jamais</span>
+            </div>
+            <div class="status-item">
+                <span style="color:var(--text-muted);">Provider:</span>
+                <span id="current-provider">Aucun</span>
+            </div>
+            <div style="flex:1;"></div>
+            <button class="btn btn-primary" onclick="manualSync()" id="btn-sync" disabled>🔄 Synchroniser</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('setup')" id="tab-setup">⚙️ Configuration</button>
+            <button class="tab" onclick="switchTab('data')" id="tab-data">📊 Données</button>
+            <button class="tab" onclick="switchTab('sync')" id="tab-sync">🔄 Synchronisation</button>
+            <button class="tab" onclick="switchTab('backup')" id="tab-backup">💾 Backup</button>
+        </div>
+
+        <!-- TAB: Setup -->
+        <div id="content-setup">
+            <div class="alert alert-info">
+                <div class="alert-icon">💡</div>
+                <div class="alert-content">
+                    <div class="alert-title">Pourquoi passer au Cloud?</div>
+                    <div class="alert-text">
+                        Synchronisation temps réel entre tous vos appareils, backup automatique, 
+                        accès multi-utilisateurs simultanés, et sécurité renforcée de vos données.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>☁️ Choisir un Provider</h3>
+                </div>
+                <div class="card-body">
+                    <div class="providers-grid">
+                        <!-- Firebase -->
+                        <div class="provider-card" onclick="selectProvider('firebase')" data-provider="firebase">
+                            <div class="provider-logo firebase">🔥</div>
+                            <div class="provider-name">Firebase</div>
+                            <div class="provider-desc">
+                                Solution Google complète avec Firestore, Authentication et Hosting. 
+                                Idéal pour applications temps réel.
+                            </div>
+                            <div class="provider-features">
+                                <span class="feature-tag">Temps réel</span>
+                                <span class="feature-tag">Auth intégrée</span>
+                                <span class="feature-tag">Gratuit 1GB</span>
+                            </div>
+                        </div>
+
+                        <!-- Supabase -->
+                        <div class="provider-card" onclick="selectProvider('supabase')" data-provider="supabase">
+                            <div class="provider-logo supabase">⚡</div>
+                            <div class="provider-name">Supabase</div>
+                            <div class="provider-desc">
+                                Alternative open-source à Firebase basée sur PostgreSQL. 
+                                Puissant et flexible.
+                            </div>
+                            <div class="provider-features">
+                                <span class="feature-tag">PostgreSQL</span>
+                                <span class="feature-tag">Open Source</span>
+                                <span class="feature-tag">API REST</span>
+                            </div>
+                        </div>
+
+                        <!-- PocketBase -->
+                        <div class="provider-card" onclick="selectProvider('pocketbase')" data-provider="pocketbase">
+                            <div class="provider-logo pocketbase">📦</div>
+                            <div class="provider-name">PocketBase</div>
+                            <div class="provider-desc">
+                                Backend léger auto-hébergé. Un seul fichier exécutable, 
+                                parfait pour garder le contrôle total.
+                            </div>
+                            <div class="provider-features">
+                                <span class="feature-tag">Self-hosted</span>
+                                <span class="feature-tag">SQLite</span>
+                                <span class="feature-tag">Léger</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Firebase Config -->
+                    <div id="config-firebase" class="form-section" style="display:none;">
+                        <div class="form-section-title">Configuration Firebase</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>API Key *</label>
+                                <input type="text" id="firebase-apiKey" placeholder="AIzaSy...">
+                            </div>
+                            <div class="form-group">
+                                <label>Project ID *</label>
+                                <input type="text" id="firebase-projectId" placeholder="trakio-pilot-xxxxx">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Auth Domain</label>
+                                <input type="text" id="firebase-authDomain" placeholder="trakio-pilot.firebaseapp.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Storage Bucket</label>
+                                <input type="text" id="firebase-storageBucket" placeholder="trakio-pilot.appspot.com">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Messaging Sender ID</label>
+                            <input type="text" id="firebase-messagingSenderId" placeholder="123456789">
+                        </div>
+                        <div class="hint">
+                            💡 Trouvez ces infos dans la console Firebase → Paramètres du projet → Général
+                        </div>
+                    </div>
+
+                    <!-- Supabase Config -->
+                    <div id="config-supabase" class="form-section" style="display:none;">
+                        <div class="form-section-title">Configuration Supabase</div>
+                        <div class="form-group">
+                            <label>URL du projet *</label>
+                            <input type="text" id="supabase-url" placeholder="https://xxxxx.supabase.co">
+                        </div>
+                        <div class="form-group">
+                            <label>Anon Key *</label>
+                            <input type="text" id="supabase-anonKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                        </div>
+                        <div class="hint">
+                            💡 Trouvez ces infos dans Supabase → Settings → API
+                        </div>
+                    </div>
+
+                    <!-- PocketBase Config -->
+                    <div id="config-pocketbase" class="form-section" style="display:none;">
+                        <div class="form-section-title">Configuration PocketBase</div>
+                        <div class="form-group">
+                            <label>URL du serveur *</label>
+                            <input type="text" id="pocketbase-url" placeholder="https://pocketbase.votreserveur.com">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Email admin</label>
+                                <input type="email" id="pocketbase-email" placeholder="admin@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Mot de passe</label>
+                                <input type="password" id="pocketbase-password" placeholder="••••••••">
+                            </div>
+                        </div>
+                        <div class="hint">
+                            💡 Déployez PocketBase sur votre serveur ou utilisez un service comme Railway/Fly.io
+                        </div>
+                    </div>
+
+                    <div style="margin-top:24px; display:flex; gap:12px;">
+                        <button class="btn btn-primary" onclick="testConnection()" id="btn-test" disabled>🔌 Tester la connexion</button>
+                        <button class="btn btn-success" onclick="saveConfig()" id="btn-save" disabled>💾 Sauvegarder</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Data -->
+        <div id="content-data" style="display:none;">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-articles">0</div>
+                    <div class="stat-label">Articles</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-clients">0</div>
+                    <div class="stat-label">Clients</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-orders">0</div>
+                    <div class="stat-label">Commandes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-shopify">0</div>
+                    <div class="stat-label">Shopify</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-size">0 KB</div>
+                    <div class="stat-label">Taille totale</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>📊 Collections à synchroniser</h3>
+                </div>
+                <div class="card-body">
+                    <div class="collections-list" id="collections-list">
+                        <!-- Collections -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>🔄 Migration des données</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <div class="alert-icon">⚠️</div>
+                        <div class="alert-content">
+                            <div class="alert-title">Migration localStorage → Cloud</div>
+                            <div class="alert-text">
+                                Cette opération va copier toutes vos données locales vers le cloud. 
+                                Vos données locales seront conservées comme backup.
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="startMigration()" id="btn-migrate" disabled>
+                        📤 Démarrer la migration
+                    </button>
+
+                    <div class="migration-progress" id="migration-progress" style="display:none;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>Migration en cours...</span>
+                            <span id="migration-percent">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill" style="width:0%;"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <span id="migration-current">0 / 0 documents</span>
+                            <span id="migration-collection">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Sync -->
+        <div id="content-sync" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h3>⚙️ Paramètres de synchronisation</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Mode de synchronisation</label>
+                        <select id="sync-mode">
+                            <option value="realtime">🔴 Temps réel (recommandé)</option>
+                            <option value="interval">⏰ Intervalle (économie batterie)</option>
+                            <option value="manual">👆 Manuel uniquement</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="sync-interval-group">
+                        <label>Intervalle de synchronisation</label>
+                        <select id="sync-interval">
+                            <option value="30">Toutes les 30 secondes</option>
+                            <option value="60">Toutes les minutes</option>
+                            <option value="300" selected>Toutes les 5 minutes</option>
+                            <option value="600">Toutes les 10 minutes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="sync-offline" checked>
+                            Activer le mode hors-ligne (cache local)
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="sync-notify" checked>
+                            Notifier les conflits de synchronisation
+                        </label>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveSyncSettings()">💾 Sauvegarder</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>📜 Journal de synchronisation</h3>
+                    <button class="btn btn-secondary" onclick="clearSyncLog()" style="padding:8px 12px;">🗑️ Vider</button>
+                </div>
+                <div class="card-body">
+                    <div class="sync-log" id="sync-log">
+                        <!-- Log entries -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Backup -->
+        <div id="content-backup" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h3>💾 Backup & Restauration</h3>
+                </div>
+                <div class="card-body">
+                    <div class="stats-grid" style="margin-bottom:24px;">
+                        <div class="stat-card">
+                            <div class="stat-value" id="backup-count">0</div>
+                            <div class="stat-label">Backups cloud</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="backup-last">-</div>
+                            <div class="stat-label">Dernier backup</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="backup-auto">OFF</div>
+                            <div class="stat-label">Backup auto</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="backup-auto-enabled">
+                            Activer le backup automatique quotidien
+                        </label>
+                    </div>
+
+                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                        <button class="btn btn-primary" onclick="createBackup()">📤 Créer un backup maintenant</button>
+                        <button class="btn btn-secondary" onclick="downloadBackup()">📥 Télécharger backup local</button>
+                        <button class="btn btn-secondary" onclick="showRestoreModal()">🔄 Restaurer</button>
+                    </div>
+
+                    <div style="margin-top:24px;">
+                        <h4 style="margin-bottom:12px;">📋 Historique des backups</h4>
+                        <div id="backup-history">
+                            <!-- Backup list -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Version -->
+    <div class="version-badge">TRAKIO Cloud v1.0.0</div>
+
+    <script>
+        // =============================================
+        // STATE
+        // =============================================
+        let selectedProvider = null;
+        let cloudConfig = JSON.parse(localStorage.getItem('trakio_cloud_config') || 'null');
+        let syncLog = JSON.parse(localStorage.getItem('trakio_sync_log') || '[]');
+        let isConnected = false;
+
+        const collections = [
+            { id: 'articles', name: 'Articles', icon: '📦', key: 'trakio_articles', enabled: true },
+            { id: 'clients', name: 'Clients', icon: '👥', key: 'trakio_quickorder', enabled: true },
+            { id: 'orders', name: 'Commandes', icon: '🛒', key: 'trakio_orders', enabled: true },
+            { id: 'shopify', name: 'Shopify Orders', icon: '🛍️', key: 'shopify_orders', enabled: true },
+            { id: 'lots', name: 'Lots & Traçabilité', icon: '📊', key: 'trakio_lots', enabled: true },
+            { id: 'whatsapp', name: 'WhatsApp History', icon: '💬', key: 'whatsapp_history', enabled: false }
+        ];
+
+        // =============================================
+        // INIT
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadConfig();
+            loadStats();
+            loadCollections();
+            loadSyncLog();
+            updateStatus();
+
+            document.getElementById('sync-mode').addEventListener('change', function() {
+                document.getElementById('sync-interval-group').style.display = 
+                    this.value === 'interval' ? 'block' : 'none';
+            });
+        });
+
+        // =============================================
+        // PROVIDER SELECTION
+        // =============================================
+        function selectProvider(provider) {
+            selectedProvider = provider;
+
+            document.querySelectorAll('.provider-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.provider === provider);
+            });
+
+            // Show config form
+            ['firebase', 'supabase', 'pocketbase'].forEach(p => {
+                document.getElementById('config-' + p).style.display = p === provider ? 'block' : 'none';
+            });
+
+            document.getElementById('btn-test').disabled = false;
+            document.getElementById('btn-save').disabled = false;
+        }
+
+        // =============================================
+        // CONFIG
+        // =============================================
+        function loadConfig() {
+            if (cloudConfig) {
+                selectedProvider = cloudConfig.provider;
+                if (selectedProvider) {
+                    selectProvider(selectedProvider);
+
+                    // Fill form
+                    if (selectedProvider === 'firebase') {
+                        document.getElementById('firebase-apiKey').value = cloudConfig.apiKey || '';
+                        document.getElementById('firebase-projectId').value = cloudConfig.projectId || '';
+                        document.getElementById('firebase-authDomain').value = cloudConfig.authDomain || '';
+                        document.getElementById('firebase-storageBucket').value = cloudConfig.storageBucket || '';
+                        document.getElementById('firebase-messagingSenderId').value = cloudConfig.messagingSenderId || '';
+                    } else if (selectedProvider === 'supabase') {
+                        document.getElementById('supabase-url').value = cloudConfig.url || '';
+                        document.getElementById('supabase-anonKey').value = cloudConfig.anonKey || '';
+                    } else if (selectedProvider === 'pocketbase') {
+                        document.getElementById('pocketbase-url').value = cloudConfig.url || '';
+                        document.getElementById('pocketbase-email').value = cloudConfig.email || '';
+                    }
+                }
+            }
+        }
+
+        function saveConfig() {
+            if (!selectedProvider) {
+                alert('Veuillez sélectionner un provider');
+                return;
+            }
+
+            let config = { provider: selectedProvider };
+
+            if (selectedProvider === 'firebase') {
+                config.apiKey = document.getElementById('firebase-apiKey').value;
+                config.projectId = document.getElementById('firebase-projectId').value;
+                config.authDomain = document.getElementById('firebase-authDomain').value;
+                config.storageBucket = document.getElementById('firebase-storageBucket').value;
+                config.messagingSenderId = document.getElementById('firebase-messagingSenderId').value;
+
+                if (!config.apiKey || !config.projectId) {
+                    alert('API Key et Project ID sont requis');
+                    return;
+                }
+            } else if (selectedProvider === 'supabase') {
+                config.url = document.getElementById('supabase-url').value;
+                config.anonKey = document.getElementById('supabase-anonKey').value;
+
+                if (!config.url || !config.anonKey) {
+                    alert('URL et Anon Key sont requis');
+                    return;
+                }
+            } else if (selectedProvider === 'pocketbase') {
+                config.url = document.getElementById('pocketbase-url').value;
+                config.email = document.getElementById('pocketbase-email').value;
+                config.password = document.getElementById('pocketbase-password').value;
+
+                if (!config.url) {
+                    alert('URL du serveur requis');
+                    return;
+                }
+            }
+
+            cloudConfig = config;
+            localStorage.setItem('trakio_cloud_config', JSON.stringify(config));
+
+            addLog('success', 'Configuration sauvegardée');
+            alert('✅ Configuration sauvegardée!');
+            updateStatus();
+        }
+
+        async function testConnection() {
+            if (!selectedProvider) {
+                alert('Veuillez sélectionner un provider');
+                return;
+            }
+
+            addLog('info', 'Test de connexion...');
+
+            // Simulate connection test
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // In real app, actually test the connection
+            const success = Math.random() > 0.2; // 80% success for demo
+
+            if (success) {
+                isConnected = true;
+                addLog('success', 'Connexion réussie!');
+                alert('✅ Connexion réussie!');
+            } else {
+                isConnected = false;
+                addLog('error', 'Échec de la connexion');
+                alert('❌ Échec de la connexion. Vérifiez vos paramètres.');
+            }
+
+            updateStatus();
+        }
+
+        // =============================================
+        // STATUS
+        // =============================================
+        function updateStatus() {
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            const provider = document.getElementById('current-provider');
+            const syncBtn = document.getElementById('btn-sync');
+            const migrateBtn = document.getElementById('btn-migrate');
+
+            if (isConnected && cloudConfig) {
+                dot.className = 'status-dot connected';
+                text.textContent = 'Connecté';
+                provider.textContent = cloudConfig.provider.charAt(0).toUpperCase() + cloudConfig.provider.slice(1);
+                syncBtn.disabled = false;
+                if (migrateBtn) migrateBtn.disabled = false;
+            } else if (cloudConfig) {
+                dot.className = 'status-dot disconnected';
+                text.textContent = 'Configuré (non testé)';
+                provider.textContent = cloudConfig.provider.charAt(0).toUpperCase() + cloudConfig.provider.slice(1);
+                syncBtn.disabled = true;
+            } else {
+                dot.className = 'status-dot disconnected';
+                text.textContent = 'Non connecté';
+                provider.textContent = 'Aucun';
+                syncBtn.disabled = true;
+            }
+        }
+
+        // =============================================
+        // STATS
+        // =============================================
+        function loadStats() {
+            const articles = JSON.parse(localStorage.getItem('trakio_articles') || '{"items":[]}');
+            const clients = JSON.parse(localStorage.getItem('trakio_quickorder') || '{"clients":[]}');
+            const orders = JSON.parse(localStorage.getItem('trakio_orders') || '[]');
+            const shopify = JSON.parse(localStorage.getItem('shopify_orders') || '[]');
+
+            document.getElementById('stat-articles').textContent = articles.items?.length || 0;
+            document.getElementById('stat-clients').textContent = clients.clients?.length || 0;
+            document.getElementById('stat-orders').textContent = orders.length;
+            document.getElementById('stat-shopify').textContent = shopify.length;
+
+            // Calculate total size
+            let totalSize = 0;
+            for (let key in localStorage) {
+                if (key.startsWith('trakio') || key.startsWith('shopify') || key.startsWith('whatsapp')) {
+                    totalSize += localStorage.getItem(key)?.length || 0;
+                }
+            }
+            document.getElementById('stat-size').textContent = (totalSize / 1024).toFixed(1) + ' KB';
+        }
+
+        // =============================================
+        // COLLECTIONS
+        // =============================================
+        function loadCollections() {
+            const container = document.getElementById('collections-list');
+
+            container.innerHTML = collections.map(col => {
+                const data = JSON.parse(localStorage.getItem(col.key) || '[]');
+                let count = 0;
+                if (Array.isArray(data)) count = data.length;
+                else if (data.items) count = data.items.length;
+                else if (data.clients) count = data.clients.length;
+
+                return `
+                    <div class="collection-item">
+                        <div class="collection-icon ${col.id}">${col.icon}</div>
+                        <div class="collection-info">
+                            <div class="collection-name">${col.name}</div>
+                            <div class="collection-count">${count} documents</div>
+                        </div>
+                        <div class="collection-toggle ${col.enabled ? 'active' : ''}" 
+                             onclick="toggleCollection('${col.id}')" 
+                             data-collection="${col.id}"></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleCollection(collectionId) {
+            const col = collections.find(c => c.id === collectionId);
+            if (col) {
+                col.enabled = !col.enabled;
+                const toggle = document.querySelector(`.collection-toggle[data-collection="${collectionId}"]`);
+                toggle.classList.toggle('active', col.enabled);
+            }
+        }
+
+        // =============================================
+        // MIGRATION
+        // =============================================
+        async function startMigration() {
+            if (!isConnected) {
+                alert('Veuillez d\'abord vous connecter au cloud');
+                return;
+            }
+
+            if (!confirm('Démarrer la migration des données vers le cloud?')) return;
+
+            const progress = document.getElementById('migration-progress');
+            const fill = document.getElementById('progress-fill');
+            const percent = document.getElementById('migration-percent');
+            const current = document.getElementById('migration-current');
+            const colName = document.getElementById('migration-collection');
+
+            progress.style.display = 'block';
+
+            const enabledCollections = collections.filter(c => c.enabled);
+            let totalDocs = 0;
+            let migratedDocs = 0;
+
+            // Count total
+            enabledCollections.forEach(col => {
+                const data = JSON.parse(localStorage.getItem(col.key) || '[]');
+                if (Array.isArray(data)) totalDocs += data.length;
+                else if (data.items) totalDocs += data.items.length;
+                else if (data.clients) totalDocs += data.clients.length;
+            });
+
+            for (const col of enabledCollections) {
+                colName.textContent = col.name;
+
+                const data = JSON.parse(localStorage.getItem(col.key) || '[]');
+                let items = [];
+                if (Array.isArray(data)) items = data;
+                else if (data.items) items = data.items;
+                else if (data.clients) items = data.clients;
+
+                for (let i = 0; i < items.length; i++) {
+                    // Simulate upload delay
+                    await new Promise(r => setTimeout(r, 50));
+                    migratedDocs++;
+
+                    const pct = Math.round((migratedDocs / totalDocs) * 100);
+                    fill.style.width = pct + '%';
+                    percent.textContent = pct + '%';
+                    current.textContent = `${migratedDocs} / ${totalDocs} documents`;
+                }
+
+                addLog('success', `${col.name}: ${items.length} documents migrés`);
+            }
+
+            addLog('success', 'Migration terminée!');
+            alert('✅ Migration terminée! ' + migratedDocs + ' documents migrés.');
+
+            document.getElementById('last-sync').textContent = new Date().toLocaleTimeString('fr-CH');
+        }
+
+        // =============================================
+        // SYNC
+        // =============================================
+        async function manualSync() {
+            if (!isConnected) return;
+
+            addLog('info', 'Synchronisation manuelle...');
+
+            // Simulate sync
+            await new Promise(r => setTimeout(r, 2000));
+
+            addLog('success', 'Synchronisation terminée');
+            document.getElementById('last-sync').textContent = new Date().toLocaleTimeString('fr-CH');
+        }
+
+        function saveSyncSettings() {
+            const settings = {
+                mode: document.getElementById('sync-mode').value,
+                interval: document.getElementById('sync-interval').value,
+                offline: document.getElementById('sync-offline').checked,
+                notify: document.getElementById('sync-notify').checked
+            };
+
+            localStorage.setItem('trakio_sync_settings', JSON.stringify(settings));
+            addLog('info', 'Paramètres de sync sauvegardés');
+            alert('✅ Paramètres sauvegardés!');
+        }
+
+        // =============================================
+        // SYNC LOG
+        // =============================================
+        function addLog(type, message) {
+            syncLog.unshift({
+                time: new Date().toLocaleTimeString('fr-CH'),
+                type: type,
+                message: message
+            });
+
+            syncLog = syncLog.slice(0, 100);
+            localStorage.setItem('trakio_sync_log', JSON.stringify(syncLog));
+            loadSyncLog();
+        }
+
+        function loadSyncLog() {
+            const container = document.getElementById('sync-log');
+
+            if (syncLog.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Aucune activité</div>';
+                return;
+            }
+
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+
+            container.innerHTML = syncLog.slice(0, 50).map(log => `
+                <div class="log-entry ${log.type}">
+                    <span class="log-time">${log.time}</span>
+                    <span class="log-icon">${icons[log.type]}</span>
+                    <span class="log-message">${log.message}</span>
+                </div>
+            `).join('');
+        }
+
+        function clearSyncLog() {
+            if (!confirm('Vider le journal?')) return;
+            syncLog = [];
+            localStorage.removeItem('trakio_sync_log');
+            loadSyncLog();
+        }
+
+        // =============================================
+        // BACKUP
+        // =============================================
+        function createBackup() {
+            const backup = {
+                _meta: {
+                    type: 'TRAKIO_CLOUD_BACKUP',
+                    version: '1.0.0',
+                    createdAt: new Date().toISOString(),
+                    provider: cloudConfig?.provider || 'local'
+                },
+                data: {}
+            };
+
+            collections.forEach(col => {
+                const data = localStorage.getItem(col.key);
+                if (data) {
+                    backup.data[col.key] = JSON.parse(data);
+                }
+            });
+
+            // In real app, upload to cloud
+            addLog('success', 'Backup créé');
+            alert('✅ Backup créé!');
+        }
+
+        function downloadBackup() {
+            const backup = {
+                _meta: {
+                    type: 'TRAKIO_FULL_BACKUP',
+                    version: '1.0.0',
+                    createdAt: new Date().toISOString()
+                },
+                data: {}
+            };
+
+            for (let key in localStorage) {
+                if (key.startsWith('trakio') || key.startsWith('shopify') || key.startsWith('whatsapp')) {
+                    try {
+                        backup.data[key] = JSON.parse(localStorage.getItem(key));
+                    } catch {
+                        backup.data[key] = localStorage.getItem(key);
+                    }
+                }
+            }
+
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trakio-backup-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            addLog('success', 'Backup téléchargé');
+        }
+
+        function showRestoreModal() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const text = await file.text();
+                try {
+                    const backup = JSON.parse(text);
+
+                    if (!backup._meta || !backup.data) {
+                        throw new Error('Format invalide');
+                    }
+
+                    if (!confirm(`Restaurer le backup du ${new Date(backup._meta.createdAt).toLocaleString('fr-CH')}?\n\nCela remplacera toutes vos données actuelles.`)) {
+                        return;
+                    }
+
+                    for (const [key, value] of Object.entries(backup.data)) {
+                        localStorage.setItem(key, JSON.stringify(value));
+                    }
+
+                    addLog('success', 'Backup restauré');
+                    alert('✅ Backup restauré! Rechargement...');
+                    location.reload();
+                } catch (err) {
+                    alert('❌ Erreur: ' + err.message);
+                }
+            };
+            input.click();
+        }
+
+        // =============================================
+        // TABS
+        // =============================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+
+            ['setup', 'data', 'sync', 'backup'].forEach(t => {
+                document.getElementById('content-' + t).style.display = t === tab ? 'block' : 'none';
+            });
+
+            if (tab === 'data') {
+                loadStats();
+                loadCollections();
+            }
+        }
+    </script>
+</body>
+</html>

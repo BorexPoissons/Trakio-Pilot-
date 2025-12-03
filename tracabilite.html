@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRAKIO Traçabilité v1.0.0 - QR Codes & Lots</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2234;
+            --bg-hover: #243049;
+            --accent-primary: #06d6a0;
+            --accent-secondary: #118ab2;
+            --accent-warning: #ffd166;
+            --accent-danger: #ef476f;
+            --accent-purple: #9d4edd;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #2d3a4f;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent-purple), #7b2cbf);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .title-block h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            padding: 8px 14px;
+            border-radius: 20px;
+            transition: var(--transition);
+            margin-bottom: 16px;
+        }
+
+        .back-link:hover {
+            background: var(--bg-hover);
+            color: var(--accent-primary);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-purple), #7b2cbf);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: var(--bg-secondary);
+            padding: 8px;
+            border-radius: var(--radius);
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 14px 24px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .tab:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--accent-purple), #7b2cbf);
+            color: #fff;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, var(--accent-purple), #7b2cbf);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .card-body { padding: 20px; }
+
+        /* Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* QR Preview */
+        .qr-preview-section {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .qr-preview-section { grid-template-columns: 1fr; }
+        }
+
+        .qr-container {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+        }
+
+        #qr-code {
+            display: inline-block;
+            padding: 16px;
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        #qr-code img {
+            display: block;
+        }
+
+        /* Label Preview */
+        .label-preview {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            color: #000;
+            font-size: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .label-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #06d6a0;
+        }
+
+        .label-logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #06d6a0, #118ab2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .label-company {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .label-row:last-child { border-bottom: none; }
+
+        .label-key { color: #666; }
+        .label-value { font-weight: 600; }
+
+        .label-qr {
+            text-align: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px dashed #ddd;
+        }
+
+        .label-qr img {
+            width: 80px;
+            height: 80px;
+        }
+
+        /* Lots Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-primary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        tr:hover { background: var(--bg-hover); }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-badge.active { background: rgba(6, 214, 160, 0.2); color: var(--accent-primary); }
+        .status-badge.expired { background: rgba(239, 71, 111, 0.2); color: var(--accent-danger); }
+        .status-badge.warning { background: rgba(255, 209, 102, 0.2); color: var(--accent-warning); }
+
+        /* Scan Section */
+        .scan-zone {
+            text-align: center;
+            padding: 60px;
+            background: var(--bg-primary);
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+        }
+
+        .scan-zone .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .scan-zone .title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .scan-zone .hint {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        #video-container {
+            display: none;
+            max-width: 400px;
+            margin: 0 auto;
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        #video-container video {
+            width: 100%;
+            display: block;
+        }
+
+        /* Result Card */
+        .result-card {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            padding: 24px;
+            display: none;
+        }
+
+        .result-card.active { display: block; }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .result-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .result-icon.success { background: rgba(6, 214, 160, 0.2); }
+        .result-icon.error { background: rgba(239, 71, 111, 0.2); }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .result-item {
+            background: var(--bg-card);
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .result-item .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .result-item .value {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        /* Print Label */
+        .print-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .print-option {
+            padding: 16px 24px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .print-option:hover { border-color: var(--accent-purple); }
+        .print-option.active { border-color: var(--accent-purple); background: rgba(157, 78, 221, 0.1); }
+
+        .print-option .icon { font-size: 32px; margin-bottom: 8px; }
+        .print-option .name { font-weight: 600; }
+        .print-option .size { font-size: 12px; color: var(--text-muted); }
+
+        /* Version Badge */
+        .version-badge {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            background: var(--bg-card);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state .title { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Link -->
+        <a href="index.html" class="back-link">← Retour TRAKIO</a>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">📊</div>
+                <div class="title-block">
+                    <h1>Traçabilité</h1>
+                    <div style="color:var(--text-muted); font-size:13px;">QR Codes & Gestion des Lots</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('generate')" id="tab-generate">🏷️ Générer QR Code</button>
+            <button class="tab" onclick="switchTab('lots')" id="tab-lots">📦 Gestion des Lots</button>
+            <button class="tab" onclick="switchTab('scan')" id="tab-scan">📷 Scanner</button>
+            <button class="tab" onclick="switchTab('history')" id="tab-history">📜 Historique</button>
+        </div>
+
+        <!-- TAB: Generate QR Code -->
+        <div id="content-generate">
+            <div class="qr-preview-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>🏷️ Créer une étiquette produit</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Produit *</label>
+                                <select id="qr-product" onchange="updateQRPreview()">
+                                    <option value="">Sélectionner un produit...</option>
+                                    <option value="saumon-fume-ecossais">Saumon Fumé Écossais</option>
+                                    <option value="saumon-fume-norvegien">Saumon Fumé Norvégien</option>
+                                    <option value="truite-fumee">Truite Fumée</option>
+                                    <option value="huitres-fc">Huîtres Fines de Claires</option>
+                                    <option value="huitres-sc">Huîtres Spéciales de Claires</option>
+                                    <option value="huitres-gillardeau">Huîtres Gillardeau</option>
+                                    <option value="foie-gras">Foie Gras</option>
+                                    <option value="fondue-poissons">Fondue de Poissons</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>N° de Lot *</label>
+                                <input type="text" id="qr-lot" placeholder="Ex: SF-2025-1202-001" oninput="updateQRPreview()">
+                                <button onclick="generateLotNumber()" style="margin-top:8px; padding:8px 12px; background:var(--bg-hover); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); cursor:pointer; font-size:12px;">🔄 Générer automatiquement</button>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Origine</label>
+                                <input type="text" id="qr-origin" placeholder="Ex: Écosse, Loch Fyne" oninput="updateQRPreview()">
+                            </div>
+                            <div class="form-group">
+                                <label>Zone FAO</label>
+                                <select id="qr-fao" onchange="updateQRPreview()">
+                                    <option value="">Sélectionner...</option>
+                                    <option value="27">27 - Atlantique Nord-Est</option>
+                                    <option value="21">21 - Atlantique Nord-Ouest</option>
+                                    <option value="34">34 - Atlantique Centre-Est</option>
+                                    <option value="37">37 - Méditerranée</option>
+                                    <option value="61">61 - Pacifique Nord-Ouest</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date de production</label>
+                                <input type="date" id="qr-production" onchange="updateQRPreview()">
+                            </div>
+                            <div class="form-group">
+                                <label>Date Limite de Consommation (DLC)</label>
+                                <input type="date" id="qr-dlc" onchange="updateQRPreview()">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select id="qr-type" onchange="updateQRPreview()">
+                                    <option value="sauvage">🎣 Sauvage</option>
+                                    <option value="elevage">🏭 Élevage</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Certifications</label>
+                                <select id="qr-certif" onchange="updateQRPreview()">
+                                    <option value="">Aucune</option>
+                                    <option value="msc">MSC (Pêche durable)</option>
+                                    <option value="asc">ASC (Aquaculture)</option>
+                                    <option value="bio">Bio</option>
+                                    <option value="label-rouge">Label Rouge</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Notes additionnelles</label>
+                            <textarea id="qr-notes" rows="2" placeholder="Informations complémentaires..." oninput="updateQRPreview()"></textarea>
+                        </div>
+
+                        <div style="margin-top:24px;">
+                            <div style="font-weight:600; margin-bottom:12px;">📐 Format d'étiquette</div>
+                            <div class="print-options">
+                                <div class="print-option active" onclick="selectLabelSize('small')" data-size="small">
+                                    <div class="icon">🏷️</div>
+                                    <div class="name">Petite</div>
+                                    <div class="size">50×30mm</div>
+                                </div>
+                                <div class="print-option" onclick="selectLabelSize('medium')" data-size="medium">
+                                    <div class="icon">🏷️</div>
+                                    <div class="name">Moyenne</div>
+                                    <div class="size">70×40mm</div>
+                                </div>
+                                <div class="print-option" onclick="selectLabelSize('large')" data-size="large">
+                                    <div class="icon">📄</div>
+                                    <div class="name">Grande</div>
+                                    <div class="size">100×70mm</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:24px; display:flex; gap:12px;">
+                            <button class="btn btn-secondary" onclick="saveLot()">💾 Sauvegarder le lot</button>
+                            <button class="btn btn-primary" onclick="printLabel()">🖨️ Imprimer l'étiquette</button>
+                            <button class="btn btn-secondary" onclick="downloadQR()">📥 Télécharger QR</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>👁️ Aperçu</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="qr-container">
+                                <div id="qr-code"></div>
+                                <div style="font-size:12px; color:#666;" id="qr-lot-display">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>🏷️ Étiquette</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="label-preview" id="label-preview">
+                                <div class="label-header">
+                                    <div class="label-logo">BP</div>
+                                    <div>
+                                        <div class="label-company">Borex Poissons</div>
+                                        <div style="font-size:10px; color:#666;">Qualité & Traçabilité</div>
+                                    </div>
+                                </div>
+                                <div class="label-row">
+                                    <span class="label-key">Produit</span>
+                                    <span class="label-value" id="label-product">-</span>
+                                </div>
+                                <div class="label-row">
+                                    <span class="label-key">Lot</span>
+                                    <span class="label-value" id="label-lot">-</span>
+                                </div>
+                                <div class="label-row">
+                                    <span class="label-key">Origine</span>
+                                    <span class="label-value" id="label-origin">-</span>
+                                </div>
+                                <div class="label-row">
+                                    <span class="label-key">DLC</span>
+                                    <span class="label-value" id="label-dlc">-</span>
+                                </div>
+                                <div class="label-qr">
+                                    <div id="label-qr-small"></div>
+                                    <div style="font-size:9px; color:#999; margin-top:4px;">Scannez pour plus d'infos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Lots Management -->
+        <div id="content-lots" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📦 Gestion des Lots</h3>
+                    <div>
+                        <input type="text" placeholder="🔍 Rechercher..." id="lots-search" oninput="filterLots()" style="padding:8px 12px; background:rgba(255,255,255,0.1); border:none; border-radius:6px; color:#fff;">
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>N° Lot</th>
+                                    <th>Produit</th>
+                                    <th>Origine</th>
+                                    <th>Production</th>
+                                    <th>DLC</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lots-tbody">
+                                <!-- Lots -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Scan -->
+        <div id="content-scan" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📷 Scanner un QR Code</h3>
+                </div>
+                <div class="card-body">
+                    <div class="scan-zone" id="scan-zone">
+                        <div class="icon">📷</div>
+                        <div class="title">Scanner un QR Code produit</div>
+                        <div class="hint">Utilisez la caméra de votre appareil pour scanner le QR code</div>
+                        <button class="btn btn-primary" onclick="startScan()">📷 Démarrer la caméra</button>
+                        <div style="margin-top:16px;">
+                            <span style="color:var(--text-muted);">ou</span>
+                        </div>
+                        <div style="margin-top:16px;">
+                            <input type="text" id="manual-code" placeholder="Entrer le code manuellement..." style="padding:12px 16px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); width:300px; max-width:100%;">
+                            <button class="btn btn-secondary" onclick="manualLookup()" style="margin-left:8px;">🔍 Rechercher</button>
+                        </div>
+                    </div>
+
+                    <div id="video-container">
+                        <video id="scan-video" playsinline></video>
+                        <button onclick="stopScan()" style="margin-top:12px;" class="btn btn-secondary">✕ Arrêter</button>
+                    </div>
+
+                    <div class="result-card" id="scan-result">
+                        <div class="result-header">
+                            <div class="result-icon success" id="result-icon">✅</div>
+                            <div>
+                                <h3 id="result-title">Produit trouvé</h3>
+                                <p style="color:var(--text-muted);" id="result-subtitle">Lot vérifié avec succès</p>
+                            </div>
+                        </div>
+                        <div class="result-details" id="result-details">
+                            <!-- Détails du produit -->
+                        </div>
+                        <div style="margin-top:20px; display:flex; gap:12px;">
+                            <button class="btn btn-secondary" onclick="resetScan()">🔄 Nouveau scan</button>
+                            <button class="btn btn-primary" onclick="printFromScan()">🖨️ Imprimer fiche</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: History -->
+        <div id="content-history" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📜 Historique des scans</h3>
+                </div>
+                <div class="card-body">
+                    <div id="scan-history">
+                        <!-- Historique -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Version -->
+    <div class="version-badge">TRAKIO Traçabilité v1.0.0</div>
+
+    <script>
+        // =============================================
+        // DATA
+        // =============================================
+        let lots = JSON.parse(localStorage.getItem('trakio_lots') || '[]');
+        let scanHistory = JSON.parse(localStorage.getItem('trakio_scan_history') || '[]');
+        let qrCode = null;
+        let qrCodeSmall = null;
+        let selectedLabelSize = 'small';
+        let videoStream = null;
+
+        const productNames = {
+            'saumon-fume-ecossais': 'Saumon Fumé Écossais',
+            'saumon-fume-norvegien': 'Saumon Fumé Norvégien',
+            'truite-fumee': 'Truite Fumée',
+            'huitres-fc': 'Huîtres Fines de Claires',
+            'huitres-sc': 'Huîtres Spéciales de Claires',
+            'huitres-gillardeau': 'Huîtres Gillardeau',
+            'foie-gras': 'Foie Gras',
+            'fondue-poissons': 'Fondue de Poissons'
+        };
+
+        // =============================================
+        // INIT
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default dates
+            document.getElementById('qr-production').valueAsDate = new Date();
+            const dlc = new Date();
+            dlc.setDate(dlc.getDate() + 14);
+            document.getElementById('qr-dlc').valueAsDate = dlc;
+
+            generateLotNumber();
+            updateQRPreview();
+            loadLots();
+            loadScanHistory();
+        });
+
+        // =============================================
+        // QR CODE GENERATION
+        // =============================================
+        function generateLotNumber() {
+            const product = document.getElementById('qr-product').value;
+            const prefix = product ? product.substring(0, 2).toUpperCase() : 'XX';
+            const date = new Date();
+            const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+            const seq = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
+            
+            document.getElementById('qr-lot').value = `${prefix}-${dateStr}-${seq}`;
+            updateQRPreview();
+        }
+
+        function updateQRPreview() {
+            const product = document.getElementById('qr-product').value;
+            const lot = document.getElementById('qr-lot').value;
+            const origin = document.getElementById('qr-origin').value;
+            const fao = document.getElementById('qr-fao').value;
+            const production = document.getElementById('qr-production').value;
+            const dlc = document.getElementById('qr-dlc').value;
+            const type = document.getElementById('qr-type').value;
+            const certif = document.getElementById('qr-certif').value;
+
+            // Update label preview
+            document.getElementById('label-product').textContent = productNames[product] || '-';
+            document.getElementById('label-lot').textContent = lot || '-';
+            document.getElementById('label-origin').textContent = origin || '-';
+            document.getElementById('label-dlc').textContent = dlc ? new Date(dlc).toLocaleDateString('fr-CH') : '-';
+            document.getElementById('qr-lot-display').textContent = lot || '-';
+
+            // Generate QR data
+            const qrData = {
+                type: 'TRAKIO_PRODUCT',
+                lot: lot,
+                product: product,
+                productName: productNames[product],
+                origin: origin,
+                fao: fao,
+                production: production,
+                dlc: dlc,
+                productionType: type,
+                certification: certif,
+                company: 'Borex Poissons',
+                url: `https://borexpoissons.ch/trace/${lot}`
+            };
+
+            // Generate QR codes
+            const qrContainer = document.getElementById('qr-code');
+            const qrSmallContainer = document.getElementById('label-qr-small');
+            
+            qrContainer.innerHTML = '';
+            qrSmallContainer.innerHTML = '';
+
+            if (lot) {
+                qrCode = new QRCode(qrContainer, {
+                    text: JSON.stringify(qrData),
+                    width: 180,
+                    height: 180,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+
+                qrCodeSmall = new QRCode(qrSmallContainer, {
+                    text: JSON.stringify(qrData),
+                    width: 60,
+                    height: 60,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+            }
+        }
+
+        // =============================================
+        // LABEL SIZE
+        // =============================================
+        function selectLabelSize(size) {
+            selectedLabelSize = size;
+            document.querySelectorAll('.print-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.size === size);
+            });
+        }
+
+        // =============================================
+        // SAVE LOT
+        // =============================================
+        function saveLot() {
+            const lot = {
+                id: Date.now(),
+                lotNumber: document.getElementById('qr-lot').value,
+                product: document.getElementById('qr-product').value,
+                productName: productNames[document.getElementById('qr-product').value],
+                origin: document.getElementById('qr-origin').value,
+                fao: document.getElementById('qr-fao').value,
+                production: document.getElementById('qr-production').value,
+                dlc: document.getElementById('qr-dlc').value,
+                type: document.getElementById('qr-type').value,
+                certification: document.getElementById('qr-certif').value,
+                notes: document.getElementById('qr-notes').value,
+                createdAt: new Date().toISOString()
+            };
+
+            if (!lot.lotNumber || !lot.product) {
+                alert('Veuillez remplir le produit et le numéro de lot');
+                return;
+            }
+
+            lots.unshift(lot);
+            localStorage.setItem('trakio_lots', JSON.stringify(lots));
+            loadLots();
+            alert('✅ Lot sauvegardé!');
+        }
+
+        // =============================================
+        // LOTS TABLE
+        // =============================================
+        function loadLots() {
+            const tbody = document.getElementById('lots-tbody');
+            
+            if (lots.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">Aucun lot enregistré</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = lots.map(lot => {
+                const dlcDate = new Date(lot.dlc);
+                const today = new Date();
+                const daysLeft = Math.ceil((dlcDate - today) / (1000 * 60 * 60 * 24));
+                
+                let statusClass = 'active';
+                let statusText = `✅ ${daysLeft}j`;
+                if (daysLeft <= 0) {
+                    statusClass = 'expired';
+                    statusText = '❌ Expiré';
+                } else if (daysLeft <= 3) {
+                    statusClass = 'warning';
+                    statusText = `⚠️ ${daysLeft}j`;
+                }
+
+                return `
+                    <tr>
+                        <td><strong style="font-family:'Space Mono',monospace;">${lot.lotNumber}</strong></td>
+                        <td>${lot.productName || '-'}</td>
+                        <td>${lot.origin || '-'}</td>
+                        <td>${lot.production ? new Date(lot.production).toLocaleDateString('fr-CH') : '-'}</td>
+                        <td>${lot.dlc ? new Date(lot.dlc).toLocaleDateString('fr-CH') : '-'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button onclick="viewLot(${lot.id})" class="btn btn-secondary" style="padding:6px 10px;">👁️</button>
+                            <button onclick="printLotLabel(${lot.id})" class="btn btn-secondary" style="padding:6px 10px;">🖨️</button>
+                            <button onclick="deleteLot(${lot.id})" class="btn btn-secondary" style="padding:6px 10px;">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterLots() {
+            const search = document.getElementById('lots-search').value.toLowerCase();
+            document.querySelectorAll('#lots-tbody tr').forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(search) ? '' : 'none';
+            });
+        }
+
+        function viewLot(id) {
+            const lot = lots.find(l => l.id === id);
+            if (!lot) return;
+
+            // Remplir le formulaire avec les données du lot
+            document.getElementById('qr-product').value = lot.product;
+            document.getElementById('qr-lot').value = lot.lotNumber;
+            document.getElementById('qr-origin').value = lot.origin || '';
+            document.getElementById('qr-fao').value = lot.fao || '';
+            document.getElementById('qr-production').value = lot.production || '';
+            document.getElementById('qr-dlc').value = lot.dlc || '';
+            document.getElementById('qr-type').value = lot.type || 'sauvage';
+            document.getElementById('qr-certif').value = lot.certification || '';
+            document.getElementById('qr-notes').value = lot.notes || '';
+
+            updateQRPreview();
+            switchTab('generate');
+        }
+
+        function deleteLot(id) {
+            if (!confirm('Supprimer ce lot?')) return;
+            lots = lots.filter(l => l.id !== id);
+            localStorage.setItem('trakio_lots', JSON.stringify(lots));
+            loadLots();
+        }
+
+        function printLotLabel(id) {
+            viewLot(id);
+            setTimeout(() => printLabel(), 500);
+        }
+
+        // =============================================
+        // PRINT & DOWNLOAD
+        // =============================================
+        function printLabel() {
+            const printWindow = window.open('', '_blank');
+            const label = document.getElementById('label-preview').innerHTML;
+            
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Étiquette - ${document.getElementById('qr-lot').value}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+                        .label { width: ${selectedLabelSize === 'small' ? '50mm' : selectedLabelSize === 'medium' ? '70mm' : '100mm'}; 
+                                 border: 1px solid #ccc; padding: 10px; margin: 10px; }
+                        .label-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid #06d6a0; }
+                        .label-logo { width: 30px; height: 30px; background: linear-gradient(135deg, #06d6a0, #118ab2); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
+                        .label-company { font-size: 14px; font-weight: 700; }
+                        .label-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; font-size: 11px; }
+                        .label-key { color: #666; }
+                        .label-value { font-weight: 600; }
+                        .label-qr { text-align: center; margin-top: 8px; }
+                        .label-qr img { width: 50px; height: 50px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="label">${label}</div>
+                    <script>window.onload = function() { window.print(); }<\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        function downloadQR() {
+            const canvas = document.querySelector('#qr-code canvas');
+            if (!canvas) {
+                alert('Veuillez d\'abord générer un QR code');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.download = `QR-${document.getElementById('qr-lot').value}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // =============================================
+        // SCAN
+        // =============================================
+        async function startScan() {
+            try {
+                const video = document.getElementById('scan-video');
+                const container = document.getElementById('video-container');
+                const zone = document.getElementById('scan-zone');
+
+                videoStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+
+                video.srcObject = videoStream;
+                video.play();
+
+                zone.style.display = 'none';
+                container.style.display = 'block';
+
+                // In a real app, use a QR scanner library like jsQR
+                // For demo, we'll use manual input
+            } catch (err) {
+                console.error('Erreur caméra:', err);
+                alert('Impossible d\'accéder à la caméra. Utilisez la saisie manuelle.');
+            }
+        }
+
+        function stopScan() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+            document.getElementById('video-container').style.display = 'none';
+            document.getElementById('scan-zone').style.display = 'block';
+        }
+
+        function manualLookup() {
+            const code = document.getElementById('manual-code').value.trim();
+            if (!code) {
+                alert('Veuillez entrer un code');
+                return;
+            }
+
+            // Chercher dans les lots
+            const lot = lots.find(l => l.lotNumber === code);
+            
+            if (lot) {
+                showScanResult(lot);
+            } else {
+                // Essayer de parser comme JSON
+                try {
+                    const data = JSON.parse(code);
+                    if (data.type === 'TRAKIO_PRODUCT') {
+                        showScanResult(data);
+                    } else {
+                        alert('QR Code non reconnu');
+                    }
+                } catch {
+                    alert('Lot non trouvé: ' + code);
+                }
+            }
+        }
+
+        function showScanResult(data) {
+            stopScan();
+            
+            const resultCard = document.getElementById('scan-result');
+            resultCard.classList.add('active');
+            document.getElementById('scan-zone').style.display = 'none';
+
+            // Ajouter à l'historique
+            scanHistory.unshift({
+                id: Date.now(),
+                lot: data.lotNumber || data.lot,
+                product: data.productName,
+                date: new Date().toISOString(),
+                success: true
+            });
+            localStorage.setItem('trakio_scan_history', JSON.stringify(scanHistory.slice(0, 50)));
+
+            // Afficher les détails
+            document.getElementById('result-details').innerHTML = `
+                <div class="result-item">
+                    <div class="label">Produit</div>
+                    <div class="value">${data.productName || '-'}</div>
+                </div>
+                <div class="result-item">
+                    <div class="label">N° Lot</div>
+                    <div class="value" style="font-family:'Space Mono',monospace;">${data.lotNumber || data.lot || '-'}</div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Origine</div>
+                    <div class="value">${data.origin || '-'}</div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Zone FAO</div>
+                    <div class="value">${data.fao || '-'}</div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Production</div>
+                    <div class="value">${data.production ? new Date(data.production).toLocaleDateString('fr-CH') : '-'}</div>
+                </div>
+                <div class="result-item">
+                    <div class="label">DLC</div>
+                    <div class="value">${data.dlc ? new Date(data.dlc).toLocaleDateString('fr-CH') : '-'}</div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Type</div>
+                    <div class="value">${data.type === 'elevage' ? '🏭 Élevage' : '🎣 Sauvage'}</div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Certification</div>
+                    <div class="value">${data.certification ? data.certification.toUpperCase() : 'Aucune'}</div>
+                </div>
+            `;
+        }
+
+        function resetScan() {
+            document.getElementById('scan-result').classList.remove('active');
+            document.getElementById('scan-zone').style.display = 'block';
+            document.getElementById('manual-code').value = '';
+        }
+
+        function printFromScan() {
+            alert('Impression de la fiche traçabilité...');
+        }
+
+        // =============================================
+        // SCAN HISTORY
+        // =============================================
+        function loadScanHistory() {
+            const container = document.getElementById('scan-history');
+            
+            if (scanHistory.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">📜</div><div class="title">Aucun historique</div><div>Les scans effectués apparaîtront ici</div></div>';
+                return;
+            }
+
+            container.innerHTML = scanHistory.map(h => `
+                <div style="display:flex; gap:16px; padding:16px; background:var(--bg-primary); border-radius:8px; margin-bottom:12px;">
+                    <div style="width:44px; height:44px; border-radius:10px; background:rgba(6, 214, 160, 0.2); display:flex; align-items:center; justify-content:center; font-size:20px;">📷</div>
+                    <div style="flex:1;">
+                        <div style="font-weight:600;">${h.product || 'Produit'}</div>
+                        <div style="font-size:13px; color:var(--text-muted);">Lot: ${h.lot}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:12px; color:var(--text-muted);">${new Date(h.date).toLocaleString('fr-CH')}</div>
+                        <div style="font-size:11px; color:var(--accent-primary);">✅ Vérifié</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // =============================================
+        // TABS
+        // =============================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+
+            ['generate', 'lots', 'scan', 'history'].forEach(t => {
+                document.getElementById('content-' + t).style.display = t === tab ? 'block' : 'none';
+            });
+
+            if (tab === 'lots') loadLots();
+            if (tab === 'history') loadScanHistory();
+        }
+    </script>
+</body>
+</html>
