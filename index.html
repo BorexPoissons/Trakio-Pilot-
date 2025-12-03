@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v4.0.3 - Gestion Complète</title>
+    <title>TRAKIO v4.0.5 - Gestion Complète</title>
     <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#06d6a0">
@@ -24,6 +24,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script>
         // Configurer PDF.js worker
         if (typeof pdfjsLib !== 'undefined') {
@@ -4429,6 +4432,88 @@
                             </div>
                         </div>
 
+                        <!-- 🔥 Firebase - Sync Temps Réel -->
+                        <div class="card" style="margin-top:20px; border:2px solid #ff9500;" data-permission="settings:firebase">
+                            <div class="card-header" style="background:rgba(255,149,0,0.15);">
+                                <h3 class="card-title" style="display:flex; align-items:center; gap:10px;">
+                                    <span style="font-size:24px;">🔥</span>
+                                    Firebase - Sync Temps Réel
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <!-- Status connexion -->
+                                <div id="firebase-status" style="padding:12px 16px; border-radius:10px; margin-bottom:16px; display:flex; align-items:center; gap:10px; background:var(--bg-primary);">
+                                    <span id="firebase-status-icon" style="font-size:20px;">⚪</span>
+                                    <div style="flex:1;">
+                                        <div id="firebase-status-text" style="font-weight:600;">Non connecté</div>
+                                        <div id="firebase-status-detail" style="font-size:12px; color:var(--text-muted);">Cliquez sur "Connecter" pour activer</div>
+                                    </div>
+                                </div>
+
+                                <!-- Bouton Connexion -->
+                                <button onclick="initFirebase()" class="btn" style="width:100%; padding:16px; background:linear-gradient(135deg, #ff9500, #ff5e3a); color:#fff; border:none; font-weight:700; border-radius:10px; font-size:15px; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:16px;">
+                                    🔥 Connecter à Firebase
+                                </button>
+
+                                <!-- Toggle synchronisation temps réel -->
+                                <div class="setting-row" style="padding:12px 0; border-top:1px solid var(--border-color); border-bottom:1px solid var(--border-color); margin-bottom:16px;">
+                                    <div class="setting-info">
+                                        <h4>⚡ Sync temps réel</h4>
+                                        <p>Les données se synchronisent instantanément entre tous les appareils</p>
+                                    </div>
+                                    <div class="toggle" id="firebase-auto-sync" onclick="toggleFirebaseAutoSync()"></div>
+                                </div>
+
+                                <!-- Avantages Firebase -->
+                                <div style="padding:14px; background:linear-gradient(135deg, rgba(255,149,0,0.15), rgba(255,94,58,0.1)); border-radius:10px; margin-bottom:16px; border-left:4px solid #ff9500;">
+                                    <div style="font-weight:700; color:#ff9500; margin-bottom:8px;">⚡ Avantages Firebase</div>
+                                    <div style="font-size:12px; color:var(--text-secondary); line-height:1.8;">
+                                        ✅ Sync <strong>instantanée</strong> (pas d'attente 5 min)<br>
+                                        ✅ Fonctionne <strong>hors-ligne</strong> (cache local)<br>
+                                        ✅ <strong>Multi-utilisateurs</strong> sans conflits<br>
+                                        ✅ Serveur Suisse 🇨🇭 (europe-west6)
+                                    </div>
+                                </div>
+
+                                <!-- Boutons actions -->
+                                <div style="display:flex; flex-direction:column; gap:10px;">
+                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                                        <button onclick="syncFromFirebase('all')" class="btn" style="padding:12px; background:rgba(255,149,0,0.2); color:#ff9500; border:1px solid #ff9500; font-weight:600; border-radius:10px;">
+                                            📥 Récupérer
+                                        </button>
+                                        <button onclick="syncToFirebase('all')" class="btn" style="padding:12px; background:#ff9500; color:#fff; border:none; font-weight:600; border-radius:10px;">
+                                            📤 Envoyer
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Sync sélective -->
+                                <div style="margin-top:16px; padding:16px; background:var(--bg-primary); border-radius:10px;">
+                                    <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px; text-transform:uppercase;">Synchronisation sélective</div>
+                                    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px;">
+                                        <button onclick="syncToFirebase('clients')" class="btn btn-secondary" style="padding:10px; font-size:12px;">
+                                            👥 Clients
+                                        </button>
+                                        <button onclick="syncToFirebase('shopify')" class="btn btn-secondary" style="padding:10px; font-size:12px;">
+                                            🛍️ Shopify
+                                        </button>
+                                        <button onclick="syncToFirebase('myfish')" class="btn btn-secondary" style="padding:10px; font-size:12px;">
+                                            🐟 MyFish
+                                        </button>
+                                        <button onclick="syncToFirebase('orders')" class="btn btn-secondary" style="padding:10px; font-size:12px;">
+                                            📦 B2B
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Info projet -->
+                                <div style="margin-top:16px; padding:12px; background:var(--bg-primary); border-radius:8px; font-size:11px; color:var(--text-muted);">
+                                    <strong>Projet:</strong> trakio-pilot-6e97a<br>
+                                    <strong>Région:</strong> europe-west6 (Zürich 🇨🇭)
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Gestion des utilisateurs -->
                         <div class="card" style="margin-top:20px;" id="users-management-card">
                             <div class="card-header">
@@ -4920,20 +5005,32 @@
                 });
             });
 
-            // Recherche dans les articles
-            const articles = QOData?.articles || [];
-            const matchedArticles = articles.filter(a =>
-                (a.code && a.code.toLowerCase().includes(q)) ||
-                (a.name && a.name.toLowerCase().includes(q)) ||
-                (a.category && a.category.toLowerCase().includes(q))
-            ).slice(0, 5);
+            // Recherche dans les articles (plusieurs sources)
+            const qoArticles = QOData?.articles || [];
+            const qoProducts = QOData?.products || [];
+            const artArticles = ArticlesData?.articles || [];
+            const allArticles = [...qoArticles, ...qoProducts, ...artArticles];
+            
+            // Dédoublonner par id ou code
+            const seenArticles = new Set();
+            const matchedArticles = allArticles.filter(a => {
+                const key = a.id || a.code || a.name;
+                if (seenArticles.has(key)) return false;
+                seenArticles.add(key);
+                
+                return (a.code && a.code.toLowerCase().includes(q)) ||
+                       (a.name && a.name.toLowerCase().includes(q)) ||
+                       (a.category && a.category.toLowerCase().includes(q)) ||
+                       (a.ean && a.ean.includes(q));
+            }).slice(0, 8);
 
             matchedArticles.forEach(a => {
+                const price = a.priceB2C || a.price || a.prixVente || 0;
                 results.push({
                     type: 'article',
                     icon: '🏷️',
                     title: a.name || a.code,
-                    subtitle: `${a.code || '-'} • ${a.category || '-'} • ${a.priceB2C ? a.priceB2C.toFixed(2) + ' CHF' : '-'}`,
+                    subtitle: `${a.code || '-'} • ${a.category || '-'} • ${price > 0 ? price.toFixed(2) + ' CHF' : '-'}`,
                     action: () => { window.location.href = 'articles.html'; }
                 });
             });
@@ -4942,35 +5039,96 @@
             const mfOrders = JSON.parse(localStorage.getItem('mf_orders') || '[]');
             const matchedOrders = mfOrders.filter(o =>
                 (o.orderNumber && o.orderNumber.toLowerCase().includes(q)) ||
+                (o.id && o.id.toString().includes(q)) ||
                 (o.clientName && o.clientName.toLowerCase().includes(q)) ||
+                (o.client && o.client.toLowerCase().includes(q)) ||
+                (o.phone && o.phone.includes(q)) ||
                 (o.storeName && o.storeName.toLowerCase().includes(q))
             ).slice(0, 5);
 
             matchedOrders.forEach(o => {
                 results.push({
-                    type: 'order',
+                    type: 'myfish',
                     icon: '🐟',
-                    title: `#${o.orderNumber}`,
-                    subtitle: `${o.clientName || '-'} • ${o.storeName || '-'} • ${o.total ? o.total.toFixed(2) + ' CHF' : '-'}`,
-                    action: () => { window.location.href='myfish.html'; }
+                    title: `${o.orderNumber || o.id || 'Cmd'} - ${o.clientName || o.client || 'Client'}`,
+                    subtitle: `${o.storeName || 'MyFish'} • ${o.total ? o.total.toFixed(2) + ' CHF' : '-'} • ${o.phone || ''}`,
+                    action: () => { 
+                        navigateTo('dashboard');
+                        setTimeout(() => {
+                            filterDashOrders('myfish');
+                        }, 200);
+                    }
                 });
             });
 
-            // Recherche dans les commandes Shopify
-            const shopifyOrders = ShopifyData?.orders || [];
-            const matchedShopify = shopifyOrders.filter(o =>
-                (o.name && o.name.toLowerCase().includes(q)) ||
-                (o.customer && o.customer.toLowerCase().includes(q)) ||
-                (o.email && o.email.toLowerCase().includes(q))
+            // Recherche dans les commandes TRAKIO B2B
+            const trakioOrders = QOData?.orders || [];
+            const matchedTrakio = trakioOrders.filter(o =>
+                (o.id && o.id.toString().toLowerCase().includes(q)) ||
+                (o.clientName && o.clientName.toLowerCase().includes(q)) ||
+                (o.client && o.client.toLowerCase().includes(q)) ||
+                (o.clientPhone && o.clientPhone.includes(q))
             ).slice(0, 5);
 
+            matchedTrakio.forEach(o => {
+                results.push({
+                    type: 'trakio',
+                    icon: '📦',
+                    title: `${o.id || 'Cmd'} - ${o.clientName || o.client || 'Client'}`,
+                    subtitle: `B2B • ${o.total ? o.total.toFixed(2) + ' CHF' : '-'} • ${o.status || 'En cours'}`,
+                    action: () => { 
+                        navigateTo('dashboard');
+                        setTimeout(() => {
+                            filterDashOrders('b2b');
+                        }, 200);
+                    }
+                });
+            });
+
+            // Recherche dans les commandes Shopify - UTILISER LES BONS CHAMPS
+            const shopifyOrders = JSON.parse(localStorage.getItem('shopify_orders') || '[]');
+            const matchedShopify = shopifyOrders.filter(o => {
+                const clientName = (o.billingName || o.shippingName || '').toLowerCase();
+                const orderName = (o.name || '').toLowerCase();
+                const email = (o.email || '').toLowerCase();
+                const phone = (o.billingPhone || o.shippingPhone || '');
+                const city = (o.shippingCity || o.billingCity || '').toLowerCase();
+                const items = (o.items || []).map(i => i.name || '').join(' ').toLowerCase();
+                
+                return clientName.includes(q) ||
+                       orderName.includes(q) ||
+                       email.includes(q) ||
+                       phone.includes(q) ||
+                       city.includes(q) ||
+                       items.includes(q);
+            }).slice(0, 8);
+
             matchedShopify.forEach(o => {
+                const clientName = o.billingName || o.shippingName || 'Client';
+                const pickupInfo = o.pickupDate ? `📅 ${o.pickupDate}` : '';
+                const location = o.pickupLocation ? (o.pickupLocation.includes('Labo') ? '🏭' : '🏪') : '';
                 results.push({
                     type: 'shopify',
-                    icon: '🛒',
-                    title: o.name || '-',
-                    subtitle: `${o.customer || '-'} • ${o.total ? o.total + ' CHF' : '-'}`,
-                    action: () => { navigateTo('shopify'); }
+                    icon: '🛍️',
+                    title: `${o.name} - ${clientName}`,
+                    subtitle: `${pickupInfo} ${location} • ${o.total ? o.total.toFixed(2) + ' CHF' : '-'} • ${o.email || ''}`,
+                    action: () => { 
+                        // Ouvrir le détail de la commande
+                        navigateTo('dashboard');
+                        setTimeout(() => {
+                            // Charger les commandes et filtrer sur Shopify
+                            filterDashOrders('shopify');
+                            // Essayer d'ouvrir le détail
+                            if (typeof loadDashboardOrders === 'function') {
+                                loadDashboardOrders();
+                                setTimeout(() => {
+                                    if (typeof openOrderDetail === 'function') {
+                                        openOrderDetail('shopify', o.name);
+                                    }
+                                }, 300);
+                            }
+                        }, 200);
+                    }
                 });
             });
 
@@ -5059,8 +5217,9 @@
             const typeLabels = {
                 'client': '👥 Clients',
                 'article': '🏷️ Articles',
-                'order': '🐟 Commandes MyFish',
-                'shopify': '🛒 Commandes Shopify',
+                'shopify': '🛍️ Commandes Shopify',
+                'myfish': '🐟 Commandes MyFish',
+                'trakio': '📦 Commandes B2B',
                 'supplier': '💰 Prix Fournisseurs',
                 'module': '📍 Navigation'
             };
@@ -6783,9 +6942,305 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '4.0.3';
+        const APP_VERSION = '4.0.5';
         const APP_VERSION_DATE = '2025-12-03';
         
+        // ═══════════════════════════════════════════════════════════════
+        // 🔥 FIREBASE CONFIGURATION
+        // ═══════════════════════════════════════════════════════════════
+        const firebaseConfig = {
+            apiKey: "AIzaSyCdVQrjMtezIG3eBxsqO2ViDi_tRbY8hdE",
+            authDomain: "trakio-pilot-6e97a.firebaseapp.com",
+            projectId: "trakio-pilot-6e97a",
+            storageBucket: "trakio-pilot-6e97a.firebasestorage.app",
+            messagingSenderId: "256841216130",
+            appId: "1:256841216130:web:4ea5a967ba39c120d8849b",
+            measurementId: "G-MZFC1GD1ZN"
+        };
+
+        // État Firebase
+        const FirebaseState = {
+            initialized: false,
+            connected: false,
+            db: null,
+            autoSync: false,
+            lastSync: null,
+            syncInProgress: false,
+            listeners: []
+        };
+
+        // Initialiser Firebase
+        function initFirebase() {
+            try {
+                if (!firebase) {
+                    console.warn('⚠️ Firebase SDK non chargé');
+                    return false;
+                }
+                
+                if (!FirebaseState.initialized) {
+                    firebase.initializeApp(firebaseConfig);
+                    FirebaseState.db = firebase.firestore();
+                    FirebaseState.initialized = true;
+                    console.log('🔥 Firebase initialisé');
+                }
+                
+                // Tester la connexion
+                FirebaseState.db.collection('_test').doc('ping').set({
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    FirebaseState.connected = true;
+                    updateFirebaseStatus('connected');
+                    console.log('✅ Firebase connecté');
+                    
+                    // Charger les préférences
+                    const savedAutoSync = localStorage.getItem('firebase_auto_sync');
+                    FirebaseState.autoSync = savedAutoSync === 'true';
+                    
+                    // Démarrer les listeners si autoSync activé
+                    if (FirebaseState.autoSync) {
+                        startFirebaseListeners();
+                    }
+                }).catch(err => {
+                    console.error('❌ Firebase erreur connexion:', err);
+                    FirebaseState.connected = false;
+                    updateFirebaseStatus('error');
+                });
+                
+                return true;
+            } catch (err) {
+                console.error('❌ Firebase init error:', err);
+                return false;
+            }
+        }
+
+        // Mettre à jour le statut visuel
+        function updateFirebaseStatus(status) {
+            const statusEl = document.getElementById('firebase-status');
+            const statusIcon = document.getElementById('firebase-status-icon');
+            const statusText = document.getElementById('firebase-status-text');
+            const statusDetail = document.getElementById('firebase-status-detail');
+            
+            if (!statusEl) return;
+            
+            if (status === 'connected') {
+                statusIcon.textContent = '🟢';
+                statusText.textContent = 'Connecté';
+                statusDetail.textContent = 'Firebase Firestore actif';
+                statusEl.style.background = 'rgba(6,214,160,0.15)';
+            } else if (status === 'syncing') {
+                statusIcon.textContent = '🔄';
+                statusText.textContent = 'Synchronisation...';
+                statusDetail.textContent = 'Envoi des données en cours';
+                statusEl.style.background = 'rgba(17,138,178,0.15)';
+            } else if (status === 'error') {
+                statusIcon.textContent = '🔴';
+                statusText.textContent = 'Erreur';
+                statusDetail.textContent = 'Impossible de se connecter';
+                statusEl.style.background = 'rgba(239,71,111,0.15)';
+            } else {
+                statusIcon.textContent = '⚪';
+                statusText.textContent = 'Non connecté';
+                statusDetail.textContent = 'Cliquez sur "Connecter" pour activer';
+                statusEl.style.background = 'var(--bg-primary)';
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // 🔥 FIREBASE SYNC FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════
+        
+        async function syncToFirebase(dataType = 'all') {
+            if (!FirebaseState.connected || !FirebaseState.db) {
+                console.warn('⚠️ Firebase non connecté');
+                return false;
+            }
+            
+            if (FirebaseState.syncInProgress) return false;
+            FirebaseState.syncInProgress = true;
+            updateFirebaseStatus('syncing');
+            
+            const db = FirebaseState.db;
+            const batch = db.batch();
+            
+            try {
+                // Sync Clients
+                if (dataType === 'all' || dataType === 'clients') {
+                    const clients = QOData?.clients || [];
+                    for (const client of clients) {
+                        const ref = db.collection('clients').doc(String(client.id));
+                        batch.set(ref, { ...client, updatedAt: new Date().toISOString() }, { merge: true });
+                    }
+                }
+                
+                // Sync Commandes B2B
+                if (dataType === 'all' || dataType === 'orders') {
+                    const orders = QOData?.orders || [];
+                    for (const order of orders) {
+                        const ref = db.collection('orders').doc('b2b').collection('items').doc(String(order.id));
+                        batch.set(ref, { ...order, updatedAt: new Date().toISOString() }, { merge: true });
+                    }
+                }
+                
+                // Sync Commandes Shopify
+                if (dataType === 'all' || dataType === 'shopify') {
+                    const shopifyOrders = JSON.parse(localStorage.getItem('shopify_orders') || '[]');
+                    for (const order of shopifyOrders) {
+                        const orderId = order.name || order.id || Date.now();
+                        const ref = db.collection('orders').doc('shopify').collection('items').doc(String(orderId));
+                        batch.set(ref, { ...order, updatedAt: new Date().toISOString() }, { merge: true });
+                    }
+                }
+                
+                // Sync Commandes MyFish
+                if (dataType === 'all' || dataType === 'myfish') {
+                    const mfOrders = JSON.parse(localStorage.getItem('mf_orders') || '[]');
+                    for (const order of mfOrders) {
+                        const ref = db.collection('orders').doc('myfish').collection('items').doc(String(order.id));
+                        batch.set(ref, { ...order, updatedAt: new Date().toISOString() }, { merge: true });
+                    }
+                }
+                
+                // Sync Articles
+                if (dataType === 'all' || dataType === 'articles') {
+                    const articles = ArticlesData?.articles || [];
+                    for (const article of articles) {
+                        const ref = db.collection('articles').doc(String(article.id));
+                        batch.set(ref, { ...article, updatedAt: new Date().toISOString() }, { merge: true });
+                    }
+                }
+                
+                // Commit batch
+                await batch.commit();
+                
+                FirebaseState.lastSync = new Date();
+                updateFirebaseStatus('connected');
+                showNotification('✅ Données synchronisées avec Firebase', 'success');
+                
+                // Sauvegarder timestamp
+                localStorage.setItem('firebase_last_sync', FirebaseState.lastSync.toISOString());
+                
+                return true;
+            } catch (err) {
+                console.error('❌ Firebase sync error:', err);
+                updateFirebaseStatus('error');
+                showNotification('❌ Erreur synchronisation Firebase', 'error');
+                return false;
+            } finally {
+                FirebaseState.syncInProgress = false;
+            }
+        }
+
+        async function syncFromFirebase(dataType = 'all') {
+            if (!FirebaseState.connected || !FirebaseState.db) {
+                console.warn('⚠️ Firebase non connecté');
+                return false;
+            }
+            
+            if (FirebaseState.syncInProgress) return false;
+            FirebaseState.syncInProgress = true;
+            updateFirebaseStatus('syncing');
+            
+            const db = FirebaseState.db;
+            
+            try {
+                // Sync Clients
+                if (dataType === 'all' || dataType === 'clients') {
+                    const snapshot = await db.collection('clients').get();
+                    const remoteClients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    if (remoteClients.length > 0) {
+                        QOData.clients = mergeData(QOData.clients || [], remoteClients, 'id');
+                        saveQOData('clients');
+                    }
+                }
+                
+                // Sync Commandes Shopify
+                if (dataType === 'all' || dataType === 'shopify') {
+                    const snapshot = await db.collection('orders').doc('shopify').collection('items').get();
+                    const remoteOrders = snapshot.docs.map(doc => ({ ...doc.data() }));
+                    if (remoteOrders.length > 0) {
+                        const localOrders = JSON.parse(localStorage.getItem('shopify_orders') || '[]');
+                        const merged = mergeData(localOrders, remoteOrders, 'name');
+                        localStorage.setItem('shopify_orders', JSON.stringify(merged));
+                    }
+                }
+                
+                // Sync Commandes MyFish
+                if (dataType === 'all' || dataType === 'myfish') {
+                    const snapshot = await db.collection('orders').doc('myfish').collection('items').get();
+                    const remoteOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    if (remoteOrders.length > 0) {
+                        const localOrders = JSON.parse(localStorage.getItem('mf_orders') || '[]');
+                        const merged = mergeData(localOrders, remoteOrders, 'id');
+                        localStorage.setItem('mf_orders', JSON.stringify(merged));
+                    }
+                }
+                
+                FirebaseState.lastSync = new Date();
+                updateFirebaseStatus('connected');
+                showNotification('📥 Données récupérées depuis Firebase', 'success');
+                
+                // Rafraîchir l'interface
+                if (typeof loadNewDashboard === 'function') loadNewDashboard();
+                
+                return true;
+            } catch (err) {
+                console.error('❌ Firebase download error:', err);
+                updateFirebaseStatus('error');
+                return false;
+            } finally {
+                FirebaseState.syncInProgress = false;
+            }
+        }
+
+        // Listeners temps réel
+        function startFirebaseListeners() {
+            if (!FirebaseState.connected || !FirebaseState.db) return;
+            
+            const db = FirebaseState.db;
+            
+            // Listener sur les commandes Shopify
+            const shopifyListener = db.collection('orders').doc('shopify').collection('items')
+                .onSnapshot(snapshot => {
+                    if (snapshot.metadata.hasPendingWrites) return; // Ignorer les changements locaux
+                    
+                    const remoteOrders = snapshot.docs.map(doc => ({ ...doc.data() }));
+                    const localOrders = JSON.parse(localStorage.getItem('shopify_orders') || '[]');
+                    const merged = mergeData(localOrders, remoteOrders, 'name');
+                    localStorage.setItem('shopify_orders', JSON.stringify(merged));
+                    
+                    // Rafraîchir si sur le dashboard
+                    if (typeof loadNewDashboard === 'function') loadNewDashboard();
+                    console.log('🔄 Shopify sync temps réel');
+                });
+            
+            FirebaseState.listeners.push(shopifyListener);
+            console.log('👂 Firebase listeners actifs');
+        }
+
+        function stopFirebaseListeners() {
+            FirebaseState.listeners.forEach(unsubscribe => unsubscribe());
+            FirebaseState.listeners = [];
+            console.log('🔇 Firebase listeners arrêtés');
+        }
+
+        function toggleFirebaseAutoSync() {
+            FirebaseState.autoSync = !FirebaseState.autoSync;
+            localStorage.setItem('firebase_auto_sync', FirebaseState.autoSync);
+            
+            const toggle = document.getElementById('firebase-auto-sync');
+            if (toggle) {
+                toggle.classList.toggle('active', FirebaseState.autoSync);
+            }
+            
+            if (FirebaseState.autoSync) {
+                startFirebaseListeners();
+                showNotification('🔄 Sync temps réel activée', 'success');
+            } else {
+                stopFirebaseListeners();
+                showNotification('⏸️ Sync temps réel désactivée', 'info');
+            }
+        }
+
         // ===== UTILISATEURS PAR DÉFAUT =====
         (function initDefaultUsers() {
             let users = JSON.parse(localStorage.getItem('trakio_users') || '[]');
@@ -6827,6 +7282,22 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '4.0.5': [
+                '🔥 Firebase intégré - Sync temps réel',
+                '⚡ Synchronisation instantanée (plus d\'attente)',
+                '📱 Fonctionne hors-ligne avec cache local',
+                '👥 Multi-utilisateurs sans conflits',
+                '🇨🇭 Serveur Zürich (europe-west6)',
+                '🎛️ Interface Firebase dans Paramètres'
+            ],
+            '4.0.4': [
+                '🔍 Recherche globale améliorée',
+                '🛍️ Recherche Shopify: nom, prénom, n° cmd, email, articles',
+                '🐟 Recherche MyFish: client, téléphone, n° cmd',
+                '📦 Recherche B2B: client, n° cmd',
+                '🏷️ Recherche articles multi-sources',
+                '➡️ Clic sur résultat ouvre le détail'
+            ],
             '4.0.3': [
                 '👤 Shopify: Affichage Nom + Prénom du client',
                 '📅 Shopify: Date de RETRAIT (pas date de commande)',
@@ -8025,6 +8496,13 @@
             
             // Initialiser la connexion Dropbox (refresh auto si nécessaire)
             setTimeout(() => initDropboxConnection(), 500);
+            
+            // Initialiser Firebase
+            setTimeout(() => {
+                if (typeof initFirebase === 'function') {
+                    initFirebase();
+                }
+            }, 1000);
             
             initUsersSystem();
             // Vérifier si une mise à jour est disponible
