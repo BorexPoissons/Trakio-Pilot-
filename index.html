@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v4.0.2 - Gestion Complète</title>
+    <title>TRAKIO v4.0.3 - Gestion Complète</title>
     <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#06d6a0">
@@ -6783,7 +6783,7 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '4.0.2';
+        const APP_VERSION = '4.0.3';
         const APP_VERSION_DATE = '2025-12-03';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
@@ -6827,6 +6827,14 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '4.0.3': [
+                '👤 Shopify: Affichage Nom + Prénom du client',
+                '📅 Shopify: Date de RETRAIT (pas date de commande)',
+                '🏭 Shopify: Lieu de retrait (Labo/Magasin/Livraison)',
+                '📦 Shopify: Liste des articles dans le détail',
+                '📝 Shopify: Notes de commande',
+                '🔢 N° CMD visible en couleur (Web# ...)'
+            ],
             '4.0.2': [
                 '🛍️ Shopify: Mapping robuste des champs (toutes variantes)',
                 '📋 Affichage amélioré: email, ville, articles',
@@ -18344,104 +18352,43 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                 });
             });
 
-            // 2. Shopify orders - Mapping robuste pour tous les formats d'export
+            // 2. Shopify orders - Utiliser les champs transformés par l'import CSV
             const shopifyOrders = JSON.parse(localStorage.getItem('shopify_orders') || '[]');
             shopifyOrders.forEach(o => {
-                // Status - plusieurs variantes
-                const status = (
-                    o['Fulfillment Status'] || 
-                    o['fulfillment_status'] || 
-                    o['Statut de traitement'] ||
-                    o['statut'] ||
-                    ''
-                ).toLowerCase();
-                if (status === 'fulfilled' || status === 'completed' || status === 'traité') return;
+                // Status
+                const status = (o.fulfillmentStatus || '').toLowerCase();
+                if (status === 'fulfilled' || status === 'completed') return;
                 
-                // Nom du client - plusieurs variantes
-                const clientName = 
-                    o['Billing Name'] || 
-                    o['Shipping Name'] || 
-                    o['billing_name'] ||
-                    o['shipping_name'] ||
-                    o['Nom de facturation'] ||
-                    o['Nom de livraison'] ||
-                    o['customer_name'] ||
-                    o['Customer'] ||
-                    o['client'] ||
-                    (o['Billing First Name'] && o['Billing Last Name'] ? o['Billing First Name'] + ' ' + o['Billing Last Name'] : '') ||
-                    (o['Shipping First Name'] && o['Shipping Last Name'] ? o['Shipping First Name'] + ' ' + o['Shipping Last Name'] : '') ||
-                    'Client Shopify';
+                // Nom du client (priorité billing puis shipping)
+                const clientName = o.billingName || o.shippingName || 'Client Shopify';
                 
                 // Téléphone
-                const phone = 
-                    o['Billing Phone'] || 
-                    o['Shipping Phone'] || 
-                    o['billing_phone'] ||
-                    o['shipping_phone'] ||
-                    o['Téléphone de facturation'] ||
-                    o['Téléphone de livraison'] ||
-                    o['phone'] ||
-                    o['Phone'] ||
-                    '';
+                const phone = o.billingPhone || o.shippingPhone || '';
                 
                 // Email
-                const email = 
-                    o['Email'] || 
-                    o['email'] || 
-                    o['E-mail'] ||
-                    o['customer_email'] ||
-                    '';
+                const email = o.email || '';
                 
-                // Date de commande
-                const createdAt = 
-                    o['Created at'] || 
-                    o['created_at'] || 
-                    o['Créée le'] ||
-                    o['Date'] ||
-                    o['date'] ||
-                    o['Paid at'] ||
-                    new Date().toISOString();
+                // Date de RETRAIT (pas date de création!)
+                const pickupDate = o.pickupDate || '';
+                const pickupTime = o.pickupTime || '';
+                const pickupLocation = o.pickupLocation || '';
+                
+                // Date de création (backup)
+                const createdAt = o.createdAt || new Date().toISOString();
                 
                 // Total
-                const total = parseFloat(
-                    o['Total'] || 
-                    o['total'] || 
-                    o['total_price'] ||
-                    o['Montant total'] ||
-                    o['Subtotal'] ||
-                    o['subtotal'] ||
-                    0
-                );
+                const total = parseFloat(o.total) || 0;
                 
                 // Numéro de commande
-                const orderId = 
-                    o['Name'] || 
-                    o['name'] ||
-                    o['Order'] ||
-                    o['order'] ||
-                    o['Numéro'] ||
-                    o['id'] ||
-                    '#' + (shopifyOrders.indexOf(o) + 1);
+                const orderId = o.name || '#' + (shopifyOrders.indexOf(o) + 1);
                 
                 // Adresse
-                const address = 
-                    o['Shipping Address1'] || 
-                    o['shipping_address1'] ||
-                    o['Adresse de livraison'] ||
-                    o['Billing Address1'] ||
-                    '';
-                
-                // Ville
-                const city = 
-                    o['Shipping City'] || 
-                    o['shipping_city'] ||
-                    o['Ville de livraison'] ||
-                    o['Billing City'] ||
-                    '';
+                const address = o.shippingAddress || o.billingAddress || '';
+                const city = o.shippingCity || o.billingCity || '';
                 
                 // Articles de la commande
-                const lineItems = o['Lineitem name'] || o['lineitem_name'] || o['Articles'] || '';
-                const lineQty = o['Lineitem quantity'] || o['lineitem_quantity'] || o['Quantité'] || '';
+                const itemsList = o.items || [];
+                const lineItems = itemsList.map(item => `${item.name} x${item.quantity}`).join(', ');
                 
                 allDashOrders.push({
                     id: orderId,
@@ -18451,14 +18398,20 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                     phone: phone,
                     email: email,
                     date: createdAt,
-                    time: extractTime(createdAt),
+                    pickupDate: pickupDate,
+                    pickupTime: pickupTime,
+                    pickupLocation: pickupLocation,
+                    time: pickupTime || extractTime(createdAt),
                     total: total,
                     status: status || 'pending',
+                    financialStatus: o.financialStatus || '',
                     address: address,
                     city: city,
                     lineItems: lineItems,
-                    lineQty: lineQty,
-                    rawData: o // Garder les données brutes pour debug
+                    items: itemsList,
+                    notes: o.notes || '',
+                    isPickup: o.isPickup || false,
+                    rawData: o
                 });
             });
 
@@ -18542,14 +18495,30 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                     'new': { bg: 'rgba(255,193,7,0.15)', color: '#ffc107', text: 'Nouvelle' },
                     'preparing': { bg: 'rgba(17,138,178,0.15)', color: '#118ab2', text: 'En prépa' },
                     'ready': { bg: 'rgba(6,214,160,0.15)', color: '#06d6a0', text: 'Prête' },
-                    'unfulfilled': { bg: 'rgba(255,193,7,0.15)', color: '#ffc107', text: 'À préparer' }
+                    'unfulfilled': { bg: 'rgba(255,193,7,0.15)', color: '#ffc107', text: 'À préparer' },
+                    'paid': { bg: 'rgba(6,214,160,0.15)', color: '#06d6a0', text: 'Payée' }
                 };
                 const statusStyle = statusColors[order.status] || statusColors['pending'];
 
-                // Format date
-                const orderDate = new Date(order.date);
-                const isToday = orderDate.toDateString() === new Date().toDateString();
-                const dateDisplay = isToday ? 'Aujourd\'hui' : orderDate.toLocaleDateString('fr-CH', { day: '2-digit', month: 'short' });
+                // Format date - Utiliser pickupDate pour Shopify si disponible
+                let dateDisplay = '';
+                let timeDisplay = '';
+                
+                if (order.source === 'shopify' && order.pickupDate) {
+                    // Date de retrait Shopify
+                    dateDisplay = order.pickupDate;
+                    timeDisplay = order.pickupTime || '';
+                } else {
+                    // Date classique
+                    const orderDate = new Date(order.date);
+                    const isToday = orderDate.toDateString() === new Date().toDateString();
+                    dateDisplay = isToday ? 'Aujourd\'hui' : orderDate.toLocaleDateString('fr-CH', { day: '2-digit', month: 'short' });
+                    timeDisplay = order.time || '';
+                }
+
+                // Lieu de retrait pour Shopify
+                const locationDisplay = order.pickupLocation || '';
+                const locationIcon = locationDisplay.includes('Laboratoire') ? '🏭' : (locationDisplay.includes('Magasin') ? '🏪' : (locationDisplay.includes('Livraison') ? '🚚' : ''));
 
                 // WhatsApp button (for all B2C sources)
                 const isB2C = order.type === 'B2C' || order.source === 'shopify' || order.source === 'myfish';
@@ -18576,20 +18545,26 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                                 <span style="color:${sourceColor}; font-weight:600;">${order.id}</span>
                                 ${order.email ? `<span>✉️ ${order.email}</span>` : ''}
                                 ${order.phone ? `<span>📱 ${order.phone}</span>` : ''}
-                                ${order.city ? `<span>📍 ${order.city}</span>` : ''}
                             </div>
                             ${order.lineItems ? `<div style="font-size:11px; color:var(--text-muted); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📦 ${order.lineItems}</div>` : ''}
                         </div>
+                        
+                        <!-- Lieu de retrait (Shopify) -->
+                        ${locationDisplay ? `
+                            <div style="padding:6px 12px; background:rgba(17,138,178,0.15); color:#118ab2; border-radius:8px; font-size:11px; font-weight:600; text-align:center; max-width:120px;">
+                                ${locationIcon} ${locationDisplay.replace('Laboratoire de Coinsins', 'Labo').replace('Magasin de Nyon', 'Magasin')}
+                            </div>
+                        ` : ''}
                         
                         <!-- Type Badge -->
                         <div style="padding:4px 10px; background:${typeBg}; color:${typeColor}; border-radius:6px; font-size:11px; font-weight:600;">
                             ${typeLabel}
                         </div>
                         
-                        <!-- Date/Time -->
-                        <div style="text-align:right; min-width:80px;">
-                            <div style="font-size:13px; font-weight:600;">${dateDisplay}</div>
-                            <div style="font-size:11px; color:var(--text-muted);">${order.time}</div>
+                        <!-- Date/Time RETRAIT -->
+                        <div style="text-align:right; min-width:100px;">
+                            <div style="font-size:13px; font-weight:600; ${order.pickupDate ? 'color:#ff9f43;' : ''}">${dateDisplay || 'Non défini'}</div>
+                            <div style="font-size:11px; color:var(--text-muted);">${timeDisplay}</div>
                         </div>
                         
                         <!-- Total -->
@@ -18664,55 +18639,114 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                 return;
             }
 
+            // Infos de retrait pour Shopify
+            const isShopify = order.source === 'shopify';
+            const pickupSection = isShopify && order.pickupDate ? `
+                <div style="padding:20px; border-bottom:1px solid var(--border-color); background:rgba(255,159,67,0.1);">
+                    <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">📅 RETRAIT / LIVRAISON</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div>
+                            <div style="font-size:11px; color:var(--text-muted);">DATE</div>
+                            <div style="font-size:16px; font-weight:700; color:#ff9f43;">${order.pickupDate}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:11px; color:var(--text-muted);">HEURE</div>
+                            <div style="font-size:16px; font-weight:600;">${order.pickupTime || 'Non définie'}</div>
+                        </div>
+                    </div>
+                    ${order.pickupLocation ? `
+                        <div style="margin-top:12px;">
+                            <div style="font-size:11px; color:var(--text-muted);">LIEU</div>
+                            <div style="font-size:14px; font-weight:600; color:#118ab2;">
+                                ${order.pickupLocation.includes('Laboratoire') ? '🏭' : (order.pickupLocation.includes('Magasin') ? '🏪' : '🚚')} 
+                                ${order.pickupLocation}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            ` : '';
+
+            // Articles pour Shopify
+            const itemsSection = order.items && order.items.length > 0 ? `
+                <div style="padding:20px; border-bottom:1px solid var(--border-color);">
+                    <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">📦 ARTICLES (${order.items.length})</div>
+                    <div style="max-height:150px; overflow-y:auto;">
+                        ${order.items.map(item => `
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border-color);">
+                                <div style="flex:1;">
+                                    <div style="font-size:13px; font-weight:600;">${item.name}</div>
+                                    ${item.sku ? `<div style="font-size:11px; color:var(--text-muted);">SKU: ${item.sku}</div>` : ''}
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-size:13px; font-weight:600;">x${item.quantity}</div>
+                                    <div style="font-size:11px; color:var(--text-muted);">${item.price.toFixed(2)} CHF</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : '';
+
+            // Notes
+            const notesSection = order.notes ? `
+                <div style="padding:20px; border-bottom:1px solid var(--border-color);">
+                    <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">📝 NOTES</div>
+                    <div style="font-size:13px; color:var(--text-secondary); background:var(--bg-primary); padding:12px; border-radius:8px;">${order.notes}</div>
+                </div>
+            ` : '';
+
             // Créer le modal de détail
             const modalHtml = `
                 <div id="order-detail-modal" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px;" onclick="if(event.target.id==='order-detail-modal') this.remove()">
-                    <div style="background:var(--bg-card); border-radius:20px; width:100%; max-width:500px; max-height:90vh; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+                    <div style="background:var(--bg-card); border-radius:20px; width:100%; max-width:550px; max-height:90vh; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,0.4);">
                         
                         <!-- Header -->
                         <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
                             <div>
                                 <div style="font-size:18px; font-weight:700;">Commande ${order.id}</div>
-                                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">${order.source.toUpperCase()}</div>
+                                <div style="font-size:12px; color:${isShopify ? '#96bf48' : 'var(--text-muted)'}; margin-top:4px;">
+                                    ${isShopify ? '🛍️ SHOPIFY' : (order.source === 'myfish' ? '🐟 MYFISH' : '📦 TRAKIO')}
+                                </div>
                             </div>
                             <button onclick="document.getElementById('order-detail-modal').remove()" style="width:36px; height:36px; border-radius:50%; border:none; background:var(--bg-hover); cursor:pointer; font-size:18px;">✕</button>
                         </div>
                         
                         <!-- Client -->
                         <div style="padding:20px; border-bottom:1px solid var(--border-color);">
-                            <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">CLIENT</div>
-                            <div style="font-size:16px; font-weight:600;">${order.client}</div>
-                            ${order.phone ? `<div style="font-size:14px; color:var(--text-secondary); margin-top:4px;">📱 ${order.phone}</div>` : ''}
+                            <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">👤 CLIENT</div>
+                            <div style="font-size:18px; font-weight:700;">${order.client}</div>
+                            ${order.phone ? `<div style="font-size:14px; color:var(--text-secondary); margin-top:6px;">📱 ${order.phone}</div>` : ''}
                             ${order.email ? `<div style="font-size:14px; color:var(--text-secondary); margin-top:4px;">✉️ ${order.email}</div>` : ''}
-                            ${order.address ? `<div style="font-size:14px; color:var(--text-secondary); margin-top:4px;">📍 ${order.address}</div>` : ''}
+                            ${order.address ? `<div style="font-size:14px; color:var(--text-secondary); margin-top:4px;">📍 ${order.address}${order.city ? ', ' + order.city : ''}</div>` : ''}
                         </div>
                         
-                        <!-- Détails -->
+                        <!-- Retrait (Shopify) -->
+                        ${pickupSection}
+                        
+                        <!-- Articles -->
+                        ${itemsSection}
+                        
+                        <!-- Notes -->
+                        ${notesSection}
+                        
+                        <!-- Détails généraux -->
                         <div style="padding:20px; border-bottom:1px solid var(--border-color);">
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                                 <div>
-                                    <div style="font-size:12px; color:var(--text-muted);">DATE</div>
+                                    <div style="font-size:11px; color:var(--text-muted);">DATE COMMANDE</div>
                                     <div style="font-size:14px; font-weight:600;">${new Date(order.date).toLocaleDateString('fr-CH')}</div>
                                 </div>
                                 <div>
-                                    <div style="font-size:12px; color:var(--text-muted);">HEURE</div>
-                                    <div style="font-size:14px; font-weight:600;">${order.time}</div>
-                                </div>
-                                <div>
-                                    <div style="font-size:12px; color:var(--text-muted);">TYPE</div>
-                                    <div style="font-size:14px; font-weight:600;">${order.type}</div>
-                                </div>
-                                <div>
-                                    <div style="font-size:12px; color:var(--text-muted);">STATUT</div>
-                                    <div style="font-size:14px; font-weight:600;">${order.status}</div>
+                                    <div style="font-size:11px; color:var(--text-muted);">STATUT</div>
+                                    <div style="font-size:14px; font-weight:600;">${order.status || 'En attente'}</div>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Total -->
                         <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
-                            <div style="font-size:14px; color:var(--text-muted);">TOTAL</div>
-                            <div style="font-size:24px; font-weight:800; color:var(--accent-primary); font-family:'Space Mono',monospace;">${parseFloat(order.total).toFixed(2)} CHF</div>
+                            <div style="font-size:14px; color:var(--text-muted);">💰 TOTAL</div>
+                            <div style="font-size:28px; font-weight:800; color:var(--accent-primary); font-family:'Space Mono',monospace;">${parseFloat(order.total).toFixed(2)} CHF</div>
                         </div>
                         
                         <!-- Actions -->
