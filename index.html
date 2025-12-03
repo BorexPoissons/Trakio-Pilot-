@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v4.0.1 - Gestion Complète</title>
+    <title>TRAKIO v4.0.2 - Gestion Complète</title>
     <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#06d6a0">
@@ -2446,6 +2446,9 @@
                         <div style="display:flex; gap:8px;">
                             <button onclick="refreshDashboardOrders()" style="padding:8px 16px; background:var(--bg-hover); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;">
                                 🔄 Actualiser
+                            </button>
+                            <button onclick="debugShopifyData()" style="padding:8px 16px; background:rgba(150,191,72,0.15); border:1px solid #96bf48; border-radius:8px; color:#96bf48; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;" title="Voir la structure des données Shopify">
+                                🔍 Debug
                             </button>
                         </div>
                     </div>
@@ -6780,7 +6783,7 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '4.0.1';
+        const APP_VERSION = '4.0.2';
         const APP_VERSION_DATE = '2025-12-03';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
@@ -6824,6 +6827,12 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '4.0.2': [
+                '🛍️ Shopify: Mapping robuste des champs (toutes variantes)',
+                '📋 Affichage amélioré: email, ville, articles',
+                '🔍 Bouton Debug pour voir la structure des données Shopify',
+                '🔧 Correction affichage nom client et montant'
+            ],
             '4.0.1': [
                 '🔴 Nouveau Dashboard Live simplifié',
                 '📊 KPIs en temps réel (CA, commandes, Shopify)',
@@ -18188,6 +18197,70 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             loadDashboardKPIs();
         }
 
+        // 🔍 Debug: Voir la structure des données Shopify
+        function debugShopifyData() {
+            const shopifyOrders = JSON.parse(localStorage.getItem('shopify_orders') || '[]');
+            if (shopifyOrders.length === 0) {
+                alert('❌ Aucune commande Shopify trouvée dans localStorage');
+                return;
+            }
+            
+            const firstOrder = shopifyOrders[0];
+            const keys = Object.keys(firstOrder);
+            
+            let info = `📊 STRUCTURE DES DONNÉES SHOPIFY\n`;
+            info += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            info += `Nombre de commandes: ${shopifyOrders.length}\n\n`;
+            info += `📋 COLONNES DISPONIBLES (${keys.length}):\n`;
+            info += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            
+            keys.forEach(key => {
+                const value = firstOrder[key];
+                const displayValue = value ? (String(value).substring(0, 40) + (String(value).length > 40 ? '...' : '')) : '(vide)';
+                info += `• ${key}: ${displayValue}\n`;
+            });
+            
+            console.log('Shopify Data Structure:', firstOrder);
+            console.log('All Shopify Orders:', shopifyOrders);
+            
+            // Créer un modal pour afficher les infos
+            const modalHtml = `
+                <div id="debug-modal" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px;" onclick="if(event.target.id==='debug-modal') this.remove()">
+                    <div style="background:var(--bg-card); border-radius:16px; width:100%; max-width:700px; max-height:90vh; overflow:auto;">
+                        <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                            <h3 style="margin:0;">🔍 Debug Shopify - Structure des données</h3>
+                            <button onclick="document.getElementById('debug-modal').remove()" style="background:none; border:none; font-size:24px; cursor:pointer;">✕</button>
+                        </div>
+                        <div style="padding:20px;">
+                            <div style="background:var(--bg-primary); padding:16px; border-radius:12px; margin-bottom:16px;">
+                                <div style="font-size:14px; color:var(--text-muted);">Nombre de commandes</div>
+                                <div style="font-size:24px; font-weight:700; color:var(--accent-primary);">${shopifyOrders.length}</div>
+                            </div>
+                            <h4 style="margin-bottom:12px;">📋 Colonnes disponibles (${keys.length})</h4>
+                            <div style="max-height:400px; overflow-y:auto; background:var(--bg-primary); border-radius:12px; padding:16px;">
+                                ${keys.map(key => {
+                                    const value = firstOrder[key];
+                                    const displayValue = value ? String(value).substring(0, 50) : '<vide>';
+                                    const isNameField = key.toLowerCase().includes('name') || key.toLowerCase().includes('nom');
+                                    const isTotalField = key.toLowerCase().includes('total') || key.toLowerCase().includes('price');
+                                    const isDateField = key.toLowerCase().includes('date') || key.toLowerCase().includes('created') || key.toLowerCase().includes('at');
+                                    const highlight = isNameField ? '#96bf48' : (isTotalField ? '#ffd166' : (isDateField ? '#118ab2' : 'var(--text-secondary)'));
+                                    return `<div style="padding:8px 0; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; gap:16px;">
+                                        <span style="font-weight:600; color:${highlight};">${key}</span>
+                                        <span style="color:var(--text-muted); text-align:right; word-break:break-all;">${displayValue}</span>
+                                    </div>`;
+                                }).join('')}
+                            </div>
+                            <div style="margin-top:16px; padding:12px; background:rgba(6,214,160,0.1); border-radius:8px; font-size:13px;">
+                                💡 Les données sont aussi affichées dans la console (F12)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
         function loadDashboardKPIs() {
             // CA du jour
             const orders = JSON.parse(localStorage.getItem('trakio_orders') || '[]');
@@ -18271,24 +18344,121 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                 });
             });
 
-            // 2. Shopify orders
+            // 2. Shopify orders - Mapping robuste pour tous les formats d'export
             const shopifyOrders = JSON.parse(localStorage.getItem('shopify_orders') || '[]');
             shopifyOrders.forEach(o => {
-                const status = (o['Fulfillment Status'] || o.fulfillment_status || '').toLowerCase();
-                if (status === 'fulfilled' || status === 'completed') return;
+                // Status - plusieurs variantes
+                const status = (
+                    o['Fulfillment Status'] || 
+                    o['fulfillment_status'] || 
+                    o['Statut de traitement'] ||
+                    o['statut'] ||
+                    ''
+                ).toLowerCase();
+                if (status === 'fulfilled' || status === 'completed' || status === 'traité') return;
+                
+                // Nom du client - plusieurs variantes
+                const clientName = 
+                    o['Billing Name'] || 
+                    o['Shipping Name'] || 
+                    o['billing_name'] ||
+                    o['shipping_name'] ||
+                    o['Nom de facturation'] ||
+                    o['Nom de livraison'] ||
+                    o['customer_name'] ||
+                    o['Customer'] ||
+                    o['client'] ||
+                    (o['Billing First Name'] && o['Billing Last Name'] ? o['Billing First Name'] + ' ' + o['Billing Last Name'] : '') ||
+                    (o['Shipping First Name'] && o['Shipping Last Name'] ? o['Shipping First Name'] + ' ' + o['Shipping Last Name'] : '') ||
+                    'Client Shopify';
+                
+                // Téléphone
+                const phone = 
+                    o['Billing Phone'] || 
+                    o['Shipping Phone'] || 
+                    o['billing_phone'] ||
+                    o['shipping_phone'] ||
+                    o['Téléphone de facturation'] ||
+                    o['Téléphone de livraison'] ||
+                    o['phone'] ||
+                    o['Phone'] ||
+                    '';
+                
+                // Email
+                const email = 
+                    o['Email'] || 
+                    o['email'] || 
+                    o['E-mail'] ||
+                    o['customer_email'] ||
+                    '';
+                
+                // Date de commande
+                const createdAt = 
+                    o['Created at'] || 
+                    o['created_at'] || 
+                    o['Créée le'] ||
+                    o['Date'] ||
+                    o['date'] ||
+                    o['Paid at'] ||
+                    new Date().toISOString();
+                
+                // Total
+                const total = parseFloat(
+                    o['Total'] || 
+                    o['total'] || 
+                    o['total_price'] ||
+                    o['Montant total'] ||
+                    o['Subtotal'] ||
+                    o['subtotal'] ||
+                    0
+                );
+                
+                // Numéro de commande
+                const orderId = 
+                    o['Name'] || 
+                    o['name'] ||
+                    o['Order'] ||
+                    o['order'] ||
+                    o['Numéro'] ||
+                    o['id'] ||
+                    '#' + (shopifyOrders.indexOf(o) + 1);
+                
+                // Adresse
+                const address = 
+                    o['Shipping Address1'] || 
+                    o['shipping_address1'] ||
+                    o['Adresse de livraison'] ||
+                    o['Billing Address1'] ||
+                    '';
+                
+                // Ville
+                const city = 
+                    o['Shipping City'] || 
+                    o['shipping_city'] ||
+                    o['Ville de livraison'] ||
+                    o['Billing City'] ||
+                    '';
+                
+                // Articles de la commande
+                const lineItems = o['Lineitem name'] || o['lineitem_name'] || o['Articles'] || '';
+                const lineQty = o['Lineitem quantity'] || o['lineitem_quantity'] || o['Quantité'] || '';
                 
                 allDashOrders.push({
-                    id: o.Name || o.id || 'SH-' + Date.now(),
+                    id: orderId,
                     source: 'shopify',
                     type: 'B2C',
-                    client: o['Billing Name'] || o['Shipping Name'] || o.customer_name || 'Client Shopify',
-                    phone: o['Billing Phone'] || o['Shipping Phone'] || o.phone || '',
-                    email: o.Email || o.email || '',
-                    date: o['Created at'] || o.created_at || new Date().toISOString(),
-                    time: extractTime(o['Created at'] || o.created_at),
-                    total: parseFloat(o.Total || o.total_price || 0),
+                    client: clientName,
+                    phone: phone,
+                    email: email,
+                    date: createdAt,
+                    time: extractTime(createdAt),
+                    total: total,
                     status: status || 'pending',
-                    address: o['Shipping Address1'] || ''
+                    address: address,
+                    city: city,
+                    lineItems: lineItems,
+                    lineQty: lineQty,
+                    rawData: o // Garder les données brutes pour debug
                 });
             });
 
@@ -18402,10 +18572,13 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                         <!-- Client Info -->
                         <div style="flex:1; min-width:0;">
                             <div style="font-weight:600; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${order.client}</div>
-                            <div style="font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:8px; margin-top:4px;">
-                                <span>${order.id}</span>
+                            <div style="font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:8px; margin-top:4px; flex-wrap:wrap;">
+                                <span style="color:${sourceColor}; font-weight:600;">${order.id}</span>
+                                ${order.email ? `<span>✉️ ${order.email}</span>` : ''}
                                 ${order.phone ? `<span>📱 ${order.phone}</span>` : ''}
+                                ${order.city ? `<span>📍 ${order.city}</span>` : ''}
                             </div>
+                            ${order.lineItems ? `<div style="font-size:11px; color:var(--text-muted); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📦 ${order.lineItems}</div>` : ''}
                         </div>
                         
                         <!-- Type Badge -->
