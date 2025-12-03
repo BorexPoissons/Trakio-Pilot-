@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAKIO Cloud v1.0.0 - Base de Données</title>
+    <title>TRAKIO Cloud v1.1.0 - Base de Données</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -1044,20 +1047,62 @@
 
             addLog('info', 'Test de connexion...');
 
-            // Simulate connection test
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            if (selectedProvider === 'firebase') {
+                try {
+                    // Récupérer la config depuis les champs
+                    const config = {
+                        apiKey: document.getElementById('firebase-apiKey').value,
+                        authDomain: document.getElementById('firebase-authDomain').value,
+                        projectId: document.getElementById('firebase-projectId').value,
+                        storageBucket: document.getElementById('firebase-storageBucket').value,
+                        messagingSenderId: document.getElementById('firebase-messagingSenderId').value
+                    };
 
-            // In real app, actually test the connection
-            const success = Math.random() > 0.2; // 80% success for demo
+                    if (!config.apiKey || !config.projectId) {
+                        alert('❌ API Key et Project ID sont requis');
+                        return;
+                    }
 
-            if (success) {
-                isConnected = true;
-                addLog('success', 'Connexion réussie!');
-                alert('✅ Connexion réussie!');
+                    // Initialiser Firebase si pas déjà fait
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(config);
+                    }
+
+                    // Tester la connexion en écrivant un document
+                    const db = firebase.firestore();
+                    await db.collection('_test').doc('connection').set({
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        testedAt: new Date().toISOString(),
+                        source: 'TRAKIO Cloud'
+                    });
+
+                    isConnected = true;
+                    cloudConfig = { provider: 'firebase', ...config };
+                    localStorage.setItem('trakio_cloud_config', JSON.stringify(cloudConfig));
+
+                    addLog('success', 'Connexion Firebase réussie!');
+                    alert('✅ Connexion Firebase réussie!');
+
+                } catch (err) {
+                    console.error('Firebase test error:', err);
+                    isConnected = false;
+                    addLog('error', 'Échec de la connexion: ' + err.message);
+                    alert('❌ Échec de la connexion. Vérifiez vos paramètres.\n\n' + err.message);
+                }
             } else {
-                isConnected = false;
-                addLog('error', 'Échec de la connexion');
-                alert('❌ Échec de la connexion. Vérifiez vos paramètres.');
+                // Pour les autres providers (simulation)
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                const success = Math.random() > 0.2;
+                
+                if (success) {
+                    isConnected = true;
+                    addLog('success', 'Connexion réussie!');
+                    alert('✅ Connexion réussie!');
+                } else {
+                    isConnected = false;
+                    addLog('error', 'Échec de la connexion');
+                    alert('❌ Échec de la connexion. Vérifiez vos paramètres.');
+                }
             }
 
             updateStatus();
@@ -1162,7 +1207,12 @@
                 return;
             }
 
-            if (!confirm('Démarrer la migration des données vers le cloud?')) return;
+            if (cloudConfig?.provider !== 'firebase') {
+                alert('Seul Firebase est supporté pour la migration réelle');
+                return;
+            }
+
+            if (!confirm('Démarrer la migration des données vers Firebase?')) return;
 
             const progress = document.getElementById('migration-progress');
             const fill = document.getElementById('progress-fill');
@@ -1172,6 +1222,7 @@
 
             progress.style.display = 'block';
 
+            const db = firebase.firestore();
             const enabledCollections = collections.filter(c => c.enabled);
             let totalDocs = 0;
             let migratedDocs = 0;
@@ -1184,33 +1235,67 @@
                 else if (data.clients) totalDocs += data.clients.length;
             });
 
-            for (const col of enabledCollections) {
-                colName.textContent = col.name;
-
-                const data = JSON.parse(localStorage.getItem(col.key) || '[]');
-                let items = [];
-                if (Array.isArray(data)) items = data;
-                else if (data.items) items = data.items;
-                else if (data.clients) items = data.clients;
-
-                for (let i = 0; i < items.length; i++) {
-                    // Simulate upload delay
-                    await new Promise(r => setTimeout(r, 50));
-                    migratedDocs++;
-
-                    const pct = Math.round((migratedDocs / totalDocs) * 100);
-                    fill.style.width = pct + '%';
-                    percent.textContent = pct + '%';
-                    current.textContent = `${migratedDocs} / ${totalDocs} documents`;
-                }
-
-                addLog('success', `${col.name}: ${items.length} documents migrés`);
+            if (totalDocs === 0) {
+                alert('Aucun document à migrer');
+                progress.style.display = 'none';
+                return;
             }
 
-            addLog('success', 'Migration terminée!');
-            alert('✅ Migration terminée! ' + migratedDocs + ' documents migrés.');
+            try {
+                for (const col of enabledCollections) {
+                    colName.textContent = col.name;
+                    addLog('info', `Migration: ${col.name}...`);
 
-            document.getElementById('last-sync').textContent = new Date().toLocaleTimeString('fr-CH');
+                    const data = JSON.parse(localStorage.getItem(col.key) || '[]');
+                    let items = [];
+                    if (Array.isArray(data)) items = data;
+                    else if (data.items) items = data.items;
+                    else if (data.clients) items = data.clients;
+
+                    // Déterminer le nom de collection Firebase
+                    let firestoreCollection = col.id;
+                    if (col.id === 'shopify') firestoreCollection = 'shopify_orders';
+                    if (col.id === 'quickorder') firestoreCollection = 'clients';
+                    if (col.id === 'orders') firestoreCollection = 'orders';
+
+                    // Batch write pour performance (max 500 par batch)
+                    const batchSize = 400;
+                    for (let i = 0; i < items.length; i += batchSize) {
+                        const batch = db.batch();
+                        const chunk = items.slice(i, i + batchSize);
+
+                        for (const item of chunk) {
+                            const docId = String(item.id || item.name || item.Name || Date.now() + Math.random());
+                            const ref = db.collection(firestoreCollection).doc(docId);
+                            batch.set(ref, {
+                                ...item,
+                                _migratedAt: new Date().toISOString(),
+                                _source: 'TRAKIO Cloud'
+                            }, { merge: true });
+
+                            migratedDocs++;
+                            const pct = Math.round((migratedDocs / totalDocs) * 100);
+                            fill.style.width = pct + '%';
+                            percent.textContent = pct + '%';
+                            current.textContent = `${migratedDocs} / ${totalDocs} documents`;
+                        }
+
+                        await batch.commit();
+                    }
+
+                    addLog('success', `${col.name}: ${items.length} documents migrés`);
+                }
+
+                addLog('success', 'Migration terminée!');
+                alert('✅ Migration terminée! ' + migratedDocs + ' documents envoyés vers Firebase.');
+
+                document.getElementById('last-sync').textContent = new Date().toLocaleTimeString('fr-CH');
+
+            } catch (err) {
+                console.error('Migration error:', err);
+                addLog('error', 'Erreur migration: ' + err.message);
+                alert('❌ Erreur lors de la migration:\n' + err.message);
+            }
         }
 
         // =============================================
@@ -1219,13 +1304,60 @@
         async function manualSync() {
             if (!isConnected) return;
 
-            addLog('info', 'Synchronisation manuelle...');
+            if (cloudConfig?.provider === 'firebase') {
+                addLog('info', 'Synchronisation manuelle Firebase...');
 
-            // Simulate sync
-            await new Promise(r => setTimeout(r, 2000));
+                try {
+                    const db = firebase.firestore();
+                    const enabledCollections = collections.filter(c => c.enabled);
+                    let totalSynced = 0;
 
-            addLog('success', 'Synchronisation terminée');
-            document.getElementById('last-sync').textContent = new Date().toLocaleTimeString('fr-CH');
+                    for (const col of enabledCollections) {
+                        const data = JSON.parse(localStorage.getItem(col.key) || '[]');
+                        let items = [];
+                        if (Array.isArray(data)) items = data;
+                        else if (data.items) items = data.items;
+                        else if (data.clients) items = data.clients;
+
+                        // Déterminer le nom de collection Firebase
+                        let firestoreCollection = col.id;
+                        if (col.id === 'shopify') firestoreCollection = 'shopify_orders';
+                        if (col.id === 'quickorder') firestoreCollection = 'clients';
+                        if (col.id === 'orders') firestoreCollection = 'orders';
+
+                        // Batch write
+                        const batchSize = 400;
+                        for (let i = 0; i < items.length; i += batchSize) {
+                            const batch = db.batch();
+                            const chunk = items.slice(i, i + batchSize);
+
+                            for (const item of chunk) {
+                                const docId = String(item.id || item.name || item.Name || Date.now() + Math.random());
+                                const ref = db.collection(firestoreCollection).doc(docId);
+                                batch.set(ref, {
+                                    ...item,
+                                    _syncedAt: new Date().toISOString()
+                                }, { merge: true });
+                                totalSynced++;
+                            }
+
+                            await batch.commit();
+                        }
+                    }
+
+                    addLog('success', `Synchronisation terminée: ${totalSynced} documents`);
+                    document.getElementById('last-sync').textContent = new Date().toLocaleTimeString('fr-CH');
+
+                } catch (err) {
+                    console.error('Sync error:', err);
+                    addLog('error', 'Erreur sync: ' + err.message);
+                }
+            } else {
+                addLog('info', 'Synchronisation manuelle...');
+                await new Promise(r => setTimeout(r, 2000));
+                addLog('success', 'Synchronisation terminée');
+                document.getElementById('last-sync').textContent = new Date().toLocaleTimeString('fr-CH');
+            }
         }
 
         function saveSyncSettings() {
