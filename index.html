@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v4.0.0 - Gestion Complète</title>
+    <title>TRAKIO v4.0.1 - Gestion Complète</title>
     <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#06d6a0">
@@ -6780,8 +6780,8 @@
         // ========================================
 
         // ===== VERSION DE L'APPLICATION =====
-        const APP_VERSION = '4.0.0';
-        const APP_VERSION_DATE = '2025-12-02';
+        const APP_VERSION = '4.0.1';
+        const APP_VERSION_DATE = '2025-12-03';
         
         // ===== UTILISATEURS PAR DÉFAUT =====
         (function initDefaultUsers() {
@@ -6824,6 +6824,15 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '4.0.1': [
+                '🔴 Nouveau Dashboard Live simplifié',
+                '📊 KPIs en temps réel (CA, commandes, Shopify)',
+                '📋 Liste unifiée des commandes (TRAKIO + Shopify + MyFish)',
+                '💬 Bouton WhatsApp sur chaque commande B2C',
+                '🔍 Clic sur commande → détail + actions',
+                '☁️ Sync Dropbox pour MyFish et Shopify',
+                '⚡ 3 accès rapides: MyFish, Commande, Cours'
+            ],
             '4.0.0': [
                 '📱 PWA: Application installable sur mobile/tablette',
                 '📡 Mode hors-ligne complet avec cache',
@@ -14853,6 +14862,28 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                     }
                 }
 
+                // Télécharger les commandes MyFish
+                const remoteMfOrders = await downloadFromDropbox(basePath + '/MyFish/_myfish_orders.json');
+                if (remoteMfOrders && Array.isArray(remoteMfOrders)) {
+                    const localMfOrders = JSON.parse(localStorage.getItem('mf_orders') || '[]');
+                    const mergedMfOrders = mergeData(localMfOrders, remoteMfOrders, 'id');
+                    if (JSON.stringify(mergedMfOrders) !== JSON.stringify(localMfOrders)) {
+                        localStorage.setItem('mf_orders', JSON.stringify(mergedMfOrders));
+                        updated = true;
+                    }
+                }
+
+                // Télécharger les commandes Shopify
+                const remoteShopifyOrders = await downloadFromDropbox(basePath + '/Shopify/_shopify_orders.json');
+                if (remoteShopifyOrders && Array.isArray(remoteShopifyOrders)) {
+                    const localShopifyOrders = JSON.parse(localStorage.getItem('shopify_orders') || '[]');
+                    const mergedShopifyOrders = mergeData(localShopifyOrders, remoteShopifyOrders, 'Name');
+                    if (JSON.stringify(mergedShopifyOrders) !== JSON.stringify(localShopifyOrders)) {
+                        localStorage.setItem('shopify_orders', JSON.stringify(mergedShopifyOrders));
+                        updated = true;
+                    }
+                }
+
                 DropboxSync.lastSync = new Date();
                 updateSyncIndicator('success');
 
@@ -14860,6 +14891,8 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                 if (updated) {
                     updateOrdersBadge();
                     updateDashboardSummary();
+                    // Rafraîchir le nouveau dashboard
+                    if (typeof loadNewDashboard === 'function') loadNewDashboard();
                 }
 
                 if (updated && !silent) {
@@ -14978,6 +15011,20 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                     // Ressources Humaines
                     const rhJson = JSON.stringify(RHData, null, 2);
                     await uploadToDropboxDirect(basePath + '/System/_rh_data.json', rhJson);
+                }
+
+                if (dataType === 'all' || dataType === 'myfish') {
+                    // MyFish - Commandes clients privés
+                    const mfOrders = JSON.parse(localStorage.getItem('mf_orders') || '[]');
+                    const mfJson = JSON.stringify(mfOrders, null, 2);
+                    await uploadToDropboxDirect(basePath + '/MyFish/_myfish_orders.json', mfJson);
+                }
+
+                if (dataType === 'all' || dataType === 'shopify') {
+                    // Shopify - Commandes importées
+                    const shopifyOrders = JSON.parse(localStorage.getItem('shopify_orders') || '[]');
+                    const shopifyJson = JSON.stringify(shopifyOrders, null, 2);
+                    await uploadToDropboxDirect(basePath + '/Shopify/_shopify_orders.json', shopifyJson);
                 }
 
                 if (dataType === 'all' || dataType === 'settings') {
@@ -18334,16 +18381,18 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                 const isToday = orderDate.toDateString() === new Date().toDateString();
                 const dateDisplay = isToday ? 'Aujourd\'hui' : orderDate.toLocaleDateString('fr-CH', { day: '2-digit', month: 'short' });
 
-                // WhatsApp button (only for B2C with phone)
-                const showWhatsApp = order.type === 'B2C' && order.phone;
-                const whatsappBtn = showWhatsApp ? `
-                    <button onclick="event.stopPropagation(); sendQuickWhatsApp('${order.phone}', '${(order.client || '').replace(/'/g, "\\'")}', '${order.id}')" style="padding:8px 14px; background:linear-gradient(135deg, #25D366, #128C7E); border:none; border-radius:8px; color:white; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">
-                        💬 WhatsApp
-                    </button>
-                ` : '';
+                // WhatsApp button (for all B2C sources)
+                const isB2C = order.type === 'B2C' || order.source === 'shopify' || order.source === 'myfish';
+                const hasPhone = order.phone && order.phone.length > 5;
+                let whatsappBtn = '';
+                if (isB2C && hasPhone) {
+                    whatsappBtn = `<button onclick="event.stopPropagation(); sendQuickWhatsApp('${order.phone}', '${(order.client || '').replace(/'/g, "\\'")}', '${order.id}')" style="padding:8px 14px; background:linear-gradient(135deg, #25D366, #128C7E); border:none; border-radius:8px; color:white; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">💬 WhatsApp</button>`;
+                } else if (isB2C) {
+                    whatsappBtn = `<button onclick="event.stopPropagation(); promptWhatsAppNumber('${(order.client || '').replace(/'/g, "\\'")}', '${order.id}')" style="padding:8px 14px; background:rgba(37,211,102,0.2); border:1px solid #25D366; border-radius:8px; color:#25D366; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">💬 WhatsApp</button>`;
+                }
 
                 return `
-                    <div class="dash-order-item" style="padding:16px 20px; border-bottom:1px solid var(--border-color); display:flex; align-items:center; gap:16px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
+                    <div class="dash-order-item" onclick="openOrderDetail('${order.source}', '${order.id}')" style="padding:16px 20px; border-bottom:1px solid var(--border-color); display:flex; align-items:center; gap:16px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
                         
                         <!-- Source Icon -->
                         <div style="width:44px; height:44px; background:${sourceColor}20; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">
@@ -18425,6 +18474,130 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             
             const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
             window.open(url, '_blank');
+        }
+
+        function promptWhatsAppNumber(clientName, orderId) {
+            const phone = prompt(`📱 Entrez le numéro de téléphone pour ${clientName}:`, '+41');
+            if (phone && phone.length > 5) {
+                sendQuickWhatsApp(phone, clientName, orderId);
+            }
+        }
+
+        function openOrderDetail(source, orderId) {
+            // Trouver la commande dans allDashOrders
+            const order = allDashOrders.find(o => o.id === orderId && o.source === source);
+            if (!order) {
+                alert('Commande non trouvée');
+                return;
+            }
+
+            // Créer le modal de détail
+            const modalHtml = `
+                <div id="order-detail-modal" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px;" onclick="if(event.target.id==='order-detail-modal') this.remove()">
+                    <div style="background:var(--bg-card); border-radius:20px; width:100%; max-width:500px; max-height:90vh; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+                        
+                        <!-- Header -->
+                        <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:18px; font-weight:700;">Commande ${order.id}</div>
+                                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">${order.source.toUpperCase()}</div>
+                            </div>
+                            <button onclick="document.getElementById('order-detail-modal').remove()" style="width:36px; height:36px; border-radius:50%; border:none; background:var(--bg-hover); cursor:pointer; font-size:18px;">✕</button>
+                        </div>
+                        
+                        <!-- Client -->
+                        <div style="padding:20px; border-bottom:1px solid var(--border-color);">
+                            <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">CLIENT</div>
+                            <div style="font-size:16px; font-weight:600;">${order.client}</div>
+                            ${order.phone ? `<div style="font-size:14px; color:var(--text-secondary); margin-top:4px;">📱 ${order.phone}</div>` : ''}
+                            ${order.email ? `<div style="font-size:14px; color:var(--text-secondary); margin-top:4px;">✉️ ${order.email}</div>` : ''}
+                            ${order.address ? `<div style="font-size:14px; color:var(--text-secondary); margin-top:4px;">📍 ${order.address}</div>` : ''}
+                        </div>
+                        
+                        <!-- Détails -->
+                        <div style="padding:20px; border-bottom:1px solid var(--border-color);">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                                <div>
+                                    <div style="font-size:12px; color:var(--text-muted);">DATE</div>
+                                    <div style="font-size:14px; font-weight:600;">${new Date(order.date).toLocaleDateString('fr-CH')}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:12px; color:var(--text-muted);">HEURE</div>
+                                    <div style="font-size:14px; font-weight:600;">${order.time}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:12px; color:var(--text-muted);">TYPE</div>
+                                    <div style="font-size:14px; font-weight:600;">${order.type}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:12px; color:var(--text-muted);">STATUT</div>
+                                    <div style="font-size:14px; font-weight:600;">${order.status}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Total -->
+                        <div style="padding:20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                            <div style="font-size:14px; color:var(--text-muted);">TOTAL</div>
+                            <div style="font-size:24px; font-weight:800; color:var(--accent-primary); font-family:'Space Mono',monospace;">${parseFloat(order.total).toFixed(2)} CHF</div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div style="padding:20px; display:flex; gap:12px;">
+                            ${order.phone ? `
+                                <button onclick="sendQuickWhatsApp('${order.phone}', '${order.client.replace(/'/g, "\\'")}', '${order.id}'); document.getElementById('order-detail-modal').remove();" style="flex:1; padding:14px; background:linear-gradient(135deg, #25D366, #128C7E); border:none; border-radius:12px; color:white; font-size:14px; font-weight:600; cursor:pointer;">
+                                    💬 WhatsApp
+                                </button>
+                            ` : `
+                                <button onclick="promptWhatsAppNumber('${order.client.replace(/'/g, "\\'")}', '${order.id}'); document.getElementById('order-detail-modal').remove();" style="flex:1; padding:14px; background:rgba(37,211,102,0.2); border:1px solid #25D366; border-radius:12px; color:#25D366; font-size:14px; font-weight:600; cursor:pointer;">
+                                    💬 WhatsApp
+                                </button>
+                            `}
+                            <button onclick="changeDashOrderStatus('${order.source}', '${order.id}')" style="flex:1; padding:14px; background:var(--accent-primary); border:none; border-radius:12px; color:#000; font-size:14px; font-weight:600; cursor:pointer;">
+                                ✅ Marquer prête
+                            </button>
+                        </div>
+                        
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function changeDashOrderStatus(source, orderId) {
+            // Fermer le modal
+            const modal = document.getElementById('order-detail-modal');
+            if (modal) modal.remove();
+            
+            // Selon la source, mettre à jour le statut
+            if (source === 'trakio') {
+                const order = QOData.orders.find(o => o.id === orderId);
+                if (order) {
+                    order.status = 'ready';
+                    order.updatedAt = new Date().toISOString();
+                    saveQOData('orders');
+                }
+            } else if (source === 'myfish') {
+                const orders = JSON.parse(localStorage.getItem('mf_orders') || '[]');
+                const order = orders.find(o => o.id === orderId);
+                if (order) {
+                    order.status = 'ready';
+                    order.updatedAt = new Date().toISOString();
+                    localStorage.setItem('mf_orders', JSON.stringify(orders));
+                    // Sync vers Dropbox
+                    if (DropboxConfig && DropboxConfig.autoSync && DropboxConfig.connected) {
+                        syncToDropbox('myfish');
+                    }
+                }
+            }
+            
+            // Rafraîchir
+            loadDashboardOrders();
+            loadDashboardKPIs();
+            
+            // Notification
+            showNotification('✅ Commande marquée comme prête', 'success');
         }
 
         function toggleMoreModules() {
