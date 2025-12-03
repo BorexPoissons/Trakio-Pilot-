@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>TRAKIO v4.0.5 - Gestion Complète</title>
+    <title>TRAKIO v4.1.0 - Gestion Complète</title>
     <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#06d6a0">
@@ -2435,48 +2435,160 @@
                 </div>
 
                 <!-- ═══════════════════════════════════════════════════════════════
+                     🎛️ COMMAND CENTER - Accès rapide unifié
+                     ═══════════════════════════════════════════════════════════════ -->
+                <div style="background:linear-gradient(145deg, var(--bg-card), rgba(6,214,160,0.05)); border:2px solid var(--accent-primary); border-radius:16px; margin-bottom:24px; overflow:hidden;">
+                    
+                    <!-- Header Command Center -->
+                    <div style="padding:12px 20px; background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span style="font-size:20px;">🎛️</span>
+                            <span style="font-size:14px; font-weight:700; color:#000;">COMMAND CENTER</span>
+                            <span style="font-size:11px; color:rgba(0,0,0,0.6); padding:3px 8px; background:rgba(0,0,0,0.15); border-radius:8px;">Accès rapide</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:11px; color:rgba(0,0,0,0.7);">⌨️ Raccourcis: </span>
+                            <kbd style="padding:3px 8px; background:rgba(0,0,0,0.2); border-radius:4px; font-size:10px; font-family:'Space Mono',monospace; color:#000;">M</kbd><span style="font-size:10px; color:rgba(0,0,0,0.6);">MyFish</span>
+                            <kbd style="padding:3px 8px; background:rgba(0,0,0,0.2); border-radius:4px; font-size:10px; font-family:'Space Mono',monospace; color:#000;">N</kbd><span style="font-size:10px; color:rgba(0,0,0,0.6);">Nouvelle CMD</span>
+                            <kbd style="padding:3px 8px; background:rgba(0,0,0,0.2); border-radius:4px; font-size:10px; font-family:'Space Mono',monospace; color:#000;">P</kbd><span style="font-size:10px; color:rgba(0,0,0,0.6);">Prix</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions rapides -->
+                    <div style="padding:16px 20px; display:grid; grid-template-columns:repeat(6, 1fr); gap:12px;">
+                        
+                        <!-- MyFish -->
+                        <div onclick="window.location.href='myfish.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(156,136,255,0.15), rgba(156,136,255,0.05)); border:1px solid rgba(156,136,255,0.3); border-radius:12px; padding:16px 12px; text-align:center; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#9c88ff'; this.style.boxShadow='0 8px 20px rgba(156,136,255,0.25)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(156,136,255,0.3)'; this.style.boxShadow=''">
+                            <div style="width:48px; height:48px; background:linear-gradient(135deg, #9c88ff, #7b68ee); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px;">🐟</div>
+                            <div style="font-size:13px; font-weight:700; color:#9c88ff;">MyFish</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Clients B2C</div>
+                        </div>
+                        
+                        <!-- Nouvelle Commande -->
+                        <div onclick="window.location.href='commandes.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(6,214,160,0.15), rgba(6,214,160,0.05)); border:1px solid rgba(6,214,160,0.3); border-radius:12px; padding:16px 12px; text-align:center; transition:all 0.2s; position:relative;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 8px 20px rgba(6,214,160,0.25)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(6,214,160,0.3)'; this.style.boxShadow=''">
+                            <div style="position:absolute; top:6px; right:6px; background:var(--accent-primary); color:#000; padding:2px 6px; border-radius:6px; font-size:8px; font-weight:700;">⭐</div>
+                            <div style="width:48px; height:48px; background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px;">🛒</div>
+                            <div style="font-size:13px; font-weight:700; color:var(--accent-primary);">Commande</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">B2B/B2C</div>
+                        </div>
+                        
+                        <!-- Cours Poissons -->
+                        <div onclick="navigateTo('cours-poissons')" style="cursor:pointer; background:linear-gradient(145deg, rgba(0,206,201,0.15), rgba(0,206,201,0.05)); border:1px solid rgba(0,206,201,0.3); border-radius:12px; padding:16px 12px; text-align:center; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#00cec9'; this.style.boxShadow='0 8px 20px rgba(0,206,201,0.25)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(0,206,201,0.3)'; this.style.boxShadow=''">
+                            <div style="width:48px; height:48px; background:linear-gradient(135deg, #00cec9, #81ecec); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px;">📈</div>
+                            <div style="font-size:13px; font-weight:700; color:#00cec9;">Cours</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Prix du jour</div>
+                        </div>
+                        
+                        <!-- Articles -->
+                        <div onclick="window.location.href='articles.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(255,107,107,0.15), rgba(255,107,107,0.05)); border:1px solid rgba(255,107,107,0.3); border-radius:12px; padding:16px 12px; text-align:center; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#ff6b6b'; this.style.boxShadow='0 8px 20px rgba(255,107,107,0.25)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(255,107,107,0.3)'; this.style.boxShadow=''">
+                            <div style="width:48px; height:48px; background:linear-gradient(135deg, #ff6b6b, #ee5a5a); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px;">📦</div>
+                            <div style="font-size:13px; font-weight:700; color:#ff6b6b;">Articles</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Catalogue</div>
+                        </div>
+                        
+                        <!-- Clients -->
+                        <div onclick="window.location.href='clients.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(255,183,77,0.15), rgba(255,183,77,0.05)); border:1px solid rgba(255,183,77,0.3); border-radius:12px; padding:16px 12px; text-align:center; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#ffb74d'; this.style.boxShadow='0 8px 20px rgba(255,183,77,0.25)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(255,183,77,0.3)'; this.style.boxShadow=''">
+                            <div style="width:48px; height:48px; background:linear-gradient(135deg, #ffb74d, #ff9800); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px;">👥</div>
+                            <div style="font-size:13px; font-weight:700; color:#ffb74d;">Clients</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Base de données</div>
+                        </div>
+                        
+                        <!-- Cloud Sync -->
+                        <div onclick="window.location.href='cloud.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(59,130,246,0.15), rgba(59,130,246,0.05)); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:16px 12px; text-align:center; transition:all 0.2s; position:relative;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#3b82f6'; this.style.boxShadow='0 8px 20px rgba(59,130,246,0.25)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(59,130,246,0.3)'; this.style.boxShadow=''">
+                            <div id="cloud-sync-indicator" style="position:absolute; top:6px; right:6px; width:8px; height:8px; background:#06d6a0; border-radius:50%; animation:pulse-dot 2s infinite;"></div>
+                            <div style="width:48px; height:48px; background:linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px;">☁️</div>
+                            <div style="font-size:13px; font-weight:700; color:#3b82f6;">Cloud</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Firebase Sync</div>
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Barre d'état Cloud -->
+                    <div style="padding:10px 20px; background:var(--bg-primary); border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; font-size:11px;">
+                        <div style="display:flex; align-items:center; gap:16px;">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span style="color:var(--text-muted);">Dropbox:</span>
+                                <span id="command-dropbox-status" style="color:#0061ff;">⚪ Déconnecté</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span style="color:var(--text-muted);">Firebase:</span>
+                                <span id="command-firebase-status" style="color:#ff9500;">⚪ Déconnecté</span>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px; color:var(--text-muted);">
+                            <span>Prochaine sync:</span>
+                            <span id="command-next-sync" style="font-family:'Space Mono',monospace; color:var(--accent-primary);">--:--</span>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════════
                      📋 COMMANDES EN COURS - Liste unifiée
                      ═══════════════════════════════════════════════════════════════ -->
                 <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:16px; margin-bottom:24px; overflow:hidden;">
                     
                     <!-- Header -->
-                    <div style="padding:16px 20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                    <div style="padding:16px 20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                         <div style="display:flex; align-items:center; gap:12px;">
                             <div style="width:10px; height:10px; background:#ef476f; border-radius:50%; animation:pulse-dot 2s infinite;"></div>
                             <h3 style="font-size:16px; font-weight:700;">Commandes en cours</h3>
                             <span id="orders-count-badge" style="background:var(--accent-primary); color:#000; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:700;">0</span>
                         </div>
-                        <div style="display:flex; gap:8px;">
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <!-- Tri -->
+                            <select id="dash-sort-order" onchange="sortDashOrders(this.value)" style="padding:8px 12px; background:var(--bg-hover); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:12px; cursor:pointer;">
+                                <option value="recent">📅 Plus récent</option>
+                                <option value="oldest">📅 Plus ancien</option>
+                                <option value="amount-high">💰 Montant ↓</option>
+                                <option value="amount-low">💰 Montant ↑</option>
+                                <option value="name">🔤 Client A-Z</option>
+                            </select>
                             <button onclick="refreshDashboardOrders()" style="padding:8px 16px; background:var(--bg-hover); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;">
                                 🔄 Actualiser
-                            </button>
-                            <button onclick="debugShopifyData()" style="padding:8px 16px; background:rgba(150,191,72,0.15); border:1px solid #96bf48; border-radius:8px; color:#96bf48; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;" title="Voir la structure des données Shopify">
-                                🔍 Debug
                             </button>
                         </div>
                     </div>
                     
+                    <!-- Barre de recherche -->
+                    <div style="padding:12px 20px; border-bottom:1px solid var(--border-color); background:var(--bg-primary);">
+                        <div style="position:relative;">
+                            <input type="text" id="dash-search-input" placeholder="🔍 Rechercher par client, téléphone, n° commande, article..." 
+                                oninput="searchDashOrders(this.value)"
+                                style="width:100%; padding:12px 16px 12px 44px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:10px; color:var(--text-primary); font-size:14px; outline:none; transition:all 0.2s;"
+                                onfocus="this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 0 0 3px rgba(6,214,160,0.15)'"
+                                onblur="this.style.borderColor='var(--border-color)'; this.style.boxShadow='none'">
+                            <span style="position:absolute; left:16px; top:50%; transform:translateY(-50%); font-size:18px; pointer-events:none;">🔍</span>
+                            <button id="dash-search-clear" onclick="clearDashSearch()" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; font-size:16px; cursor:pointer; display:none; color:var(--text-muted);">✕</button>
+                        </div>
+                    </div>
+                    
                     <!-- Filtres -->
-                    <div style="padding:12px 20px; border-bottom:1px solid var(--border-color); display:flex; gap:8px; flex-wrap:wrap;">
+                    <div style="padding:12px 20px; border-bottom:1px solid var(--border-color); display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                        <span style="font-size:12px; color:var(--text-muted); margin-right:4px;">Filtrer:</span>
                         <button class="dash-filter active" onclick="filterDashOrders('all')" data-filter="all" style="padding:8px 16px; border-radius:20px; border:none; font-size:12px; font-weight:600; cursor:pointer; background:var(--accent-primary); color:#000;">
                             Tous
                         </button>
-                        <button class="dash-filter" onclick="filterDashOrders('shopify')" data-filter="shopify" style="padding:8px 16px; border-radius:20px; border:1px solid var(--border-color); font-size:12px; font-weight:600; cursor:pointer; background:transparent; color:var(--text-secondary);">
+                        <button class="dash-filter" onclick="filterDashOrders('shopify')" data-filter="shopify" style="padding:8px 16px; border-radius:20px; border:1px solid #96bf48; font-size:12px; font-weight:600; cursor:pointer; background:rgba(150,191,72,0.1); color:#96bf48;">
                             🛍️ Shopify
                         </button>
-                        <button class="dash-filter" onclick="filterDashOrders('myfish')" data-filter="myfish" style="padding:8px 16px; border-radius:20px; border:1px solid var(--border-color); font-size:12px; font-weight:600; cursor:pointer; background:transparent; color:var(--text-secondary);">
+                        <button class="dash-filter" onclick="filterDashOrders('myfish')" data-filter="myfish" style="padding:8px 16px; border-radius:20px; border:1px solid #9c88ff; font-size:12px; font-weight:600; cursor:pointer; background:rgba(156,136,255,0.1); color:#9c88ff;">
                             🐟 MyFish
                         </button>
-                        <button class="dash-filter" onclick="filterDashOrders('b2b')" data-filter="b2b" style="padding:8px 16px; border-radius:20px; border:1px solid var(--border-color); font-size:12px; font-weight:600; cursor:pointer; background:transparent; color:var(--text-secondary);">
+                        <button class="dash-filter" onclick="filterDashOrders('b2b')" data-filter="b2b" style="padding:8px 16px; border-radius:20px; border:1px solid #118ab2; font-size:12px; font-weight:600; cursor:pointer; background:rgba(17,138,178,0.1); color:#118ab2;">
                             🏢 B2B
                         </button>
-                        <button class="dash-filter" onclick="filterDashOrders('b2c')" data-filter="b2c" style="padding:8px 16px; border-radius:20px; border:1px solid var(--border-color); font-size:12px; font-weight:600; cursor:pointer; background:transparent; color:var(--text-secondary);">
+                        <button class="dash-filter" onclick="filterDashOrders('b2c')" data-filter="b2c" style="padding:8px 16px; border-radius:20px; border:1px solid #9c88ff; font-size:12px; font-weight:600; cursor:pointer; background:rgba(156,136,255,0.1); color:#9c88ff;">
                             👤 B2C
                         </button>
+                        <!-- Indicateur de recherche active -->
+                        <div id="dash-search-indicator" style="display:none; margin-left:auto; padding:6px 12px; background:rgba(255,209,102,0.2); border-radius:8px; font-size:11px; color:#ffd166;">
+                            <span id="dash-search-count">0</span> résultat(s) pour "<span id="dash-search-term"></span>"
+                        </div>
                     </div>
                     
                     <!-- Liste des commandes -->
-                    <div id="dash-orders-list" style="max-height:400px; overflow-y:auto;">
+                    <div id="dash-orders-list" style="max-height:500px; overflow-y:auto;">
                         <!-- Commandes injectées par JS -->
                         <div style="padding:40px; text-align:center; color:var(--text-muted);">
                             <div style="font-size:48px; margin-bottom:12px;">📦</div>
@@ -2487,83 +2599,58 @@
                 </div>
 
                 <!-- ═══════════════════════════════════════════════════════════════
-                     ⚡ ACCÈS RAPIDES - 3 modules clés
-                     ═══════════════════════════════════════════════════════════════ -->
-                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:24px;">
-                    
-                    <!-- MyFish -->
-                    <div onclick="window.location.href='myfish.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(156,136,255,0.15), rgba(123,104,238,0.1)); border:2px solid #9c88ff; border-radius:16px; padding:24px; text-align:center; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(156,136,255,0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
-                        <div style="width:64px; height:64px; background:linear-gradient(135deg, #9c88ff, #7b68ee); border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; box-shadow:0 8px 20px rgba(156,136,255,0.4);">
-                            <span style="font-size:32px;">🐟</span>
-                        </div>
-                        <div style="font-size:18px; font-weight:700; color:#9c88ff;">MyFish</div>
-                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Clients privés</div>
-                    </div>
-                    
-                    <!-- Nouvelle Commande -->
-                    <div onclick="window.location.href='commandes.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(6,214,160,0.15), rgba(17,138,178,0.1)); border:2px solid var(--accent-primary); border-radius:16px; padding:24px; text-align:center; transition:all 0.25s; position:relative;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(6,214,160,0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
-                        <div style="position:absolute; top:10px; right:10px; background:var(--accent-primary); color:#000; padding:4px 10px; border-radius:10px; font-size:10px; font-weight:700;">PRINCIPAL</div>
-                        <div style="width:64px; height:64px; background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; box-shadow:0 8px 20px rgba(6,214,160,0.4);">
-                            <span style="font-size:32px;">🛒</span>
-                        </div>
-                        <div style="font-size:18px; font-weight:700; color:var(--accent-primary);">Commande</div>
-                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Prise de commande</div>
-                    </div>
-                    
-                    <!-- Cours Poissons -->
-                    <div onclick="navigateTo('cours-poissons')" style="cursor:pointer; background:linear-gradient(145deg, rgba(0,206,201,0.15), rgba(129,236,236,0.1)); border:2px solid #00cec9; border-radius:16px; padding:24px; text-align:center; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(0,206,201,0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
-                        <div style="width:64px; height:64px; background:linear-gradient(135deg, #00cec9, #81ecec); border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; box-shadow:0 8px 20px rgba(0,206,201,0.4);">
-                            <span style="font-size:32px;">📈</span>
-                        </div>
-                        <div style="font-size:18px; font-weight:700; color:#00cec9;">Cours</div>
-                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Prix du jour</div>
-                    </div>
-                    
-                </div>
-
-                <!-- ═══════════════════════════════════════════════════════════════
-                     🔧 AUTRES MODULES - Section repliable
+                     🛠️ OUTILS SECONDAIRES - Compact
                      ═══════════════════════════════════════════════════════════════ -->
                 <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:16px; overflow:hidden;">
                     
-                    <div onclick="toggleMoreModules()" style="padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="padding:12px 20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-size:14px;">🔧</span>
-                            <span style="font-size:14px; font-weight:600; color:var(--text-muted);">Autres modules</span>
+                            <span style="font-size:14px;">🛠️</span>
+                            <span style="font-size:14px; font-weight:600;">Outils & Modules</span>
                         </div>
-                        <svg id="more-modules-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" style="transition:transform 0.3s;"><polyline points="6 9 12 15 18 9"/></svg>
+                        <span style="font-size:11px; color:var(--text-muted);">Accès rapide aux fonctionnalités</span>
                     </div>
                     
-                    <div id="more-modules-content" style="display:none; padding:0 20px 20px; display:grid; grid-template-columns:repeat(6, 1fr); gap:12px;">
+                    <div style="padding:16px 20px; display:grid; grid-template-columns:repeat(8, 1fr); gap:10px;">
                         
-                        <div onclick="window.location.href='articles.html'" style="cursor:pointer; background:var(--bg-hover); border-radius:12px; padding:16px 10px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,107,107,0.15)'" onmouseout="this.style.background='var(--bg-hover)'">
-                            <div style="font-size:24px; margin-bottom:6px;">📦</div>
-                            <div style="font-size:11px; font-weight:600;">Articles</div>
+                        <div onclick="window.location.href='shopify.html'" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:14px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(150,191,72,0.15)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:22px; margin-bottom:4px;">🛍️</div>
+                            <div style="font-size:10px; font-weight:600; color:#96bf48;">Shopify</div>
                         </div>
                         
-                        <div onclick="window.location.href='clients.html'" style="cursor:pointer; background:var(--bg-hover); border-radius:12px; padding:16px 10px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,183,77,0.15)'" onmouseout="this.style.background='var(--bg-hover)'">
-                            <div style="font-size:24px; margin-bottom:6px;">👥</div>
-                            <div style="font-size:11px; font-weight:600;">Clients</div>
+                        <div onclick="window.location.href='whatsapp.html'" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:14px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(37,211,102,0.15)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:22px; margin-bottom:4px;">💬</div>
+                            <div style="font-size:10px; font-weight:600; color:#25D366;">WhatsApp</div>
                         </div>
                         
-                        <div onclick="navigateTo('orders')" style="cursor:pointer; background:var(--bg-hover); border-radius:12px; padding:16px 10px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(9,132,227,0.15)'" onmouseout="this.style.background='var(--bg-hover)'">
-                            <div style="font-size:24px; margin-bottom:6px;">📋</div>
-                            <div style="font-size:11px; font-weight:600;">Liste Cmd</div>
+                        <div onclick="window.location.href='compta.html'" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:14px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(6,214,160,0.15)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:22px; margin-bottom:4px;">💰</div>
+                            <div style="font-size:10px; font-weight:600; color:var(--accent-primary);">Compta</div>
                         </div>
                         
-                        <div onclick="navigateTo('analyses')" style="cursor:pointer; background:var(--bg-hover); border-radius:12px; padding:16px 10px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(156,136,255,0.15)'" onmouseout="this.style.background='var(--bg-hover)'">
-                            <div style="font-size:24px; margin-bottom:6px;">📊</div>
-                            <div style="font-size:11px; font-weight:600;">Analyses</div>
+                        <div onclick="navigateTo('analyses')" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:14px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(156,136,255,0.15)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:22px; margin-bottom:4px;">📊</div>
+                            <div style="font-size:10px; font-weight:600; color:#9c88ff;">Analyses</div>
                         </div>
                         
-                        <div onclick="window.location.href='whatsapp.html'" style="cursor:pointer; background:var(--bg-hover); border-radius:12px; padding:16px 10px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(37,211,102,0.15)'" onmouseout="this.style.background='var(--bg-hover)'">
-                            <div style="font-size:24px; margin-bottom:6px;">💬</div>
-                            <div style="font-size:11px; font-weight:600;">WhatsApp</div>
+                        <div onclick="navigateTo('orders')" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:14px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(17,138,178,0.15)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:22px; margin-bottom:4px;">📋</div>
+                            <div style="font-size:10px; font-weight:600; color:#118ab2;">Liste Cmd</div>
                         </div>
                         
-                        <div onclick="window.location.href='compta.html'" style="cursor:pointer; background:var(--bg-hover); border-radius:12px; padding:16px 10px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(6,214,160,0.15)'" onmouseout="this.style.background='var(--bg-hover)'">
-                            <div style="font-size:24px; margin-bottom:6px;">💰</div>
-                            <div style="font-size:11px; font-weight:600;">Compta</div>
+                        <div onclick="window.location.href='tracabilite.html'" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:14px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,159,67,0.15)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:22px; margin-bottom:4px;">🏷️</div>
+                            <div style="font-size:10px; font-weight:600; color:#ff9f43;">Traçabilité</div>
+                        </div>
+                        
+                        <div onclick="navigateTo('fournisseurs')" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:14px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,107,107,0.15)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:22px; margin-bottom:4px;">🚚</div>
+                            <div style="font-size:10px; font-weight:600; color:#ff6b6b;">Fournisseurs</div>
+                        </div>
+                        
+                        <div onclick="navigateTo('settings')" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:14px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(100,116,139,0.15)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:22px; margin-bottom:4px;">⚙️</div>
+                            <div style="font-size:10px; font-weight:600; color:var(--text-muted);">Paramètres</div>
                         </div>
                         
                     </div>
@@ -7282,6 +7369,14 @@
 
         // Changelog des versions (pour affichage)
         const VERSION_CHANGELOG = {
+            '4.1.0': [
+                '🎛️ Command Center - Hub central d\'accès rapide',
+                '⌨️ Raccourcis clavier (M=MyFish, N=Commande, P=Prix, etc.)',
+                '🔍 Recherche avancée dans les commandes en cours',
+                '📅 Tri commandes par date, montant ou nom client',
+                '☁️ Indicateurs de statut Cloud (Dropbox + Firebase)',
+                '🎨 Interface harmonisée et navigation fluide'
+            ],
             '4.0.5': [
                 '🔥 Firebase intégré - Sync temps réel',
                 '⚡ Synchronisation instantanée (plus d\'attente)',
@@ -18672,15 +18767,199 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
         
         let allDashOrders = [];
         let currentDashFilter = 'all';
+        let currentDashSort = 'recent';
+        let currentDashSearch = '';
 
         function loadNewDashboard() {
             loadDashboardKPIs();
             loadDashboardOrders();
+            updateCommandCenterStatus();
         }
 
         function refreshDashboardOrders() {
             loadDashboardOrders();
             loadDashboardKPIs();
+        }
+
+        // 🎛️ COMMAND CENTER - Mise à jour des statuts
+        function updateCommandCenterStatus() {
+            // Dropbox status
+            const dropboxStatus = document.getElementById('command-dropbox-status');
+            if (dropboxStatus) {
+                if (DropboxConfig.accessToken) {
+                    dropboxStatus.innerHTML = '<span style="color:#06d6a0;">🟢 Connecté</span>';
+                } else {
+                    dropboxStatus.innerHTML = '<span style="color:#ef476f;">🔴 Déconnecté</span>';
+                }
+            }
+            
+            // Firebase status
+            const firebaseStatus = document.getElementById('command-firebase-status');
+            if (firebaseStatus) {
+                const fbConfig = localStorage.getItem('trakio_cloud_config');
+                if (fbConfig) {
+                    try {
+                        const config = JSON.parse(fbConfig);
+                        if (config.provider === 'firebase') {
+                            firebaseStatus.innerHTML = '<span style="color:#06d6a0;">🟢 Connecté</span>';
+                        } else {
+                            firebaseStatus.innerHTML = '<span style="color:#ffd166;">🟡 ' + config.provider + '</span>';
+                        }
+                    } catch { 
+                        firebaseStatus.innerHTML = '<span style="color:#ef476f;">🔴 Déconnecté</span>';
+                    }
+                } else {
+                    firebaseStatus.innerHTML = '<span style="color:#ef476f;">🔴 Déconnecté</span>';
+                }
+            }
+            
+            // Prochaine sync
+            const nextSync = document.getElementById('command-next-sync');
+            const syncCountdown = document.getElementById('sync-countdown');
+            if (nextSync && syncCountdown) {
+                nextSync.textContent = syncCountdown.textContent;
+            }
+        }
+
+        // ⌨️ RACCOURCIS CLAVIER - Command Center
+        document.addEventListener('keydown', function(e) {
+            // Ignorer si on est dans un input/textarea
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+                return;
+            }
+            
+            // Ignorer si Ctrl, Alt ou Meta est pressé (sauf Ctrl+K)
+            if (e.ctrlKey || e.altKey || e.metaKey) {
+                return;
+            }
+            
+            switch(e.key.toLowerCase()) {
+                case 'm': // MyFish
+                    window.location.href = 'myfish.html';
+                    break;
+                case 'n': // Nouvelle commande
+                    window.location.href = 'commandes.html';
+                    break;
+                case 'p': // Prix / Cours
+                    navigateTo('cours-poissons');
+                    break;
+                case 'a': // Articles
+                    window.location.href = 'articles.html';
+                    break;
+                case 'c': // Clients
+                    window.location.href = 'clients.html';
+                    break;
+                case 'k': // Cloud
+                    window.location.href = 'cloud.html';
+                    break;
+                case 's': // Shopify
+                    window.location.href = 'shopify.html';
+                    break;
+                case 'd': // Dashboard (retour accueil)
+                    navigateTo('dashboard');
+                    break;
+                case '/': // Focus sur la recherche
+                    e.preventDefault();
+                    const searchInput = document.getElementById('global-search-input') || document.getElementById('dash-search-input');
+                    if (searchInput) searchInput.focus();
+                    break;
+            }
+        });
+
+        // Mettre à jour le statut Command Center toutes les 30 secondes
+        setInterval(updateCommandCenterStatus, 30000);
+
+        // 🔍 RECHERCHE - Fonction de recherche intuitive
+        function searchDashOrders(query) {
+            currentDashSearch = query.trim().toLowerCase();
+            const clearBtn = document.getElementById('dash-search-clear');
+            const indicator = document.getElementById('dash-search-indicator');
+            
+            if (clearBtn) clearBtn.style.display = currentDashSearch ? 'block' : 'none';
+            
+            renderDashboardOrders();
+            
+            // Mettre à jour l'indicateur de recherche
+            if (currentDashSearch && indicator) {
+                const filtered = getFilteredAndSearchedOrders();
+                document.getElementById('dash-search-count').textContent = filtered.length;
+                document.getElementById('dash-search-term').textContent = currentDashSearch;
+                indicator.style.display = 'flex';
+            } else if (indicator) {
+                indicator.style.display = 'none';
+            }
+        }
+
+        function clearDashSearch() {
+            const input = document.getElementById('dash-search-input');
+            if (input) input.value = '';
+            searchDashOrders('');
+        }
+
+        // 📅 TRI - Fonction de tri
+        function sortDashOrders(sortType) {
+            currentDashSort = sortType;
+            
+            switch(sortType) {
+                case 'recent':
+                    allDashOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    break;
+                case 'oldest':
+                    allDashOrders.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    break;
+                case 'amount-high':
+                    allDashOrders.sort((a, b) => (b.total || 0) - (a.total || 0));
+                    break;
+                case 'amount-low':
+                    allDashOrders.sort((a, b) => (a.total || 0) - (b.total || 0));
+                    break;
+                case 'name':
+                    allDashOrders.sort((a, b) => (a.client || '').localeCompare(b.client || ''));
+                    break;
+            }
+            
+            renderDashboardOrders();
+        }
+
+        // Obtenir les commandes filtrées ET recherchées
+        function getFilteredAndSearchedOrders() {
+            let filtered = allDashOrders;
+            
+            // Filtre par source/type
+            if (currentDashFilter !== 'all') {
+                if (currentDashFilter === 'shopify') {
+                    filtered = filtered.filter(o => o.source === 'shopify');
+                } else if (currentDashFilter === 'myfish') {
+                    filtered = filtered.filter(o => o.source === 'myfish');
+                } else if (currentDashFilter === 'b2b') {
+                    filtered = filtered.filter(o => o.type === 'B2B');
+                } else if (currentDashFilter === 'b2c') {
+                    filtered = filtered.filter(o => o.type === 'B2C');
+                }
+            }
+            
+            // Filtre par recherche
+            if (currentDashSearch) {
+                filtered = filtered.filter(o => {
+                    const searchFields = [
+                        o.client || '',
+                        o.phone || '',
+                        o.email || '',
+                        o.id || '',
+                        o.lineItems || '',
+                        o.city || '',
+                        o.address || '',
+                        o.notes || '',
+                        o.pickupLocation || '',
+                        // Recherche dans les articles
+                        (o.items || []).map(i => i.name || '').join(' ')
+                    ].join(' ').toLowerCase();
+                    
+                    return searchFields.includes(currentDashSearch);
+                });
+            }
+            
+            return filtered;
         }
 
         // 🔍 Debug: Voir la structure des données Shopify
@@ -18912,10 +19191,8 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
                 });
             });
 
-            // Sort by date/time (most recent first)
-            allDashOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            renderDashboardOrders();
+            // Sort by date/time (most recent first) by default
+            sortDashOrders(currentDashSort);
         }
 
         function extractTime(dateStr) {
@@ -18932,32 +19209,44 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             const container = document.getElementById('dash-orders-list');
             if (!container) return;
 
-            // Filter
-            let filtered = allDashOrders;
-            if (currentDashFilter !== 'all') {
-                if (currentDashFilter === 'shopify') {
-                    filtered = allDashOrders.filter(o => o.source === 'shopify');
-                } else if (currentDashFilter === 'myfish') {
-                    filtered = allDashOrders.filter(o => o.source === 'myfish');
-                } else if (currentDashFilter === 'b2b') {
-                    filtered = allDashOrders.filter(o => o.type === 'B2B');
-                } else if (currentDashFilter === 'b2c') {
-                    filtered = allDashOrders.filter(o => o.type === 'B2C');
-                }
-            }
+            // Utiliser la nouvelle fonction qui gère filtre ET recherche
+            let filtered = getFilteredAndSearchedOrders();
 
             // Update count badge
             const countBadge = document.getElementById('orders-count-badge');
             if (countBadge) countBadge.textContent = filtered.length;
 
             if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div style="padding:60px 40px; text-align:center; color:var(--text-muted);">
-                        <div style="font-size:48px; margin-bottom:16px;">✅</div>
-                        <div style="font-size:16px; font-weight:600;">Aucune commande en cours</div>
-                        <div style="font-size:13px; margin-top:8px;">Toutes les commandes sont traitées</div>
-                    </div>
-                `;
+                // Distinguer entre pas de commande vs pas de résultat de recherche
+                if (currentDashSearch) {
+                    container.innerHTML = `
+                        <div style="padding:60px 40px; text-align:center; color:var(--text-muted);">
+                            <div style="font-size:48px; margin-bottom:16px;">🔍</div>
+                            <div style="font-size:16px; font-weight:600;">Aucun résultat pour "${currentDashSearch}"</div>
+                            <div style="font-size:13px; margin-top:8px;">Essayez avec d'autres termes</div>
+                            <button onclick="clearDashSearch()" style="margin-top:16px; padding:10px 20px; background:var(--accent-primary); color:#000; border:none; border-radius:8px; cursor:pointer; font-weight:600;">
+                                ✕ Effacer la recherche
+                            </button>
+                        </div>
+                    `;
+                } else if (currentDashFilter !== 'all') {
+                    const filterNames = { shopify: 'Shopify', myfish: 'MyFish', b2b: 'B2B', b2c: 'B2C' };
+                    container.innerHTML = `
+                        <div style="padding:60px 40px; text-align:center; color:var(--text-muted);">
+                            <div style="font-size:48px; margin-bottom:16px;">📭</div>
+                            <div style="font-size:16px; font-weight:600;">Aucune commande ${filterNames[currentDashFilter] || ''}</div>
+                            <div style="font-size:13px; margin-top:8px;">Pas de commande en cours pour ce filtre</div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div style="padding:60px 40px; text-align:center; color:var(--text-muted);">
+                            <div style="font-size:48px; margin-bottom:16px;">✅</div>
+                            <div style="font-size:16px; font-weight:600;">Aucune commande en cours</div>
+                            <div style="font-size:13px; margin-top:8px;">Toutes les commandes sont traitées</div>
+                        </div>
+                    `;
+                }
                 return;
             }
 
