@@ -797,41 +797,89 @@ L'équipe Borex Poissons
         // CLIENTS
         // =============================================
         function loadClients() {
-            const data = JSON.parse(localStorage.getItem('trakio_quickorder') || '{}');
-            const clients = data.clients || [];
+            // Charger depuis trakio_quickorder
+            const trakioData = JSON.parse(localStorage.getItem('trakio_quickorder') || '{}');
+            let clients = trakioData.clients || [];
+
+            // Charger aussi depuis shopify_orders (extraire les clients des commandes)
+            const shopifyOrders = JSON.parse(localStorage.getItem('shopify_orders') || '[]');
+            
+            // Extraire les clients uniques des commandes Shopify
+            const shopifyClients = [];
+            const seenEmails = new Set();
+            const seenPhones = new Set();
+
+            shopifyOrders.forEach(order => {
+                const email = order.Email || order.email || '';
+                const phone = order['Billing Phone'] || order['Shipping Phone'] || order.phone || '';
+                const name = order['Billing Name'] || order['Shipping Name'] || order.customer_name || '';
+                const company = order['Billing Company'] || order['Shipping Company'] || '';
+                
+                // Éviter les doublons
+                if (email && seenEmails.has(email.toLowerCase())) return;
+                if (phone && seenPhones.has(phone.replace(/\D/g, ''))) return;
+                if (!name && !company) return;
+
+                if (email) seenEmails.add(email.toLowerCase());
+                if (phone) seenPhones.add(phone.replace(/\D/g, ''));
+
+                shopifyClients.push({
+                    id: 'shopify_' + (shopifyClients.length + 1),
+                    name: name,
+                    company: company,
+                    email: email,
+                    phone: phone,
+                    mobile: phone,
+                    type: 'Shopify',
+                    address: order['Shipping Address1'] || order['Billing Address1'] || '',
+                    city: order['Shipping City'] || order['Billing City'] || '',
+                    source: 'shopify'
+                });
+            });
+
+            // Fusionner les deux listes (trakio + shopify)
+            const allClients = [...clients, ...shopifyClients];
 
             const container = document.getElementById('client-list');
             const bulkContainer = document.getElementById('bulk-client-list');
 
-            if (clients.length === 0) {
-                container.innerHTML = '<div class="empty-state"><div class="icon">👥</div><div class="title">Aucun client</div><div>Ajoutez des clients dans le module Clients</div></div>';
+            // Stats
+            const totalClients = allClients.length;
+            const withPhone = allClients.filter(c => c.phone || c.mobile).length;
+            document.getElementById('stats-total') && (document.getElementById('stats-total').textContent = totalClients);
+            document.getElementById('stats-phone') && (document.getElementById('stats-phone').textContent = withPhone);
+
+            if (allClients.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">👥</div><div class="title">Aucun client</div><div>Importez des commandes Shopify ou ajoutez des clients dans le module Clients</div></div>';
+                bulkContainer.innerHTML = '';
                 return;
             }
 
-            container.innerHTML = clients.map(client => {
+            container.innerHTML = allClients.map(client => {
                 const hasPhone = client.phone || client.mobile;
                 const phone = client.mobile || client.phone || '';
                 const initials = getInitials(client.name || client.company || 'N/A');
                 const type = client.type || 'B2C';
+                const typeClass = type.toLowerCase().replace(/[^a-z]/g, '');
 
                 return `
-                    <div class="client-item" onclick="selectClient(${client.id})" data-id="${client.id}">
+                    <div class="client-item" onclick="selectClient('${client.id}')" data-id="${client.id}">
                         <div class="client-avatar">${initials}</div>
                         <div class="client-info">
                             <div class="client-name">${client.name || client.company || 'Sans nom'}</div>
                             <div class="client-phone ${!hasPhone ? 'no-phone' : ''}">${hasPhone ? formatPhone(phone) : '❌ Pas de téléphone'}</div>
                         </div>
-                        <span class="client-badge ${type.toLowerCase()}">${type}</span>
+                        <span class="client-badge ${typeClass}">${type}</span>
                     </div>
                 `;
             }).join('');
 
-            // Bulk list
-            bulkContainer.innerHTML = clients.filter(c => c.phone || c.mobile).map(client => {
+            // Bulk list - seulement ceux avec téléphone
+            bulkContainer.innerHTML = allClients.filter(c => c.phone || c.mobile).map(client => {
                 const phone = client.mobile || client.phone;
                 return `
-                    <div class="client-item" onclick="toggleBulkClient(${client.id})" data-id="${client.id}">
-                        <input type="checkbox" class="bulk-check" data-id="${client.id}" onclick="event.stopPropagation(); toggleBulkClient(${client.id})">
+                    <div class="client-item" onclick="toggleBulkClient('${client.id}')" data-id="${client.id}">
+                        <input type="checkbox" class="bulk-check" data-id="${client.id}" onclick="event.stopPropagation(); toggleBulkClient('${client.id}')">
                         <div class="client-avatar">${getInitials(client.name || client.company)}</div>
                         <div class="client-info">
                             <div class="client-name">${client.name || client.company}</div>
@@ -840,9 +888,13 @@ L'équipe Borex Poissons
                     </div>
                 `;
             }).join('');
+
+            // Stocker les clients pour usage ultérieur
+            window.allClientsCache = allClients;
         }
 
         function getInitials(name) {
+            if (!name) return '??';
             return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
         }
 
@@ -865,15 +917,26 @@ L'équipe Borex Poissons
         }
 
         function selectClient(clientId) {
-            const data = JSON.parse(localStorage.getItem('trakio_quickorder') || '{}');
-            const client = (data.clients || []).find(c => c.id === clientId);
-            if (!client) return;
+            // Chercher dans le cache (trakio + shopify)
+            const allClients = window.allClientsCache || [];
+            let client = allClients.find(c => c.id == clientId || c.id === clientId);
+            
+            // Si pas trouvé dans le cache, chercher dans trakio_quickorder
+            if (!client) {
+                const data = JSON.parse(localStorage.getItem('trakio_quickorder') || '{}');
+                client = (data.clients || []).find(c => c.id == clientId);
+            }
+            
+            if (!client) {
+                console.warn('Client non trouvé:', clientId);
+                return;
+            }
 
             selectedClient = client;
 
             // Update UI
             document.querySelectorAll('.client-item').forEach(item => {
-                item.classList.toggle('active', parseInt(item.dataset.id) === clientId);
+                item.classList.toggle('active', item.dataset.id == clientId);
             });
 
             // Update composer header
@@ -1021,15 +1084,7 @@ L'équipe Borex Poissons
 
             // Remplacer les variables
             if (selectedClient) {
-                const nameParts = (selectedClient.name || '').split(' ');
-                message = message
-                    .replace(/{nom}/g, selectedClient.name || selectedClient.company || '')
-                    .replace(/{prenom}/g, nameParts[0] || '')
-                    .replace(/{commande}/g, '#' + (Math.floor(Math.random() * 1000) + 1000))
-                    .replace(/{date}/g, new Date().toLocaleDateString('fr-CH'))
-                    .replace(/{heure}/g, '14:00')
-                    .replace(/{lieu}/g, 'Laboratoire de Coinsins')
-                    .replace(/{total}/g, '125.00');
+                message = replaceVariables(message, selectedClient);
             }
 
             // Ajouter signature si activée
@@ -1039,6 +1094,38 @@ L'équipe Borex Poissons
 
             document.getElementById('message-preview').textContent = message || 'Votre message apparaîtra ici...';
             document.getElementById('preview-time').textContent = new Date().toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function replaceVariables(message, client) {
+            if (!client) return message;
+            const nameParts = (client.name || '').split(' ');
+            return message
+                .replace(/{nom}/g, client.name || client.company || '')
+                .replace(/{prenom}/g, nameParts[0] || '')
+                .replace(/{entreprise}/g, client.company || '')
+                .replace(/{email}/g, client.email || '')
+                .replace(/{telephone}/g, formatPhone(client.mobile || client.phone) || '')
+                .replace(/{commande}/g, '#' + (Math.floor(Math.random() * 1000) + 1000))
+                .replace(/{date}/g, new Date().toLocaleDateString('fr-CH'))
+                .replace(/{heure}/g, '14:00')
+                .replace(/{lieu}/g, 'Laboratoire de Coinsins')
+                .replace(/{total}/g, '125.00');
+        }
+
+        function saveToHistory(client, message, status) {
+            const history = JSON.parse(localStorage.getItem('whatsapp_history') || '[]');
+            history.unshift({
+                id: Date.now(),
+                clientId: client.id,
+                clientName: client.name || client.company,
+                phone: formatPhone(client.mobile || client.phone),
+                message: message.substring(0, 100),
+                fullMessage: message,
+                date: new Date().toISOString(),
+                status: status
+            });
+            // Garder max 100 messages
+            localStorage.setItem('whatsapp_history', JSON.stringify(history.slice(0, 100)));
         }
 
         function clearMessage() {
@@ -1077,15 +1164,8 @@ L'équipe Borex Poissons
             const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
 
             // Sauvegarder dans l'historique
-            history.unshift({
-                id: Date.now(),
-                client: selectedClient.name || selectedClient.company,
-                phone: phone,
-                message: message.substring(0, 100),
-                date: new Date().toISOString(),
-                status: 'sent'
-            });
-            localStorage.setItem('whatsapp_history', JSON.stringify(history.slice(0, 100)));
+            saveToHistory(selectedClient, message, 'sent');
+            loadHistory();
 
             // Ouvrir WhatsApp
             window.open(url, '_blank');
@@ -1108,8 +1188,8 @@ L'équipe Borex Poissons
 
         function toggleBulkSelectAll() {
             const checked = document.getElementById('bulk-select-all').checked;
-            const data = JSON.parse(localStorage.getItem('trakio_quickorder') || '{}');
-            const clients = (data.clients || []).filter(c => c.phone || c.mobile);
+            // Utiliser le cache des clients (trakio + shopify)
+            const clients = (window.allClientsCache || []).filter(c => c.phone || c.mobile);
 
             if (checked) {
                 bulkSelectedClients = clients.map(c => c.id);
@@ -1146,10 +1226,35 @@ L'équipe Borex Poissons
                 return;
             }
 
-            alert(`📤 Envoi groupé préparé pour ${bulkSelectedClients.length} client(s).\n\nLes messages seront ouverts un par un dans WhatsApp.`);
+            // Récupérer les clients sélectionnés
+            const clients = (window.allClientsCache || []).filter(c => bulkSelectedClients.includes(c.id));
+            
+            if (clients.length === 0) {
+                alert('Aucun client trouvé');
+                return;
+            }
 
-            // Ouvrir le premier
-            // Dans une vraie app, on pourrait utiliser l'API WhatsApp Business
+            // Ouvrir WhatsApp pour chaque client (avec délai)
+            let opened = 0;
+            clients.forEach((client, index) => {
+                const phone = formatPhone(client.mobile || client.phone);
+                const personalizedMessage = replaceVariables(message, client);
+                
+                setTimeout(() => {
+                    const url = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(personalizedMessage)}`;
+                    window.open(url, '_blank');
+                    opened++;
+                    
+                    if (opened === clients.length) {
+                        // Sauvegarder dans l'historique
+                        clients.forEach(c => {
+                            saveToHistory(c, personalizedMessage, 'sent');
+                        });
+                    }
+                }, index * 1500); // 1.5s entre chaque
+            });
+
+            alert(`📤 Envoi groupé pour ${clients.length} client(s).\n\nLes fenêtres WhatsApp vont s'ouvrir une par une.`);
         }
 
         // =============================================
