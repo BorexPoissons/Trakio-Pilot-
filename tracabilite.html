@@ -595,6 +595,16 @@
                     <label class="setting-label">📐 Longueur étiquette (mm)</label>
                     <input type="number" class="setting-input" id="setting-length" value="100" min="20" max="300">
                 </div>
+                
+                <div style="background:rgba(6,214,160,0.1); border:1px solid var(--accent-primary); border-radius:10px; padding:14px; margin-top:16px;">
+                    <div style="font-size:13px; font-weight:600; color:var(--accent-primary); margin-bottom:8px;">💡 Configuration Windows requise</div>
+                    <div style="font-size:11px; color:var(--text-secondary); line-height:1.5;">
+                        1. Installez le <strong>pilote Brother QL-1100</strong> depuis brother.ch<br>
+                        2. Dans l'impression, sélectionnez <strong>"62mm"</strong> ou <strong>"DK-22205"</strong> comme taille de papier<br>
+                        3. Si absent, ouvrez <strong>Brother P-touch Editor</strong> pour créer le format
+                    </div>
+                </div>
+                
                 <button class="test-connection-btn" onclick="testPrinter()">🔍 Tester la connexion</button>
             </div>
             <div class="modal-footer">
@@ -803,29 +813,113 @@
             if (!product) { showToast('❌ Veuillez entrer un nom de produit', 'error'); return; }
             saveToHistory();
             
-            const printWindow = window.open('', '_blank', 'width=300,height=500');
+            const labelHeight = printerConfig.labelLength || 100;
+            const printWindow = window.open('', '_blank', 'width=300,height=600');
             let labelsHTML = '';
             for (let i = 0; i < printQty; i++) { labelsHTML += generateLabelHTML(); }
             
-            printWindow.document.write(`<!DOCTYPE html><html><head><title>Impression</title><style>
-                @page { size: 62mm ${printerConfig.labelLength}mm; margin: 0; }
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { font-family: Arial, sans-serif; background: #fff; }
-                .label { width: 62mm; padding: 3mm; page-break-after: always; }
-                .label:last-child { page-break-after: avoid; }
-                .label-header { display: flex; align-items: center; gap: 3mm; padding-bottom: 2mm; border-bottom: 0.3mm solid #ddd; margin-bottom: 2mm; }
-                .logo { width: 10mm; height: 10mm; background: linear-gradient(135deg, #06d6a0, #118ab2); border-radius: 2mm; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10pt; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                .company-name { font-size: 11pt; font-weight: bold; color: #1a1a2e; }
-                .company-tagline { font-size: 7pt; color: #888; }
-                .info-row { display: flex; justify-content: space-between; padding: 1mm 0; border-bottom: 0.2mm solid #f0f0f0; }
-                .info-key { font-size: 8pt; color: #888; }
-                .info-value { font-size: 8pt; font-weight: bold; color: #1a1a2e; }
-                .qr-section { display: flex; flex-direction: column; align-items: center; padding-top: 2mm; margin-top: 2mm; border-top: 0.3mm solid #ddd; }
-                .qr-code img { width: 15mm; height: 15mm; }
-                .qr-text { font-size: 6pt; color: #888; margin-top: 1mm; }
-            </style></head><body>${labelsHTML}<script>window.onload=function(){setTimeout(function(){window.print();setTimeout(function(){window.close();},500);},300);};<\/script></body></html>`);
+            printWindow.document.write(`<!DOCTYPE html><html><head><title>Étiquette Borex Poissons</title>
+<style>
+    /* FORMAT BROTHER DK-22205 (62mm x longueur variable) */
+    @page { 
+        size: 62mm ${labelHeight}mm; 
+        margin: 0; 
+    }
+    @media print {
+        html, body {
+            width: 62mm;
+            margin: 0;
+            padding: 0;
+        }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+        font-family: Arial, sans-serif; 
+        background: #fff;
+        width: 62mm;
+    }
+    .print-instructions {
+        padding: 15px;
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        border-radius: 8px;
+        margin: 10px;
+        font-size: 12px;
+    }
+    .print-instructions h3 { color: #856404; margin-bottom: 8px; }
+    .print-instructions ol { margin-left: 20px; color: #856404; }
+    .print-instructions li { margin: 4px 0; }
+    @media print { .print-instructions { display: none !important; } }
+    
+    .label { 
+        width: 62mm; 
+        padding: 3mm; 
+        page-break-after: always;
+        background: #fff;
+    }
+    .label:last-child { page-break-after: avoid; }
+    .label-header { 
+        display: flex; 
+        align-items: center; 
+        gap: 3mm; 
+        padding-bottom: 2mm; 
+        border-bottom: 0.3mm solid #ddd; 
+        margin-bottom: 2mm; 
+    }
+    .logo { 
+        width: 10mm; 
+        height: 10mm; 
+        background: linear-gradient(135deg, #06d6a0, #118ab2); 
+        border-radius: 2mm; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        color: #fff; 
+        font-size: 10pt; 
+        font-weight: bold; 
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact; 
+    }
+    .company-name { font-size: 11pt; font-weight: bold; color: #1a1a2e; }
+    .company-tagline { font-size: 7pt; color: #888; }
+    .info-row { 
+        display: flex; 
+        justify-content: space-between; 
+        padding: 1mm 0; 
+        border-bottom: 0.2mm solid #f0f0f0; 
+    }
+    .info-key { font-size: 8pt; color: #888; }
+    .info-value { font-size: 8pt; font-weight: bold; color: #1a1a2e; }
+    .qr-section { 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        padding-top: 2mm; 
+        margin-top: 2mm; 
+        border-top: 0.3mm solid #ddd; 
+    }
+    .qr-code img { width: 15mm; height: 15mm; }
+    .qr-text { font-size: 6pt; color: #888; margin-top: 1mm; }
+</style>
+</head>
+<body>
+    <div class="print-instructions">
+        <h3>⚠️ IMPORTANT - Configuration impression</h3>
+        <ol>
+            <li><strong>Destination:</strong> Brother QL-1100</li>
+            <li><strong>Taille du papier:</strong> Cliquez sur "Plus de paramètres" → Sélectionnez <strong>"62mm"</strong> ou <strong>"DK-22205"</strong></li>
+            <li><strong>Marges:</strong> Aucune (si possible)</li>
+            <li>Cliquez sur <strong>Imprimer</strong></li>
+        </ol>
+    </div>
+    ${labelsHTML}
+<script>
+    // Ne pas auto-print pour laisser l'utilisateur configurer
+    // window.onload = function() { window.print(); };
+</script>
+</body></html>`);
             printWindow.document.close();
-            showToast(`🖨️ Impression de ${printQty} étiquette(s)...`, 'success');
+            showToast(`🖨️ Configurez le format 62mm puis cliquez Imprimer`, 'success');
         }
 
         function generateLabelHTML() {
