@@ -7193,8 +7193,8 @@
         // Initialiser Firebase
         function initFirebase() {
             try {
-                if (!firebase) {
-                    console.warn('⚠️ Firebase SDK non chargé');
+                if (typeof firebase === 'undefined') {
+                    console.log('ℹ️ Firebase SDK non disponible (mode preview)');
                     return false;
                 }
                 
@@ -7229,7 +7229,10 @@
                 
                 return true;
             } catch (err) {
-                console.error('❌ Firebase init error:', err);
+                // Silencieux en mode preview
+                if (err.name !== 'ReferenceError') {
+                    console.error('❌ Firebase init error:', err);
+                }
                 return false;
             }
         }
