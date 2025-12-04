@@ -3,1225 +3,935 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAKIO Traçabilité v1.0.0 - QR Codes & Lots</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>TRAKIO - Traçabilité & Étiquettes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
-            --bg-primary: #0a0e17;
-            --bg-secondary: #111827;
-            --bg-card: #1a2234;
-            --bg-hover: #243049;
+            --bg-primary: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-hover: #1a1a25;
+            --border-color: #2a2a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #ccccdd;
+            --text-muted: #8888aa;
             --accent-primary: #06d6a0;
             --accent-secondary: #118ab2;
             --accent-warning: #ffd166;
             --accent-danger: #ef476f;
-            --accent-purple: #9d4edd;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border-color: #2d3a4f;
+            --accent-purple: #9c88ff;
             --radius: 16px;
             --radius-sm: 10px;
-            --shadow: 0 8px 32px rgba(0,0,0,0.4);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
-            padding: 20px;
         }
 
-        .container { max-width: 1400px; margin: 0 auto; }
-
-        /* Header */
+        /* HEADER */
         .header {
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
 
-        .logo {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--accent-purple), #7b2cbf);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-        }
-
-        .title-block h1 {
-            font-size: 28px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 13px;
-            padding: 8px 14px;
-            border-radius: 20px;
-            transition: var(--transition);
-            margin-bottom: 16px;
-        }
-
-        .back-link:hover {
-            background: var(--bg-hover);
-            color: var(--accent-primary);
-        }
-
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
+        .back-btn {
+            width: 40px; height: 40px;
+            background: rgba(0,0,0,0.2);
+            border: none; border-radius: 10px;
+            color: #000; font-size: 20px;
             cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .back-btn:hover { background: rgba(0,0,0,0.3); transform: translateX(-2px); }
+
+        .header-title { display: flex; align-items: center; gap: 12px; }
+        .header-title h1 { font-size: 20px; font-weight: 800; color: #000; }
+        .header-title span { font-size: 12px; color: rgba(0,0,0,0.6); padding: 4px 10px; background: rgba(0,0,0,0.15); border-radius: 8px; }
+
+        .header-right { display: flex; align-items: center; gap: 12px; }
+
+        .printer-status {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 14px; background: rgba(0,0,0,0.2);
+            border-radius: 10px; font-size: 12px; color: #000;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-purple), #7b2cbf);
-            color: #fff;
+        .printer-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #ef476f;
+        }
+        .printer-dot.connected {
+            background: #06d6a0;
+            animation: pulse-dot 2s infinite;
         }
 
-        .btn-secondary {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
+        @keyframes pulse-dot {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { box-shadow: 0 0 0 6px rgba(6,214,160,0); }
         }
 
-        .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+        .settings-btn {
+            padding: 8px 14px; background: rgba(0,0,0,0.2);
+            border: none; border-radius: 10px;
+            color: #000; font-size: 13px; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; gap: 6px;
+            transition: all 0.2s;
+        }
+        .settings-btn:hover { background: rgba(0,0,0,0.3); }
 
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-            background: var(--bg-secondary);
-            padding: 8px;
-            border-radius: var(--radius);
-            flex-wrap: wrap;
+        /* MAIN LAYOUT */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px; padding: 24px;
+            max-width: 1400px; margin: 0 auto;
         }
 
-        .tab {
-            padding: 14px 24px;
-            border: none;
-            background: transparent;
-            color: var(--text-muted);
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: var(--radius-sm);
-            transition: var(--transition);
+        @media (max-width: 1024px) {
+            .main-container { grid-template-columns: 1fr; }
         }
 
-        .tab:hover { background: var(--bg-hover); color: var(--text-primary); }
-
-        .tab.active {
-            background: linear-gradient(135deg, var(--accent-purple), #7b2cbf);
-            color: #fff;
-        }
-
-        /* Cards */
-        .card {
+        /* FORM SECTION */
+        .form-section {
             background: var(--bg-card);
-            border-radius: var(--radius);
             border: 1px solid var(--border-color);
+            border-radius: var(--radius);
             overflow: hidden;
-            margin-bottom: 20px;
         }
 
-        .card-header {
+        .section-header {
             padding: 16px 20px;
-            background: linear-gradient(135deg, var(--accent-purple), #7b2cbf);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
         }
+        .section-header h2 { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
 
-        .card-header h3 {
-            color: #fff;
-            font-size: 16px;
-            font-weight: 700;
-        }
+        .section-body { padding: 20px; }
 
-        .card-body { padding: 20px; }
-
-        /* Form */
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 16px;
-            margin-bottom: 20px;
         }
 
-        .form-group {
-            margin-bottom: 16px;
-        }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.full { grid-column: span 2; }
+        .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
 
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 16px;
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 12px 14px;
             background: var(--bg-primary);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             color: var(--text-primary);
-            font-size: 14px;
+            font-size: 14px; font-family: inherit;
+            transition: all 0.2s;
         }
-
-        .form-group input:focus,
-        .form-group select:focus {
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
-            border-color: var(--accent-purple);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(6,214,160,0.15);
         }
+        .form-group textarea { resize: vertical; min-height: 80px; }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
+        /* Quick Products */
+        .quick-products { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color); }
+        .quick-products-title { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px; }
+        .quick-products-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .quick-product-btn {
+            padding: 8px 14px; background: var(--bg-hover);
+            border: 1px solid var(--border-color); border-radius: 20px;
+            color: var(--text-secondary); font-size: 12px;
+            cursor: pointer; transition: all 0.2s;
         }
+        .quick-product-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
 
-        /* QR Preview */
-        .qr-preview-section {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 24px;
+        /* History */
+        .history-section { margin-top: 24px; }
+        .history-list { max-height: 200px; overflow-y: auto; }
+
+        .history-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px; background: var(--bg-primary);
+            border-radius: var(--radius-sm); margin-bottom: 8px;
+            cursor: pointer; transition: all 0.2s;
         }
+        .history-item:hover { background: var(--bg-hover); transform: translateX(4px); }
+        .history-item-info { display: flex; flex-direction: column; gap: 2px; }
+        .history-item-name { font-size: 13px; font-weight: 600; }
+        .history-item-details { font-size: 11px; color: var(--text-muted); }
+        .history-item-time { font-size: 11px; color: var(--text-muted); font-family: 'Space Mono', monospace; }
 
-        @media (max-width: 900px) {
-            .qr-preview-section { grid-template-columns: 1fr; }
-        }
+        /* PREVIEW SECTION */
+        .preview-section { display: flex; flex-direction: column; gap: 16px; }
 
-        .qr-container {
-            background: #fff;
+        .label-preview-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: var(--radius);
-            padding: 24px;
-            text-align: center;
+            overflow: hidden;
         }
 
-        #qr-code {
-            display: inline-block;
-            padding: 16px;
-            background: #fff;
-            border-radius: 8px;
-            margin-bottom: 16px;
+        .preview-header {
+            padding: 12px 16px; background: var(--bg-hover);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
         }
+        .preview-header h3 { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .preview-size { font-size: 11px; color: var(--text-muted); font-family: 'Space Mono', monospace; }
 
-        #qr-code img {
-            display: block;
-        }
-
-        /* Label Preview */
-        .label-preview {
-            background: #fff;
-            border-radius: 8px;
+        .preview-body {
             padding: 20px;
-            color: #000;
-            font-size: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex; justify-content: center; align-items: center;
+            background: #fff; min-height: 300px;
+        }
+
+        /* Label Design */
+        .label-container {
+            width: 234px; background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 16px; font-family: 'Inter', sans-serif;
         }
 
         .label-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #06d6a0;
+            display: flex; align-items: center; gap: 12px;
+            padding-bottom: 12px; border-bottom: 1px solid #eee; margin-bottom: 12px;
         }
 
         .label-logo {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #06d6a0, #118ab2);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-weight: 700;
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 14px; font-weight: 800;
         }
 
-        .label-company {
-            font-size: 16px;
-            font-weight: 700;
-        }
+        .label-company { flex: 1; }
+        .label-company-name { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+        .label-company-tagline { font-size: 10px; color: #888; }
 
-        .label-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            border-bottom: 1px solid #eee;
-        }
-
+        .label-info { margin-bottom: 12px; }
+        .label-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
         .label-row:last-child { border-bottom: none; }
-
-        .label-key { color: #666; }
-        .label-value { font-weight: 600; }
+        .label-key { font-size: 11px; color: #888; }
+        .label-value { font-size: 11px; font-weight: 600; color: #1a1a2e; font-family: 'Space Mono', monospace; }
 
         .label-qr {
-            text-align: center;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 2px dashed #ddd;
+            display: flex; flex-direction: column; align-items: center;
+            padding-top: 12px; border-top: 1px solid #eee;
         }
+        .label-qr-code { width: 80px; height: 80px; margin-bottom: 6px; }
+        .label-qr-text { font-size: 9px; color: #888; }
 
-        .label-qr img {
-            width: 80px;
-            height: 80px;
-        }
-
-        /* Lots Table */
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        th {
-            background: var(--bg-primary);
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            color: var(--text-muted);
-        }
-
-        tr:hover { background: var(--bg-hover); }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .status-badge.active { background: rgba(6, 214, 160, 0.2); color: var(--accent-primary); }
-        .status-badge.expired { background: rgba(239, 71, 111, 0.2); color: var(--accent-danger); }
-        .status-badge.warning { background: rgba(255, 209, 102, 0.2); color: var(--accent-warning); }
-
-        /* Scan Section */
-        .scan-zone {
-            text-align: center;
-            padding: 60px;
-            background: var(--bg-primary);
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius);
-            margin-bottom: 20px;
-        }
-
-        .scan-zone .icon {
-            font-size: 64px;
-            margin-bottom: 16px;
-        }
-
-        .scan-zone .title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .scan-zone .hint {
-            color: var(--text-muted);
-            margin-bottom: 20px;
-        }
-
-        #video-container {
-            display: none;
-            max-width: 400px;
-            margin: 0 auto;
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-
-        #video-container video {
-            width: 100%;
-            display: block;
-        }
-
-        /* Result Card */
-        .result-card {
-            background: var(--bg-primary);
-            border-radius: var(--radius);
-            padding: 24px;
-            display: none;
-        }
-
-        .result-card.active { display: block; }
-
-        .result-header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .result-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-        }
-
-        .result-icon.success { background: rgba(6, 214, 160, 0.2); }
-        .result-icon.error { background: rgba(239, 71, 111, 0.2); }
-
-        .result-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-        }
-
-        .result-item {
+        /* ACTIONS */
+        .actions-card {
             background: var(--bg-card);
-            padding: 16px;
-            border-radius: 8px;
-        }
-
-        .result-item .label {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-        }
-
-        .result-item .value {
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        /* Print Label */
-        .print-options {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .print-option {
-            padding: 16px 24px;
-            background: var(--bg-primary);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: var(--transition);
-            text-align: center;
-        }
-
-        .print-option:hover { border-color: var(--accent-purple); }
-        .print-option.active { border-color: var(--accent-purple); background: rgba(157, 78, 221, 0.1); }
-
-        .print-option .icon { font-size: 32px; margin-bottom: 8px; }
-        .print-option .name { font-weight: 600; }
-        .print-option .size { font-size: 12px; color: var(--text-muted); }
-
-        /* Version Badge */
-        .version-badge {
-            position: fixed;
-            bottom: 16px;
-            right: 16px;
-            background: var(--bg-card);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            color: var(--text-muted);
             border: 1px solid var(--border-color);
+            border-radius: var(--radius); padding: 16px;
         }
 
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
+        .qty-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .qty-label { font-size: 13px; color: var(--text-muted); }
+        .qty-controls { display: flex; align-items: center; gap: 8px; }
+
+        .qty-btn {
+            width: 36px; height: 36px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            color: var(--text-primary); font-size: 18px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .qty-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+
+        .qty-value { width: 60px; text-align: center; font-size: 18px; font-weight: 700; font-family: 'Space Mono', monospace; }
+
+        .print-btn {
+            width: 100%; padding: 16px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none; border-radius: var(--radius-sm);
+            color: #000; font-size: 16px; font-weight: 700;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.2s;
+        }
+        .print-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(6,214,160,0.3); }
+        .print-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .print-btn .icon { font-size: 20px; }
+
+        .secondary-actions { display: flex; gap: 10px; margin-top: 12px; }
+
+        .secondary-btn {
+            flex: 1; padding: 12px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+            color: var(--text-secondary); font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .secondary-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+
+        /* MODAL */
+        .modal-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            width: 100%; max-width: 500px; max-height: 90vh;
+            overflow-y: auto; animation: slideIn 0.3s ease;
         }
 
-        .empty-state .icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
-        .empty-state .title { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary); }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-header h2 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+
+        .modal-close {
+            width: 36px; height: 36px;
+            background: var(--bg-hover); border: none; border-radius: 8px;
+            color: var(--text-muted); font-size: 18px; cursor: pointer;
+        }
+
+        .modal-body { padding: 20px; }
+
+        .setting-group { margin-bottom: 20px; }
+        .setting-group:last-child { margin-bottom: 0; }
+        .setting-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+
+        .setting-input {
+            width: 100%; padding: 12px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+            color: var(--text-primary); font-size: 14px;
+        }
+        .setting-input:focus { outline: none; border-color: var(--accent-primary); }
+        .setting-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+        .test-connection-btn {
+            width: 100%; padding: 12px;
+            background: var(--bg-hover);
+            border: 1px solid var(--accent-secondary); border-radius: var(--radius-sm);
+            color: var(--accent-secondary); font-size: 13px; font-weight: 600;
+            cursor: pointer; margin-top: 16px;
+        }
+        .test-connection-btn:hover { background: rgba(17,138,178,0.1); }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex; gap: 10px; justify-content: flex-end;
+        }
+
+        .modal-btn { padding: 10px 20px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; }
+        .modal-btn.primary { background: var(--accent-primary); border: none; color: #000; }
+        .modal-btn.secondary { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); }
+
+        /* TOAST */
+        .toast {
+            position: fixed; bottom: 24px; right: 24px;
+            padding: 14px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color); border-radius: var(--radius-sm);
+            display: flex; align-items: center; gap: 10px;
+            z-index: 2000; animation: slideInToast 0.3s ease;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        .toast.success { border-color: var(--accent-primary); }
+        .toast.error { border-color: var(--accent-danger); }
+
+        @keyframes slideInToast {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* PRINT STYLES - Brother QL-1100 DK-22205 (62mm) */
+        @media print {
+            @page { size: 62mm auto; margin: 0; }
+            body { margin: 0; padding: 0; background: #fff; }
+            .header, .form-section, .actions-card, .history-section, .preview-header, .modal-overlay, .toast, .secondary-actions { display: none !important; }
+            .main-container { display: block; padding: 0; max-width: none; }
+            .preview-section { display: block; }
+            .label-preview-card { border: none; background: transparent; border-radius: 0; }
+            .preview-body { padding: 0; min-height: auto; background: #fff; }
+            .label-container { width: 62mm; box-shadow: none; border-radius: 0; padding: 3mm; page-break-after: always; }
+        }
+
+        @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 12px; text-align: center; }
+            .header-right { width: 100%; justify-content: center; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full { grid-column: span 1; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Back Link -->
-        <a href="index.html" class="back-link">← Retour TRAKIO</a>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="window.location.href='index.html'">←</button>
+            <div class="header-title">
+                <h1>🏷️ Traçabilité</h1>
+                <span>Étiquettes & QR Codes</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="printer-status">
+                <div class="printer-dot" id="printer-dot"></div>
+                <span id="printer-status-text">Brother QL-1100</span>
+            </div>
+            <button class="settings-btn" onclick="openSettings()">⚙️ Configuration</button>
+        </div>
+    </header>
 
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <div class="logo">📊</div>
-                <div class="title-block">
-                    <h1>Traçabilité</h1>
-                    <div style="color:var(--text-muted); font-size:13px;">QR Codes & Gestion des Lots</div>
+    <!-- MAIN CONTENT -->
+    <div class="main-container">
+        <!-- Formulaire -->
+        <div class="form-section">
+            <div class="section-header">
+                <h2>📝 Informations produit</h2>
+                <button class="settings-btn" onclick="clearForm()" style="background:transparent; border:1px solid var(--border-color); color:var(--text-muted);">🗑️ Effacer</button>
+            </div>
+            <div class="section-body">
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>📦 Produit</label>
+                        <input type="text" id="input-product" placeholder="Ex: Filet de perche du Léman" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>🔢 Numéro de lot</label>
+                        <input type="text" id="input-lot" placeholder="Auto-généré" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>📅 Date de production</label>
+                        <input type="date" id="input-date-prod" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>🌍 Origine / Zone FAO</label>
+                        <input type="text" id="input-origin" placeholder="Ex: Suisse, Lac Léman" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>📅 DLC (Date Limite Consommation)</label>
+                        <input type="date" id="input-dlc" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>🌡️ Température de conservation</label>
+                        <select id="input-temp" oninput="updatePreview()">
+                            <option value="0°C à +2°C">0°C à +2°C (frais)</option>
+                            <option value="-18°C">-18°C (congelé)</option>
+                            <option value="+4°C à +8°C">+4°C à +8°C</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>⚖️ Poids net</label>
+                        <input type="text" id="input-weight" placeholder="Ex: 500g" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>🏭 Site de production</label>
+                        <select id="input-site" oninput="updatePreview(); generateLotNumber();">
+                            <option value="Laboratoire Coinsins">Laboratoire Coinsins</option>
+                            <option value="Magasin Nyon">Magasin Nyon</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label>📝 Notes / Allergènes</label>
+                        <textarea id="input-notes" placeholder="Ex: Contient du poisson. Peut contenir des traces de crustacés." oninput="updatePreview()"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Produits rapides -->
+                <div class="quick-products">
+                    <div class="quick-products-title">⚡ Produits fréquents</div>
+                    <div class="quick-products-grid" id="quick-products-grid"></div>
+                </div>
+                
+                <!-- Historique -->
+                <div class="history-section">
+                    <div class="section-header" style="padding:0; border:none; margin-bottom:12px;">
+                        <h2 style="font-size:14px;">📜 Dernières étiquettes</h2>
+                    </div>
+                    <div class="history-list" id="history-list"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('generate')" id="tab-generate">🏷️ Générer QR Code</button>
-            <button class="tab" onclick="switchTab('lots')" id="tab-lots">📦 Gestion des Lots</button>
-            <button class="tab" onclick="switchTab('scan')" id="tab-scan">📷 Scanner</button>
-            <button class="tab" onclick="switchTab('history')" id="tab-history">📜 Historique</button>
-        </div>
-
-        <!-- TAB: Generate QR Code -->
-        <div id="content-generate">
-            <div class="qr-preview-section">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>🏷️ Créer une étiquette produit</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Produit *</label>
-                                <select id="qr-product" onchange="updateQRPreview()">
-                                    <option value="">Sélectionner un produit...</option>
-                                    <option value="saumon-fume-ecossais">Saumon Fumé Écossais</option>
-                                    <option value="saumon-fume-norvegien">Saumon Fumé Norvégien</option>
-                                    <option value="truite-fumee">Truite Fumée</option>
-                                    <option value="huitres-fc">Huîtres Fines de Claires</option>
-                                    <option value="huitres-sc">Huîtres Spéciales de Claires</option>
-                                    <option value="huitres-gillardeau">Huîtres Gillardeau</option>
-                                    <option value="foie-gras">Foie Gras</option>
-                                    <option value="fondue-poissons">Fondue de Poissons</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>N° de Lot *</label>
-                                <input type="text" id="qr-lot" placeholder="Ex: SF-2025-1202-001" oninput="updateQRPreview()">
-                                <button onclick="generateLotNumber()" style="margin-top:8px; padding:8px 12px; background:var(--bg-hover); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); cursor:pointer; font-size:12px;">🔄 Générer automatiquement</button>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Origine</label>
-                                <input type="text" id="qr-origin" placeholder="Ex: Écosse, Loch Fyne" oninput="updateQRPreview()">
-                            </div>
-                            <div class="form-group">
-                                <label>Zone FAO</label>
-                                <select id="qr-fao" onchange="updateQRPreview()">
-                                    <option value="">Sélectionner...</option>
-                                    <option value="27">27 - Atlantique Nord-Est</option>
-                                    <option value="21">21 - Atlantique Nord-Ouest</option>
-                                    <option value="34">34 - Atlantique Centre-Est</option>
-                                    <option value="37">37 - Méditerranée</option>
-                                    <option value="61">61 - Pacifique Nord-Ouest</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Date de production</label>
-                                <input type="date" id="qr-production" onchange="updateQRPreview()">
-                            </div>
-                            <div class="form-group">
-                                <label>Date Limite de Consommation (DLC)</label>
-                                <input type="date" id="qr-dlc" onchange="updateQRPreview()">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Type</label>
-                                <select id="qr-type" onchange="updateQRPreview()">
-                                    <option value="sauvage">🎣 Sauvage</option>
-                                    <option value="elevage">🏭 Élevage</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Certifications</label>
-                                <select id="qr-certif" onchange="updateQRPreview()">
-                                    <option value="">Aucune</option>
-                                    <option value="msc">MSC (Pêche durable)</option>
-                                    <option value="asc">ASC (Aquaculture)</option>
-                                    <option value="bio">Bio</option>
-                                    <option value="label-rouge">Label Rouge</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Notes additionnelles</label>
-                            <textarea id="qr-notes" rows="2" placeholder="Informations complémentaires..." oninput="updateQRPreview()"></textarea>
-                        </div>
-
-                        <div style="margin-top:24px;">
-                            <div style="font-weight:600; margin-bottom:12px;">📐 Format d'étiquette</div>
-                            <div class="print-options">
-                                <div class="print-option active" onclick="selectLabelSize('small')" data-size="small">
-                                    <div class="icon">🏷️</div>
-                                    <div class="name">Petite</div>
-                                    <div class="size">50×30mm</div>
-                                </div>
-                                <div class="print-option" onclick="selectLabelSize('medium')" data-size="medium">
-                                    <div class="icon">🏷️</div>
-                                    <div class="name">Moyenne</div>
-                                    <div class="size">70×40mm</div>
-                                </div>
-                                <div class="print-option" onclick="selectLabelSize('large')" data-size="large">
-                                    <div class="icon">📄</div>
-                                    <div class="name">Grande</div>
-                                    <div class="size">100×70mm</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style="margin-top:24px; display:flex; gap:12px;">
-                            <button class="btn btn-secondary" onclick="saveLot()">💾 Sauvegarder le lot</button>
-                            <button class="btn btn-primary" onclick="printLabel()">🖨️ Imprimer l'étiquette</button>
-                            <button class="btn btn-secondary" onclick="downloadQR()">📥 Télécharger QR</button>
-                        </div>
-                    </div>
+        <!-- Preview & Actions -->
+        <div class="preview-section">
+            <div class="label-preview-card">
+                <div class="preview-header">
+                    <h3>👁️ Aperçu étiquette</h3>
+                    <span class="preview-size">62mm × auto (DK-22205)</span>
                 </div>
-
-                <!-- Preview -->
-                <div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>👁️ Aperçu</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="qr-container">
-                                <div id="qr-code"></div>
-                                <div style="font-size:12px; color:#666;" id="qr-lot-display">-</div>
+                <div class="preview-body">
+                    <div class="label-container" id="label-preview">
+                        <div class="label-header">
+                            <div class="label-logo">BP</div>
+                            <div class="label-company">
+                                <div class="label-company-name">Borex Poissons</div>
+                                <div class="label-company-tagline">Qualité & Traçabilité</div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>🏷️ Étiquette</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="label-preview" id="label-preview">
-                                <div class="label-header">
-                                    <div class="label-logo">BP</div>
-                                    <div>
-                                        <div class="label-company">Borex Poissons</div>
-                                        <div style="font-size:10px; color:#666;">Qualité & Traçabilité</div>
-                                    </div>
-                                </div>
-                                <div class="label-row">
-                                    <span class="label-key">Produit</span>
-                                    <span class="label-value" id="label-product">-</span>
-                                </div>
-                                <div class="label-row">
-                                    <span class="label-key">Lot</span>
-                                    <span class="label-value" id="label-lot">-</span>
-                                </div>
-                                <div class="label-row">
-                                    <span class="label-key">Origine</span>
-                                    <span class="label-value" id="label-origin">-</span>
-                                </div>
-                                <div class="label-row">
-                                    <span class="label-key">DLC</span>
-                                    <span class="label-value" id="label-dlc">-</span>
-                                </div>
-                                <div class="label-qr">
-                                    <div id="label-qr-small"></div>
-                                    <div style="font-size:9px; color:#999; margin-top:4px;">Scannez pour plus d'infos</div>
-                                </div>
+                        <div class="label-info">
+                            <div class="label-row">
+                                <span class="label-key">Produit</span>
+                                <span class="label-value" id="preview-product">-</span>
                             </div>
+                            <div class="label-row">
+                                <span class="label-key">Lot</span>
+                                <span class="label-value" id="preview-lot">XX-00000000-000</span>
+                            </div>
+                            <div class="label-row">
+                                <span class="label-key">Origine</span>
+                                <span class="label-value" id="preview-origin">-</span>
+                            </div>
+                            <div class="label-row">
+                                <span class="label-key">DLC</span>
+                                <span class="label-value" id="preview-dlc">--.--.----</span>
+                            </div>
+                            <div class="label-row">
+                                <span class="label-key">Poids</span>
+                                <span class="label-value" id="preview-weight">-</span>
+                            </div>
+                            <div class="label-row">
+                                <span class="label-key">Conservation</span>
+                                <span class="label-value" id="preview-temp">0°C à +2°C</span>
+                            </div>
+                        </div>
+                        <div class="label-qr">
+                            <div class="label-qr-code" id="qrcode"></div>
+                            <div class="label-qr-text">Scannez pour plus d'infos</div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- TAB: Lots Management -->
-        <div id="content-lots" style="display:none;">
-            <div class="card">
-                <div class="card-header">
-                    <h3>📦 Gestion des Lots</h3>
-                    <div>
-                        <input type="text" placeholder="🔍 Rechercher..." id="lots-search" oninput="filterLots()" style="padding:8px 12px; background:rgba(255,255,255,0.1); border:none; border-radius:6px; color:#fff;">
+            
+            <div class="actions-card">
+                <div class="qty-row">
+                    <span class="qty-label">Quantité à imprimer :</span>
+                    <div class="qty-controls">
+                        <button class="qty-btn" onclick="changeQty(-1)">−</button>
+                        <span class="qty-value" id="print-qty">1</span>
+                        <button class="qty-btn" onclick="changeQty(1)">+</button>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>N° Lot</th>
-                                    <th>Produit</th>
-                                    <th>Origine</th>
-                                    <th>Production</th>
-                                    <th>DLC</th>
-                                    <th>Statut</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="lots-tbody">
-                                <!-- Lots -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB: Scan -->
-        <div id="content-scan" style="display:none;">
-            <div class="card">
-                <div class="card-header">
-                    <h3>📷 Scanner un QR Code</h3>
-                </div>
-                <div class="card-body">
-                    <div class="scan-zone" id="scan-zone">
-                        <div class="icon">📷</div>
-                        <div class="title">Scanner un QR Code produit</div>
-                        <div class="hint">Utilisez la caméra de votre appareil pour scanner le QR code</div>
-                        <button class="btn btn-primary" onclick="startScan()">📷 Démarrer la caméra</button>
-                        <div style="margin-top:16px;">
-                            <span style="color:var(--text-muted);">ou</span>
-                        </div>
-                        <div style="margin-top:16px;">
-                            <input type="text" id="manual-code" placeholder="Entrer le code manuellement..." style="padding:12px 16px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); width:300px; max-width:100%;">
-                            <button class="btn btn-secondary" onclick="manualLookup()" style="margin-left:8px;">🔍 Rechercher</button>
-                        </div>
-                    </div>
-
-                    <div id="video-container">
-                        <video id="scan-video" playsinline></video>
-                        <button onclick="stopScan()" style="margin-top:12px;" class="btn btn-secondary">✕ Arrêter</button>
-                    </div>
-
-                    <div class="result-card" id="scan-result">
-                        <div class="result-header">
-                            <div class="result-icon success" id="result-icon">✅</div>
-                            <div>
-                                <h3 id="result-title">Produit trouvé</h3>
-                                <p style="color:var(--text-muted);" id="result-subtitle">Lot vérifié avec succès</p>
-                            </div>
-                        </div>
-                        <div class="result-details" id="result-details">
-                            <!-- Détails du produit -->
-                        </div>
-                        <div style="margin-top:20px; display:flex; gap:12px;">
-                            <button class="btn btn-secondary" onclick="resetScan()">🔄 Nouveau scan</button>
-                            <button class="btn btn-primary" onclick="printFromScan()">🖨️ Imprimer fiche</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB: History -->
-        <div id="content-history" style="display:none;">
-            <div class="card">
-                <div class="card-header">
-                    <h3>📜 Historique des scans</h3>
-                </div>
-                <div class="card-body">
-                    <div id="scan-history">
-                        <!-- Historique -->
-                    </div>
+                <button class="print-btn" id="print-btn" onclick="printLabels()">
+                    <span class="icon">🖨️</span>
+                    <span>Imprimer sur Brother QL-1100</span>
+                </button>
+                <div class="secondary-actions">
+                    <button class="secondary-btn" onclick="saveToHistory()">💾 Sauvegarder</button>
+                    <button class="secondary-btn" onclick="downloadPNG()">📥 PNG</button>
+                    <button class="secondary-btn" onclick="copyQRData()">📋 Copier</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Version -->
-    <div class="version-badge">TRAKIO Traçabilité v1.0.0</div>
+    <!-- SETTINGS MODAL -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>⚙️ Configuration imprimante</h2>
+                <button class="modal-close" onclick="closeSettings()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label class="setting-label">🖨️ Modèle d'imprimante</label>
+                    <select class="setting-input" id="setting-model">
+                        <option value="QL-1100">Brother QL-1100</option>
+                        <option value="QL-820NWB">Brother QL-820NWB</option>
+                        <option value="QL-800">Brother QL-800</option>
+                        <option value="QL-710W">Brother QL-710W</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">🌐 Adresse IP de l'imprimante</label>
+                    <input type="text" class="setting-input" id="setting-ip" placeholder="Ex: 192.168.1.100">
+                    <div class="setting-hint">Trouvez l'IP dans le menu réseau de l'imprimante</div>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">🔌 Port</label>
+                    <input type="text" class="setting-input" id="setting-port" value="9100" placeholder="9100">
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">📏 Type d'étiquette</label>
+                    <select class="setting-input" id="setting-label-type">
+                        <option value="DK-22205">DK-22205 (62mm continu)</option>
+                        <option value="DK-22212">DK-22212 (62mm film)</option>
+                        <option value="DK-11202">DK-11202 (62x100mm)</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">📐 Longueur étiquette (mm)</label>
+                    <input type="number" class="setting-input" id="setting-length" value="100" min="20" max="300">
+                </div>
+                <button class="test-connection-btn" onclick="testPrinter()">🔍 Tester la connexion</button>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" onclick="closeSettings()">Annuler</button>
+                <button class="modal-btn primary" onclick="saveSettings()">💾 Enregistrer</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // =============================================
-        // DATA
-        // =============================================
-        let lots = JSON.parse(localStorage.getItem('trakio_lots') || '[]');
-        let scanHistory = JSON.parse(localStorage.getItem('trakio_scan_history') || '[]');
-        let qrCode = null;
-        let qrCodeSmall = null;
-        let selectedLabelSize = 'small';
-        let videoStream = null;
+        const CONFIG_KEY = 'trakio_printer_config';
+        const HISTORY_KEY = 'trakio_label_history';
+        
+        let printerConfig = { model: 'QL-1100', ip: '', port: '9100', labelType: 'DK-22205', labelLength: 100 };
+        let printQty = 1;
+        let qrCodeInstance = null;
+        
+        const quickProducts = [
+            { name: 'Filet de perche', origin: 'Lac Léman, Suisse' },
+            { name: 'Féra entière', origin: 'Lac Léman, Suisse' },
+            { name: 'Omble chevalier', origin: 'Lac Léman, Suisse' },
+            { name: 'Truite fumée', origin: 'Suisse' },
+            { name: 'Saumon fumé', origin: 'Norvège, Atlantique NE' },
+            { name: 'Crevettes roses', origin: 'Atlantique NE, FAO 27' },
+            { name: 'Moules de bouchot', origin: 'France, Atlantique' },
+            { name: 'Huîtres fines', origin: 'France, Marennes' }
+        ];
 
-        const productNames = {
-            'saumon-fume-ecossais': 'Saumon Fumé Écossais',
-            'saumon-fume-norvegien': 'Saumon Fumé Norvégien',
-            'truite-fumee': 'Truite Fumée',
-            'huitres-fc': 'Huîtres Fines de Claires',
-            'huitres-sc': 'Huîtres Spéciales de Claires',
-            'huitres-gillardeau': 'Huîtres Gillardeau',
-            'foie-gras': 'Foie Gras',
-            'fondue-poissons': 'Fondue de Poissons'
-        };
-
-        // =============================================
-        // INIT
-        // =============================================
         document.addEventListener('DOMContentLoaded', function() {
-            // Set default dates
-            document.getElementById('qr-production').valueAsDate = new Date();
-            const dlc = new Date();
-            dlc.setDate(dlc.getDate() + 14);
-            document.getElementById('qr-dlc').valueAsDate = dlc;
-
+            loadConfig();
+            loadHistory();
+            renderQuickProducts();
             generateLotNumber();
-            updateQRPreview();
-            loadLots();
-            loadScanHistory();
+            setDefaultDates();
+            initQRCode();
+            updatePreview();
+            checkPrinterStatus();
         });
 
-        // =============================================
-        // QR CODE GENERATION
-        // =============================================
+        function loadConfig() {
+            const saved = localStorage.getItem(CONFIG_KEY);
+            if (saved) {
+                printerConfig = JSON.parse(saved);
+                document.getElementById('setting-model').value = printerConfig.model;
+                document.getElementById('setting-ip').value = printerConfig.ip;
+                document.getElementById('setting-port').value = printerConfig.port;
+                document.getElementById('setting-label-type').value = printerConfig.labelType;
+                document.getElementById('setting-length').value = printerConfig.labelLength;
+            }
+        }
+
+        function setDefaultDates() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('input-date-prod').value = today;
+            const dlc = new Date();
+            dlc.setDate(dlc.getDate() + 5);
+            document.getElementById('input-dlc').value = dlc.toISOString().split('T')[0];
+        }
+
         function generateLotNumber() {
-            const product = document.getElementById('qr-product').value;
-            const prefix = product ? product.substring(0, 2).toUpperCase() : 'XX';
-            const date = new Date();
-            const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+            const now = new Date();
+            const date = now.toISOString().split('T')[0].replace(/-/g, '');
             const seq = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
-            
-            document.getElementById('qr-lot').value = `${prefix}-${dateStr}-${seq}`;
-            updateQRPreview();
+            const site = document.getElementById('input-site')?.value || '';
+            const prefix = site.includes('Coinsins') ? 'LC' : 'MN';
+            const lot = `${prefix}-${date}-${seq}`;
+            document.getElementById('input-lot').value = lot;
+            updatePreview();
+            return lot;
         }
 
-        function updateQRPreview() {
-            const product = document.getElementById('qr-product').value;
-            const lot = document.getElementById('qr-lot').value;
-            const origin = document.getElementById('qr-origin').value;
-            const fao = document.getElementById('qr-fao').value;
-            const production = document.getElementById('qr-production').value;
-            const dlc = document.getElementById('qr-dlc').value;
-            const type = document.getElementById('qr-type').value;
-            const certif = document.getElementById('qr-certif').value;
-
-            // Update label preview
-            document.getElementById('label-product').textContent = productNames[product] || '-';
-            document.getElementById('label-lot').textContent = lot || '-';
-            document.getElementById('label-origin').textContent = origin || '-';
-            document.getElementById('label-dlc').textContent = dlc ? new Date(dlc).toLocaleDateString('fr-CH') : '-';
-            document.getElementById('qr-lot-display').textContent = lot || '-';
-
-            // Generate QR data
-            const qrData = {
-                type: 'TRAKIO_PRODUCT',
-                lot: lot,
-                product: product,
-                productName: productNames[product],
-                origin: origin,
-                fao: fao,
-                production: production,
-                dlc: dlc,
-                productionType: type,
-                certification: certif,
-                company: 'Borex Poissons',
-                url: `https://borexpoissons.ch/trace/${lot}`
-            };
-
-            // Generate QR codes
-            const qrContainer = document.getElementById('qr-code');
-            const qrSmallContainer = document.getElementById('label-qr-small');
-            
+        function initQRCode() {
+            const qrContainer = document.getElementById('qrcode');
             qrContainer.innerHTML = '';
-            qrSmallContainer.innerHTML = '';
-
-            if (lot) {
-                qrCode = new QRCode(qrContainer, {
-                    text: JSON.stringify(qrData),
-                    width: 180,
-                    height: 180,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.M
-                });
-
-                qrCodeSmall = new QRCode(qrSmallContainer, {
-                    text: JSON.stringify(qrData),
-                    width: 60,
-                    height: 60,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.L
-                });
-            }
-        }
-
-        // =============================================
-        // LABEL SIZE
-        // =============================================
-        function selectLabelSize(size) {
-            selectedLabelSize = size;
-            document.querySelectorAll('.print-option').forEach(opt => {
-                opt.classList.toggle('active', opt.dataset.size === size);
+            qrCodeInstance = new QRCode(qrContainer, {
+                text: 'https://borexpoissons.ch/trace/',
+                width: 80, height: 80,
+                colorDark: '#1a1a2e', colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
             });
         }
 
-        // =============================================
-        // SAVE LOT
-        // =============================================
-        function saveLot() {
-            const lot = {
-                id: Date.now(),
-                lotNumber: document.getElementById('qr-lot').value,
-                product: document.getElementById('qr-product').value,
-                productName: productNames[document.getElementById('qr-product').value],
-                origin: document.getElementById('qr-origin').value,
-                fao: document.getElementById('qr-fao').value,
-                production: document.getElementById('qr-production').value,
-                dlc: document.getElementById('qr-dlc').value,
-                type: document.getElementById('qr-type').value,
-                certification: document.getElementById('qr-certif').value,
-                notes: document.getElementById('qr-notes').value,
-                createdAt: new Date().toISOString()
+        function updatePreview() {
+            const product = document.getElementById('input-product').value || '-';
+            const lot = document.getElementById('input-lot').value || 'XX-00000000-000';
+            const origin = document.getElementById('input-origin').value || '-';
+            const dlc = document.getElementById('input-dlc').value;
+            const weight = document.getElementById('input-weight').value || '-';
+            const temp = document.getElementById('input-temp').value;
+            
+            document.getElementById('preview-product').textContent = product.length > 25 ? product.slice(0, 25) + '...' : product;
+            document.getElementById('preview-lot').textContent = lot;
+            document.getElementById('preview-origin').textContent = origin.length > 20 ? origin.slice(0, 20) + '...' : origin;
+            document.getElementById('preview-dlc').textContent = dlc ? formatDate(dlc) : '--.--.----';
+            document.getElementById('preview-weight').textContent = weight;
+            document.getElementById('preview-temp').textContent = temp;
+            updateQRCode();
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('fr-CH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        function updateQRCode() {
+            const data = {
+                p: document.getElementById('input-product').value,
+                l: document.getElementById('input-lot').value,
+                o: document.getElementById('input-origin').value,
+                d: document.getElementById('input-dlc').value,
+                w: document.getElementById('input-weight').value,
+                s: document.getElementById('input-site').value
             };
+            const qrText = `https://borexpoissons.ch/trace/?d=${btoa(JSON.stringify(data))}`;
+            if (qrCodeInstance) { qrCodeInstance.clear(); qrCodeInstance.makeCode(qrText); }
+        }
 
-            if (!lot.lotNumber || !lot.product) {
-                alert('Veuillez remplir le produit et le numéro de lot');
+        function renderQuickProducts() {
+            const container = document.getElementById('quick-products-grid');
+            container.innerHTML = quickProducts.map(p => `
+                <button class="quick-product-btn" onclick="selectQuickProduct('${p.name}', '${p.origin}')">${p.name}</button>
+            `).join('');
+        }
+
+        function selectQuickProduct(name, origin) {
+            document.getElementById('input-product').value = name;
+            document.getElementById('input-origin').value = origin;
+            generateLotNumber();
+            updatePreview();
+            showToast(`✅ ${name} sélectionné`, 'success');
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            renderHistory(history);
+        }
+
+        function renderHistory(history) {
+            const container = document.getElementById('history-list');
+            if (history.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted);"><div style="font-size:32px; margin-bottom:8px; opacity:0.5;">📭</div><div style="font-size:12px;">Aucune étiquette sauvegardée</div></div>`;
                 return;
             }
-
-            lots.unshift(lot);
-            localStorage.setItem('trakio_lots', JSON.stringify(lots));
-            loadLots();
-            alert('✅ Lot sauvegardé!');
-        }
-
-        // =============================================
-        // LOTS TABLE
-        // =============================================
-        function loadLots() {
-            const tbody = document.getElementById('lots-tbody');
-            
-            if (lots.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">Aucun lot enregistré</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = lots.map(lot => {
-                const dlcDate = new Date(lot.dlc);
-                const today = new Date();
-                const daysLeft = Math.ceil((dlcDate - today) / (1000 * 60 * 60 * 24));
-                
-                let statusClass = 'active';
-                let statusText = `✅ ${daysLeft}j`;
-                if (daysLeft <= 0) {
-                    statusClass = 'expired';
-                    statusText = '❌ Expiré';
-                } else if (daysLeft <= 3) {
-                    statusClass = 'warning';
-                    statusText = `⚠️ ${daysLeft}j`;
-                }
-
-                return `
-                    <tr>
-                        <td><strong style="font-family:'Space Mono',monospace;">${lot.lotNumber}</strong></td>
-                        <td>${lot.productName || '-'}</td>
-                        <td>${lot.origin || '-'}</td>
-                        <td>${lot.production ? new Date(lot.production).toLocaleDateString('fr-CH') : '-'}</td>
-                        <td>${lot.dlc ? new Date(lot.dlc).toLocaleDateString('fr-CH') : '-'}</td>
-                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                        <td>
-                            <button onclick="viewLot(${lot.id})" class="btn btn-secondary" style="padding:6px 10px;">👁️</button>
-                            <button onclick="printLotLabel(${lot.id})" class="btn btn-secondary" style="padding:6px 10px;">🖨️</button>
-                            <button onclick="deleteLot(${lot.id})" class="btn btn-secondary" style="padding:6px 10px;">🗑️</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function filterLots() {
-            const search = document.getElementById('lots-search').value.toLowerCase();
-            document.querySelectorAll('#lots-tbody tr').forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(search) ? '' : 'none';
-            });
-        }
-
-        function viewLot(id) {
-            const lot = lots.find(l => l.id === id);
-            if (!lot) return;
-
-            // Remplir le formulaire avec les données du lot
-            document.getElementById('qr-product').value = lot.product;
-            document.getElementById('qr-lot').value = lot.lotNumber;
-            document.getElementById('qr-origin').value = lot.origin || '';
-            document.getElementById('qr-fao').value = lot.fao || '';
-            document.getElementById('qr-production').value = lot.production || '';
-            document.getElementById('qr-dlc').value = lot.dlc || '';
-            document.getElementById('qr-type').value = lot.type || 'sauvage';
-            document.getElementById('qr-certif').value = lot.certification || '';
-            document.getElementById('qr-notes').value = lot.notes || '';
-
-            updateQRPreview();
-            switchTab('generate');
-        }
-
-        function deleteLot(id) {
-            if (!confirm('Supprimer ce lot?')) return;
-            lots = lots.filter(l => l.id !== id);
-            localStorage.setItem('trakio_lots', JSON.stringify(lots));
-            loadLots();
-        }
-
-        function printLotLabel(id) {
-            viewLot(id);
-            setTimeout(() => printLabel(), 500);
-        }
-
-        // =============================================
-        // PRINT & DOWNLOAD
-        // =============================================
-        function printLabel() {
-            const printWindow = window.open('', '_blank');
-            const label = document.getElementById('label-preview').innerHTML;
-            
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Étiquette - ${document.getElementById('qr-lot').value}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                        .label { width: ${selectedLabelSize === 'small' ? '50mm' : selectedLabelSize === 'medium' ? '70mm' : '100mm'}; 
-                                 border: 1px solid #ccc; padding: 10px; margin: 10px; }
-                        .label-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid #06d6a0; }
-                        .label-logo { width: 30px; height: 30px; background: linear-gradient(135deg, #06d6a0, #118ab2); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
-                        .label-company { font-size: 14px; font-weight: 700; }
-                        .label-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; font-size: 11px; }
-                        .label-key { color: #666; }
-                        .label-value { font-weight: 600; }
-                        .label-qr { text-align: center; margin-top: 8px; }
-                        .label-qr img { width: 50px; height: 50px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="label">${label}</div>
-                    <script>window.onload = function() { window.print(); }<\/script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-        }
-
-        function downloadQR() {
-            const canvas = document.querySelector('#qr-code canvas');
-            if (!canvas) {
-                alert('Veuillez d\'abord générer un QR code');
-                return;
-            }
-            
-            const link = document.createElement('a');
-            link.download = `QR-${document.getElementById('qr-lot').value}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        }
-
-        // =============================================
-        // SCAN
-        // =============================================
-        async function startScan() {
-            try {
-                const video = document.getElementById('scan-video');
-                const container = document.getElementById('video-container');
-                const zone = document.getElementById('scan-zone');
-
-                videoStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' }
-                });
-
-                video.srcObject = videoStream;
-                video.play();
-
-                zone.style.display = 'none';
-                container.style.display = 'block';
-
-                // In a real app, use a QR scanner library like jsQR
-                // For demo, we'll use manual input
-            } catch (err) {
-                console.error('Erreur caméra:', err);
-                alert('Impossible d\'accéder à la caméra. Utilisez la saisie manuelle.');
-            }
-        }
-
-        function stopScan() {
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-            }
-            document.getElementById('video-container').style.display = 'none';
-            document.getElementById('scan-zone').style.display = 'block';
-        }
-
-        function manualLookup() {
-            const code = document.getElementById('manual-code').value.trim();
-            if (!code) {
-                alert('Veuillez entrer un code');
-                return;
-            }
-
-            // Chercher dans les lots
-            const lot = lots.find(l => l.lotNumber === code);
-            
-            if (lot) {
-                showScanResult(lot);
-            } else {
-                // Essayer de parser comme JSON
-                try {
-                    const data = JSON.parse(code);
-                    if (data.type === 'TRAKIO_PRODUCT') {
-                        showScanResult(data);
-                    } else {
-                        alert('QR Code non reconnu');
-                    }
-                } catch {
-                    alert('Lot non trouvé: ' + code);
-                }
-            }
-        }
-
-        function showScanResult(data) {
-            stopScan();
-            
-            const resultCard = document.getElementById('scan-result');
-            resultCard.classList.add('active');
-            document.getElementById('scan-zone').style.display = 'none';
-
-            // Ajouter à l'historique
-            scanHistory.unshift({
-                id: Date.now(),
-                lot: data.lotNumber || data.lot,
-                product: data.productName,
-                date: new Date().toISOString(),
-                success: true
-            });
-            localStorage.setItem('trakio_scan_history', JSON.stringify(scanHistory.slice(0, 50)));
-
-            // Afficher les détails
-            document.getElementById('result-details').innerHTML = `
-                <div class="result-item">
-                    <div class="label">Produit</div>
-                    <div class="value">${data.productName || '-'}</div>
-                </div>
-                <div class="result-item">
-                    <div class="label">N° Lot</div>
-                    <div class="value" style="font-family:'Space Mono',monospace;">${data.lotNumber || data.lot || '-'}</div>
-                </div>
-                <div class="result-item">
-                    <div class="label">Origine</div>
-                    <div class="value">${data.origin || '-'}</div>
-                </div>
-                <div class="result-item">
-                    <div class="label">Zone FAO</div>
-                    <div class="value">${data.fao || '-'}</div>
-                </div>
-                <div class="result-item">
-                    <div class="label">Production</div>
-                    <div class="value">${data.production ? new Date(data.production).toLocaleDateString('fr-CH') : '-'}</div>
-                </div>
-                <div class="result-item">
-                    <div class="label">DLC</div>
-                    <div class="value">${data.dlc ? new Date(data.dlc).toLocaleDateString('fr-CH') : '-'}</div>
-                </div>
-                <div class="result-item">
-                    <div class="label">Type</div>
-                    <div class="value">${data.type === 'elevage' ? '🏭 Élevage' : '🎣 Sauvage'}</div>
-                </div>
-                <div class="result-item">
-                    <div class="label">Certification</div>
-                    <div class="value">${data.certification ? data.certification.toUpperCase() : 'Aucune'}</div>
-                </div>
-            `;
-        }
-
-        function resetScan() {
-            document.getElementById('scan-result').classList.remove('active');
-            document.getElementById('scan-zone').style.display = 'block';
-            document.getElementById('manual-code').value = '';
-        }
-
-        function printFromScan() {
-            alert('Impression de la fiche traçabilité...');
-        }
-
-        // =============================================
-        // SCAN HISTORY
-        // =============================================
-        function loadScanHistory() {
-            const container = document.getElementById('scan-history');
-            
-            if (scanHistory.length === 0) {
-                container.innerHTML = '<div class="empty-state"><div class="icon">📜</div><div class="title">Aucun historique</div><div>Les scans effectués apparaîtront ici</div></div>';
-                return;
-            }
-
-            container.innerHTML = scanHistory.map(h => `
-                <div style="display:flex; gap:16px; padding:16px; background:var(--bg-primary); border-radius:8px; margin-bottom:12px;">
-                    <div style="width:44px; height:44px; border-radius:10px; background:rgba(6, 214, 160, 0.2); display:flex; align-items:center; justify-content:center; font-size:20px;">📷</div>
-                    <div style="flex:1;">
-                        <div style="font-weight:600;">${h.product || 'Produit'}</div>
-                        <div style="font-size:13px; color:var(--text-muted);">Lot: ${h.lot}</div>
+            container.innerHTML = history.slice(0, 10).map(item => `
+                <div class="history-item" onclick="loadFromHistory('${item.id}')">
+                    <div class="history-item-info">
+                        <div class="history-item-name">${item.product}</div>
+                        <div class="history-item-details">Lot: ${item.lot} • ${item.origin}</div>
                     </div>
-                    <div style="text-align:right;">
-                        <div style="font-size:12px; color:var(--text-muted);">${new Date(h.date).toLocaleString('fr-CH')}</div>
-                        <div style="font-size:11px; color:var(--accent-primary);">✅ Vérifié</div>
-                    </div>
+                    <div class="history-item-time">${formatDateTime(item.timestamp)}</div>
                 </div>
             `).join('');
         }
 
-        // =============================================
-        // TABS
-        // =============================================
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + tab).classList.add('active');
-
-            ['generate', 'lots', 'scan', 'history'].forEach(t => {
-                document.getElementById('content-' + t).style.display = t === tab ? 'block' : 'none';
-            });
-
-            if (tab === 'lots') loadLots();
-            if (tab === 'history') loadScanHistory();
+        function formatDateTime(ts) {
+            const d = new Date(ts);
+            return d.toLocaleDateString('fr-CH', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
         }
+
+        function saveToHistory() {
+            const item = {
+                id: Date.now().toString(),
+                product: document.getElementById('input-product').value,
+                lot: document.getElementById('input-lot').value,
+                origin: document.getElementById('input-origin').value,
+                dlc: document.getElementById('input-dlc').value,
+                weight: document.getElementById('input-weight').value,
+                temp: document.getElementById('input-temp').value,
+                site: document.getElementById('input-site').value,
+                notes: document.getElementById('input-notes').value,
+                timestamp: new Date().toISOString()
+            };
+            if (!item.product) { showToast('❌ Veuillez entrer un nom de produit', 'error'); return; }
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            history.unshift(item);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 50)));
+            renderHistory(history);
+            showToast('✅ Étiquette sauvegardée', 'success');
+        }
+
+        function loadFromHistory(id) {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            const item = history.find(h => h.id === id);
+            if (item) {
+                document.getElementById('input-product').value = item.product;
+                document.getElementById('input-lot').value = item.lot;
+                document.getElementById('input-origin').value = item.origin;
+                document.getElementById('input-dlc').value = item.dlc;
+                document.getElementById('input-weight').value = item.weight || '';
+                document.getElementById('input-temp').value = item.temp || '0°C à +2°C';
+                document.getElementById('input-site').value = item.site || 'Laboratoire Coinsins';
+                document.getElementById('input-notes').value = item.notes || '';
+                generateLotNumber();
+                updatePreview();
+                showToast(`✅ ${item.product} chargé`, 'success');
+            }
+        }
+
+        function changeQty(delta) {
+            printQty = Math.max(1, Math.min(99, printQty + delta));
+            document.getElementById('print-qty').textContent = printQty;
+        }
+
+        function printLabels() {
+            const product = document.getElementById('input-product').value;
+            if (!product) { showToast('❌ Veuillez entrer un nom de produit', 'error'); return; }
+            saveToHistory();
+            
+            const printWindow = window.open('', '_blank', 'width=300,height=500');
+            let labelsHTML = '';
+            for (let i = 0; i < printQty; i++) { labelsHTML += generateLabelHTML(); }
+            
+            printWindow.document.write(`<!DOCTYPE html><html><head><title>Impression</title><style>
+                @page { size: 62mm ${printerConfig.labelLength}mm; margin: 0; }
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { font-family: Arial, sans-serif; background: #fff; }
+                .label { width: 62mm; padding: 3mm; page-break-after: always; }
+                .label:last-child { page-break-after: avoid; }
+                .label-header { display: flex; align-items: center; gap: 3mm; padding-bottom: 2mm; border-bottom: 0.3mm solid #ddd; margin-bottom: 2mm; }
+                .logo { width: 10mm; height: 10mm; background: linear-gradient(135deg, #06d6a0, #118ab2); border-radius: 2mm; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10pt; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                .company-name { font-size: 11pt; font-weight: bold; color: #1a1a2e; }
+                .company-tagline { font-size: 7pt; color: #888; }
+                .info-row { display: flex; justify-content: space-between; padding: 1mm 0; border-bottom: 0.2mm solid #f0f0f0; }
+                .info-key { font-size: 8pt; color: #888; }
+                .info-value { font-size: 8pt; font-weight: bold; color: #1a1a2e; }
+                .qr-section { display: flex; flex-direction: column; align-items: center; padding-top: 2mm; margin-top: 2mm; border-top: 0.3mm solid #ddd; }
+                .qr-code img { width: 15mm; height: 15mm; }
+                .qr-text { font-size: 6pt; color: #888; margin-top: 1mm; }
+            </style></head><body>${labelsHTML}<script>window.onload=function(){setTimeout(function(){window.print();setTimeout(function(){window.close();},500);},300);};<\/script></body></html>`);
+            printWindow.document.close();
+            showToast(`🖨️ Impression de ${printQty} étiquette(s)...`, 'success');
+        }
+
+        function generateLabelHTML() {
+            const product = document.getElementById('input-product').value;
+            const lot = document.getElementById('input-lot').value;
+            const origin = document.getElementById('input-origin').value;
+            const dlc = document.getElementById('input-dlc').value;
+            const weight = document.getElementById('input-weight').value;
+            const temp = document.getElementById('input-temp').value;
+            const qrImg = document.querySelector('#qrcode img');
+            const qrSrc = qrImg ? qrImg.src : '';
+            
+            return `<div class="label">
+                <div class="label-header"><div class="logo">BP</div><div><div class="company-name">Borex Poissons</div><div class="company-tagline">Qualité & Traçabilité</div></div></div>
+                <div class="info-row"><span class="info-key">Produit</span><span class="info-value">${product || '-'}</span></div>
+                <div class="info-row"><span class="info-key">Lot</span><span class="info-value">${lot}</span></div>
+                <div class="info-row"><span class="info-key">Origine</span><span class="info-value">${origin || '-'}</span></div>
+                <div class="info-row"><span class="info-key">DLC</span><span class="info-value">${dlc ? formatDate(dlc) : '-'}</span></div>
+                ${weight ? `<div class="info-row"><span class="info-key">Poids</span><span class="info-value">${weight}</span></div>` : ''}
+                <div class="info-row" style="border:none;"><span class="info-key">Conservation</span><span class="info-value">${temp}</span></div>
+                <div class="qr-section"><div class="qr-code"><img src="${qrSrc}" /></div><div class="qr-text">Scannez pour plus d'infos</div></div>
+            </div>`;
+        }
+
+        function openSettings() { document.getElementById('settings-modal').classList.add('active'); }
+        function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); }
+
+        function saveSettings() {
+            printerConfig = {
+                model: document.getElementById('setting-model').value,
+                ip: document.getElementById('setting-ip').value,
+                port: document.getElementById('setting-port').value,
+                labelType: document.getElementById('setting-label-type').value,
+                labelLength: parseInt(document.getElementById('setting-length').value)
+            };
+            localStorage.setItem(CONFIG_KEY, JSON.stringify(printerConfig));
+            closeSettings();
+            checkPrinterStatus();
+            showToast('✅ Configuration enregistrée', 'success');
+        }
+
+        function testPrinter() {
+            const ip = document.getElementById('setting-ip').value;
+            if (!ip) { showToast('❌ Veuillez entrer une adresse IP', 'error'); return; }
+            showToast('🔍 Test de connexion...', 'success');
+            setTimeout(() => {
+                const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+                if (ipRegex.test(ip)) {
+                    showToast('✅ Format IP valide. Sélectionnez l\'imprimante dans la boîte de dialogue d\'impression.', 'success');
+                    document.getElementById('printer-dot').classList.add('connected');
+                    document.getElementById('printer-status-text').textContent = `Brother ${document.getElementById('setting-model').value} (${ip})`;
+                } else {
+                    showToast('❌ Format IP invalide', 'error');
+                }
+            }, 1000);
+        }
+
+        function checkPrinterStatus() {
+            if (printerConfig.ip) {
+                document.getElementById('printer-dot').classList.add('connected');
+                document.getElementById('printer-status-text').textContent = `Brother ${printerConfig.model} (${printerConfig.ip})`;
+            } else {
+                document.getElementById('printer-dot').classList.remove('connected');
+                document.getElementById('printer-status-text').textContent = 'Brother QL-1100 (Non configuré)';
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('input-product').value = '';
+            document.getElementById('input-origin').value = '';
+            document.getElementById('input-weight').value = '';
+            document.getElementById('input-notes').value = '';
+            generateLotNumber();
+            setDefaultDates();
+            updatePreview();
+            showToast('🗑️ Formulaire effacé', 'success');
+        }
+
+        function downloadPNG() { showToast('💡 Utilisez une capture d\'écran pour sauvegarder en PNG', 'success'); }
+
+        function copyQRData() {
+            const data = {
+                product: document.getElementById('input-product').value,
+                lot: document.getElementById('input-lot').value,
+                origin: document.getElementById('input-origin').value,
+                dlc: document.getElementById('input-dlc').value,
+                weight: document.getElementById('input-weight').value,
+                temp: document.getElementById('input-temp').value,
+                site: document.getElementById('input-site').value
+            };
+            navigator.clipboard.writeText(JSON.stringify(data, null, 2))
+                .then(() => showToast('📋 Données copiées', 'success'))
+                .catch(() => showToast('❌ Erreur lors de la copie', 'error'));
+        }
+
+        function showToast(message, type = 'success') {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeSettings(); });
     </script>
 </body>
 </html>
