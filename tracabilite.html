@@ -546,10 +546,10 @@
                 </div>
                 <button class="print-btn" id="print-btn" onclick="printLabels()">
                     <span class="icon">🖨️</span>
-                    <span>Imprimer avec P-touch Editor</span>
+                    <span>Imprimer directement</span>
                 </button>
                 <div class="secondary-actions">
-                    <button class="secondary-btn" onclick="printDirect()" title="Impression navigateur (fallback)">🌐 Impression directe</button>
+                    <button class="secondary-btn" onclick="printBrowserFallback()" title="Impression via navigateur">🌐 Navigateur</button>
                     <button class="secondary-btn" onclick="saveToHistory()">💾 Sauvegarder</button>
                     <button class="secondary-btn" onclick="copyQRData()">📋 Copier</button>
                 </div>
@@ -808,68 +808,132 @@
             document.getElementById('print-qty').textContent = printQty;
         }
 
-        function printLabels() {
-            const product = document.getElementById('input-product').value;
-            if (!product) { showToast('❌ Veuillez entrer un nom de produit', 'error'); return; }
-            saveToHistory();
-            
-            // Ouvrir P-touch Editor avec les données
-            showPtouchDialog();
+        // ═══════════════════════════════════════════════════════════════
+        // IMPRESSION DIRECTE VIA SERVEUR LOCAL
+        // ═══════════════════════════════════════════════════════════════
+        
+        const PRINT_SERVER_URL = 'http://localhost:5555';
+        let printServerOnline = false;
+        
+        // Vérifier si le serveur d'impression est actif
+        async function checkPrintServer() {
+            try {
+                const response = await fetch(`${PRINT_SERVER_URL}/status`, { 
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    printServerOnline = true;
+                    document.getElementById('printer-dot').classList.add('connected');
+                    document.getElementById('printer-status-text').textContent = `${data.printer} ✓ Direct`;
+                    return true;
+                }
+            } catch (e) {
+                printServerOnline = false;
+                document.getElementById('printer-dot').classList.remove('connected');
+                document.getElementById('printer-status-text').textContent = 'Serveur hors ligne';
+            }
+            return false;
         }
         
-        function showPtouchDialog() {
+        async function printLabels() {
             const product = document.getElementById('input-product').value;
-            const lot = document.getElementById('input-lot').value;
-            const origin = document.getElementById('input-origin').value;
-            const dlc = document.getElementById('input-dlc').value;
-            const weight = document.getElementById('input-weight').value;
-            const temp = document.getElementById('input-temp').value;
+            if (!product) { 
+                showToast('❌ Veuillez entrer un nom de produit', 'error'); 
+                return; 
+            }
             
-            const dlcFormatted = dlc ? formatDate(dlc) : '-';
+            saveToHistory();
             
-            // Créer le contenu pour P-touch
-            const ptouchData = `Produit: ${product}
-Lot: ${lot}
-Origine: ${origin}
-DLC: ${dlcFormatted}
-Poids: ${weight || '-'}
-Conservation: ${temp}`;
-
-            // Afficher modal avec instructions
+            // Vérifier le serveur
+            const serverOk = await checkPrintServer();
+            
+            if (serverOk) {
+                // IMPRESSION DIRECTE via serveur local
+                await printDirect();
+            } else {
+                // Pas de serveur - afficher les instructions
+                showServerInstructions();
+            }
+        }
+        
+        async function printDirect() {
+            const data = {
+                product: document.getElementById('input-product').value,
+                lot: document.getElementById('input-lot').value,
+                origin: document.getElementById('input-origin').value,
+                dlc: document.getElementById('input-dlc').value ? formatDate(document.getElementById('input-dlc').value) : '',
+                weight: document.getElementById('input-weight').value,
+                temp: document.getElementById('input-temp').value,
+                site: document.getElementById('input-site').value,
+                quantity: printQty
+            };
+            
+            try {
+                showToast('🖨️ Impression en cours...', 'success');
+                
+                const response = await fetch(`${PRINT_SERVER_URL}/print`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast(`✅ ${result.message}`, 'success');
+                } else {
+                    showToast(`❌ ${result.error}`, 'error');
+                }
+            } catch (e) {
+                showToast('❌ Erreur de connexion au serveur', 'error');
+                showServerInstructions();
+            }
+        }
+        
+        function showServerInstructions() {
             const modal = document.createElement('div');
             modal.className = 'modal-overlay active';
-            modal.id = 'ptouch-modal';
+            modal.id = 'server-modal';
             modal.innerHTML = `
-                <div class="modal" style="max-width:600px;">
+                <div class="modal" style="max-width:650px;">
                     <div class="modal-header">
-                        <h2>🖨️ Imprimer avec P-touch Editor</h2>
-                        <button class="modal-close" onclick="closePtouchModal()">✕</button>
+                        <h2>🖨️ Configuration impression directe</h2>
+                        <button class="modal-close" onclick="document.getElementById('server-modal').remove()">✕</button>
                     </div>
                     <div class="modal-body">
-                        <div style="background:rgba(6,214,160,0.1); border:1px solid var(--accent-primary); border-radius:12px; padding:16px; margin-bottom:20px;">
-                            <div style="font-size:14px; font-weight:700; color:var(--accent-primary); margin-bottom:12px;">📋 Données de l'étiquette</div>
-                            <div style="background:var(--bg-primary); border-radius:8px; padding:12px; font-family:'Space Mono',monospace; font-size:12px; white-space:pre-line; color:var(--text-primary);">${ptouchData}</div>
-                            <button onclick="copyPtouchData()" style="margin-top:12px; padding:10px 16px; background:var(--accent-primary); border:none; border-radius:8px; color:#000; font-weight:600; cursor:pointer; width:100%;">
-                                📋 Copier les données
-                            </button>
+                        <div style="background:rgba(239,71,111,0.1); border:1px solid var(--accent-danger); border-radius:12px; padding:16px; margin-bottom:20px;">
+                            <div style="font-size:14px; font-weight:700; color:var(--accent-danger);">⚠️ Serveur d'impression non détecté</div>
+                            <div style="font-size:12px; color:var(--text-secondary); margin-top:8px;">
+                                Pour imprimer directement sur votre Brother QL-1100, installez le serveur d'impression.
+                            </div>
                         </div>
                         
-                        <div style="font-size:14px; font-weight:700; margin-bottom:12px;">📝 Instructions :</div>
-                        <ol style="font-size:13px; color:var(--text-secondary); line-height:1.8; margin-left:20px;">
-                            <li>Ouvrez <strong>Brother P-touch Editor</strong></li>
-                            <li>Sélectionnez le format <strong>DK-22205 (62mm)</strong></li>
-                            <li>Créez votre mise en page ou utilisez un modèle</li>
-                            <li>Collez les données copiées ou saisissez manuellement</li>
-                            <li>Ajoutez le <strong>QR Code</strong> (Code → QR Code)</li>
-                            <li>Imprimez ! 🖨️</li>
+                        <div style="font-size:14px; font-weight:700; margin-bottom:12px;">📥 Installation (une seule fois) :</div>
+                        <ol style="font-size:13px; color:var(--text-secondary); line-height:2; margin-left:20px; margin-bottom:20px;">
+                            <li>Téléchargez <strong>trakio_print_server.py</strong> depuis GitHub</li>
+                            <li>Installez Python 3 depuis <a href="https://python.org" target="_blank" style="color:var(--accent-primary);">python.org</a></li>
+                            <li>Ouvrez CMD et tapez :<br>
+                                <code style="background:var(--bg-primary); padding:8px 12px; border-radius:6px; display:block; margin:8px 0; font-family:'Space Mono',monospace;">pip install brother_ql Pillow flask flask-cors qrcode</code>
+                            </li>
+                            <li>Double-cliquez sur <strong>trakio_print_server.py</strong> pour lancer</li>
+                            <li>Laissez la fenêtre ouverte en arrière-plan</li>
                         </ol>
                         
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">
-                            <button onclick="exportCSV()" class="secondary-btn" style="padding:14px;">
-                                📊 Exporter CSV
+                        <div style="background:rgba(6,214,160,0.1); border:1px solid var(--accent-primary); border-radius:12px; padding:16px;">
+                            <div style="font-size:13px; font-weight:600; color:var(--accent-primary); margin-bottom:8px;">💡 Une fois installé :</div>
+                            <div style="font-size:12px; color:var(--text-secondary);">
+                                Le serveur démarre automatiquement et TRAKIO imprimera directement sur votre Brother QL-1100 en USB !
+                            </div>
+                        </div>
+                        
+                        <div style="display:flex; gap:10px; margin-top:20px;">
+                            <button onclick="checkPrintServer().then(ok => { if(ok) { document.getElementById('server-modal').remove(); showToast('✅ Serveur connecté!', 'success'); }})" class="secondary-btn" style="flex:1; padding:14px;">
+                                🔄 Réessayer la connexion
                             </button>
-                            <button onclick="openPtouchEditor()" class="secondary-btn" style="padding:14px; background:var(--accent-primary); border-color:var(--accent-primary); color:#000;">
-                                🚀 Ouvrir P-touch
+                            <button onclick="printBrowserFallback()" class="secondary-btn" style="flex:1; padding:14px; background:var(--bg-hover);">
+                                🌐 Impression navigateur
                             </button>
                         </div>
                     </div>
@@ -878,150 +942,66 @@ Conservation: ${temp}`;
             document.body.appendChild(modal);
         }
         
-        function closePtouchModal() {
-            const modal = document.getElementById('ptouch-modal');
-            if (modal) modal.remove();
-        }
-        
-        function copyPtouchData() {
+        // Fallback impression navigateur
+        function printBrowserFallback() {
+            document.getElementById('server-modal')?.remove();
+            
             const product = document.getElementById('input-product').value;
             const lot = document.getElementById('input-lot').value;
             const origin = document.getElementById('input-origin').value;
             const dlc = document.getElementById('input-dlc').value;
             const weight = document.getElementById('input-weight').value;
             const temp = document.getElementById('input-temp').value;
-            
-            const text = `${product}\t${lot}\t${origin}\t${dlc ? formatDate(dlc) : '-'}\t${weight || '-'}\t${temp}`;
-            
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('✅ Données copiées ! Collez dans P-touch Editor', 'success');
-            });
-        }
-        
-        function exportCSV() {
-            const product = document.getElementById('input-product').value;
-            const lot = document.getElementById('input-lot').value;
-            const origin = document.getElementById('input-origin').value;
-            const dlc = document.getElementById('input-dlc').value;
-            const weight = document.getElementById('input-weight').value;
-            const temp = document.getElementById('input-temp').value;
-            const site = document.getElementById('input-site').value;
-            
-            // Créer CSV pour import P-touch (fusion)
-            const headers = 'Produit;Lot;Origine;DLC;Poids;Conservation;Site;QR_Data';
-            const qrData = btoa(JSON.stringify({p:product,l:lot,o:origin,d:dlc}));
-            const row = `${product};${lot};${origin};${dlc ? formatDate(dlc) : ''};${weight || ''};${temp};${site};${qrData}`;
-            
-            // Ajouter plusieurs lignes si quantité > 1
-            let rows = [headers];
-            for (let i = 0; i < printQty; i++) {
-                rows.push(row);
-            }
-            
-            const csv = rows.join('\n');
-            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `etiquette_${lot}.csv`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            showToast(`✅ CSV exporté (${printQty} étiquette${printQty > 1 ? 's' : ''})`, 'success');
-        }
-        
-        function openPtouchEditor() {
-            // Tenter d'ouvrir P-touch Editor (ne fonctionne que si associé)
-            showToast('💡 Ouvrez P-touch Editor manuellement depuis le menu Démarrer', 'success');
-            closePtouchModal();
-        }
-        
-        // Impression directe simplifiée (fallback)
-        function printDirect() {
-            const product = document.getElementById('input-product').value;
-            if (!product) { showToast('❌ Veuillez entrer un nom de produit', 'error'); return; }
-            
-            const labelContent = document.getElementById('label-preview').cloneNode(true);
+            const qrImg = document.querySelector('#qrcode img');
+            const qrSrc = qrImg ? qrImg.src : '';
             
             const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Étiquette ${document.getElementById('input-lot').value}</title>
-                    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-                    <style>
-                        @page { size: 62mm 100mm; margin: 0; }
-                        * { margin: 0; padding: 0; box-sizing: border-box; }
-                        body { 
-                            font-family: 'Inter', Arial, sans-serif;
-                            width: 62mm;
-                            padding: 3mm;
-                            background: #fff;
-                        }
-                        .label-container { 
-                            width: 100%; 
-                            background: #fff;
-                            padding: 0;
-                            box-shadow: none;
-                            border-radius: 0;
-                        }
-                        .label-header {
-                            display: flex;
-                            align-items: center;
-                            gap: 8px;
-                            padding-bottom: 8px;
-                            border-bottom: 1px solid #ddd;
-                            margin-bottom: 8px;
-                        }
-                        .label-logo {
-                            width: 32px; height: 32px;
-                            background: linear-gradient(135deg, #06d6a0, #118ab2);
-                            border-radius: 6px;
-                            display: flex; align-items: center; justify-content: center;
-                            color: #fff; font-size: 11px; font-weight: 800;
-                            -webkit-print-color-adjust: exact;
-                            print-color-adjust: exact;
-                        }
-                        .label-company-name { font-size: 14px; font-weight: 700; color: #1a1a2e; }
-                        .label-company-tagline { font-size: 8px; color: #888; }
-                        .label-row {
-                            display: flex;
-                            justify-content: space-between;
-                            padding: 4px 0;
-                            border-bottom: 1px solid #f0f0f0;
-                        }
-                        .label-key { font-size: 9px; color: #888; }
-                        .label-value { font-size: 9px; font-weight: 600; color: #1a1a2e; }
-                        .label-qr {
-                            display: flex;
-                            flex-direction: column;
-                            align-items: center;
-                            padding-top: 8px;
-                            border-top: 1px solid #ddd;
-                            margin-top: 8px;
-                        }
-                        .label-qr-code { width: 60px; height: 60px; }
-                        .label-qr-code img { width: 100%; height: 100%; }
-                        .label-qr-text { font-size: 7px; color: #888; margin-top: 4px; }
-                        .no-print { display: none; }
-                        @media print {
-                            body { width: 62mm; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${labelContent.outerHTML}
-                    <script>
-                        window.onload = function() {
-                            setTimeout(function() { window.print(); }, 500);
-                        };
-                    <\/script>
-                </body>
-                </html>
-            `);
+            printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+    <title>Étiquette ${lot}</title>
+    <style>
+        @page { size: 62mm 100mm; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; width: 62mm; padding: 3mm; background: #fff; }
+        .header { display: flex; align-items: center; gap: 2mm; padding-bottom: 2mm; border-bottom: 0.5mm solid #ddd; margin-bottom: 2mm; }
+        .logo { width: 8mm; height: 8mm; background: linear-gradient(135deg, #06d6a0, #118ab2); border-radius: 1.5mm; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 8pt; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .company { font-size: 10pt; font-weight: bold; }
+        .tagline { font-size: 6pt; color: #888; }
+        .row { display: flex; justify-content: space-between; padding: 1mm 0; border-bottom: 0.2mm solid #f0f0f0; font-size: 7pt; }
+        .key { color: #888; }
+        .val { font-weight: bold; color: #1a1a2e; }
+        .qr { text-align: center; padding-top: 2mm; border-top: 0.5mm solid #ddd; margin-top: 2mm; }
+        .qr img { width: 12mm; height: 12mm; }
+        .qr-text { font-size: 5pt; color: #888; margin-top: 1mm; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">BP</div>
+        <div><div class="company">Borex Poissons</div><div class="tagline">Qualité & Traçabilité</div></div>
+    </div>
+    <div class="row"><span class="key">Produit</span><span class="val">${product || '-'}</span></div>
+    <div class="row"><span class="key">Lot</span><span class="val">${lot}</span></div>
+    <div class="row"><span class="key">Origine</span><span class="val">${origin || '-'}</span></div>
+    <div class="row"><span class="key">DLC</span><span class="val">${dlc ? formatDate(dlc) : '-'}</span></div>
+    ${weight ? `<div class="row"><span class="key">Poids</span><span class="val">${weight}</span></div>` : ''}
+    <div class="row" style="border:none;"><span class="key">Conservation</span><span class="val">${temp}</span></div>
+    <div class="qr">
+        <img src="${qrSrc}" />
+        <div class="qr-text">Scannez pour plus d'infos</div>
+    </div>
+    <script>window.onload=function(){setTimeout(function(){window.print();},500);};<\/script>
+</body>
+</html>`);
             printWindow.document.close();
+            showToast('🖨️ Sélectionnez Brother QL-1100 et format 62mm', 'success');
         }
+        
+        // Vérifier le serveur au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(checkPrintServer, 1000);
+        });
 
         function generateLabelHTML() {
             const product = document.getElementById('input-product').value;
@@ -1079,13 +1059,8 @@ Conservation: ${temp}`;
         }
 
         function checkPrinterStatus() {
-            if (printerConfig.ip) {
-                document.getElementById('printer-dot').classList.add('connected');
-                document.getElementById('printer-status-text').textContent = `Brother ${printerConfig.model} (${printerConfig.ip})`;
-            } else {
-                document.getElementById('printer-dot').classList.remove('connected');
-                document.getElementById('printer-status-text').textContent = 'Brother QL-1100 (Non configuré)';
-            }
+            // Délégué à checkPrintServer() au chargement
+            checkPrintServer();
         }
 
         function clearForm() {
