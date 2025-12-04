@@ -2376,178 +2376,312 @@
 
         <!-- Page Content -->
         <div class="page-content">
-            <!-- Dashboard Page - NOUVEAU LIVE DASHBOARD -->
+            <!-- Dashboard Page - 🔴 LIVE DASHBOARD UNIFIÉ -->
             <div class="module-page active" id="page-dashboard">
                 
                 <!-- ═══════════════════════════════════════════════════════════════
-                     📊 KPIs - 4 cartes principales
+                     🔴 HEADER LIVE - Indicateur temps réel
                      ═══════════════════════════════════════════════════════════════ -->
-                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:linear-gradient(135deg, rgba(255, 71, 87, 0.12), rgba(255, 107, 53, 0.08)); border:1px solid rgba(255, 71, 87, 0.25); border-radius:16px; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:16px;">
+                        <!-- LIVE Indicator -->
+                        <div id="live-indicator" style="display:flex; align-items:center; gap:10px; padding:10px 20px; background:linear-gradient(135deg, #ff4757, #ff6b81); border-radius:30px; animation:pulse-live 2s infinite;">
+                            <div style="width:10px; height:10px; background:#fff; border-radius:50%; animation:blink-dot 1s infinite;"></div>
+                            <span style="font-size:13px; font-weight:800; color:#fff; text-transform:uppercase; letter-spacing:1px;">LIVE</span>
+                        </div>
+                        <div>
+                            <div style="font-size:18px; font-weight:700;">Dashboard temps réel</div>
+                            <div style="font-size:12px; color:var(--text-muted);">Mise à jour automatique</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:16px;">
+                        <!-- Refresh countdown -->
+                        <div style="display:flex; align-items:center; gap:8px; padding:10px 16px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px;">
+                            <div id="refresh-spinner" style="width:14px; height:14px; border:2px solid var(--border-color); border-top-color:var(--accent-primary); border-radius:50%; animation:spin 1s linear infinite;"></div>
+                            <span style="font-size:12px; color:var(--text-muted);">Refresh: <span id="live-refresh-countdown" style="font-family:'Space Mono',monospace; color:var(--accent-primary);">30</span>s</span>
+                        </div>
+                        <!-- Heure -->
+                        <div id="live-current-time" style="padding:10px 20px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:12px; font-family:'Space Mono',monospace; font-size:18px; font-weight:700;">--:--:--</div>
+                    </div>
+                </div>
+
+                <style>
+                    @keyframes pulse-live { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.5); } 50% { box-shadow: 0 0 0 12px rgba(255, 71, 87, 0); } }
+                    @keyframes blink-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+                    @keyframes spin { to { transform: rotate(360deg); } }
+                    @keyframes slideInAlert { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+                </style>
+
+                <!-- ═══════════════════════════════════════════════════════════════
+                     🚨 ALERTES - Notifications urgentes
+                     ═══════════════════════════════════════════════════════════════ -->
+                <div id="live-alerts-container" style="margin-bottom:20px;">
+                    <!-- Généré dynamiquement par JS -->
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════════
+                     📊 KPIs - 6 cartes cliquables
+                     ═══════════════════════════════════════════════════════════════ -->
+                <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:14px; margin-bottom:20px;">
                     
                     <!-- CA du jour -->
-                    <div style="background:linear-gradient(145deg, var(--bg-card), var(--bg-secondary)); border:1px solid var(--border-color); border-radius:16px; padding:20px; position:relative; overflow:hidden;">
+                    <div onclick="navigateTo('analyses')" style="cursor:pointer; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:18px; position:relative; overflow:hidden; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(6,214,160,0.2)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
                         <div style="position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));"></div>
-                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                            <div style="width:42px; height:42px; background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius:12px; display:flex; align-items:center; justify-content:center;">
-                                <span style="font-size:20px;">💰</span>
-                            </div>
-                            <span style="font-size:13px; color:var(--text-muted);">CA du jour</span>
-                        </div>
-                        <div id="kpi-ca-jour" style="font-size:28px; font-weight:800; font-family:'Space Mono',monospace; color:var(--accent-primary);">0 CHF</div>
+                        <div style="font-size:28px; margin-bottom:8px;">💰</div>
+                        <div id="kpi-ca-jour" style="font-size:26px; font-weight:800; font-family:'Space Mono',monospace; color:var(--accent-primary);">0</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">CA Aujourd'hui</div>
                     </div>
                     
-                    <!-- Commandes totales -->
-                    <div style="background:linear-gradient(145deg, var(--bg-card), var(--bg-secondary)); border:1px solid var(--border-color); border-radius:16px; padding:20px; position:relative; overflow:hidden;">
+                    <!-- Commandes -->
+                    <div onclick="navigateTo('orders')" style="cursor:pointer; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:18px; position:relative; overflow:hidden; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(17,138,178,0.2)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
                         <div style="position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, #118ab2, #06d6a0);"></div>
-                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                            <div style="width:42px; height:42px; background:linear-gradient(135deg, #118ab2, #06d6a0); border-radius:12px; display:flex; align-items:center; justify-content:center;">
-                                <span style="font-size:20px;">📦</span>
-                            </div>
-                            <span style="font-size:13px; color:var(--text-muted);">Commandes</span>
-                        </div>
-                        <div id="kpi-commandes" style="font-size:28px; font-weight:800; font-family:'Space Mono',monospace; color:#118ab2;">0</div>
+                        <div style="font-size:28px; margin-bottom:8px;">📦</div>
+                        <div id="kpi-commandes" style="font-size:26px; font-weight:800; font-family:'Space Mono',monospace; color:#118ab2;">0</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Cmd. du jour</div>
                     </div>
                     
-                    <!-- En cours -->
-                    <div style="background:linear-gradient(145deg, var(--bg-card), var(--bg-secondary)); border:1px solid var(--border-color); border-radius:16px; padding:20px; position:relative; overflow:hidden;">
+                    <!-- En attente -->
+                    <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:18px; position:relative; overflow:hidden;">
                         <div style="position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, #ffd166, #ff9f43);"></div>
-                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                            <div style="width:42px; height:42px; background:linear-gradient(135deg, #ffd166, #ff9f43); border-radius:12px; display:flex; align-items:center; justify-content:center;">
-                                <span style="font-size:20px;">⏳</span>
-                            </div>
-                            <span style="font-size:13px; color:var(--text-muted);">En cours</span>
-                        </div>
-                        <div id="kpi-encours" style="font-size:28px; font-weight:800; font-family:'Space Mono',monospace; color:#ffd166;">0</div>
+                        <div style="font-size:28px; margin-bottom:8px;">⏳</div>
+                        <div id="kpi-encours" style="font-size:26px; font-weight:800; font-family:'Space Mono',monospace; color:#ffd166;">0</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">En attente</div>
+                    </div>
+                    
+                    <!-- Urgentes -->
+                    <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:18px; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, #ef476f, #ff6b6b);"></div>
+                        <div style="font-size:28px; margin-bottom:8px;">🚨</div>
+                        <div id="kpi-urgent" style="font-size:26px; font-weight:800; font-family:'Space Mono',monospace; color:#ef476f;">0</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Urgentes</div>
                     </div>
                     
                     <!-- Shopify -->
-                    <div onclick="window.location.href='shopify.html'" style="cursor:pointer; background:linear-gradient(145deg, var(--bg-card), var(--bg-secondary)); border:1px solid var(--border-color); border-radius:16px; padding:20px; position:relative; overflow:hidden; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(150,191,72,0.2)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                    <div onclick="window.location.href='shopify.html'" style="cursor:pointer; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:18px; position:relative; overflow:hidden; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(150,191,72,0.2)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
                         <div style="position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, #96bf48, #5a8f29);"></div>
-                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                            <div style="width:42px; height:42px; background:linear-gradient(135deg, #96bf48, #5a8f29); border-radius:12px; display:flex; align-items:center; justify-content:center;">
-                                <span style="font-size:20px;">🛍️</span>
-                            </div>
-                            <span style="font-size:13px; color:var(--text-muted);">Shopify</span>
-                        </div>
-                        <div id="kpi-shopify" style="font-size:28px; font-weight:800; font-family:'Space Mono',monospace; color:#96bf48;">0</div>
+                        <div style="font-size:28px; margin-bottom:8px;">🛍️</div>
+                        <div id="kpi-shopify" style="font-size:26px; font-weight:800; font-family:'Space Mono',monospace; color:#96bf48;">0</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Shopify</div>
+                    </div>
+                    
+                    <!-- Clients -->
+                    <div onclick="window.location.href='clients.html'" style="cursor:pointer; background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:18px; position:relative; overflow:hidden; transition:all 0.25s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(156,136,255,0.2)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                        <div style="position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, #9c88ff, #7b68ee);"></div>
+                        <div style="font-size:28px; margin-bottom:8px;">👥</div>
+                        <div id="kpi-clients-count" style="font-size:26px; font-weight:800; font-family:'Space Mono',monospace; color:#9c88ff;">0</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Clients actifs</div>
                     </div>
                     
                 </div>
 
                 <!-- ═══════════════════════════════════════════════════════════════
-                     🎛️ COMMAND CENTER - Accès rapide unifié
+                     🎛️ COMMAND CENTER - Accès rapide PRO
                      ═══════════════════════════════════════════════════════════════ -->
-                <div style="background:linear-gradient(145deg, var(--bg-card), rgba(6,214,160,0.05)); border:2px solid var(--accent-primary); border-radius:16px; margin-bottom:24px; overflow:hidden;">
+                <div style="background:linear-gradient(145deg, var(--bg-card), rgba(6,214,160,0.03)); border:2px solid var(--accent-primary); border-radius:16px; margin-bottom:20px; overflow:hidden;">
                     
-                    <!-- Header Command Center -->
-                    <div style="padding:12px 20px; background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); display:flex; justify-content:space-between; align-items:center;">
+                    <!-- Header -->
+                    <div style="padding:14px 20px; background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                         <div style="display:flex; align-items:center; gap:12px;">
-                            <span style="font-size:20px;">🎛️</span>
-                            <span style="font-size:14px; font-weight:700; color:#000;">COMMAND CENTER</span>
-                            <span style="font-size:11px; color:rgba(0,0,0,0.6); padding:3px 8px; background:rgba(0,0,0,0.15); border-radius:8px;">Accès rapide</span>
+                            <span style="font-size:22px;">🎛️</span>
+                            <span style="font-size:16px; font-weight:800; color:#000;">COMMAND CENTER</span>
+                            <span style="font-size:10px; color:rgba(0,0,0,0.6); padding:4px 10px; background:rgba(0,0,0,0.12); border-radius:8px;">Accès rapide</span>
                         </div>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="font-size:11px; color:rgba(0,0,0,0.7);">⌨️ Raccourcis: </span>
-                            <kbd style="padding:3px 8px; background:rgba(0,0,0,0.2); border-radius:4px; font-size:10px; font-family:'Space Mono',monospace; color:#000;">M</kbd><span style="font-size:10px; color:rgba(0,0,0,0.6);">MyFish</span>
-                            <kbd style="padding:3px 8px; background:rgba(0,0,0,0.2); border-radius:4px; font-size:10px; font-family:'Space Mono',monospace; color:#000;">N</kbd><span style="font-size:10px; color:rgba(0,0,0,0.6);">Nouvelle CMD</span>
-                            <kbd style="padding:3px 8px; background:rgba(0,0,0,0.2); border-radius:4px; font-size:10px; font-family:'Space Mono',monospace; color:#000;">P</kbd><span style="font-size:10px; color:rgba(0,0,0,0.6);">Prix</span>
+                        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                            <span style="font-size:11px; color:rgba(0,0,0,0.7);">⌨️</span>
+                            <kbd style="padding:3px 8px; background:rgba(0,0,0,0.18); border-radius:4px; font-size:10px; font-family:'Space Mono',monospace; color:#000;">M</kbd><span style="font-size:10px; color:rgba(0,0,0,0.6); margin-right:8px;">MyFish</span>
+                            <kbd style="padding:3px 8px; background:rgba(0,0,0,0.18); border-radius:4px; font-size:10px; font-family:'Space Mono',monospace; color:#000;">N</kbd><span style="font-size:10px; color:rgba(0,0,0,0.6); margin-right:8px;">Commande</span>
+                            <kbd style="padding:3px 8px; background:rgba(0,0,0,0.18); border-radius:4px; font-size:10px; font-family:'Space Mono',monospace; color:#000;">S</kbd><span style="font-size:10px; color:rgba(0,0,0,0.6);">Shopify</span>
                         </div>
                     </div>
                     
-                    <!-- Actions rapides -->
-                    <div style="padding:16px 20px; display:grid; grid-template-columns:repeat(6, 1fr); gap:12px;">
+                    <!-- 8 Actions principales -->
+                    <div style="padding:18px 20px; display:grid; grid-template-columns:repeat(8, 1fr); gap:12px;">
                         
-                        <!-- MyFish -->
-                        <div onclick="window.location.href='myfish.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(156,136,255,0.15), rgba(156,136,255,0.05)); border:1px solid rgba(156,136,255,0.3); border-radius:12px; padding:16px 12px; text-align:center; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#9c88ff'; this.style.boxShadow='0 8px 20px rgba(156,136,255,0.25)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(156,136,255,0.3)'; this.style.boxShadow=''">
-                            <div style="width:48px; height:48px; background:linear-gradient(135deg, #9c88ff, #7b68ee); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px;">🐟</div>
+                        <!-- MyFish PRO -->
+                        <div onclick="window.location.href='myfish.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(156,136,255,0.12), rgba(156,136,255,0.04)); border:1px solid rgba(156,136,255,0.25); border-radius:14px; padding:16px 10px; text-align:center; transition:all 0.2s; position:relative;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#9c88ff'; this.style.boxShadow='0 8px 24px rgba(156,136,255,0.3)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(156,136,255,0.25)'; this.style.boxShadow=''">
+                            <div style="position:absolute; top:6px; right:6px; background:linear-gradient(135deg, #9c88ff, #7b68ee); color:#fff; padding:2px 6px; border-radius:6px; font-size:8px; font-weight:700;">PRO</div>
+                            <div style="width:50px; height:50px; background:linear-gradient(135deg, #9c88ff, #7b68ee); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:26px;">🐟</div>
                             <div style="font-size:13px; font-weight:700; color:#9c88ff;">MyFish</div>
-                            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Clients B2C</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Vente magasin</div>
                         </div>
                         
-                        <!-- Nouvelle Commande -->
-                        <div onclick="window.location.href='commandes.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(6,214,160,0.15), rgba(6,214,160,0.05)); border:1px solid rgba(6,214,160,0.3); border-radius:12px; padding:16px 12px; text-align:center; transition:all 0.2s; position:relative;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 8px 20px rgba(6,214,160,0.25)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(6,214,160,0.3)'; this.style.boxShadow=''">
-                            <div style="position:absolute; top:6px; right:6px; background:var(--accent-primary); color:#000; padding:2px 6px; border-radius:6px; font-size:8px; font-weight:700;">⭐</div>
-                            <div style="width:48px; height:48px; background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px;">🛒</div>
-                            <div style="font-size:13px; font-weight:700; color:var(--accent-primary);">Commande</div>
-                            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">B2B/B2C</div>
+                        <!-- Commandes PRO -->
+                        <div onclick="window.location.href='commandes.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(6,214,160,0.12), rgba(6,214,160,0.04)); border:1px solid rgba(6,214,160,0.25); border-radius:14px; padding:16px 10px; text-align:center; transition:all 0.2s; position:relative;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='var(--accent-primary)'; this.style.boxShadow='0 8px 24px rgba(6,214,160,0.3)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(6,214,160,0.25)'; this.style.boxShadow=''">
+                            <div style="position:absolute; top:6px; right:6px; background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color:#000; padding:2px 6px; border-radius:6px; font-size:8px; font-weight:700;">PRO</div>
+                            <div style="width:50px; height:50px; background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:26px;">📦</div>
+                            <div style="font-size:13px; font-weight:700; color:var(--accent-primary);">Commandes</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">B2B / B2C</div>
                         </div>
                         
-                        <!-- Cours Poissons -->
-                        <div onclick="navigateTo('cours-poissons')" style="cursor:pointer; background:linear-gradient(145deg, rgba(0,206,201,0.15), rgba(0,206,201,0.05)); border:1px solid rgba(0,206,201,0.3); border-radius:12px; padding:16px 12px; text-align:center; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#00cec9'; this.style.boxShadow='0 8px 20px rgba(0,206,201,0.25)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(0,206,201,0.3)'; this.style.boxShadow=''">
-                            <div style="width:48px; height:48px; background:linear-gradient(135deg, #00cec9, #81ecec); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px;">📈</div>
+                        <!-- Shopify -->
+                        <div onclick="window.location.href='shopify.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(150,191,72,0.12), rgba(150,191,72,0.04)); border:1px solid rgba(150,191,72,0.25); border-radius:14px; padding:16px 10px; text-align:center; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#96bf48'; this.style.boxShadow='0 8px 24px rgba(150,191,72,0.3)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(150,191,72,0.25)'; this.style.boxShadow=''">
+                            <div style="width:50px; height:50px; background:linear-gradient(135deg, #96bf48, #5a8f29); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:26px;">🛍️</div>
+                            <div style="font-size:13px; font-weight:700; color:#96bf48;">Shopify</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Web orders</div>
+                        </div>
+                        
+                        <!-- Cours/Prix -->
+                        <div onclick="navigateTo('cours-poissons')" style="cursor:pointer; background:linear-gradient(145deg, rgba(0,206,201,0.12), rgba(0,206,201,0.04)); border:1px solid rgba(0,206,201,0.25); border-radius:14px; padding:16px 10px; text-align:center; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#00cec9'; this.style.boxShadow='0 8px 24px rgba(0,206,201,0.3)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(0,206,201,0.25)'; this.style.boxShadow=''">
+                            <div style="width:50px; height:50px; background:linear-gradient(135deg, #00cec9, #81ecec); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:26px;">📈</div>
                             <div style="font-size:13px; font-weight:700; color:#00cec9;">Cours</div>
-                            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Prix du jour</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Prix du jour</div>
                         </div>
                         
                         <!-- Articles -->
-                        <div onclick="window.location.href='articles.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(255,107,107,0.15), rgba(255,107,107,0.05)); border:1px solid rgba(255,107,107,0.3); border-radius:12px; padding:16px 12px; text-align:center; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#ff6b6b'; this.style.boxShadow='0 8px 20px rgba(255,107,107,0.25)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(255,107,107,0.3)'; this.style.boxShadow=''">
-                            <div style="width:48px; height:48px; background:linear-gradient(135deg, #ff6b6b, #ee5a5a); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px;">📦</div>
+                        <div onclick="window.location.href='articles.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(255,107,107,0.12), rgba(255,107,107,0.04)); border:1px solid rgba(255,107,107,0.25); border-radius:14px; padding:16px 10px; text-align:center; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#ff6b6b'; this.style.boxShadow='0 8px 24px rgba(255,107,107,0.3)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(255,107,107,0.25)'; this.style.boxShadow=''">
+                            <div style="width:50px; height:50px; background:linear-gradient(135deg, #ff6b6b, #ee5a5a); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:26px;">📋</div>
                             <div style="font-size:13px; font-weight:700; color:#ff6b6b;">Articles</div>
-                            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Catalogue</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Catalogue</div>
                         </div>
                         
                         <!-- Clients -->
-                        <div onclick="window.location.href='clients.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(255,183,77,0.15), rgba(255,183,77,0.05)); border:1px solid rgba(255,183,77,0.3); border-radius:12px; padding:16px 12px; text-align:center; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#ffb74d'; this.style.boxShadow='0 8px 20px rgba(255,183,77,0.25)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(255,183,77,0.3)'; this.style.boxShadow=''">
-                            <div style="width:48px; height:48px; background:linear-gradient(135deg, #ffb74d, #ff9800); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px;">👥</div>
+                        <div onclick="window.location.href='clients.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(255,183,77,0.12), rgba(255,183,77,0.04)); border:1px solid rgba(255,183,77,0.25); border-radius:14px; padding:16px 10px; text-align:center; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#ffb74d'; this.style.boxShadow='0 8px 24px rgba(255,183,77,0.3)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(255,183,77,0.25)'; this.style.boxShadow=''">
+                            <div style="width:50px; height:50px; background:linear-gradient(135deg, #ffb74d, #ff9800); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:26px;">👥</div>
                             <div style="font-size:13px; font-weight:700; color:#ffb74d;">Clients</div>
-                            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Base de données</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">CRM</div>
                         </div>
                         
-                        <!-- Cloud Sync -->
-                        <div onclick="window.location.href='cloud.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(59,130,246,0.15), rgba(59,130,246,0.05)); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:16px 12px; text-align:center; transition:all 0.2s; position:relative;" onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#3b82f6'; this.style.boxShadow='0 8px 20px rgba(59,130,246,0.25)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(59,130,246,0.3)'; this.style.boxShadow=''">
-                            <div id="cloud-sync-indicator" style="position:absolute; top:6px; right:6px; width:8px; height:8px; background:#06d6a0; border-radius:50%; animation:pulse-dot 2s infinite;"></div>
-                            <div style="width:48px; height:48px; background:linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:24px;">☁️</div>
+                        <!-- Cloud -->
+                        <div onclick="window.location.href='cloud.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border:1px solid rgba(59,130,246,0.25); border-radius:14px; padding:16px 10px; text-align:center; transition:all 0.2s; position:relative;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#3b82f6'; this.style.boxShadow='0 8px 24px rgba(59,130,246,0.3)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(59,130,246,0.25)'; this.style.boxShadow=''">
+                            <div id="cloud-sync-indicator" style="position:absolute; top:8px; right:8px; width:8px; height:8px; background:var(--accent-primary); border-radius:50%; animation:pulse-dot 2s infinite;"></div>
+                            <div style="width:50px; height:50px; background:linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:26px;">☁️</div>
                             <div style="font-size:13px; font-weight:700; color:#3b82f6;">Cloud</div>
-                            <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Firebase Sync</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Sync</div>
+                        </div>
+                        
+                        <!-- WhatsApp -->
+                        <div onclick="window.location.href='whatsapp.html'" style="cursor:pointer; background:linear-gradient(145deg, rgba(37,211,102,0.12), rgba(37,211,102,0.04)); border:1px solid rgba(37,211,102,0.25); border-radius:14px; padding:16px 10px; text-align:center; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='#25D366'; this.style.boxShadow='0 8px 24px rgba(37,211,102,0.3)'" onmouseout="this.style.transform=''; this.style.borderColor='rgba(37,211,102,0.25)'; this.style.boxShadow=''">
+                            <div style="width:50px; height:50px; background:linear-gradient(135deg, #25D366, #128C7E); border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:26px;">💬</div>
+                            <div style="font-size:13px; font-weight:700; color:#25D366;">WhatsApp</div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Messages</div>
                         </div>
                         
                     </div>
                     
                     <!-- Barre d'état Cloud -->
-                    <div style="padding:10px 20px; background:var(--bg-primary); border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; font-size:11px;">
-                        <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="padding:10px 20px; background:var(--bg-primary); border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-size:11px;">
+                        <div style="display:flex; align-items:center; gap:20px;">
                             <div style="display:flex; align-items:center; gap:6px;">
                                 <span style="color:var(--text-muted);">Dropbox:</span>
-                                <span id="command-dropbox-status" style="color:#0061ff;">⚪ Déconnecté</span>
+                                <span id="command-dropbox-status" style="font-weight:600;">⚪ —</span>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px;">
                                 <span style="color:var(--text-muted);">Firebase:</span>
-                                <span id="command-firebase-status" style="color:#ff9500;">⚪ Déconnecté</span>
+                                <span id="command-firebase-status" style="font-weight:600;">⚪ —</span>
                             </div>
                         </div>
                         <div style="display:flex; align-items:center; gap:6px; color:var(--text-muted);">
                             <span>Prochaine sync:</span>
-                            <span id="command-next-sync" style="font-family:'Space Mono',monospace; color:var(--accent-primary);">--:--</span>
+                            <span id="command-next-sync" style="font-family:'Space Mono',monospace; color:var(--accent-primary); font-weight:600;">--:--</span>
                         </div>
                     </div>
                     
                 </div>
 
                 <!-- ═══════════════════════════════════════════════════════════════
-                     📋 COMMANDES EN COURS - Liste unifiée
+                     📋 COMMANDES EN COURS - Liste temps réel
                      ═══════════════════════════════════════════════════════════════ -->
-                <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:16px; margin-bottom:24px; overflow:hidden;">
+                <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:16px; margin-bottom:20px; overflow:hidden;">
                     
                     <!-- Header -->
                     <div style="padding:16px 20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                         <div style="display:flex; align-items:center; gap:12px;">
                             <div style="width:10px; height:10px; background:#ef476f; border-radius:50%; animation:pulse-dot 2s infinite;"></div>
-                            <h3 style="font-size:16px; font-weight:700;">Commandes en cours</h3>
-                            <span id="orders-count-badge" style="background:var(--accent-primary); color:#000; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:700;">0</span>
+                            <h3 style="font-size:16px; font-weight:700;">📋 Commandes en cours</h3>
+                            <span id="orders-count-badge" style="background:var(--accent-primary); color:#000; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:700;">0</span>
                         </div>
-                        <div style="display:flex; gap:8px; align-items:center;">
+                        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                            <!-- Recherche -->
+                            <div style="position:relative;">
+                                <input type="text" id="dash-search-input" placeholder="🔍 Rechercher..." oninput="searchDashOrders(this.value)" style="padding:8px 14px 8px 36px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:12px; width:180px;">
+                                <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:12px; color:var(--text-muted);">🔍</span>
+                            </div>
                             <!-- Tri -->
-                            <select id="dash-sort-order" onchange="sortDashOrders(this.value)" style="padding:8px 12px; background:var(--bg-hover); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:12px; cursor:pointer;">
+                            <select id="dash-sort-order" onchange="sortDashOrders(this.value)" style="padding:8px 12px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:12px; cursor:pointer;">
                                 <option value="recent">📅 Plus récent</option>
                                 <option value="oldest">📅 Plus ancien</option>
                                 <option value="amount-high">💰 Montant ↓</option>
                                 <option value="amount-low">💰 Montant ↑</option>
                                 <option value="name">🔤 Client A-Z</option>
                             </select>
-                            <button onclick="refreshDashboardOrders()" style="padding:8px 16px; background:var(--bg-hover); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                            <button onclick="refreshDashboardOrders()" style="padding:8px 14px; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent-primary)'" onmouseout="this.style.borderColor='var(--border-color)'">
                                 🔄 Actualiser
                             </button>
                         </div>
+                    </div>
+                    
+                    <!-- Filtres -->
+                    <div style="padding:12px 20px; background:var(--bg-primary); border-bottom:1px solid var(--border-color); display:flex; gap:8px; flex-wrap:wrap;">
+                        <button onclick="filterDashOrders('all')" id="dash-filter-all" class="dash-filter-btn active" style="padding:8px 16px; background:var(--accent-primary); border:none; border-radius:20px; color:#000; font-size:12px; font-weight:600; cursor:pointer;">Tous</button>
+                        <button onclick="filterDashOrders('shopify')" id="dash-filter-shopify" class="dash-filter-btn" style="padding:8px 16px; background:transparent; border:1px solid #96bf48; border-radius:20px; color:#96bf48; font-size:12px; font-weight:600; cursor:pointer;">🛍️ Shopify</button>
+                        <button onclick="filterDashOrders('myfish')" id="dash-filter-myfish" class="dash-filter-btn" style="padding:8px 16px; background:transparent; border:1px solid #9c88ff; border-radius:20px; color:#9c88ff; font-size:12px; font-weight:600; cursor:pointer;">🐟 MyFish</button>
+                        <button onclick="filterDashOrders('b2b')" id="dash-filter-b2b" class="dash-filter-btn" style="padding:8px 16px; background:transparent; border:1px solid #118ab2; border-radius:20px; color:#118ab2; font-size:12px; font-weight:600; cursor:pointer;">🏢 B2B</button>
+                        <button onclick="filterDashOrders('b2c')" id="dash-filter-b2c" class="dash-filter-btn" style="padding:8px 16px; background:transparent; border:1px solid #9c88ff; border-radius:20px; color:#9c88ff; font-size:12px; font-weight:600; cursor:pointer;">👤 B2C</button>
+                    </div>
+                    
+                    <!-- Liste -->
+                    <div id="dash-orders-list" style="max-height:400px; overflow-y:auto; padding:16px 20px;">
+                        <div style="text-align:center; padding:40px 20px; color:var(--text-muted);">
+                            <div style="font-size:48px; margin-bottom:12px; opacity:0.5;">📭</div>
+                            <div style="font-size:14px;">Chargement des commandes...</div>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════════
+                     🛠️ OUTILS SECONDAIRES - Barre compacte
+                     ═══════════════════════════════════════════════════════════════ -->
+                <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:16px 20px; margin-bottom:20px;">
+                    <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                        <span>🛠️</span> Outils & Modules
+                    </div>
+                    <div style="display:grid; grid-template-columns:repeat(8, 1fr); gap:10px;">
+                        
+                        <div onclick="window.location.href='compta.html'" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:12px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(6,214,160,0.12)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:20px; margin-bottom:4px;">💰</div>
+                            <div style="font-size:10px; font-weight:600; color:var(--accent-primary);">Compta</div>
+                        </div>
+                        
+                        <div onclick="navigateTo('analyses')" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:12px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(156,136,255,0.12)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:20px; margin-bottom:4px;">📊</div>
+                            <div style="font-size:10px; font-weight:600; color:#9c88ff;">Analyses</div>
+                        </div>
+                        
+                        <div onclick="navigateTo('orders')" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:12px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(17,138,178,0.12)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:20px; margin-bottom:4px;">📋</div>
+                            <div style="font-size:10px; font-weight:600; color:#118ab2;">Liste Cmd</div>
+                        </div>
+                        
+                        <div onclick="window.location.href='tracabilite.html'" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:12px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,159,67,0.12)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:20px; margin-bottom:4px;">🏷️</div>
+                            <div style="font-size:10px; font-weight:600; color:#ff9f43;">Traçabilité</div>
+                        </div>
+                        
+                        <div onclick="navigateTo('fournisseurs')" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:12px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,107,107,0.12)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:20px; margin-bottom:4px;">🚚</div>
+                            <div style="font-size:10px; font-weight:600; color:#ff6b6b;">Fournisseurs</div>
+                        </div>
+                        
+                        <div onclick="navigateTo('rh')" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:12px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,183,77,0.12)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:20px; margin-bottom:4px;">👔</div>
+                            <div style="font-size:10px; font-weight:600; color:#ffb74d;">RH</div>
+                        </div>
+                        
+                        <div onclick="navigateTo('settings')" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:12px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(100,116,139,0.12)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:20px; margin-bottom:4px;">⚙️</div>
+                            <div style="font-size:10px; font-weight:600; color:var(--text-muted);">Paramètres</div>
+                        </div>
+                        
+                        <div onclick="window.location.href='trakio-pilot.html'" style="cursor:pointer; background:var(--bg-hover); border-radius:10px; padding:12px 8px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(239,71,111,0.12)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--bg-hover)'; this.style.transform=''">
+                            <div style="font-size:20px; margin-bottom:4px;">⏱️</div>
+                            <div style="font-size:10px; font-weight:600; color:#ef476f;">Pilot</div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+            </div>
                     </div>
                     
                     <!-- Barre de recherche -->
@@ -18777,16 +18911,134 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
         let currentDashFilter = 'all';
         let currentDashSort = 'recent';
         let currentDashSearch = '';
+        let liveRefreshCountdown = 30;
+        const LIVE_REFRESH_INTERVAL = 30;
 
         function loadNewDashboard() {
             loadDashboardKPIs();
             loadDashboardOrders();
             updateCommandCenterStatus();
+            loadLiveAlerts();
+            startLiveRefresh();
+        }
+
+        // 🔴 LIVE - Démarrer le refresh automatique
+        function startLiveRefresh() {
+            // Mettre à jour l'heure toutes les secondes
+            setInterval(updateLiveTime, 1000);
+            updateLiveTime();
+            
+            // Countdown refresh
+            setInterval(function() {
+                liveRefreshCountdown--;
+                const countdownEl = document.getElementById('live-refresh-countdown');
+                if (countdownEl) countdownEl.textContent = liveRefreshCountdown;
+                
+                if (liveRefreshCountdown <= 0) {
+                    liveRefreshCountdown = LIVE_REFRESH_INTERVAL;
+                    refreshDashboardOrders();
+                    loadLiveAlerts();
+                }
+            }, 1000);
+        }
+
+        function updateLiveTime() {
+            const timeEl = document.getElementById('live-current-time');
+            if (timeEl) {
+                const now = new Date();
+                timeEl.textContent = now.toLocaleTimeString('fr-CH', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+            }
+        }
+
+        // 🚨 LIVE - Charger les alertes
+        function loadLiveAlerts() {
+            const container = document.getElementById('live-alerts-container');
+            if (!container) return;
+            
+            const alerts = [];
+            
+            // Shopify urgentes
+            const shopifyOrders = JSON.parse(localStorage.getItem('shopify_orders') || '[]');
+            const urgent = shopifyOrders.filter(o => 
+                o.financialStatus === 'paid' && !o.processed
+            );
+            
+            if (urgent.length > 0) {
+                alerts.push({
+                    type: 'danger',
+                    icon: '🚨',
+                    title: `${urgent.length} commande(s) Shopify à traiter!`,
+                    desc: 'Commandes payées en attente de préparation',
+                    action: 'Voir',
+                    url: 'shopify.html'
+                });
+            }
+            
+            // Retraits du jour
+            const today = new Date().toDateString();
+            const pickupsToday = shopifyOrders.filter(o => {
+                if (!o.pickupDate) return false;
+                const pickupDate = parseLiveDate(o.pickupDate);
+                return pickupDate && pickupDate.toDateString() === today && !o.processed;
+            });
+            
+            if (pickupsToday.length > 0) {
+                alerts.push({
+                    type: 'warning',
+                    icon: '📦',
+                    title: `${pickupsToday.length} retrait(s) prévu(s) aujourd'hui`,
+                    desc: 'Préparez les commandes pour le retrait',
+                    action: 'Voir',
+                    url: 'shopify.html'
+                });
+            }
+            
+            // Si pas d'alertes, message positif
+            if (alerts.length === 0) {
+                container.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:16px; padding:14px 20px; background:linear-gradient(135deg, rgba(6,214,160,0.12), rgba(6,214,160,0.05)); border:1px solid rgba(6,214,160,0.25); border-radius:14px; animation:slideInAlert 0.3s ease;">
+                        <div style="font-size:28px;">✅</div>
+                        <div style="flex:1;">
+                            <div style="font-size:14px; font-weight:700; color:var(--accent-primary);">Tout est en ordre!</div>
+                            <div style="font-size:12px; color:var(--text-muted);">Aucune alerte pour le moment</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Afficher les alertes
+            container.innerHTML = alerts.map(alert => `
+                <div style="display:flex; align-items:center; gap:16px; padding:14px 20px; background:linear-gradient(135deg, rgba(${alert.type === 'danger' ? '239,71,111' : '255,209,102'},0.12), rgba(${alert.type === 'danger' ? '239,71,111' : '255,209,102'},0.05)); border:1px solid rgba(${alert.type === 'danger' ? '239,71,111' : '255,209,102'},0.25); border-radius:14px; margin-bottom:10px; animation:slideInAlert 0.3s ease;">
+                    <div style="font-size:28px;">${alert.icon}</div>
+                    <div style="flex:1;">
+                        <div style="font-size:14px; font-weight:700;">${alert.title}</div>
+                        <div style="font-size:12px; color:var(--text-muted);">${alert.desc}</div>
+                    </div>
+                    <button onclick="window.location.href='${alert.url}'" style="padding:10px 18px; background:rgba(255,255,255,0.1); border:none; border-radius:10px; color:var(--text-primary); font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">${alert.action} →</button>
+                </div>
+            `).join('');
+        }
+
+        function parseLiveDate(dateStr) {
+            if (!dateStr) return null;
+            const months = { 'Jan':0, 'Feb':1, 'Mar':2, 'Apr':3, 'May':4, 'Jun':5, 'Jul':6, 'Aug':7, 'Sep':8, 'Oct':9, 'Nov':10, 'Dec':11 };
+            const match = dateStr.match(/(\d{1,2})\s+(\w{3})\s+(\d{4})/);
+            if (match) {
+                return new Date(parseInt(match[3]), months[match[2]], parseInt(match[1]));
+            }
+            const isoDate = new Date(dateStr);
+            return isNaN(isoDate) ? null : isoDate;
         }
 
         function refreshDashboardOrders() {
             loadDashboardOrders();
             loadDashboardKPIs();
+            updateCommandCenterStatus();
         }
 
         // 🎛️ COMMAND CENTER - Mise à jour des statuts
@@ -19039,12 +19291,14 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             const orders = JSON.parse(localStorage.getItem('trakio_orders') || '[]');
             const shopifyOrders = JSON.parse(localStorage.getItem('shopify_orders') || '[]');
             const mfOrders = JSON.parse(localStorage.getItem('mf_orders') || '[]');
+            const clientsData = JSON.parse(localStorage.getItem('trakio_quickorder') || '{}');
             
             const today = new Date().toISOString().slice(0, 10);
             let caJour = 0;
             let totalCommandes = 0;
             let enCours = 0;
             let shopifyCount = 0;
+            let urgentCount = 0;
 
             // TRAKIO orders
             orders.forEach(o => {
@@ -19062,9 +19316,14 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
             // Shopify orders
             shopifyOrders.forEach(o => {
                 const status = (o['Fulfillment Status'] || o.fulfillment_status || '').toLowerCase();
+                const financial = (o['Financial Status'] || o.financial_status || '').toLowerCase();
                 if (status !== 'fulfilled' && status !== 'completed') {
                     shopifyCount++;
                     enCours++;
+                    // Urgentes = payées mais pas traitées
+                    if (financial === 'paid' && !o.processed) {
+                        urgentCount++;
+                    }
                 }
                 const total = parseFloat(o.Total || o.total_price || 0);
                 caJour += total;
@@ -19073,25 +19332,50 @@ ${data.conservationTemp || data.conservationDetail ? `<tr><td style="background:
 
             // MyFish orders
             mfOrders.forEach(o => {
+                const orderDate = (o.date || o.createdAt || '').slice(0, 10);
+                if (orderDate === today) {
+                    caJour += parseFloat(o.total) || 0;
+                    totalCommandes++;
+                }
                 const status = (o.status || '').toLowerCase();
-                if (status !== 'completed' && status !== 'done') {
+                if (status !== 'completed' && status !== 'done' && status !== 'delivered') {
                     enCours++;
                 }
-                totalCommandes++;
             });
 
-            // Update KPIs
-            const caEl = document.getElementById('kpi-ca-jour');
-            if (caEl) caEl.textContent = caJour.toLocaleString('fr-CH') + ' CHF';
+            // Clients actifs
+            const clientsArray = clientsData.clients || [];
+            const activeClients = clientsArray.filter(c => c.active !== false).length;
+
+            // Update KPIs avec animation
+            animateLiveKPI('kpi-ca-jour', caJour, true);
+            animateLiveKPI('kpi-commandes', totalCommandes);
+            animateLiveKPI('kpi-encours', enCours);
+            animateLiveKPI('kpi-urgent', urgentCount);
+            animateLiveKPI('kpi-shopify', shopifyCount);
+            animateLiveKPI('kpi-clients-count', activeClients);
+        }
+
+        function animateLiveKPI(elementId, targetValue, isCurrency = false) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
             
-            const cmdEl = document.getElementById('kpi-commandes');
-            if (cmdEl) cmdEl.textContent = totalCommandes;
-            
-            const encEl = document.getElementById('kpi-encours');
-            if (encEl) encEl.textContent = enCours;
-            
-            const shopEl = document.getElementById('kpi-shopify');
-            if (shopEl) shopEl.textContent = shopifyCount;
+            const current = parseInt(el.textContent.replace(/[^\d]/g, '')) || 0;
+            const duration = 400;
+            const steps = 15;
+            const increment = (targetValue - current) / steps;
+            let step = 0;
+
+            const timer = setInterval(() => {
+                step++;
+                const value = Math.round(current + (increment * step));
+                el.textContent = isCurrency ? value.toLocaleString('fr-CH') : value;
+                
+                if (step >= steps) {
+                    clearInterval(timer);
+                    el.textContent = isCurrency ? targetValue.toLocaleString('fr-CH') : targetValue;
+                }
+            }, duration / steps);
         }
 
         function loadDashboardOrders() {
