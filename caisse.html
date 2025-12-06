@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>TRAKIO Caisse v1.4.0</title>
+<title>TRAKIO Caisse v1.5.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -11,11 +11,12 @@
 --bg:#0a1628;--surface:#12223d;--surface2:#1a2d4a;--surface3:#243a5e;
 --primary:#00d4aa;--primary-dark:#00b894;--accent:#ff6b6b;--warning:#ffd93d;
 --text:#ffffff;--text-muted:#8fa3bf;--border:#2d4a6f;
+--twint:#000000;--twint-bg:#ffffff;
 --radius:10px;--shadow:0 4px 20px rgba(0,0,0,0.4);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;overflow:hidden}
-.app{display:grid;grid-template-columns:1fr 100px 420px;grid-template-rows:auto 1fr;height:100vh;height:100dvh;overflow:hidden}
+.app{display:grid;grid-template-columns:1fr 110px 420px;grid-template-rows:auto 1fr;height:100vh;height:100dvh;overflow:hidden}
 
 /* HEADER */
 .header{grid-column:1/-1;background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%);padding:8px 12px;display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--primary)}
@@ -43,16 +44,22 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 .articles-list{flex:1;overflow-y:auto;padding:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;align-content:start}
 .article-tile{background:linear-gradient(145deg,var(--surface2),var(--surface3));border:1px solid var(--border);border-radius:var(--radius);padding:10px;cursor:pointer;transition:all .2s;text-align:center}
 .article-tile:hover{transform:translateY(-2px);border-color:var(--primary);box-shadow:var(--shadow)}
-.article-name{font-size:11px;font-weight:500;margin-bottom:5px;line-height:1.3;min-height:28px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.article-name{font-size:11px;font-weight:500;margin-bottom:3px;line-height:1.3;min-height:28px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.article-origin{font-size:9px;color:var(--warning);margin-bottom:4px;font-weight:500}
 .article-price{font-size:15px;font-weight:700;color:var(--primary)}
 .article-unit{font-size:9px;color:var(--text-muted)}
 
-/* CATEGORIES */
-.categories-section{background:var(--surface2);border-left:1px solid var(--border);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
-.cat-btn{padding:16px 8px;text-align:center;cursor:pointer;transition:all .2s;border-bottom:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;min-height:70px}
-.cat-btn:hover{filter:brightness(1.1)}
-.cat-btn.active{box-shadow:inset 4px 0 0 #fff}
-.cat-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.4);line-height:1.3;word-break:break-word}
+/* CATEGORIES - Nouveau design avec onglets verticaux stylés */
+.categories-section{background:linear-gradient(180deg,var(--surface2) 0%,var(--surface) 100%);border-left:1px solid var(--border);border-right:1px solid var(--border);display:flex;flex-direction:column;gap:6px;padding:8px 6px;overflow-y:auto}
+.cat-btn{padding:10px 8px;text-align:center;cursor:pointer;transition:all .25s;border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:65px;border:2px solid transparent;position:relative;overflow:hidden}
+.cat-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);opacity:0;transition:opacity .2s}
+.cat-btn:hover::before{opacity:1}
+.cat-btn:hover{transform:scale(1.03);box-shadow:0 4px 15px rgba(0,0,0,0.3)}
+.cat-btn.active{border-color:#fff;box-shadow:0 0 20px rgba(255,255,255,0.2)}
+.cat-btn.active::after{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#fff;border-radius:0 4px 4px 0}
+.cat-icon{font-size:20px;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.3))}
+.cat-name{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.5);line-height:1.2}
+.cat-count{font-size:8px;opacity:0.7;font-weight:500}
 
 /* TICKET */
 .ticket-section{background:var(--surface);display:flex;flex-direction:column;border-left:2px solid var(--primary)}
@@ -65,6 +72,7 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 .ticket-item-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .ticket-item-info{flex:1}
 .ticket-item-name{font-size:12px;font-weight:500;margin-bottom:2px}
+.ticket-item-origin{font-size:10px;color:var(--warning)}
 .ticket-item-detail{font-size:10px;color:var(--text-muted)}
 .ticket-item-qty{display:flex;align-items:center;gap:6px;margin-top:5px}
 .qty-btn{width:24px;height:24px;border-radius:50%;border:none;background:var(--surface3);color:var(--text);cursor:pointer;font-size:13px;font-weight:700}
@@ -87,10 +95,14 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 
 /* PAIEMENT */
 .payment-section{padding:8px;background:var(--surface3);display:grid;grid-template-columns:repeat(3,1fr);gap:6px;flex-shrink:0;padding-bottom:max(8px,env(safe-area-inset-bottom))}
-.pay-btn{padding:12px 8px;border-radius:var(--radius);border:2px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;text-align:center;transition:all .2s}
-.pay-btn:hover{border-color:var(--primary)}
-.pay-icon{font-size:18px;display:block}
+.pay-btn{padding:12px 8px;border-radius:var(--radius);border:2px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;text-align:center;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
+.pay-btn:hover{border-color:var(--primary);transform:translateY(-2px)}
+.pay-icon{font-size:20px;display:block}
 .pay-label{font-size:9px;font-weight:600}
+/* Bouton Twint spécial */
+.pay-btn.twint-btn{background:#000;border-color:#000}
+.pay-btn.twint-btn:hover{border-color:#00a0e2;box-shadow:0 0 15px rgba(0,160,226,0.4)}
+.twint-logo{width:90px;height:28px;display:block}
 
 /* MODALS */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
@@ -109,26 +121,25 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 .form-input,.form-select{background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;color:var(--text);font-size:12px}
 .form-input:focus,.form-select:focus{outline:none;border-color:var(--primary)}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 
 /* SETTINGS TABS */
-.settings-tabs{display:flex;gap:6px;margin-bottom:15px;border-bottom:2px solid var(--border);padding-bottom:10px}
-.settings-tab{padding:8px 16px;border-radius:var(--radius) var(--radius) 0 0;background:var(--surface3);border:1px solid var(--border);border-bottom:none;cursor:pointer;font-size:12px;font-weight:500}
+.settings-tabs{display:flex;gap:6px;margin-bottom:15px;border-bottom:2px solid var(--border);padding-bottom:10px;flex-wrap:wrap}
+.settings-tab{padding:8px 14px;border-radius:var(--radius) var(--radius) 0 0;background:var(--surface3);border:1px solid var(--border);border-bottom:none;cursor:pointer;font-size:11px;font-weight:500}
 .settings-tab.active{background:var(--primary);color:var(--bg);border-color:var(--primary)}
 .settings-panel{display:none}
 .settings-panel.active{display:block}
 
-/* ARTICLES LIST */
-.art-list{display:flex;flex-direction:column;gap:6px;max-height:350px;overflow-y:auto}
-.art-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);cursor:pointer}
-.art-item:hover{border-color:var(--primary)}
-.art-item-info{flex:1}
-.art-item-name{font-size:12px;font-weight:500}
-.art-item-cat{font-size:10px;color:var(--text-muted)}
-.art-item input{width:70px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:6px;color:var(--text);font-size:11px;text-align:center}
-.art-item-btn{width:32px;height:32px;border-radius:6px;border:none;background:var(--surface3);color:var(--text);cursor:pointer;font-size:12px}
-.art-item-btn:hover{background:var(--primary);color:var(--bg)}
-.art-item-btn.fav.active{background:var(--warning);color:var(--bg)}
-.art-item-btn.del:hover{background:var(--accent)}
+/* ARTICLES LIST avec tuiles cliquables */
+.art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;max-height:400px;overflow-y:auto;padding:5px}
+.art-card{background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:all .2s;text-align:center}
+.art-card:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:var(--shadow)}
+.art-card-name{font-size:12px;font-weight:600;margin-bottom:4px;line-height:1.3}
+.art-card-origin{font-size:10px;color:var(--warning);margin-bottom:4px}
+.art-card-price{font-size:16px;font-weight:700;color:var(--primary)}
+.art-card-info{font-size:9px;color:var(--text-muted);margin-top:4px}
+.art-card-fav{position:absolute;top:6px;right:6px;font-size:14px}
+.art-card{position:relative}
 
 /* CATEGORIES LIST */
 .cat-list{display:flex;flex-direction:column;gap:6px}
@@ -137,7 +148,7 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 .cat-item-info{flex:1}
 .cat-item input[type="text"]{flex:1;background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--text);font-size:12px}
 .cat-item input[type="color"]{width:50px;height:32px;border:none;border-radius:6px;cursor:pointer}
-.cat-count{font-size:10px;color:var(--text-muted)}
+.cat-count-badge{font-size:10px;color:var(--text-muted);background:var(--surface3);padding:2px 8px;border-radius:10px}
 
 /* EVENTS */
 .event-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px;background:var(--surface2);border-radius:var(--radius);margin-bottom:15px}
@@ -148,11 +159,12 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 .events-list{margin-top:15px}
 .event-card{background:var(--surface2);border-radius:var(--radius);padding:12px;margin-bottom:8px;border-left:4px solid var(--warning)}
 .event-card.active{border-left-color:var(--primary);background:rgba(0,212,170,0.05)}
-.event-card-title{font-weight:600;font-size:13px;margin-bottom:4px}
+.event-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.event-card-title{font-weight:600;font-size:13px}
 .event-card-info{font-size:11px;color:var(--text-muted);margin-bottom:8px}
 .event-card-stats{display:flex;gap:12px;font-size:11px;margin-bottom:8px}
 .event-card-stat .val{font-weight:600;color:var(--primary)}
-.event-card-actions{display:flex;gap:6px}
+.event-card-actions{display:flex;gap:6px;flex-wrap:wrap}
 
 /* CASH MODAL */
 .cash-display{text-align:center;padding:20px;background:var(--surface2);border-radius:var(--radius);margin-bottom:15px}
@@ -203,14 +215,18 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 .history-btn:hover{background:var(--primary);color:var(--bg)}
 .history-btn.del:hover{background:var(--accent)}
 
+/* Event recap actions */
+.event-recap-actions{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+
 /* RESPONSIVE */
 @media(max-width:1100px){
-.app{grid-template-columns:1fr 90px 380px}
-.cat-btn{min-height:60px;padding:14px 6px}
-.cat-name{font-size:9px}
+.app{grid-template-columns:1fr 100px 380px}
+.cat-btn{min-height:58px;padding:8px 6px}
+.cat-icon{font-size:18px}
+.cat-name{font-size:8px}
 }
 @media(max-width:900px){
-.app{grid-template-columns:1fr 80px 320px}
+.app{grid-template-columns:1fr 85px 320px}
 .header{padding:6px 8px;gap:6px}
 .logo h1{font-size:15px}
 .search-bar{max-width:120px}
@@ -218,32 +234,38 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 .article-tile{padding:8px}
 .article-name{font-size:10px;min-height:24px}
 .article-price{font-size:13px}
-.cat-btn{min-height:50px;padding:12px 5px}
-.cat-name{font-size:8px}
+.cat-btn{min-height:50px;padding:8px 5px}
+.cat-icon{font-size:16px}
+.cat-name{font-size:7px}
+.categories-section{padding:6px 4px;gap:4px}
 }
 @media(max-width:700px){
-.app{grid-template-columns:1fr 60px 220px}
+.app{grid-template-columns:1fr 70px 240px}
 .logo-badge{display:none}
 .search-bar{max-width:80px}
 .btn{padding:5px 8px;font-size:10px}
 .articles-list{grid-template-columns:repeat(auto-fill,minmax(70px,1fr))}
 .article-name{font-size:9px}
 .article-price{font-size:12px}
-.cat-btn{min-height:42px;padding:10px 4px}
-.cat-name{font-size:7px}
+.cat-btn{min-height:42px;padding:6px 4px}
+.cat-icon{font-size:14px}
+.cat-name{font-size:6px}
+.cat-count{display:none}
 .ticket-totals{padding:6px}
 .total-row.grand{font-size:15px}
 .pay-btn{padding:10px 5px}
-.pay-icon{font-size:14px}
+.twint-logo{width:70px;height:22px}
 .pay-label{font-size:8px}
 }
 @media(max-width:550px){
-.app{grid-template-columns:1fr 50px 180px}
+.app{grid-template-columns:1fr 55px 190px}
 .header-actions .btn:not(:first-child):not(:last-child){display:none}
 .articles-list{grid-template-columns:repeat(2,1fr)}
 .article-tile{padding:6px}
 .ticket-item{padding:8px}
 .ticket-item-name{font-size:11px}
+.cat-btn{min-height:36px}
+.cat-icon{font-size:12px}
 }
 </style>
 </head>
@@ -298,14 +320,27 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 <div class="payment-section">
 <button class="pay-btn" onclick="payWith('cash')"><span class="pay-icon">💵</span><span class="pay-label">Espèces</span></button>
 <button class="pay-btn" onclick="payWith('card')"><span class="pay-icon">💳</span><span class="pay-label">Carte</span></button>
-<button class="pay-btn" onclick="payWith('twint')"><span class="pay-icon">📱</span><span class="pay-label">Twint</span></button>
+<button class="pay-btn twint-btn" onclick="payWith('twint')">
+<svg class="twint-logo" viewBox="0 0 140 40" fill="none">
+<rect width="140" height="40" rx="6" fill="#000"/>
+<!-- Hexagon -->
+<path d="M25 8L35 13V27L25 32L15 27V13L25 8Z" fill="#fff" stroke="#fff" stroke-width="1"/>
+<!-- Icon inside hexagon -->
+<path d="M22 14C22 14 19 17 19 20C19 23 22 26 22 26" stroke="#1a9fd9" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+<path d="M25 14L25 26" stroke="#ef5350" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M28 14C28 14 31 17 31 20C31 23 28 26 28 26" stroke="#ef5350" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+<circle cx="25" cy="11" r="2" fill="#ffb300"/>
+<!-- TWINT text -->
+<text x="48" y="26" font-family="Arial,sans-serif" font-size="18" font-weight="bold" fill="#fff">TWINT</text>
+</svg>
+</button>
 </div>
 </section>
 </div>
 
 <!-- MODAL PARAMETRES -->
 <div class="modal-overlay" id="settingsModal">
-<div class="modal">
+<div class="modal" style="max-width:800px">
 <div class="modal-header">
 <h3>⚙️ Paramètres</h3>
 <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
@@ -320,24 +355,26 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 
 <div class="settings-panel active" id="panelArticles">
 <div class="form-group">
-<input type="text" class="form-input" id="searchArtSettings" placeholder="🔍 Rechercher un article..." oninput="renderArtList()">
+<input type="text" class="form-input" id="searchArtSettings" placeholder="🔍 Rechercher un article..." oninput="renderArtGrid()">
 </div>
-<div class="form-grid" style="margin-bottom:15px">
+<div class="form-grid-3" style="margin-bottom:15px">
 <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="newArtName" placeholder="Saumon fumé"></div>
+<div class="form-group"><label class="form-label">Origine</label><input type="text" class="form-input" id="newArtOrigin" placeholder="Norvège"></div>
 <div class="form-group"><label class="form-label">Prix CHF</label><input type="number" class="form-input" id="newArtPrice" step="0.05"></div>
 <div class="form-group"><label class="form-label">Catégorie</label><select class="form-select" id="newArtCat"></select></div>
 <div class="form-group"><label class="form-label">Unité</label><select class="form-select" id="newArtUnit"><option value="pce">Pièce</option><option value="kg">Kg</option><option value="100g">100g</option></select></div>
 <div class="form-group"><label class="form-label">TVA</label><select class="form-select" id="newArtTva"><option value="2.6">2.6%</option><option value="8.1">8.1%</option></select></div>
-<div class="form-group" style="justify-content:flex-end"><button class="btn btn-primary" onclick="addArticle()">+ Ajouter</button></div>
 </div>
-<div class="art-list" id="artList"></div>
+<div style="text-align:right;margin-bottom:15px"><button class="btn btn-primary" onclick="addArticle()">+ Ajouter article</button></div>
+<div class="art-grid" id="artGrid"></div>
 </div>
 
 <div class="settings-panel" id="panelCategories">
 <div class="form-grid" style="margin-bottom:15px">
 <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="newCatName" placeholder="Poissons"></div>
+<div class="form-group"><label class="form-label">Emoji</label><input type="text" class="form-input" id="newCatEmoji" placeholder="🐟" maxlength="2"></div>
 <div class="form-group"><label class="form-label">Couleur</label><input type="color" class="form-input" id="newCatColor" value="#00d4aa" style="height:38px;padding:2px"></div>
-<div class="form-group" style="grid-column:1/-1;flex-direction:row;justify-content:flex-end"><button class="btn btn-primary" onclick="addCategory()">+ Ajouter</button></div>
+<div class="form-group" style="justify-content:flex-end"><button class="btn btn-primary" onclick="addCategory()">+ Ajouter</button></div>
 </div>
 <div class="cat-list" id="catList"></div>
 </div>
@@ -364,6 +401,39 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 <div class="form-group" style="justify-content:flex-end"><button class="btn btn-primary" onclick="saveGeneral()">💾 Enregistrer</button></div>
 </div>
 </div>
+</div>
+</div>
+</div>
+
+<!-- MODAL EDITION ARTICLE -->
+<div class="modal-overlay" id="editArticleModal">
+<div class="modal" style="max-width:450px">
+<div class="modal-header">
+<h3>✏️ Modifier l'article</h3>
+<button class="modal-close" onclick="closeModal('editArticleModal')">×</button>
+</div>
+<div class="modal-body">
+<input type="hidden" id="editArtId">
+<div class="form-grid">
+<div class="form-group" style="grid-column:1/-1"><label class="form-label">Nom</label><input type="text" class="form-input" id="editArtName"></div>
+<div class="form-group"><label class="form-label">Origine</label><input type="text" class="form-input" id="editArtOrigin" placeholder="Pays/Région"></div>
+<div class="form-group"><label class="form-label">Prix CHF</label><input type="number" class="form-input" id="editArtPrice" step="0.05"></div>
+<div class="form-group"><label class="form-label">Catégorie</label><select class="form-select" id="editArtCat"></select></div>
+<div class="form-group"><label class="form-label">Unité</label><select class="form-select" id="editArtUnit"><option value="pce">Pièce</option><option value="kg">Kg</option><option value="100g">100g</option></select></div>
+<div class="form-group"><label class="form-label">TVA</label><select class="form-select" id="editArtTva"><option value="2.6">2.6%</option><option value="8.1">8.1%</option></select></div>
+<div class="form-group">
+<label class="form-label">Favori</label>
+<label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+<input type="checkbox" id="editArtFav" style="width:18px;height:18px">
+<span>⭐ Article favori</span>
+</label>
+</div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn" style="margin-right:auto;color:var(--accent)" onclick="deleteArticleFromEdit()">🗑️ Supprimer</button>
+<button class="btn" onclick="closeModal('editArticleModal')">Annuler</button>
+<button class="btn btn-primary" onclick="saveArticleEdit()">💾 Enregistrer</button>
 </div>
 </div>
 </div>
@@ -439,14 +509,14 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 
 <!-- MODAL HISTORIQUE -->
 <div class="modal-overlay" id="historyModal">
-<div class="modal" style="max-width:850px">
+<div class="modal" style="max-width:900px">
 <div class="modal-header">
-<h3>📊 Historique</h3>
+<h3>📊 Historique des ventes</h3>
 <button class="modal-close" onclick="closeModal('historyModal')">×</button>
 </div>
 <div class="modal-body">
 <div class="history-filters">
-<select id="historyEvent" onchange="filterHistory()"><option value="">Tous événements</option></select>
+<select id="historyEvent" onchange="filterHistory();toggleEventRecap()"><option value="">Tous événements</option></select>
 <input type="date" id="historyStart">
 <span style="color:var(--text-muted)">→</span>
 <input type="date" id="historyEnd">
@@ -457,8 +527,13 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 <div class="history-stat"><div class="label">Redevance</div><div class="value warning" id="historyRed">CHF 0</div></div>
 </div>
 </div>
+<!-- Boutons récap événement -->
+<div class="event-recap-actions" id="eventRecapActions" style="display:none">
+<button class="btn btn-primary" onclick="printEventRecap()">🖨️ Imprimer récapitulatif</button>
+<button class="btn" onclick="emailEventRecap()">📧 Envoyer par email</button>
+</div>
 <table class="history-table">
-<thead><tr><th>#</th><th>Date</th><th>Heure</th><th>Événement</th><th>Articles</th><th>Total</th><th>Mode</th><th>Statut</th><th>Actions</th></tr></thead>
+<thead><tr><th>#</th><th>Date</th><th>Heure</th><th>Événement</th><th>Articles</th><th>Total HT</th><th>Remise</th><th>Total TTC</th><th>Mode</th><th>Actions</th></tr></thead>
 <tbody id="historyBody"></tbody>
 </table>
 </div>
@@ -507,27 +582,27 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 </div>
 
 <script>
-const APP_VERSION='1.4.0';
+const APP_VERSION='1.5.0';
 
 // STATE
 let state={
   categories:[
-    {id:'fav',name:'Favoris',color:'#ffd93d'},
-    {id:'poissons',name:'Poissons',color:'#00d4aa'},
-    {id:'crustaces',name:'Crustacés',color:'#ff6b6b'},
-    {id:'fumes',name:'Fumés',color:'#9b59b6'},
-    {id:'accomp',name:'Accomp.',color:'#3498db'},
-    {id:'divers',name:'Divers',color:'#95a5a6'}
+    {id:'fav',name:'Favoris',emoji:'⭐',color:'#ffd93d'},
+    {id:'poissons',name:'Poissons',emoji:'🐟',color:'#00d4aa'},
+    {id:'crustaces',name:'Crustacés',emoji:'🦐',color:'#ff6b6b'},
+    {id:'fumes',name:'Fumés',emoji:'🔥',color:'#9b59b6'},
+    {id:'accomp',name:'Accomp.',emoji:'🥗',color:'#3498db'},
+    {id:'divers',name:'Divers',emoji:'📦',color:'#95a5a6'}
   ],
   articles:[
-    {id:1,name:'Saumon fumé 100g',price:8.50,cat:'fumes',tva:2.6,unit:'pce',favorite:true},
-    {id:2,name:'Filet de perche',price:58.00,cat:'poissons',tva:2.6,unit:'kg',favorite:true},
-    {id:3,name:'Crevettes roses',price:32.00,cat:'crustaces',tva:2.6,unit:'kg',favorite:false},
-    {id:4,name:'Filet de sandre',price:52.00,cat:'poissons',tva:2.6,unit:'kg',favorite:true},
-    {id:5,name:'Dos de cabillaud',price:38.00,cat:'poissons',tva:2.6,unit:'kg',favorite:false},
-    {id:6,name:'Homard bleu',price:89.00,cat:'crustaces',tva:2.6,unit:'kg',favorite:false},
-    {id:7,name:'Salade Neptune',price:9.50,cat:'accomp',tva:2.6,unit:'pce',favorite:false},
-    {id:8,name:'Tarama maison',price:6.50,cat:'accomp',tva:2.6,unit:'pce',favorite:false}
+    {id:1,name:'Saumon fumé 100g',origin:'Écosse',price:8.50,cat:'fumes',tva:2.6,unit:'pce',favorite:true},
+    {id:2,name:'Filet de perche',origin:'Lac Léman',price:58.00,cat:'poissons',tva:2.6,unit:'kg',favorite:true},
+    {id:3,name:'Crevettes roses',origin:'Madagascar',price:32.00,cat:'crustaces',tva:2.6,unit:'kg',favorite:false},
+    {id:4,name:'Filet de sandre',origin:'Lac Neuchâtel',price:52.00,cat:'poissons',tva:2.6,unit:'kg',favorite:true},
+    {id:5,name:'Dos de cabillaud',origin:'Atlantique Nord',price:38.00,cat:'poissons',tva:2.6,unit:'kg',favorite:false},
+    {id:6,name:'Homard bleu',origin:'Bretagne',price:89.00,cat:'crustaces',tva:2.6,unit:'kg',favorite:false},
+    {id:7,name:'Salade Neptune',origin:'Maison',price:9.50,cat:'accomp',tva:2.6,unit:'pce',favorite:false},
+    {id:8,name:'Tarama maison',origin:'Maison',price:6.50,cat:'accomp',tva:2.6,unit:'pce',favorite:false}
   ],
   cart:[],
   transactions:[],
@@ -549,10 +624,11 @@ let lastTransaction=null;
 function swiss(n){return Math.round(n*20)/20;}
 function formatCHF(n){return'CHF '+n.toFixed(2);}
 function genId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,5);}
+function formatDate(d){return d.split('-').reverse().join('/');}
 
 // STORAGE
 function save(){
-  localStorage.setItem('trakio_caisse_v14',JSON.stringify({
+  localStorage.setItem('trakio_caisse_v15',JSON.stringify({
     categories:state.categories,
     articles:state.articles,
     transactions:state.transactions,
@@ -565,7 +641,7 @@ function save(){
 }
 function load(){
   try{
-    const d=localStorage.getItem('trakio_caisse_v14');
+    const d=localStorage.getItem('trakio_caisse_v15');
     if(d){
       const p=JSON.parse(d);
       if(p.categories)state.categories=p.categories;
@@ -580,14 +656,31 @@ function load(){
   }catch(e){console.error('Load error',e);}
 }
 
-// RENDER CATEGORIES
+// RENDER CATEGORIES - Nouveau design avec icônes
 function renderCategories(){
-  document.getElementById('categoriesList').innerHTML=state.categories.map(c=>`
-    <div class="cat-btn ${state.currentCat===c.id?'active':''}" style="background:${c.color}" onclick="selectCat('${c.id}')">
+  document.getElementById('categoriesList').innerHTML=state.categories.map(c=>{
+    const count=c.id==='fav'?state.articles.filter(a=>a.favorite).length:state.articles.filter(a=>a.cat===c.id).length;
+    return`
+    <div class="cat-btn ${state.currentCat===c.id?'active':''}" style="background:linear-gradient(145deg,${c.color},${adjustColor(c.color,-30)})" onclick="selectCat('${c.id}')">
+      <span class="cat-icon">${c.emoji||'📦'}</span>
       <span class="cat-name">${c.name}</span>
+      <span class="cat-count">${count}</span>
     </div>
-  `).join('');
+  `;}).join('');
 }
+
+function adjustColor(hex,amt){
+  let c=hex.replace('#','');
+  let num=parseInt(c,16);
+  let r=(num>>16)+amt;
+  let g=((num>>8)&0x00FF)+amt;
+  let b=(num&0x0000FF)+amt;
+  r=Math.max(0,Math.min(255,r));
+  g=Math.max(0,Math.min(255,g));
+  b=Math.max(0,Math.min(255,b));
+  return'#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+
 function selectCat(id){
   state.currentCat=id;
   renderCategories();
@@ -606,13 +699,14 @@ function renderArticles(){
   }
   
   if(search){
-    arts=state.articles.filter(a=>a.name.toLowerCase().includes(search));
+    arts=state.articles.filter(a=>a.name.toLowerCase().includes(search)||a.origin?.toLowerCase().includes(search));
   }
   
   document.getElementById('articlesCount').textContent=arts.length+' articles';
   document.getElementById('articlesList').innerHTML=arts.map(a=>`
     <div class="article-tile" onclick="addToCart(${a.id})">
       <div class="article-name">${a.name}</div>
+      ${a.origin?`<div class="article-origin">${a.origin}</div>`:''}
       <div class="article-price">${formatCHF(a.price)}</div>
       <div class="article-unit">/${a.unit}</div>
     </div>
@@ -640,6 +734,7 @@ function addToCart(id){
       id:genId(),
       articleId:art.id,
       name:art.name,
+      origin:art.origin||'',
       unitPrice:art.price,
       qty:1,
       unit:art.unit,
@@ -657,6 +752,7 @@ function addWeighted(weight){
     id:genId(),
     articleId:pendingArticle.id,
     name:pendingArticle.name,
+    origin:pendingArticle.origin||'',
     unitPrice:pendingArticle.price,
     qty:weight,
     unit:'kg',
@@ -710,6 +806,7 @@ function renderCart(){
           <div class="ticket-item-row">
             <div class="ticket-item-info">
               <div class="ticket-item-name">${item.name}</div>
+              ${item.origin?`<div class="ticket-item-origin">📍 ${item.origin}</div>`:''}
               ${item.weight?`<div class="ticket-item-detail">${item.weight.toFixed(3)} kg × ${formatCHF(item.unitPrice)}/kg</div>`:''}
               ${!item.weight?`
                 <div class="ticket-item-qty">
@@ -879,6 +976,20 @@ function finalize(method,total,change,given){
   const now=new Date();
   const ev=state.events.find(e=>e.id===state.activeEvent);
   
+  // Calculer HT et remises
+  let totalHT=0,totalDiscount=0;
+  state.cart.forEach(item=>{
+    let line=swiss(item.unitPrice*item.qty);
+    let disc=0;
+    if(item.discount>0){
+      disc=item.discountType==='percent'?swiss(line*item.discount/100):swiss(item.discount);
+      totalDiscount+=disc;
+    }
+    const afterDisc=swiss(line-disc);
+    const rate=item.tva/100;
+    totalHT+=swiss(afterDisc/(1+rate));
+  });
+  
   const trans={
     id:genId(),
     num:state.ticketNum,
@@ -886,6 +997,8 @@ function finalize(method,total,change,given){
     time:now.toTimeString().slice(0,5),
     items:JSON.parse(JSON.stringify(state.cart)),
     ttc:total,
+    ht:swiss(totalHT),
+    totalDiscount:swiss(totalDiscount),
     method:method,
     cancelled:false,
     given:given||null,
@@ -939,14 +1052,15 @@ function printTicket(trans){
 }
 
 function generateTicketHTML(trans){
-  const date=trans.date.split('-').reverse().join('/');
+  const date=formatDate(trans.date);
   const methods={cash:'ESPÈCES',card:'CARTE',twint:'TWINT'};
   
   let items='',subtotalHT=0,tva26=0,tva81=0;
   trans.items.forEach(item=>{
     let line=swiss(item.unitPrice*item.qty);
+    let disc=0;
     if(item.discount>0){
-      const disc=item.discountType==='percent'?swiss(line*item.discount/100):swiss(item.discount);
+      disc=item.discountType==='percent'?swiss(line*item.discount/100):swiss(item.discount);
       line=swiss(line-disc);
     }
     const rate=item.tva/100;
@@ -954,9 +1068,10 @@ function generateTicketHTML(trans){
     subtotalHT+=ht;
     if(item.tva===2.6)tva26+=swiss(line-ht);else tva81+=swiss(line-ht);
     
-    items+=`<tr><td>${item.name.substring(0,24)}</td><td style="text-align:right">${line.toFixed(2)}</td></tr>`;
+    items+=`<tr><td>${item.name.substring(0,22)}${item.origin?' ('+item.origin.substring(0,8)+')':''}</td><td style="text-align:right">${line.toFixed(2)}</td></tr>`;
     if(item.weight)items+=`<tr><td colspan="2" style="font-size:10px;color:#666;padding-left:10px">${item.weight.toFixed(3)}kg × ${item.unitPrice.toFixed(2)}/kg</td></tr>`;
     else if(item.qty>1)items+=`<tr><td colspan="2" style="font-size:10px;color:#666;padding-left:10px">${item.qty} × ${item.unitPrice.toFixed(2)}</td></tr>`;
+    if(disc>0)items+=`<tr><td colspan="2" style="font-size:10px;color:#c00;padding-left:10px">Remise: -${disc.toFixed(2)}</td></tr>`;
   });
   
   return`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ticket</title>
@@ -991,13 +1106,18 @@ function emailLast(){
   let body=`BOREX POISSONS%0D%0ATicket #${String(trans.num).padStart(3,'0')}%0D%0A${trans.date} ${trans.time}%0D%0A%0D%0A`;
   trans.items.forEach(i=>{
     let line=swiss(i.unitPrice*i.qty);
-    body+=`${i.name}: CHF ${line.toFixed(2)}%0D%0A`;
+    body+=`${i.name}${i.origin?' ('+i.origin+')':''}: CHF ${line.toFixed(2)}%0D%0A`;
   });
   body+=`%0D%0ATOTAL: CHF ${trans.ttc.toFixed(2)}%0D%0A%0D%0AMerci !`;
   window.location.href=`mailto:?subject=${encodeURIComponent(subject)}&body=${body}`;
 }
 
 // HISTORY
+function toggleEventRecap(){
+  const evId=document.getElementById('historyEvent').value;
+  document.getElementById('eventRecapActions').style.display=evId?'flex':'none';
+}
+
 function filterHistory(){
   const start=document.getElementById('historyStart').value;
   const end=document.getElementById('historyEnd').value;
@@ -1008,8 +1128,14 @@ function filterHistory(){
   if(end)list=list.filter(t=>t.date<=end);
   if(evId)list=list.filter(t=>t.eventId===evId);
   
-  let total=0;
-  list.forEach(t=>{if(!t.cancelled)total+=t.ttc;});
+  let total=0,totalHT=0,totalDisc=0;
+  list.forEach(t=>{
+    if(!t.cancelled){
+      total+=t.ttc;
+      totalHT+=t.ht||0;
+      totalDisc+=t.totalDiscount||0;
+    }
+  });
   const red=swiss(total*state.redevance/100);
   
   document.getElementById('historyTotal').textContent=formatCHF(total);
@@ -1019,13 +1145,14 @@ function filterHistory(){
   document.getElementById('historyBody').innerHTML=list.map(t=>`
     <tr style="${t.cancelled?'opacity:0.5;text-decoration:line-through':''}">
       <td>#${String(t.num).padStart(3,'0')}</td>
-      <td>${t.date.split('-').reverse().join('/')}</td>
+      <td>${formatDate(t.date)}</td>
       <td>${t.time}</td>
-      <td>${t.eventName||'-'}</td>
+      <td style="max-width:100px;overflow:hidden;text-overflow:ellipsis">${t.eventName||'-'}</td>
       <td>${t.items.length}</td>
+      <td>${formatCHF(t.ht||0)}</td>
+      <td style="color:var(--accent)">${t.totalDiscount>0?'-'+formatCHF(t.totalDiscount):'-'}</td>
       <td><strong>${formatCHF(t.ttc)}</strong></td>
       <td>${methods[t.method]}</td>
-      <td><span class="history-status ${t.cancelled?'cancelled':'paid'}">${t.cancelled?'Annulé':'Payé'}</span></td>
       <td class="history-actions">
         ${!t.cancelled?`
           <button class="history-btn" onclick="printTicket(state.transactions.find(x=>x.id==='${t.id}'))" title="Imprimer">🖨️</button>
@@ -1034,6 +1161,151 @@ function filterHistory(){
       </td>
     </tr>
   `).join('');
+}
+
+// EVENT RECAP - Impression/Email récapitulatif
+function printEventRecap(){
+  const evId=document.getElementById('historyEvent').value;
+  if(!evId)return;
+  const ev=state.events.find(e=>e.id===evId);
+  if(!ev)return;
+  
+  const html=generateEventRecapHTML(evId,ev);
+  const win=window.open('','_blank','width=800,height=900');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>win.print(),300);
+}
+
+function emailEventRecap(){
+  const evId=document.getElementById('historyEvent').value;
+  if(!evId)return;
+  const ev=state.events.find(e=>e.id===evId);
+  if(!ev)return;
+  
+  const trans=state.transactions.filter(t=>t.eventId===evId&&!t.cancelled);
+  let totalHT=0,totalDisc=0,totalTTC=0;
+  trans.forEach(t=>{totalHT+=t.ht||0;totalDisc+=t.totalDiscount||0;totalTTC+=t.ttc;});
+  
+  const subject=`Récapitulatif ${ev.name} - ${formatDate(ev.dateStart)}`;
+  let body=`RÉCAPITULATIF ÉVÉNEMENT%0D%0A%0D%0A`;
+  body+=`${ev.name}%0D%0A📍 ${ev.location||'N/A'}%0D%0A📅 ${formatDate(ev.dateStart)} → ${formatDate(ev.dateEnd)}%0D%0A%0D%0A`;
+  body+=`═══════════════════════════%0D%0A`;
+  body+=`Nombre de ventes: ${trans.length}%0D%0A`;
+  body+=`Total HT: CHF ${totalHT.toFixed(2)}%0D%0A`;
+  body+=`Remises: CHF ${totalDisc.toFixed(2)}%0D%0A`;
+  body+=`TOTAL TTC: CHF ${totalTTC.toFixed(2)}%0D%0A`;
+  body+=`Redevance ${state.redevance}%: CHF ${swiss(totalTTC*state.redevance/100).toFixed(2)}%0D%0A`;
+  body+=`═══════════════════════════%0D%0A%0D%0A`;
+  body+=`Borex Poissons`;
+  
+  window.location.href=`mailto:?subject=${encodeURIComponent(subject)}&body=${body}`;
+}
+
+function generateEventRecapHTML(evId,ev){
+  const trans=state.transactions.filter(t=>t.eventId===evId&&!t.cancelled);
+  let totalHTSansRemise=0,totalDisc=0,totalHT=0,totalTTC=0;
+  
+  // Calculer les totaux
+  trans.forEach(t=>{
+    t.items.forEach(item=>{
+      const line=swiss(item.unitPrice*item.qty);
+      const rate=item.tva/100;
+      totalHTSansRemise+=swiss(line/(1+rate));
+      let disc=0;
+      if(item.discount>0){
+        disc=item.discountType==='percent'?swiss(line*item.discount/100):swiss(item.discount);
+      }
+      totalDisc+=disc;
+    });
+    totalHT+=t.ht||0;
+    totalTTC+=t.ttc;
+  });
+  
+  const redevance=swiss(totalTTC*state.redevance/100);
+  const net=swiss(totalTTC-redevance);
+  const methods={cash:'Espèces',card:'Carte',twint:'Twint'};
+  
+  // Tableau des ventes
+  let rows=trans.map((t,i)=>{
+    const desc=t.items.map(it=>it.name+(it.origin?' ('+it.origin+')':'')).join(', ');
+    return`<tr>
+      <td style="padding:8px;border:1px solid #ddd">${formatDate(t.date)}</td>
+      <td style="padding:8px;border:1px solid #ddd">${t.time}</td>
+      <td style="padding:8px;border:1px solid #ddd;font-size:11px;max-width:250px">${desc.substring(0,60)}${desc.length>60?'...':''}</td>
+      <td style="padding:8px;border:1px solid #ddd;text-align:right">${(t.ht||0).toFixed(2)}</td>
+      <td style="padding:8px;border:1px solid #ddd;text-align:right;color:#c00">${t.totalDiscount>0?'-'+t.totalDiscount.toFixed(2):'-'}</td>
+      <td style="padding:8px;border:1px solid #ddd;text-align:right;font-weight:bold">${t.ttc.toFixed(2)}</td>
+      <td style="padding:8px;border:1px solid #ddd;text-align:center">${methods[t.method]}</td>
+    </tr>`;
+  }).join('');
+  
+  return`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Récapitulatif ${ev.name}</title>
+<style>
+@media print{@page{size:A4;margin:15mm}}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#fff;color:#333;padding:20px}
+.header{text-align:center;margin-bottom:30px;padding-bottom:20px;border-bottom:3px solid #00d4aa}
+.logo{font-size:28px;font-weight:bold;color:#0a1628}
+.event-name{font-size:22px;color:#00d4aa;margin-top:10px}
+.event-info{font-size:14px;color:#666;margin-top:8px}
+.section{margin:25px 0}
+.section-title{font-size:16px;font-weight:bold;color:#0a1628;margin-bottom:15px;padding-bottom:8px;border-bottom:2px solid #eee}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#0a1628;color:#fff;padding:10px;text-align:left}
+.summary{background:#f8f9fa;border-radius:10px;padding:20px;margin-top:30px}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.summary-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee}
+.summary-item.total{border:none;font-size:18px;font-weight:bold;color:#00d4aa;padding-top:15px;border-top:2px solid #00d4aa}
+.summary-item .label{color:#666}
+.summary-item .value{font-weight:600}
+.footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #eee;font-size:11px;color:#999}
+.highlight-box{background:linear-gradient(135deg,#00d4aa,#00b894);color:#fff;padding:20px;border-radius:10px;margin:20px 0}
+.highlight-box .big{font-size:32px;font-weight:bold}
+</style></head><body>
+
+<div class="header">
+<div class="logo">BOREX POISSONS</div>
+<div class="event-name">📅 ${ev.name}</div>
+<div class="event-info">📍 ${ev.location||'N/A'} | ${formatDate(ev.dateStart)}${ev.dateEnd!==ev.dateStart?' → '+formatDate(ev.dateEnd):''}</div>
+</div>
+
+<div class="highlight-box" style="display:flex;justify-content:space-around;text-align:center">
+<div><div style="font-size:12px;opacity:0.8">Nombre de ventes</div><div class="big">${trans.length}</div></div>
+<div><div style="font-size:12px;opacity:0.8">Chiffre d'affaires TTC</div><div class="big">CHF ${totalTTC.toFixed(2)}</div></div>
+<div><div style="font-size:12px;opacity:0.8">Net (après redevance)</div><div class="big">CHF ${net.toFixed(2)}</div></div>
+</div>
+
+<div class="section">
+<div class="section-title">📋 Détail des ventes</div>
+<table>
+<thead><tr><th>Date</th><th>Heure</th><th>Description</th><th style="text-align:right">HT</th><th style="text-align:right">Remise</th><th style="text-align:right">TTC</th><th style="text-align:center">Paiement</th></tr></thead>
+<tbody>${rows}</tbody>
+</table>
+</div>
+
+<div class="summary">
+<div class="section-title">💰 Récapitulatif financier</div>
+<div class="summary-grid">
+<div>
+<div class="summary-item"><span class="label">Total HT (avant remises)</span><span class="value">CHF ${totalHTSansRemise.toFixed(2)}</span></div>
+<div class="summary-item"><span class="label">Total des remises</span><span class="value" style="color:#c00">- CHF ${totalDisc.toFixed(2)}</span></div>
+<div class="summary-item"><span class="label">Total HT (après remises)</span><span class="value">CHF ${totalHT.toFixed(2)}</span></div>
+</div>
+<div>
+<div class="summary-item"><span class="label">Total TTC</span><span class="value">CHF ${totalTTC.toFixed(2)}</span></div>
+<div class="summary-item"><span class="label">Redevance (${state.redevance}%)</span><span class="value" style="color:#c00">- CHF ${redevance.toFixed(2)}</span></div>
+<div class="summary-item total"><span class="label">NET À PERCEVOIR</span><span class="value">CHF ${net.toFixed(2)}</span></div>
+</div>
+</div>
+</div>
+
+<div class="footer">
+Document généré le ${new Date().toLocaleDateString('fr-CH')} à ${new Date().toLocaleTimeString('fr-CH').slice(0,5)}<br>
+Borex Poissons - TRAKIO Caisse v${APP_VERSION}
+</div>
+
+</body></html>`;
 }
 
 function cancelTrans(id){
@@ -1047,12 +1319,14 @@ function cancelTrans(id){
 function exportCSV(){
   const start=document.getElementById('historyStart').value;
   const end=document.getElementById('historyEnd').value;
+  const evId=document.getElementById('historyEvent').value;
   let list=state.transactions;
   if(start)list=list.filter(t=>t.date>=start);
   if(end)list=list.filter(t=>t.date<=end);
+  if(evId)list=list.filter(t=>t.eventId===evId);
   
-  let csv='N°;Date;Heure;Événement;Articles;Total;Mode;Statut\n';
-  list.forEach(t=>csv+=`${t.num};${t.date};${t.time};${t.eventName||''};${t.items.length};${t.ttc.toFixed(2)};${t.method};${t.cancelled?'Annulé':'Payé'}\n`);
+  let csv='N°;Date;Heure;Événement;Articles;HT;Remise;TTC;Mode;Statut\n';
+  list.forEach(t=>csv+=`${t.num};${t.date};${t.time};${t.eventName||''};${t.items.length};${(t.ht||0).toFixed(2)};${(t.totalDiscount||0).toFixed(2)};${t.ttc.toFixed(2)};${t.method};${t.cancelled?'Annulé':'Payé'}\n`);
   
   const blob=new Blob([csv],{type:'text/csv'});
   const link=document.createElement('a');
@@ -1068,39 +1342,87 @@ function switchTab(tab){
   document.querySelector(`.settings-tab[onclick="switchTab('${tab}')"]`).classList.add('active');
   document.getElementById('panel'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
   
-  if(tab==='articles')renderArtList();
+  if(tab==='articles')renderArtGrid();
   if(tab==='categories')renderCatList();
   if(tab==='events')renderEvents();
   if(tab==='general')loadGeneral();
 }
 
-// ARTICLES SETTINGS
-function renderArtList(){
+// ARTICLES SETTINGS - Grille avec tuiles cliquables
+function renderArtGrid(){
   const catSel=document.getElementById('newArtCat');
-  catSel.innerHTML=state.categories.filter(c=>c.id!=='fav').map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  catSel.innerHTML=state.categories.filter(c=>c.id!=='fav').map(c=>`<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
   
   const search=(document.getElementById('searchArtSettings')?.value||'').toLowerCase();
   let list=state.articles;
-  if(search)list=list.filter(a=>a.name.toLowerCase().includes(search));
+  if(search)list=list.filter(a=>a.name.toLowerCase().includes(search)||a.origin?.toLowerCase().includes(search));
   
-  document.getElementById('artList').innerHTML=list.map(a=>{
+  document.getElementById('artGrid').innerHTML=list.map(a=>{
     const cat=state.categories.find(c=>c.id===a.cat);
     return`
-      <div class="art-item">
-        <div class="art-item-info">
-          <div class="art-item-name">${a.name}</div>
-          <div class="art-item-cat">${cat?.name||a.cat} · ${a.unit} · TVA ${a.tva}%</div>
-        </div>
-        <input type="number" value="${a.price.toFixed(2)}" step="0.05" onchange="updateArtPrice(${a.id},this.value)">
-        <button class="art-item-btn fav ${a.favorite?'active':''}" onclick="toggleFav(${a.id})">⭐</button>
-        <button class="art-item-btn del" onclick="deleteArt(${a.id})">🗑️</button>
+      <div class="art-card" onclick="openEditArticle(${a.id})">
+        ${a.favorite?'<span class="art-card-fav">⭐</span>':''}
+        <div class="art-card-name">${a.name}</div>
+        ${a.origin?`<div class="art-card-origin">📍 ${a.origin}</div>`:''}
+        <div class="art-card-price">${formatCHF(a.price)}</div>
+        <div class="art-card-info">${cat?.emoji||''} ${cat?.name||a.cat} · /${a.unit}</div>
       </div>
     `;
   }).join('');
 }
 
+function openEditArticle(id){
+  const art=state.articles.find(a=>a.id===id);
+  if(!art)return;
+  
+  document.getElementById('editArtId').value=art.id;
+  document.getElementById('editArtName').value=art.name;
+  document.getElementById('editArtOrigin').value=art.origin||'';
+  document.getElementById('editArtPrice').value=art.price;
+  document.getElementById('editArtUnit').value=art.unit;
+  document.getElementById('editArtTva').value=art.tva;
+  document.getElementById('editArtFav').checked=art.favorite;
+  
+  const catSel=document.getElementById('editArtCat');
+  catSel.innerHTML=state.categories.filter(c=>c.id!=='fav').map(c=>`<option value="${c.id}" ${art.cat===c.id?'selected':''}>${c.emoji} ${c.name}</option>`).join('');
+  
+  openModal('editArticleModal');
+}
+
+function saveArticleEdit(){
+  const id=parseInt(document.getElementById('editArtId').value);
+  const art=state.articles.find(a=>a.id===id);
+  if(!art)return;
+  
+  art.name=document.getElementById('editArtName').value.trim();
+  art.origin=document.getElementById('editArtOrigin').value.trim();
+  art.price=parseFloat(document.getElementById('editArtPrice').value)||0;
+  art.cat=document.getElementById('editArtCat').value;
+  art.unit=document.getElementById('editArtUnit').value;
+  art.tva=parseFloat(document.getElementById('editArtTva').value);
+  art.favorite=document.getElementById('editArtFav').checked;
+  
+  save();
+  renderArtGrid();
+  renderArticles();
+  renderCategories();
+  closeModal('editArticleModal');
+}
+
+function deleteArticleFromEdit(){
+  const id=parseInt(document.getElementById('editArtId').value);
+  if(!confirm('Supprimer cet article ?'))return;
+  state.articles=state.articles.filter(a=>a.id!==id);
+  save();
+  renderArtGrid();
+  renderArticles();
+  renderCategories();
+  closeModal('editArticleModal');
+}
+
 function addArticle(){
   const name=document.getElementById('newArtName').value.trim();
+  const origin=document.getElementById('newArtOrigin').value.trim();
   const price=parseFloat(document.getElementById('newArtPrice').value)||0;
   const cat=document.getElementById('newArtCat').value;
   const unit=document.getElementById('newArtUnit').value;
@@ -1110,32 +1432,16 @@ function addArticle(){
   if(price<=0){alert('Prix requis');return;}
   
   const newId=Math.max(...state.articles.map(a=>a.id),0)+1;
-  state.articles.push({id:newId,name,price,cat,unit,tva,favorite:false});
+  state.articles.push({id:newId,name,origin,price,cat,unit,tva,favorite:false});
   
   document.getElementById('newArtName').value='';
+  document.getElementById('newArtOrigin').value='';
   document.getElementById('newArtPrice').value='';
   
   save();
-  renderArtList();
+  renderArtGrid();
   renderArticles();
-}
-
-function updateArtPrice(id,val){
-  const art=state.articles.find(a=>a.id===id);
-  if(art){art.price=parseFloat(val)||0;save();renderArticles();}
-}
-
-function toggleFav(id){
-  const art=state.articles.find(a=>a.id===id);
-  if(art){art.favorite=!art.favorite;save();renderArtList();renderArticles();}
-}
-
-function deleteArt(id){
-  if(!confirm('Supprimer cet article ?'))return;
-  state.articles=state.articles.filter(a=>a.id!==id);
-  save();
-  renderArtList();
-  renderArticles();
+  renderCategories();
 }
 
 // CATEGORIES SETTINGS
@@ -1145,12 +1451,13 @@ function renderCatList(){
     return`
       <div class="cat-item">
         <div class="cat-color" style="background:${c.color}"></div>
-        <div class="cat-item-info">
-          <input type="text" value="${c.name}" onchange="updateCatName('${c.id}',this.value)">
-          <div class="cat-count">${count} article${count>1?'s':''}</div>
+        <input type="text" value="${c.emoji||''}" onchange="updateCatEmoji('${c.id}',this.value)" style="width:50px;text-align:center" maxlength="2">
+        <div class="cat-item-info" style="flex:1">
+          <input type="text" value="${c.name}" onchange="updateCatName('${c.id}',this.value)" style="width:100%">
         </div>
+        <span class="cat-count-badge">${count} art.</span>
         <input type="color" value="${c.color}" onchange="updateCatColor('${c.id}',this.value)">
-        <button class="art-item-btn del" onclick="deleteCat('${c.id}')">🗑️</button>
+        <button class="btn btn-icon" onclick="deleteCat('${c.id}')" style="color:var(--accent)">🗑️</button>
       </div>
     `;
   }).join('');
@@ -1158,14 +1465,16 @@ function renderCatList(){
 
 function addCategory(){
   const name=document.getElementById('newCatName').value.trim();
+  const emoji=document.getElementById('newCatEmoji').value.trim()||'📦';
   const color=document.getElementById('newCatColor').value;
   if(!name){alert('Nom requis');return;}
   
   const id=name.toLowerCase().replace(/[^a-z0-9]/g,'');
   if(state.categories.find(c=>c.id===id)){alert('Existe déjà');return;}
   
-  state.categories.push({id,name,color});
+  state.categories.push({id,name,emoji,color});
   document.getElementById('newCatName').value='';
+  document.getElementById('newCatEmoji').value='';
   save();
   renderCatList();
   renderCategories();
@@ -1174,6 +1483,11 @@ function addCategory(){
 function updateCatName(id,val){
   const cat=state.categories.find(c=>c.id===id);
   if(cat){cat.name=val;save();renderCategories();}
+}
+
+function updateCatEmoji(id,val){
+  const cat=state.categories.find(c=>c.id===id);
+  if(cat){cat.emoji=val;save();renderCategories();}
 }
 
 function updateCatColor(id,val){
@@ -1192,14 +1506,12 @@ function deleteCat(id){
 
 // EVENTS
 function renderEvents(){
-  // Articles chips
   document.getElementById('eventArticles').innerHTML=state.articles.map(a=>`
     <div class="event-chip ${a.favorite?'selected':''}" data-id="${a.id}" onclick="this.classList.toggle('selected')">
       ${a.name} (${a.price.toFixed(2)})
     </div>
   `).join('');
   
-  // Events list
   document.getElementById('eventsList').innerHTML=state.events.length===0?'<p style="color:var(--text-muted);font-size:12px">Aucun événement</p>':
     state.events.map(e=>{
       const trans=state.transactions.filter(t=>t.eventId===e.id&&!t.cancelled);
@@ -1207,8 +1519,10 @@ function renderEvents(){
       const isActive=state.activeEvent===e.id;
       return`
         <div class="event-card ${isActive?'active':''}">
-          <div class="event-card-title">${isActive?'🟢 ':''}${e.name}</div>
-          <div class="event-card-info">📍 ${e.location||'N/A'} · ${e.dateStart} → ${e.dateEnd||e.dateStart}</div>
+          <div class="event-card-header">
+            <div class="event-card-title">${isActive?'🟢 ':''}${e.name}</div>
+          </div>
+          <div class="event-card-info">📍 ${e.location||'N/A'} · 📅 ${formatDate(e.dateStart)} → ${formatDate(e.dateEnd||e.dateStart)}</div>
           <div class="event-card-stats">
             <div class="event-card-stat">Ventes: <span class="val">${trans.length}</span></div>
             <div class="event-card-stat">CA: <span class="val">${formatCHF(total)}</span></div>
@@ -1223,7 +1537,6 @@ function renderEvents(){
       `;
     }).join('');
   
-  // Update history filter
   document.getElementById('historyEvent').innerHTML='<option value="">Tous événements</option>'+
     state.events.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
 }
@@ -1242,14 +1555,7 @@ function saveEvent(){
   const articles=[];
   document.querySelectorAll('.event-chip.selected').forEach(el=>articles.push(parseInt(el.dataset.id)));
   
-  state.events.push({
-    id:genId(),
-    name,location,
-    dateStart:start,
-    dateEnd:end||start,
-    discount,margin,
-    articles
-  });
+  state.events.push({id:genId(),name,location,dateStart:start,dateEnd:end||start,discount,margin,articles});
   
   document.getElementById('eventName').value='';
   document.getElementById('eventLocation').value='';
@@ -1323,6 +1629,7 @@ function openModal(id){
     document.getElementById('historyEnd').value=today;
     renderEvents();
     filterHistory();
+    toggleEventRecap();
   }
   if(id==='settingsModal')switchTab('articles');
 }
