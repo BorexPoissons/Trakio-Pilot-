@@ -143,11 +143,29 @@
         .kpi-value { font-size: 28px; font-weight: 700; margin-bottom: 5px; }
         .kpi-label { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* Filters */
+        /* Filters - Collapsible on scroll */
+        .filters-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg-dark);
+            padding: 15px 0;
+            margin: 0 -20px;
+            padding-left: 20px;
+            padding-right: 20px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .filters-wrapper.hidden {
+            transform: translateY(-100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        
         .filters-bar {
             display: flex;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             flex-wrap: wrap;
             align-items: center;
         }
@@ -186,7 +204,6 @@
         .status-tabs {
             display: flex;
             gap: 8px;
-            margin-bottom: 20px;
             flex-wrap: wrap;
         }
         
@@ -565,18 +582,20 @@
             <div class="kpi-card" style="--kpi-color: var(--success)"><div class="kpi-icon">💰</div><div class="kpi-value" id="kpi-ca">0</div><div class="kpi-label">CA jour</div></div>
         </div>
         
-        <div class="filters-bar">
-            <div class="search-box"><input type="text" id="search-input" placeholder="Rechercher..."></div>
-            <select class="filter-select" id="filter-source"><option value="">Toutes sources</option><option value="trakio">📋 TRAKIO</option><option value="myfish">🛒 MyFish</option><option value="shopify">🛍️ Shopify</option></select>
-            <input type="date" class="filter-select" id="filter-date">
-        </div>
-        
-        <div class="status-tabs">
-            <button class="status-tab active" data-status="all">Toutes <span class="count" id="count-all">0</span></button>
-            <button class="status-tab" data-status="pending">🟡 Attente <span class="count" id="count-pending">0</span></button>
-            <button class="status-tab" data-status="confirmed">🔵 Confirmées <span class="count" id="count-confirmed">0</span></button>
-            <button class="status-tab" data-status="ready">🟣 Prêtes <span class="count" id="count-ready">0</span></button>
-            <button class="status-tab" data-status="delivered">🟢 Livrées <span class="count" id="count-delivered">0</span></button>
+        <div class="filters-wrapper" id="filters-wrapper">
+            <div class="filters-bar">
+                <div class="search-box"><input type="text" id="search-input" placeholder="Rechercher..."></div>
+                <select class="filter-select" id="filter-source"><option value="">Toutes sources</option><option value="trakio">📋 TRAKIO</option><option value="myfish">🛒 MyFish</option><option value="shopify">🛍️ Shopify</option></select>
+                <input type="date" class="filter-select" id="filter-date">
+            </div>
+            
+            <div class="status-tabs">
+                <button class="status-tab active" data-status="all">Toutes <span class="count" id="count-all">0</span></button>
+                <button class="status-tab" data-status="pending">🟡 Attente <span class="count" id="count-pending">0</span></button>
+                <button class="status-tab" data-status="confirmed">🔵 Confirmées <span class="count" id="count-confirmed">0</span></button>
+                <button class="status-tab" data-status="ready">🟣 Prêtes <span class="count" id="count-ready">0</span></button>
+                <button class="status-tab" data-status="delivered">🟢 Livrées <span class="count" id="count-delivered">0</span></button>
+            </div>
         </div>
         
         <div class="card">
@@ -641,6 +660,33 @@
     
     <script>
         let allOrders = [], allClients = [], allArticles = [], currentFilter = 'all', editingOrderId = null, orderArticles = [], lineCounter = 0;
+        
+        // Scroll detection for filters
+        let lastScrollY = 0;
+        let ticking = false;
+        
+        function handleScroll() {
+            const currentScrollY = window.scrollY;
+            const filtersWrapper = document.getElementById('filters-wrapper');
+            
+            if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                // Scrolling DOWN - hide filters
+                filtersWrapper.classList.add('hidden');
+            } else {
+                // Scrolling UP - show filters
+                filtersWrapper.classList.remove('hidden');
+            }
+            
+            lastScrollY = currentScrollY;
+            ticking = false;
+        }
+        
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(handleScroll);
+                ticking = true;
+            }
+        });
         
         document.addEventListener('DOMContentLoaded', async () => {
             await initTrakioApp('commandes');
