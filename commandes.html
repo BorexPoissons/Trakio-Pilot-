@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TRAKIO v4.3.0 - Commandes</title>
+    <title>TRAKIO v4.3.0 - Commandes PRO</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    
-    <!-- TRAKIO Core -->
     <script src="js/trakio-config.js"></script>
     <script src="js/trakio-sync.js"></script>
     <script src="js/trakio-ui.js"></script>
@@ -36,48 +33,23 @@
             --purple: #8b5cf6;
         }
         
-        .page-container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        .page-container { max-width: 1600px; margin: 0 auto; padding: 20px; }
         
         .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
             gap: 15px;
         }
         
-        .page-title {
-            font-size: 28px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .page-title { font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .page-title .live-dot { width: 10px; height: 10px; background: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
         
-        .page-title .live-dot {
-            width: 12px;
-            height: 12px;
-            background: var(--success);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-            box-shadow: 0 0 10px var(--success);
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(0.95); }
-        }
-        
-        .quick-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+        .quick-actions { display: flex; gap: 10px; flex-wrap: wrap; }
         
         .quick-btn {
             padding: 10px 18px;
@@ -92,58 +64,48 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            text-decoration: none;
         }
         
-        .quick-btn:hover {
-            background: var(--primary);
-            border-color: var(--primary);
-            transform: translateY(-2px);
+        .quick-btn:hover { background: var(--primary); border-color: var(--primary); transform: translateY(-2px); }
+        .quick-btn.primary { background: var(--primary); border-color: var(--primary); }
+        
+        /* KPI Compact */
+        .kpi-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         
-        .quick-btn.primary {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-        
-        /* KPI */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        
-        .kpi-card {
+        .kpi-mini {
             background: var(--bg-card);
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 12px 18px;
             border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 140px;
             position: relative;
             overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
         }
         
-        .kpi-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-        
-        .kpi-card::before {
+        .kpi-mini::before {
             content: '';
             position: absolute;
-            top: 0;
             left: 0;
-            right: 0;
-            height: 4px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
             background: var(--kpi-color, var(--primary));
         }
         
-        .kpi-icon { font-size: 32px; margin-bottom: 10px; }
-        .kpi-value { font-size: 28px; font-weight: 700; margin-bottom: 5px; }
-        .kpi-label { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-mini-icon { font-size: 24px; }
+        .kpi-mini-content { display: flex; flex-direction: column; }
+        .kpi-mini-value { font-size: 20px; font-weight: 700; line-height: 1.2; }
+        .kpi-mini-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
         
-        /* Filters - Collapsible on scroll */
+        /* Filters Wrapper - Hide on scroll */
         .filters-wrapper {
             position: sticky;
             top: 0;
@@ -156,103 +118,74 @@
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
         
-        .filters-wrapper.hidden {
-            transform: translateY(-100%);
-            opacity: 0;
-            pointer-events: none;
-        }
+        .filters-wrapper.hidden { transform: translateY(-100%); opacity: 0; pointer-events: none; }
         
-        .filters-bar {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
+        .filters-bar { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
         
-        .search-box {
-            flex: 1;
-            min-width: 250px;
-            position: relative;
-        }
-        
+        .search-box { flex: 1; min-width: 200px; position: relative; }
         .search-box input {
             width: 100%;
-            padding: 12px 15px 12px 45px;
+            padding: 10px 12px 10px 40px;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 10px;
             color: var(--text);
             font-size: 14px;
         }
-        
         .search-box input:focus { outline: none; border-color: var(--primary); }
-        .search-box::before { content: '🔍'; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); }
+        .search-box::before { content: '🔍'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; }
         
         .filter-select {
-            padding: 12px 15px;
+            padding: 10px 12px;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 10px;
             color: var(--text);
             font-size: 14px;
-            cursor: pointer;
         }
         
-        .filter-select:focus { outline: none; border-color: var(--primary); }
-        
-        .status-tabs {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
+        .status-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
         
         .status-tab {
-            padding: 10px 18px;
+            padding: 8px 14px;
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 25px;
+            border-radius: 20px;
             color: var(--text-muted);
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         
         .status-tab:hover { background: var(--bg-input); color: var(--text); }
         .status-tab.active { background: var(--primary); border-color: var(--primary); color: white; }
-        .status-tab .count { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .status-tab .count { background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; font-size: 11px; font-weight: 600; }
         
-        /* Card */
-        .card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
+        /* Card & Table */
+        .card { background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; }
         
-        /* Table */
         .table-header {
             display: grid;
-            grid-template-columns: 100px 1.5fr 120px 100px 120px 110px 80px;
-            padding: 15px 20px;
+            grid-template-columns: 90px 1.5fr 100px 90px 100px 100px 60px;
+            padding: 12px 16px;
             background: var(--bg-input);
             font-weight: 600;
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             color: var(--text-muted);
-            gap: 15px;
+            gap: 12px;
         }
         
         .order-row {
             display: grid;
-            grid-template-columns: 100px 1.5fr 120px 100px 120px 110px 80px;
-            padding: 15px 20px;
+            grid-template-columns: 90px 1.5fr 100px 90px 100px 100px 60px;
+            padding: 12px 16px;
             border-bottom: 1px solid var(--border);
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             transition: all 0.2s;
             cursor: pointer;
         }
@@ -260,88 +193,56 @@
         .order-row:hover { background: var(--bg-input); }
         .order-row:last-child { border-bottom: none; }
         
-        .order-number { font-weight: 700; color: var(--primary); font-size: 14px; }
-        
-        .order-client { display: flex; align-items: center; gap: 12px; }
+        .order-number { font-weight: 700; color: var(--primary); font-size: 13px; }
+        .order-client { display: flex; align-items: center; gap: 10px; }
         
         .client-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: 700;
-            color: white;
-            flex-shrink: 0;
+            width: 34px; height: 34px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700; color: white;
         }
-        
         .client-avatar.b2b { background: linear-gradient(135deg, #0ea5e9, #06b6d4); }
         .client-avatar.b2c { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
         
-        .client-info { min-width: 0; }
-        .client-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .client-company { font-size: 12px; color: var(--text-muted); }
+        .client-name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .client-company { font-size: 11px; color: var(--text-muted); }
         
-        .order-source {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 5px 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-        }
+        .order-source { display: inline-flex; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .order-source.trakio { background: rgba(14,165,233,0.15); color: var(--primary); }
+        .order-source.myfish { background: rgba(139,92,246,0.15); color: var(--purple); }
+        .order-source.shopify { background: rgba(16,185,129,0.15); color: var(--success); }
         
-        .order-source.trakio { background: rgba(14, 165, 233, 0.15); color: var(--primary); }
-        .order-source.myfish { background: rgba(139, 92, 246, 0.15); color: var(--purple); }
-        .order-source.shopify { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .order-date { color: var(--text-muted); font-size: 12px; }
+        .order-total { font-weight: 700; color: var(--success); font-size: 14px; }
         
-        .order-date { color: var(--text-muted); font-size: 13px; }
-        .order-total { font-weight: 700; color: var(--success); font-size: 15px; }
-        
-        .order-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .order-status.pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
-        .order-status.confirmed { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
-        .order-status.ready { background: rgba(139, 92, 246, 0.15); color: var(--purple); }
-        .order-status.delivered { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-        .order-status.cancelled { background: rgba(239, 68, 68, 0.15); color: var(--error); }
+        .order-status { display: inline-flex; padding: 5px 10px; border-radius: 15px; font-size: 11px; font-weight: 600; }
+        .order-status.pending { background: rgba(245,158,11,0.15); color: var(--warning); }
+        .order-status.confirmed { background: rgba(59,130,246,0.15); color: #3b82f6; }
+        .order-status.ready { background: rgba(139,92,246,0.15); color: var(--purple); }
+        .order-status.delivered { background: rgba(16,185,129,0.15); color: var(--success); }
+        .order-status.cancelled { background: rgba(239,68,68,0.15); color: var(--error); }
         
         .action-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            border: none;
-            background: var(--bg-input);
-            color: var(--text-muted);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+            width: 30px; height: 30px;
+            border-radius: 8px; border: none;
+            background: var(--bg-input); color: var(--text-muted);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-        
         .action-btn:hover { background: var(--primary); color: white; }
         
-        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
-        .empty-state-icon { font-size: 64px; margin-bottom: 20px; }
-        .empty-state-text { font-size: 18px; }
+        .empty-state { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+        .empty-state-icon { font-size: 50px; margin-bottom: 15px; }
+        .empty-state-text { font-size: 16px; }
         
-        /* Modal */
+        /* ============================================
+           WIZARD MODAL
+        ============================================ */
+        
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             display: none;
             justify-content: center;
             align-items: flex-start;
@@ -349,80 +250,367 @@
             z-index: 10002;
             overflow-y: auto;
         }
-        
         .modal-overlay.active { display: flex; }
         
-        .modal {
+        .wizard-modal {
             background: var(--bg-card);
             border-radius: 20px;
             width: 100%;
-            max-width: 900px;
-            margin-top: 60px;
+            max-width: 700px;
+            margin-top: 40px;
             border: 1px solid var(--border);
             animation: modalSlide 0.3s ease;
         }
         
-        @keyframes modalSlide {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        @keyframes modalSlide { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .wizard-header {
             padding: 20px 25px;
             border-bottom: 1px solid var(--border);
             background: rgba(0,0,0,0.2);
             border-radius: 20px 20px 0 0;
         }
         
-        .modal-title { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .wizard-title {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
         
-        .modal-close {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            border: none;
+        .wizard-close {
+            position: absolute;
+            top: 20px; right: 20px;
+            width: 36px; height: 36px;
+            border-radius: 10px; border: none;
+            background: var(--bg-input); color: var(--text-muted);
+            font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .wizard-close:hover { background: var(--error); color: white; }
+        
+        /* Progress Steps */
+        .wizard-progress {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .wizard-progress::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 40px;
+            right: 40px;
+            height: 3px;
+            background: var(--border);
+        }
+        
+        .wizard-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .step-circle {
+            width: 40px; height: 40px;
+            border-radius: 50%;
             background: var(--bg-input);
+            border: 3px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
             color: var(--text-muted);
-            font-size: 22px;
+            transition: all 0.3s;
+        }
+        
+        .wizard-step.active .step-circle {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 20px rgba(14,165,233,0.5);
+        }
+        
+        .wizard-step.completed .step-circle {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .wizard-step.active .step-label { color: var(--primary); }
+        .wizard-step.completed .step-label { color: var(--success); }
+        
+        /* Wizard Body */
+        .wizard-body {
+            padding: 30px 25px;
+            min-height: 350px;
+        }
+        
+        .wizard-panel { display: none; animation: fadeIn 0.3s ease; }
+        .wizard-panel.active { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        
+        .panel-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        
+        /* Search Client */
+        .client-search-input {
+            width: 100%;
+            padding: 18px 20px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            color: var(--text);
+            font-size: 18px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .client-search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(14,165,233,0.2);
+        }
+        
+        .client-search-input::placeholder { color: var(--text-muted); }
+        
+        .search-hints {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .search-hint {
+            background: var(--bg-input);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        /* Client Results */
+        .client-results-list {
+            margin-top: 20px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        .client-result-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: var(--bg-input);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .client-result-item:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+        
+        .client-result-item.selected {
+            border-color: var(--success);
+            background: rgba(16,185,129,0.1);
+        }
+        
+        .result-avatar {
+            width: 50px; height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .result-info { flex: 1; }
+        .result-name { font-weight: 700; font-size: 16px; margin-bottom: 2px; }
+        .result-company { color: var(--primary); font-size: 14px; font-weight: 500; }
+        .result-details { color: var(--text-muted); font-size: 12px; margin-top: 3px; }
+        
+        .result-select {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--text-muted);
+        }
+        
+        .client-result-item.selected .result-select {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        
+        /* Client Confirmed Card */
+        .client-confirmed {
+            background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05));
+            border: 2px solid var(--success);
+            border-radius: 16px;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .confirmed-avatar {
+            width: 70px; height: 70px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--success), #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .confirmed-info { flex: 1; }
+        .confirmed-name { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+        .confirmed-company { color: var(--success); font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+        .confirmed-details { color: var(--text-muted); font-size: 13px; line-height: 1.6; }
+        
+        .confirmed-check {
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+        
+        /* Articles Panel */
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .article-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-input);
+            border-radius: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .article-item:hover { border-color: var(--primary); }
+        .article-item.selected { border-color: var(--success); background: rgba(16,185,129,0.1); }
+        
+        .article-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .article-info { flex: 1; min-width: 0; }
+        .article-name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .article-price { color: var(--success); font-weight: 700; font-size: 14px; }
+        
+        .article-qty {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .qty-btn {
+            width: 30px; height: 30px;
+            border-radius: 8px;
+            border: none;
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
-        .modal-close:hover { background: var(--error); color: white; }
+        .qty-btn:hover { background: var(--primary); }
         
-        .modal-body { padding: 25px; max-height: 65vh; overflow-y: auto; }
+        .qty-input {
+            width: 50px;
+            padding: 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            text-align: center;
+            font-weight: 600;
+        }
         
-        .modal-footer {
+        /* Cart Summary */
+        .cart-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--bg-input);
+            border-radius: 12px;
             display: flex;
             justify-content: space-between;
-            gap: 10px;
-            padding: 20px 25px;
-            border-top: 1px solid var(--border);
-            background: rgba(0,0,0,0.1);
-            border-radius: 0 0 20px 20px;
-        }
-        
-        /* Form */
-        .form-section { margin-bottom: 25px; }
-        .form-section-title {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
             align-items: center;
-            gap: 10px;
         }
         
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .cart-count { color: var(--text-muted); font-size: 14px; }
+        .cart-count strong { color: var(--text); }
+        .cart-total { font-size: 20px; font-weight: 700; color: var(--success); }
+        
+        /* Delivery Form */
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-group.full-width { grid-column: 1 / -1; }
+        .form-group.full { grid-column: 1 / -1; }
         .form-label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
         
         .form-input, .form-select, .form-textarea {
@@ -433,98 +621,63 @@
             color: var(--text);
             font-size: 14px;
         }
-        
-        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); }
+        .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary); }
         .form-textarea { resize: vertical; min-height: 80px; }
         
-        /* Client Search */
-        .client-search-container { position: relative; }
-        
-        .client-search-results {
-            position: absolute;
-            top: 100%;
-            left: 0; right: 0;
+        /* Recap Panel */
+        .recap-section {
             background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 100;
-            display: none;
-            margin-top: 5px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
         }
         
-        .client-search-results.active { display: block; }
-        
-        .client-result {
-            padding: 12px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .client-result:hover { background: var(--border); }
-        .client-result:last-child { border-bottom: none; }
-        .client-result-name { font-weight: 600; color: var(--text); }
-        .client-result-info { font-size: 12px; color: var(--text-muted); }
-        
-        /* Articles */
-        .order-articles { background: var(--bg-input); border-radius: 12px; overflow: hidden; }
-        
-        .article-row {
-            display: grid;
-            grid-template-columns: 1fr 90px 90px 90px 40px;
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border);
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .article-row:last-child { border-bottom: none; }
-        .article-row.header { background: var(--bg-card); font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--text-muted); }
-        
-        .add-article-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px;
-            background: transparent;
-            border: 2px dashed var(--border);
-            border-radius: 10px;
+        .recap-section-title {
+            font-size: 12px;
             color: var(--text-muted);
-            cursor: pointer;
-            width: 100%;
-            margin-top: 15px;
-        }
-        
-        .add-article-btn:hover { border-color: var(--primary); color: var(--primary); }
-        
-        .remove-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            border: none;
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--error);
-            cursor: pointer;
+            text-transform: uppercase;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
         }
         
-        .remove-btn:hover { background: var(--error); color: white; }
+        .recap-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
         
-        .order-totals { background: var(--bg-input); border-radius: 12px; padding: 20px; margin-top: 20px; }
-        .total-row { display: flex; justify-content: space-between; padding: 8px 0; color: var(--text-muted); font-size: 14px; }
-        .total-row.final { border-top: 2px solid var(--border); margin-top: 10px; padding-top: 15px; font-size: 20px; font-weight: 700; color: var(--success); }
+        .recap-row:last-child { border-bottom: none; }
         
-        /* Buttons */
+        .recap-total {
+            background: linear-gradient(135deg, var(--success), #059669);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .recap-total-label { font-size: 16px; font-weight: 600; }
+        .recap-total-value { font-size: 28px; font-weight: 700; }
+        
+        /* Wizard Footer */
+        .wizard-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 25px;
+            border-top: 1px solid var(--border);
+            background: rgba(0,0,0,0.1);
+            border-radius: 0 0 20px 20px;
+        }
+        
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 12px 20px;
+            padding: 12px 24px;
             border: none;
             border-radius: 10px;
             font-size: 14px;
@@ -533,62 +686,92 @@
             transition: all 0.2s;
         }
         
-        .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); }
         .btn-secondary { background: var(--bg-input); color: var(--text); border: 1px solid var(--border); }
         .btn-secondary:hover { background: var(--border); }
-        .btn-danger { background: var(--error); color: white; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(14,165,233,0.4); }
+        .btn-success { background: linear-gradient(135deg, var(--success), #059669); color: white; }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(16,185,129,0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
         
         /* Responsive */
-        @media (max-width: 1000px) {
+        @media (max-width: 768px) {
             .table-header { display: none; }
             .order-row {
                 grid-template-columns: 1fr 1fr;
-                grid-template-rows: auto auto auto;
-                padding: 15px;
-                gap: 10px;
+                gap: 8px;
             }
             .order-number { grid-column: 1; }
             .order-status { grid-column: 2; justify-self: end; }
             .order-client { grid-column: 1 / -1; }
             .order-source { grid-column: 1; }
             .order-date { grid-column: 2; justify-self: end; }
-            .order-total { grid-column: 1; font-size: 18px; }
+            .order-total { grid-column: 1; }
             .order-actions { grid-column: 2; justify-self: end; }
-        }
-        
-        @media (max-width: 600px) {
-            .page-header { flex-direction: column; align-items: flex-start; }
-            .quick-actions { width: 100%; }
-            .quick-btn { flex: 1; justify-content: center; }
-            .article-row { grid-template-columns: 1fr 70px 40px; }
+            
+            .kpi-bar { flex-direction: column; }
+            .kpi-mini { width: 100%; }
+            
+            .wizard-progress::before { display: none; }
+            .step-label { display: none; }
+            .form-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="page-container">
         <div class="page-header">
-            <h1 class="page-title">📋 Commandes <span class="live-dot"></span></h1>
+            <h1 class="page-title">📋 Commandes PRO <span class="live-dot"></span></h1>
             <div class="quick-actions">
-                <button class="quick-btn primary" onclick="openNewOrderModal()">➕ Nouvelle commande</button>
+                <button class="quick-btn primary" onclick="openWizard()">📞 Nouvelle commande</button>
                 <button class="quick-btn" onclick="exportOrders()">📥 Export</button>
             </div>
         </div>
         
-        <div class="kpi-grid">
-            <div class="kpi-card" style="--kpi-color: var(--primary)"><div class="kpi-icon">📋</div><div class="kpi-value" id="kpi-total">0</div><div class="kpi-label">Total</div></div>
-            <div class="kpi-card" style="--kpi-color: var(--warning)"><div class="kpi-icon">⏳</div><div class="kpi-value" id="kpi-pending">0</div><div class="kpi-label">En attente</div></div>
-            <div class="kpi-card" style="--kpi-color: var(--purple)"><div class="kpi-icon">📅</div><div class="kpi-value" id="kpi-today">0</div><div class="kpi-label">Aujourd'hui</div></div>
-            <div class="kpi-card" style="--kpi-color: var(--success)"><div class="kpi-icon">💰</div><div class="kpi-value" id="kpi-ca">0</div><div class="kpi-label">CA jour</div></div>
+        <!-- KPI Compact -->
+        <div class="kpi-bar">
+            <div class="kpi-mini" style="--kpi-color: var(--primary)">
+                <div class="kpi-mini-icon">📋</div>
+                <div class="kpi-mini-content">
+                    <div class="kpi-mini-value" id="kpi-total">0</div>
+                    <div class="kpi-mini-label">Total</div>
+                </div>
+            </div>
+            <div class="kpi-mini" style="--kpi-color: var(--warning)">
+                <div class="kpi-mini-icon">⏳</div>
+                <div class="kpi-mini-content">
+                    <div class="kpi-mini-value" id="kpi-pending">0</div>
+                    <div class="kpi-mini-label">En attente</div>
+                </div>
+            </div>
+            <div class="kpi-mini" style="--kpi-color: var(--purple)">
+                <div class="kpi-mini-icon">📅</div>
+                <div class="kpi-mini-content">
+                    <div class="kpi-mini-value" id="kpi-today">0</div>
+                    <div class="kpi-mini-label">Aujourd'hui</div>
+                </div>
+            </div>
+            <div class="kpi-mini" style="--kpi-color: var(--success)">
+                <div class="kpi-mini-icon">💰</div>
+                <div class="kpi-mini-content">
+                    <div class="kpi-mini-value" id="kpi-ca">0 CHF</div>
+                    <div class="kpi-mini-label">CA jour</div>
+                </div>
+            </div>
         </div>
         
+        <!-- Filters -->
         <div class="filters-wrapper" id="filters-wrapper">
             <div class="filters-bar">
                 <div class="search-box"><input type="text" id="search-input" placeholder="Rechercher..."></div>
-                <select class="filter-select" id="filter-source"><option value="">Toutes sources</option><option value="trakio">📋 TRAKIO</option><option value="myfish">🛒 MyFish</option><option value="shopify">🛍️ Shopify</option></select>
+                <select class="filter-select" id="filter-source">
+                    <option value="">Toutes sources</option>
+                    <option value="trakio">📋 TRAKIO</option>
+                    <option value="myfish">🛒 MyFish</option>
+                    <option value="shopify">🛍️ Shopify</option>
+                </select>
                 <input type="date" class="filter-select" id="filter-date">
             </div>
-            
             <div class="status-tabs">
                 <button class="status-tab active" data-status="all">Toutes <span class="count" id="count-all">0</span></button>
                 <button class="status-tab" data-status="pending">🟡 Attente <span class="count" id="count-pending">0</span></button>
@@ -598,109 +781,222 @@
             </div>
         </div>
         
+        <!-- Orders Table -->
         <div class="card">
-            <div class="table-header"><div>N°</div><div>Client</div><div>Source</div><div>Date</div><div>Total</div><div>Statut</div><div></div></div>
-            <div id="orders-list"><div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">Chargement...</div></div></div>
+            <div class="table-header">
+                <div>N°</div><div>Client</div><div>Source</div><div>Date</div><div>Total</div><div>Statut</div><div></div>
+            </div>
+            <div id="orders-list">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <div class="empty-state-text">Chargement...</div>
+                </div>
+            </div>
         </div>
     </div>
     
-    <div class="modal-overlay" id="order-modal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 class="modal-title"><span id="modal-icon">➕</span> <span id="modal-title-text">Nouvelle commande</span></h2>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
+    <!-- WIZARD MODAL -->
+    <div class="modal-overlay" id="wizard-modal">
+        <div class="wizard-modal">
+            <div class="wizard-header" style="position: relative;">
+                <button class="wizard-close" onclick="closeWizard()">&times;</button>
+                <div class="wizard-title">📞 Nouvelle commande PRO</div>
+                
+                <div class="wizard-progress">
+                    <div class="wizard-step active" data-step="1">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Client</div>
+                    </div>
+                    <div class="wizard-step" data-step="2">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Validation</div>
+                    </div>
+                    <div class="wizard-step" data-step="3">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Articles</div>
+                    </div>
+                    <div class="wizard-step" data-step="4">
+                        <div class="step-circle">4</div>
+                        <div class="step-label">Livraison</div>
+                    </div>
+                    <div class="wizard-step" data-step="5">
+                        <div class="step-circle">5</div>
+                        <div class="step-label">Récap</div>
+                    </div>
+                </div>
             </div>
-            <div class="modal-body">
-                <form id="order-form">
-                    <input type="hidden" id="order-id">
-                    <div class="form-section">
-                        <div class="form-section-title">👤 Client</div>
-                        <div class="form-grid">
-                            <div class="form-group full-width client-search-container">
-                                <label class="form-label">Rechercher</label>
-                                <input type="text" class="form-input" id="client-search" placeholder="Nom, entreprise..." autocomplete="off">
-                                <input type="hidden" id="client-id">
-                                <div class="client-search-results" id="client-results"></div>
-                            </div>
-                            <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input" id="client-name" readonly></div>
-                            <div class="form-group"><label class="form-label">Téléphone</label><input type="text" class="form-input" id="client-phone" readonly></div>
+            
+            <div class="wizard-body">
+                <!-- STEP 1: Search Client -->
+                <div class="wizard-panel active" id="panel-1">
+                    <div class="panel-title">🔍 Rechercher le client</div>
+                    <div class="panel-subtitle">Entrez le nom d'entreprise, le nom ou le téléphone</div>
+                    
+                    <input type="text" class="client-search-input" id="wizard-client-search" placeholder="Borex, Dupont, 079..." autofocus>
+                    
+                    <div class="search-hints">
+                        <span class="search-hint">🏢 Entreprise</span>
+                        <span class="search-hint">👤 Nom</span>
+                        <span class="search-hint">📞 Téléphone</span>
+                    </div>
+                    
+                    <div class="client-results-list" id="wizard-client-results"></div>
+                </div>
+                
+                <!-- STEP 2: Confirm Client -->
+                <div class="wizard-panel" id="panel-2">
+                    <div class="panel-title">✅ Confirmer le client</div>
+                    <div class="panel-subtitle">Vérifiez les informations du client</div>
+                    
+                    <div class="client-confirmed" id="client-confirmed-card">
+                        <div class="confirmed-avatar" id="confirmed-avatar">?</div>
+                        <div class="confirmed-info">
+                            <div class="confirmed-name" id="confirmed-name">-</div>
+                            <div class="confirmed-company" id="confirmed-company">-</div>
+                            <div class="confirmed-details" id="confirmed-details">-</div>
+                        </div>
+                        <div class="confirmed-check">✓</div>
+                    </div>
+                </div>
+                
+                <!-- STEP 3: Articles -->
+                <div class="wizard-panel" id="panel-3">
+                    <div class="panel-title">🐟 Sélectionner les articles</div>
+                    <div class="panel-subtitle">Cliquez pour ajouter, ajustez les quantités</div>
+                    
+                    <div class="articles-grid" id="articles-grid"></div>
+                    
+                    <div class="cart-summary">
+                        <div class="cart-count"><strong id="cart-items">0</strong> articles</div>
+                        <div class="cart-total" id="cart-total">0.00 CHF</div>
+                    </div>
+                </div>
+                
+                <!-- STEP 4: Delivery -->
+                <div class="wizard-panel" id="panel-4">
+                    <div class="panel-title">📅 Détails de livraison</div>
+                    <div class="panel-subtitle">Date, heure et mode de livraison</div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Date de livraison *</label>
+                            <input type="date" class="form-input" id="wiz-delivery-date">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Heure souhaitée</label>
+                            <input type="time" class="form-input" id="wiz-delivery-time">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Type</label>
+                            <select class="form-select" id="wiz-order-type">
+                                <option value="pickup">🏪 Retrait en magasin</option>
+                                <option value="delivery">🚚 Livraison</option>
+                                <option value="market">🎪 Marché</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Statut initial</label>
+                            <select class="form-select" id="wiz-order-status">
+                                <option value="pending">🟡 En attente</option>
+                                <option value="confirmed">🔵 Confirmée</option>
+                            </select>
+                        </div>
+                        <div class="form-group full">
+                            <label class="form-label">Notes / Instructions</label>
+                            <textarea class="form-textarea" id="wiz-notes" placeholder="Instructions spéciales, remarques..."></textarea>
                         </div>
                     </div>
-                    <div class="form-section">
-                        <div class="form-section-title">📋 Commande</div>
-                        <div class="form-grid">
-                            <div class="form-group"><label class="form-label">Date livraison</label><input type="date" class="form-input" id="delivery-date" required></div>
-                            <div class="form-group"><label class="form-label">Heure</label><input type="time" class="form-input" id="delivery-time"></div>
-                            <div class="form-group"><label class="form-label">Type</label><select class="form-select" id="order-type"><option value="pickup">🏪 Retrait</option><option value="delivery">🚚 Livraison</option><option value="market">🎪 Marché</option></select></div>
-                            <div class="form-group"><label class="form-label">Statut</label><select class="form-select" id="order-status"><option value="pending">🟡 En attente</option><option value="confirmed">🔵 Confirmée</option><option value="ready">🟣 Prête</option><option value="delivered">🟢 Livrée</option><option value="cancelled">🔴 Annulée</option></select></div>
+                </div>
+                
+                <!-- STEP 5: Recap -->
+                <div class="wizard-panel" id="panel-5">
+                    <div class="panel-title">📋 Récapitulatif</div>
+                    <div class="panel-subtitle">Vérifiez et validez la commande</div>
+                    
+                    <div class="recap-section">
+                        <div class="recap-section-title">👤 Client</div>
+                        <div class="recap-row">
+                            <span id="recap-client-name">-</span>
+                            <span id="recap-client-phone">-</span>
                         </div>
                     </div>
-                    <div class="form-section">
-                        <div class="form-section-title">🐟 Articles</div>
-                        <div class="order-articles" id="order-articles"><div class="article-row header"><div>Article</div><div>Qté</div><div>Prix</div><div>Total</div><div></div></div></div>
-                        <button type="button" class="add-article-btn" onclick="addArticleLine()">➕ Ajouter article</button>
-                        <div class="order-totals">
-                            <div class="total-row"><span>Sous-total HT</span><span id="subtotal-ht">0.00 CHF</span></div>
-                            <div class="total-row"><span>TVA (2.6%)</span><span id="total-tva">0.00 CHF</span></div>
-                            <div class="total-row final"><span>TOTAL TTC</span><span id="total-ttc">0.00 CHF</span></div>
+                    
+                    <div class="recap-section">
+                        <div class="recap-section-title">🐟 Articles</div>
+                        <div id="recap-articles"></div>
+                    </div>
+                    
+                    <div class="recap-section">
+                        <div class="recap-section-title">📅 Livraison</div>
+                        <div class="recap-row">
+                            <span id="recap-delivery-date">-</span>
+                            <span id="recap-delivery-type">-</span>
                         </div>
                     </div>
-                    <div class="form-section">
-                        <div class="form-section-title">📝 Notes</div>
-                        <textarea class="form-textarea" id="order-notes" placeholder="Instructions..."></textarea>
+                    
+                    <div class="recap-total">
+                        <div class="recap-total-label">TOTAL TTC</div>
+                        <div class="recap-total-value" id="recap-total">0.00 CHF</div>
                     </div>
-                </form>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" id="btn-delete" onclick="deleteOrder()" style="display:none;">🗑️ Supprimer</button>
-                <div style="display:flex;gap:10px;"><button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button><button type="button" class="btn btn-primary" onclick="saveOrder()">💾 Enregistrer</button></div>
+            
+            <div class="wizard-footer">
+                <button class="btn btn-secondary" id="btn-prev" onclick="prevStep()" style="visibility: hidden;">
+                    ← Précédent
+                </button>
+                <button class="btn btn-primary" id="btn-next" onclick="nextStep()">
+                    Suivant →
+                </button>
             </div>
         </div>
     </div>
     
     <script>
-        let allOrders = [], allClients = [], allArticles = [], currentFilter = 'all', editingOrderId = null, orderArticles = [], lineCounter = 0;
+        // ============================================
+        // DATA
+        // ============================================
+        let allOrders = [], allClients = [], allArticles = [];
+        let currentFilter = 'all';
         
-        // Scroll detection for filters
-        let lastScrollY = 0;
-        let ticking = false;
+        // Wizard State
+        let wizardStep = 1;
+        let selectedClient = null;
+        let cart = {}; // { articleId: { article, qty } }
         
+        // Scroll handler
+        let lastScrollY = 0, ticking = false;
         function handleScroll() {
-            const currentScrollY = window.scrollY;
-            const filtersWrapper = document.getElementById('filters-wrapper');
-            
-            if (currentScrollY > lastScrollY && currentScrollY > 100) {
-                // Scrolling DOWN - hide filters
-                filtersWrapper.classList.add('hidden');
-            } else {
-                // Scrolling UP - show filters
-                filtersWrapper.classList.remove('hidden');
-            }
-            
-            lastScrollY = currentScrollY;
+            const y = window.scrollY;
+            const f = document.getElementById('filters-wrapper');
+            if (y > lastScrollY && y > 100) f.classList.add('hidden');
+            else f.classList.remove('hidden');
+            lastScrollY = y;
             ticking = false;
         }
+        window.addEventListener('scroll', () => { if (!ticking) { requestAnimationFrame(handleScroll); ticking = true; } });
         
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                requestAnimationFrame(handleScroll);
-                ticking = true;
-            }
-        });
-        
+        // ============================================
+        // INIT
+        // ============================================
         document.addEventListener('DOMContentLoaded', async () => {
             await initTrakioApp('commandes');
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('filter-date').value = today;
-            document.getElementById('delivery-date').value = today;
-            await loadClients();
-            await loadArticles();
+            document.getElementById('wiz-delivery-date').value = today;
+            
+            await loadData();
             setupListeners();
             setupEvents();
         });
         
-        async function loadClients() { try { allClients = await Clients.getAll(); } catch(e) { console.error(e); } }
-        async function loadArticles() { try { allArticles = await Articles.getAll(); } catch(e) { console.error(e); } }
+        async function loadData() {
+            try {
+                allClients = await Clients.getAll();
+                allArticles = await Articles.getAll();
+                console.log(`👥 ${allClients.length} clients, 🐟 ${allArticles.length} articles`);
+            } catch(e) { console.error(e); }
+        }
         
         function setupListeners() {
             Commandes.listen((orders, changes) => {
@@ -715,60 +1011,367 @@
             document.getElementById('search-input').addEventListener('input', renderOrders);
             document.getElementById('filter-source').addEventListener('change', renderOrders);
             document.getElementById('filter-date').addEventListener('change', renderOrders);
+            
             document.querySelectorAll('.status-tab').forEach(t => t.addEventListener('click', () => {
                 document.querySelectorAll('.status-tab').forEach(x => x.classList.remove('active'));
                 t.classList.add('active');
                 currentFilter = t.dataset.status;
                 renderOrders();
             }));
-            document.getElementById('client-search').addEventListener('input', (e) => {
-                const q = e.target.value.toLowerCase(), r = document.getElementById('client-results');
-                if(q.length < 2) { r.classList.remove('active'); return; }
-                const m = allClients.filter(c => (c.nom?.toLowerCase().includes(q)) || (c.prenom?.toLowerCase().includes(q)) || (c.entreprise?.toLowerCase().includes(q)) || (c.telephone?.includes(q))).slice(0,5);
-                if(!m.length) { r.classList.remove('active'); return; }
-                r.innerHTML = m.map(c => `<div class="client-result" onclick="selectClient('${c.id}')"><div class="client-result-name">${c.prenom||''} ${c.nom||''}</div><div class="client-result-info">${c.entreprise||''} • ${c.telephone||''}</div></div>`).join('');
-                r.classList.add('active');
-            });
-            document.addEventListener('click', (e) => { if(!e.target.closest('.client-search-container')) document.getElementById('client-results').classList.remove('active'); });
-            document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeModal(); });
-            document.getElementById('order-modal').addEventListener('click', (e) => { if(e.target.classList.contains('modal-overlay')) closeModal(); });
+            
+            // Wizard client search
+            document.getElementById('wizard-client-search').addEventListener('input', searchClients);
+            
+            document.addEventListener('keydown', e => { if(e.key === 'Escape') closeWizard(); });
+            document.getElementById('wizard-modal').addEventListener('click', e => { if(e.target.classList.contains('modal-overlay')) closeWizard(); });
         }
         
+        // ============================================
+        // RENDER ORDERS
+        // ============================================
         function renderOrders() {
-            const container = document.getElementById('orders-list'), search = document.getElementById('search-input').value.toLowerCase(), src = document.getElementById('filter-source').value, dt = document.getElementById('filter-date').value;
+            const container = document.getElementById('orders-list');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const src = document.getElementById('filter-source').value;
+            const dt = document.getElementById('filter-date').value;
+            
             let f = [...allOrders];
             if(currentFilter !== 'all') f = f.filter(o => o.status === currentFilter);
             if(src) f = f.filter(o => o.source === src);
             if(dt) f = f.filter(o => { const d = o.deliveryDate?.toDate ? o.deliveryDate.toDate() : new Date(o.deliveryDate); return d.toISOString().split('T')[0] === dt; });
             if(search) f = f.filter(o => (o.orderNumber?.toLowerCase().includes(search)) || (o.clientName?.toLowerCase().includes(search)) || (o.clientCompany?.toLowerCase().includes(search)));
+            
             f.sort((a,b) => { const da = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt||0), db = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt||0); return db - da; });
+            
             updateCounts();
+            
             if(!f.length) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-text">Aucune commande</div></div>'; return; }
-            container.innerHTML = f.map(o => { const d = o.deliveryDate?.toDate ? o.deliveryDate.toDate() : new Date(o.deliveryDate), ds = d.toLocaleDateString('fr-CH',{day:'2-digit',month:'2-digit'}), i = (o.clientName||'?').charAt(0).toUpperCase(), t = o.clientCompany ? 'b2b' : 'b2c'; return `<div class="order-row" onclick="editOrder('${o.id}')"><div class="order-number">#${o.orderNumber||o.id.slice(-6).toUpperCase()}</div><div class="order-client"><div class="client-avatar ${t}">${i}</div><div class="client-info"><div class="client-name">${o.clientName||'Inconnu'}</div><div class="client-company">${o.clientCompany||''}</div></div></div><div><span class="order-source ${o.source||'trakio'}">${getSource(o.source)}</span></div><div class="order-date">${ds}</div><div class="order-total">${formatCHF(o.total||0)}</div><div><span class="order-status ${o.status||'pending'}">${getStatus(o.status)}</span></div><div class="order-actions" onclick="event.stopPropagation()"><button class="action-btn" onclick="editOrder('${o.id}')">✏️</button></div></div>`; }).join('');
+            
+            container.innerHTML = f.map(o => {
+                const d = o.deliveryDate?.toDate ? o.deliveryDate.toDate() : new Date(o.deliveryDate);
+                const ds = d.toLocaleDateString('fr-CH',{day:'2-digit',month:'2-digit'});
+                const i = (o.clientName||'?').charAt(0).toUpperCase();
+                const t = o.clientCompany ? 'b2b' : 'b2c';
+                return `<div class="order-row" onclick="editOrder('${o.id}')">
+                    <div class="order-number">#${o.orderNumber||o.id.slice(-6).toUpperCase()}</div>
+                    <div class="order-client"><div class="client-avatar ${t}">${i}</div><div><div class="client-name">${o.clientName||'Inconnu'}</div><div class="client-company">${o.clientCompany||''}</div></div></div>
+                    <div><span class="order-source ${o.source||'trakio'}">${getSource(o.source)}</span></div>
+                    <div class="order-date">${ds}</div>
+                    <div class="order-total">${formatCHF(o.total||0)}</div>
+                    <div><span class="order-status ${o.status||'pending'}">${getStatus(o.status)}</span></div>
+                    <div><button class="action-btn" onclick="event.stopPropagation();editOrder('${o.id}')">✏️</button></div>
+                </div>`;
+            }).join('');
         }
         
-        function getSource(s) { return {trakio:'📋 TRAKIO',myfish:'🛒 MyFish',shopify:'🛍️ Shopify'}[s]||'📋 TRAKIO'; }
+        function getSource(s) { return {trakio:'📋 PRO',myfish:'🛒 MyFish',shopify:'🛍️ Shopify'}[s]||'📋 PRO'; }
         function getStatus(s) { return {pending:'🟡 Attente',confirmed:'🔵 Confirmée',ready:'🟣 Prête',delivered:'🟢 Livrée',cancelled:'🔴 Annulée'}[s]||'🟡 Attente'; }
-        function updateCounts() { document.getElementById('count-all').textContent = allOrders.length; document.getElementById('count-pending').textContent = allOrders.filter(o=>o.status==='pending').length; document.getElementById('count-confirmed').textContent = allOrders.filter(o=>o.status==='confirmed').length; document.getElementById('count-ready').textContent = allOrders.filter(o=>o.status==='ready').length; document.getElementById('count-delivered').textContent = allOrders.filter(o=>o.status==='delivered').length; }
-        function updateKPIs() { const today = new Date().toISOString().split('T')[0], tO = allOrders.filter(o=>{ const d = o.deliveryDate?.toDate ? o.deliveryDate.toDate() : new Date(o.deliveryDate); return d.toISOString().split('T')[0] === today; }), ca = tO.reduce((s,o)=>s+(o.total||0),0); document.getElementById('kpi-total').textContent = allOrders.length; document.getElementById('kpi-pending').textContent = allOrders.filter(o=>o.status==='pending').length; document.getElementById('kpi-today').textContent = tO.length; document.getElementById('kpi-ca').textContent = formatCHF(ca); }
         
-        function openNewOrderModal() { editingOrderId = null; orderArticles = []; lineCounter = 0; document.getElementById('modal-icon').textContent = '➕'; document.getElementById('modal-title-text').textContent = 'Nouvelle commande'; document.getElementById('order-form').reset(); document.getElementById('order-id').value = ''; document.getElementById('client-id').value = ''; document.getElementById('client-name').value = ''; document.getElementById('client-phone').value = ''; document.getElementById('delivery-date').value = new Date().toISOString().split('T')[0]; document.getElementById('btn-delete').style.display = 'none'; resetArticles(); updateTotals(); document.getElementById('order-modal').classList.add('active'); }
-        function editOrder(id) { const o = allOrders.find(x=>x.id===id); if(!o) return; editingOrderId = id; orderArticles = o.articles||[]; document.getElementById('modal-icon').textContent = '✏️'; document.getElementById('modal-title-text').textContent = `Commande #${o.orderNumber||id.slice(-6).toUpperCase()}`; document.getElementById('order-id').value = id; document.getElementById('client-id').value = o.clientId||''; document.getElementById('client-search').value = o.clientName||''; document.getElementById('client-name').value = o.clientName||''; document.getElementById('client-phone').value = o.clientPhone||''; const d = o.deliveryDate?.toDate ? o.deliveryDate.toDate() : new Date(o.deliveryDate); document.getElementById('delivery-date').value = d.toISOString().split('T')[0]; document.getElementById('delivery-time').value = o.deliveryTime||''; document.getElementById('order-type').value = o.type||'pickup'; document.getElementById('order-status').value = o.status||'pending'; document.getElementById('order-notes').value = o.notes||''; document.getElementById('btn-delete').style.display = 'block'; renderArticleLines(); updateTotals(); document.getElementById('order-modal').classList.add('active'); }
-        function closeModal() { document.getElementById('order-modal').classList.remove('active'); }
-        function selectClient(id) { const c = allClients.find(x=>x.id===id); if(!c) return; document.getElementById('client-id').value = id; document.getElementById('client-search').value = `${c.prenom||''} ${c.nom||''}`.trim(); document.getElementById('client-name').value = `${c.prenom||''} ${c.nom||''}`.trim(); document.getElementById('client-phone').value = c.telephone||''; document.getElementById('client-results').classList.remove('active'); }
+        function updateCounts() {
+            document.getElementById('count-all').textContent = allOrders.length;
+            document.getElementById('count-pending').textContent = allOrders.filter(o=>o.status==='pending').length;
+            document.getElementById('count-confirmed').textContent = allOrders.filter(o=>o.status==='confirmed').length;
+            document.getElementById('count-ready').textContent = allOrders.filter(o=>o.status==='ready').length;
+            document.getElementById('count-delivered').textContent = allOrders.filter(o=>o.status==='delivered').length;
+        }
         
-        function resetArticles() { document.getElementById('order-articles').innerHTML = '<div class="article-row header"><div>Article</div><div>Qté</div><div>Prix</div><div>Total</div><div></div></div>'; }
-        function renderArticleLines() { resetArticles(); const c = document.getElementById('order-articles'); lineCounter = 0; orderArticles.forEach(a => { lineCounter++; const l = `line-${lineCounter}`, r = document.createElement('div'); r.className = 'article-row'; r.id = l; r.innerHTML = `<select class="form-select" onchange="onArticleChange('${l}',this.value)"><option value="">Sélectionner...</option>${allArticles.filter(x=>x.actif!==false).map(x=>`<option value="${x.id}" ${x.id===a.articleId?'selected':''}>${x.nom||x.name}</option>`).join('')}</select><input type="number" class="form-input" value="${a.qty||1}" min="0.1" step="0.1" onchange="onQtyChange('${l}',this.value)" style="width:80px;text-align:center;"><input type="number" class="form-input" value="${a.price||0}" step="0.05" onchange="onPriceChange('${l}',this.value)" style="width:80px;text-align:right;"><div style="font-weight:600;">${((a.qty||1)*(a.price||0)).toFixed(2)}</div><button type="button" class="remove-btn" onclick="removeLine('${l}')">✕</button>`; c.appendChild(r); }); }
-        function addArticleLine() { lineCounter++; const l = `line-${lineCounter}`, c = document.getElementById('order-articles'), r = document.createElement('div'); r.className = 'article-row'; r.id = l; r.innerHTML = `<select class="form-select" onchange="onArticleChange('${l}',this.value)"><option value="">Sélectionner...</option>${allArticles.filter(x=>x.actif!==false).map(x=>`<option value="${x.id}">${x.nom||x.name}</option>`).join('')}</select><input type="number" class="form-input" value="1" min="0.1" step="0.1" onchange="onQtyChange('${l}',this.value)" style="width:80px;text-align:center;"><input type="number" class="form-input" value="0" step="0.05" onchange="onPriceChange('${l}',this.value)" style="width:80px;text-align:right;"><div style="font-weight:600;">0.00</div><button type="button" class="remove-btn" onclick="removeLine('${l}')">✕</button>`; c.appendChild(r); orderArticles.push({lineId:l,articleId:'',name:'',qty:1,price:0}); }
-        function onArticleChange(l,id) { const a = allArticles.find(x=>x.id===id), i = orderArticles.findIndex(x=>x.lineId===l); if(i>=0&&a) { orderArticles[i].articleId = id; orderArticles[i].name = a.nom||a.name; orderArticles[i].price = a.prixVente||0; const r = document.getElementById(l); r.querySelectorAll('input')[1].value = a.prixVente||0; r.querySelector('div:last-of-type').textContent = (orderArticles[i].qty*orderArticles[i].price).toFixed(2); } updateTotals(); }
-        function onQtyChange(l,v) { const i = orderArticles.findIndex(x=>x.lineId===l); if(i>=0) { orderArticles[i].qty = parseFloat(v)||0; document.getElementById(l).querySelector('div:last-of-type').textContent = (orderArticles[i].qty*orderArticles[i].price).toFixed(2); } updateTotals(); }
-        function onPriceChange(l,v) { const i = orderArticles.findIndex(x=>x.lineId===l); if(i>=0) { orderArticles[i].price = parseFloat(v)||0; document.getElementById(l).querySelector('div:last-of-type').textContent = (orderArticles[i].qty*orderArticles[i].price).toFixed(2); } updateTotals(); }
-        function removeLine(l) { document.getElementById(l)?.remove(); orderArticles = orderArticles.filter(x=>x.lineId!==l); updateTotals(); }
-        function updateTotals() { const s = orderArticles.reduce((a,x)=>a+(x.qty||0)*(x.price||0),0), t = s*(TRAKIO.TVA.ALIMENTAIRE/100), total = TRAKIO.swiss(s+t); document.getElementById('subtotal-ht').textContent = s.toFixed(2)+' CHF'; document.getElementById('total-tva').textContent = t.toFixed(2)+' CHF'; document.getElementById('total-ttc').textContent = total.toFixed(2)+' CHF'; }
+        function updateKPIs() {
+            const today = new Date().toISOString().split('T')[0];
+            const tO = allOrders.filter(o=>{ const d = o.deliveryDate?.toDate ? o.deliveryDate.toDate() : new Date(o.deliveryDate); return d.toISOString().split('T')[0] === today; });
+            const ca = tO.reduce((s,o)=>s+(o.total||0),0);
+            
+            document.getElementById('kpi-total').textContent = allOrders.length;
+            document.getElementById('kpi-pending').textContent = allOrders.filter(o=>o.status==='pending').length;
+            document.getElementById('kpi-today').textContent = tO.length;
+            document.getElementById('kpi-ca').textContent = formatCHF(ca);
+        }
         
-        async function saveOrder() { const cn = document.getElementById('client-name').value, dd = document.getElementById('delivery-date').value; if(!cn) { showNotification('Sélectionnez un client','error'); return; } if(!dd) { showNotification('Indiquez une date','error'); return; } if(!orderArticles.filter(a=>a.articleId).length) { showNotification('Ajoutez un article','error'); return; } const s = orderArticles.reduce((a,x)=>a+(x.qty||0)*(x.price||0),0), t = s*(TRAKIO.TVA.ALIMENTAIRE/100), total = TRAKIO.swiss(s+t), cl = allClients.find(c=>c.id===document.getElementById('client-id').value), data = { clientId: document.getElementById('client-id').value||null, clientName: cn, clientCompany: cl?.entreprise||'', clientPhone: document.getElementById('client-phone').value, deliveryDate: new Date(dd), deliveryTime: document.getElementById('delivery-time').value, type: document.getElementById('order-type').value, status: document.getElementById('order-status').value, source: 'trakio', articles: orderArticles.filter(a=>a.articleId).map(a=>({articleId:a.articleId,name:a.name,qty:a.qty,price:a.price})), subtotal:s, tva:t, total, notes: document.getElementById('order-notes').value }; try { if(editingOrderId) { await Commandes.save(editingOrderId, data); showNotification('Commande mise à jour','success'); } else { const n = allOrders.length+1, today = new Date(); data.orderNumber = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(n).padStart(4,'0')}`; await Commandes.save(null, data); showNotification('Commande créée','success'); } closeModal(); } catch(e) { console.error(e); showNotification('Erreur','error'); } }
-        async function deleteOrder() { if(!editingOrderId||!confirm('Supprimer cette commande ?')) return; try { await Commandes.delete(editingOrderId); showNotification('Commande supprimée','success'); closeModal(); } catch(e) { console.error(e); showNotification('Erreur','error'); } }
-        function exportOrders() { showNotification('Export en cours...','info'); }
+        // ============================================
+        // WIZARD
+        // ============================================
+        function openWizard() {
+            wizardStep = 1;
+            selectedClient = null;
+            cart = {};
+            
+            document.getElementById('wizard-client-search').value = '';
+            document.getElementById('wizard-client-results').innerHTML = '';
+            document.getElementById('wiz-delivery-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('wiz-delivery-time').value = '';
+            document.getElementById('wiz-notes').value = '';
+            
+            updateWizardUI();
+            document.getElementById('wizard-modal').classList.add('active');
+            
+            setTimeout(() => document.getElementById('wizard-client-search').focus(), 100);
+        }
+        
+        function closeWizard() {
+            document.getElementById('wizard-modal').classList.remove('active');
+        }
+        
+        function updateWizardUI() {
+            // Update steps
+            document.querySelectorAll('.wizard-step').forEach(s => {
+                const step = parseInt(s.dataset.step);
+                s.classList.remove('active', 'completed');
+                if (step === wizardStep) s.classList.add('active');
+                else if (step < wizardStep) s.classList.add('completed');
+            });
+            
+            // Update panels
+            document.querySelectorAll('.wizard-panel').forEach((p, i) => {
+                p.classList.toggle('active', i + 1 === wizardStep);
+            });
+            
+            // Update buttons
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            
+            btnPrev.style.visibility = wizardStep === 1 ? 'hidden' : 'visible';
+            
+            if (wizardStep === 5) {
+                btnNext.innerHTML = '✅ Valider la commande';
+                btnNext.className = 'btn btn-success';
+            } else {
+                btnNext.innerHTML = 'Suivant →';
+                btnNext.className = 'btn btn-primary';
+            }
+            
+            // Check if can proceed
+            btnNext.disabled = !canProceed();
+            
+            // Load step-specific content
+            if (wizardStep === 2 && selectedClient) loadClientConfirmation();
+            if (wizardStep === 3) loadArticlesGrid();
+            if (wizardStep === 5) loadRecap();
+        }
+        
+        function canProceed() {
+            if (wizardStep === 1) return selectedClient !== null;
+            if (wizardStep === 2) return selectedClient !== null;
+            if (wizardStep === 3) return Object.keys(cart).length > 0;
+            if (wizardStep === 4) return document.getElementById('wiz-delivery-date').value !== '';
+            return true;
+        }
+        
+        function nextStep() {
+            if (wizardStep === 5) {
+                saveWizardOrder();
+                return;
+            }
+            if (canProceed() && wizardStep < 5) {
+                wizardStep++;
+                updateWizardUI();
+            }
+        }
+        
+        function prevStep() {
+            if (wizardStep > 1) {
+                wizardStep--;
+                updateWizardUI();
+            }
+        }
+        
+        // Search clients
+        function searchClients() {
+            const q = document.getElementById('wizard-client-search').value.toLowerCase();
+            const container = document.getElementById('wizard-client-results');
+            
+            if (q.length < 2) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            const matches = allClients.filter(c => 
+                (c.nom?.toLowerCase().includes(q)) ||
+                (c.prenom?.toLowerCase().includes(q)) ||
+                (c.entreprise?.toLowerCase().includes(q)) ||
+                (c.telephone?.includes(q))
+            ).slice(0, 6);
+            
+            if (!matches.length) {
+                container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);">Aucun client trouvé</div>';
+                return;
+            }
+            
+            container.innerHTML = matches.map(c => {
+                const initial = (c.entreprise || c.nom || '?').charAt(0).toUpperCase();
+                const isSelected = selectedClient?.id === c.id;
+                return `<div class="client-result-item ${isSelected ? 'selected' : ''}" onclick="selectWizardClient('${c.id}')">
+                    <div class="result-avatar">${initial}</div>
+                    <div class="result-info">
+                        <div class="result-name">${c.prenom || ''} ${c.nom || ''}</div>
+                        <div class="result-company">${c.entreprise || 'Particulier'}</div>
+                        <div class="result-details">📞 ${c.telephone || '-'} • 📍 ${c.ville || '-'}</div>
+                    </div>
+                    <div class="result-select">${isSelected ? '✓' : '→'}</div>
+                </div>`;
+            }).join('');
+        }
+        
+        function selectWizardClient(id) {
+            selectedClient = allClients.find(c => c.id === id);
+            searchClients(); // Refresh to show selection
+            updateWizardUI();
+        }
+        
+        function loadClientConfirmation() {
+            if (!selectedClient) return;
+            const c = selectedClient;
+            const initial = (c.entreprise || c.nom || '?').charAt(0).toUpperCase();
+            
+            document.getElementById('confirmed-avatar').textContent = initial;
+            document.getElementById('confirmed-name').textContent = `${c.prenom || ''} ${c.nom || ''}`.trim() || 'Sans nom';
+            document.getElementById('confirmed-company').textContent = c.entreprise || 'Particulier';
+            document.getElementById('confirmed-details').innerHTML = `
+                📞 ${c.telephone || '-'}<br>
+                📧 ${c.email || '-'}<br>
+                📍 ${c.adresse || ''} ${c.npa || ''} ${c.ville || ''}
+            `;
+        }
+        
+        function loadArticlesGrid() {
+            const grid = document.getElementById('articles-grid');
+            const articles = allArticles.filter(a => a.actif !== false);
+            
+            grid.innerHTML = articles.map(a => {
+                const qty = cart[a.id]?.qty || 0;
+                const icon = getCategoryIcon(a.categorie);
+                return `<div class="article-item ${qty > 0 ? 'selected' : ''}" id="art-${a.id}">
+                    <div class="article-icon">${icon}</div>
+                    <div class="article-info">
+                        <div class="article-name">${a.nom || a.name}</div>
+                        <div class="article-price">${formatCHF(a.prixVente || 0)}/kg</div>
+                    </div>
+                    <div class="article-qty">
+                        <button class="qty-btn" onclick="event.stopPropagation();updateCart('${a.id}',-1)">−</button>
+                        <input type="number" class="qty-input" value="${qty}" min="0" step="0.1" onchange="setCart('${a.id}',this.value)" onclick="event.stopPropagation()">
+                        <button class="qty-btn" onclick="event.stopPropagation();updateCart('${a.id}',1)">+</button>
+                    </div>
+                </div>`;
+            }).join('');
+            
+            updateCartSummary();
+        }
+        
+        function getCategoryIcon(cat) {
+            const icons = { poissons: '🐟', crustaces: '🦐', coquillages: '🦪', fumes: '🔥', prepares: '🍽️', epices: '🧂' };
+            return icons[cat?.toLowerCase()] || '🐟';
+        }
+        
+        function updateCart(id, delta) {
+            const article = allArticles.find(a => a.id === id);
+            if (!article) return;
+            
+            if (!cart[id]) cart[id] = { article, qty: 0 };
+            cart[id].qty = Math.max(0, cart[id].qty + delta);
+            
+            if (cart[id].qty === 0) delete cart[id];
+            
+            loadArticlesGrid();
+            updateWizardUI();
+        }
+        
+        function setCart(id, val) {
+            const article = allArticles.find(a => a.id === id);
+            if (!article) return;
+            
+            const qty = parseFloat(val) || 0;
+            if (qty > 0) {
+                cart[id] = { article, qty };
+            } else {
+                delete cart[id];
+            }
+            
+            loadArticlesGrid();
+            updateWizardUI();
+        }
+        
+        function updateCartSummary() {
+            const items = Object.values(cart);
+            const count = items.length;
+            const total = items.reduce((s, i) => s + (i.qty * (i.article.prixVente || 0)), 0);
+            
+            document.getElementById('cart-items').textContent = count;
+            document.getElementById('cart-total').textContent = formatCHF(total);
+        }
+        
+        function loadRecap() {
+            if (!selectedClient) return;
+            
+            document.getElementById('recap-client-name').textContent = `${selectedClient.prenom || ''} ${selectedClient.nom || ''} - ${selectedClient.entreprise || 'Particulier'}`;
+            document.getElementById('recap-client-phone').textContent = selectedClient.telephone || '-';
+            
+            const items = Object.values(cart);
+            document.getElementById('recap-articles').innerHTML = items.map(i => `
+                <div class="recap-row">
+                    <span>${i.article.nom || i.article.name} × ${i.qty}</span>
+                    <span>${formatCHF(i.qty * (i.article.prixVente || 0))}</span>
+                </div>
+            `).join('');
+            
+            const subtotal = items.reduce((s, i) => s + (i.qty * (i.article.prixVente || 0)), 0);
+            const tva = subtotal * 0.026;
+            const total = TRAKIO.swiss(subtotal + tva);
+            
+            document.getElementById('recap-delivery-date').textContent = document.getElementById('wiz-delivery-date').value;
+            const type = document.getElementById('wiz-order-type').value;
+            document.getElementById('recap-delivery-type').textContent = { pickup: '🏪 Retrait', delivery: '🚚 Livraison', market: '🎪 Marché' }[type];
+            
+            document.getElementById('recap-total').textContent = formatCHF(total);
+        }
+        
+        async function saveWizardOrder() {
+            if (!selectedClient || Object.keys(cart).length === 0) return;
+            
+            const items = Object.values(cart);
+            const subtotal = items.reduce((s, i) => s + (i.qty * (i.article.prixVente || 0)), 0);
+            const tva = subtotal * 0.026;
+            const total = TRAKIO.swiss(subtotal + tva);
+            
+            const count = allOrders.length + 1;
+            const today = new Date();
+            const orderNumber = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(count).padStart(4,'0')}`;
+            
+            const data = {
+                orderNumber,
+                clientId: selectedClient.id,
+                clientName: `${selectedClient.prenom || ''} ${selectedClient.nom || ''}`.trim(),
+                clientCompany: selectedClient.entreprise || '',
+                clientPhone: selectedClient.telephone || '',
+                deliveryDate: new Date(document.getElementById('wiz-delivery-date').value),
+                deliveryTime: document.getElementById('wiz-delivery-time').value,
+                type: document.getElementById('wiz-order-type').value,
+                status: document.getElementById('wiz-order-status').value,
+                source: 'trakio',
+                articles: items.map(i => ({
+                    articleId: i.article.id,
+                    name: i.article.nom || i.article.name,
+                    qty: i.qty,
+                    price: i.article.prixVente || 0
+                })),
+                subtotal, tva, total,
+                notes: document.getElementById('wiz-notes').value
+            };
+            
+            try {
+                await Commandes.save(null, data);
+                showNotification('✅ Commande créée !', 'success');
+                closeWizard();
+            } catch(e) {
+                console.error(e);
+                showNotification('Erreur', 'error');
+            }
+        }
+        
+        function editOrder(id) {
+            showNotification('Édition à venir...', 'info');
+        }
+        
+        function exportOrders() {
+            showNotification('Export en cours...', 'info');
+        }
     </script>
 </body>
 </html>
