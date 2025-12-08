@@ -1,265 +1,265 @@
 /**
  * TRAKIO UI v4.5.0
- * Interface unifiée - Header, navigation, thème, user switcher
+ * Header unifié + Navigation + Toasts + User Switcher
  */
 
 const TrakioUI = {
-    VERSION: '4.5.0',
-    currentModule: null,
-    theme: 'dark',
     currentUser: null,
-    firebaseStatus: 'connecting',
-
-    init() {
-        this.detectCurrentModule();
-        this.loadTheme();
-        this.loadUser();
-        this.injectStyles();
+    currentModule: '',
+    
+    // ==================== INIT ====================
+    init(moduleId = 'dashboard') {
+        this.currentModule = moduleId;
+        this.currentUser = TrakioUsers.getCurrentUser();
         this.injectHeader();
-        this.checkPermissions();
+        this.applyTheme();
+        this.updateConnectionStatus();
         
-        // Écouter les changements de connexion
-        window.addEventListener('online', () => this.setFirebaseStatus('connected'));
-        window.addEventListener('offline', () => this.setFirebaseStatus('offline'));
+        // Check connection every 30s
+        setInterval(() => this.updateConnectionStatus(), 30000);
+        
+        console.log('🎨 TrakioUI initialized for:', moduleId);
     },
-
-    detectCurrentModule() {
-        const path = window.location.pathname;
-        const filename = path.split('/').pop().replace('.html', '') || 'index';
-        const moduleMap = {
-            'index': 'dashboard',
-            'articles': 'articles',
-            'clients': 'clients',
-            'commandes': 'commandes',
-            'myfish': 'myfish',
-            'caisse': 'caisse',
-            'tracabilite': 'tracabilite',
-            'compta': 'compta',
-            'shopify': 'shopify',
-            'parametres': 'parametres',
-            'cloud': 'cloud',
-            'live': 'live',
-            'whatsapp': 'whatsapp'
+    
+    // ==================== HEADER ====================
+    injectHeader() {
+        const header = document.createElement('header');
+        header.className = 'trakio-header';
+        header.innerHTML = this.buildHeaderHTML();
+        
+        document.body.insertBefore(header, document.body.firstChild);
+        
+        // Add header styles
+        this.injectStyles();
+    },
+    
+    buildHeaderHTML() {
+        const user = this.currentUser || { name: 'User', role: 'viewer' };
+        const initial = (user.name || 'U')[0].toUpperCase();
+        const roleColors = {
+            admin: '#ef4444',
+            manager: '#f59e0b',
+            vendeur: '#10b981',
+            viewer: '#6b7280'
         };
-        this.currentModule = moduleMap[filename] || 'dashboard';
-    },
-
-    checkPermissions() {
-        if (this.currentModule === 'parametres') return; // Toujours accessible
-        if (!TrakioPermissions.canAccess(this.currentModule)) {
-            this.showAccessDenied();
-        }
-    },
-
-    showAccessDenied() {
-        document.body.innerHTML = `
-            <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;background:var(--trakio-bg);color:var(--trakio-text);">
-                <div style="font-size:80px;margin-bottom:20px;">🔒</div>
-                <h1 style="margin-bottom:10px;">Accès refusé</h1>
-                <p style="color:var(--trakio-text-muted);margin-bottom:30px;">Vous n'avez pas accès à ce module.</p>
-                <a href="index.html" style="padding:12px 30px;background:var(--trakio-primary);color:white;border-radius:10px;text-decoration:none;font-weight:600;">← Retour au dashboard</a>
+        const avatarColor = roleColors[user.role] || '#6b7280';
+        
+        return `
+            <div class="header-left">
+                <a href="index.html" class="header-logo">
+                    <span class="logo-icon">🐟</span>
+                    <span class="logo-text">TRAKIO</span>
+                    <span class="logo-version">v4.5</span>
+                </a>
+                <nav class="header-nav">
+                    ${this.buildNavItems()}
+                </nav>
+            </div>
+            <div class="header-right">
+                <button class="header-btn theme-toggle" onclick="TrakioUI.toggleTheme()" title="Changer thème">
+                    <span class="theme-icon">☀️</span>
+                </button>
+                <div class="connection-status" id="connection-status" title="Statut connexion">
+                    <span class="status-dot"></span>
+                </div>
+                <button class="header-user" onclick="TrakioUI.openUserSwitcher()">
+                    <div class="user-avatar" style="background:${avatarColor}">${initial}</div>
+                    <span class="user-name">${user.name}</span>
+                </button>
+            </div>
+            
+            <!-- User Switcher Modal -->
+            <div class="user-switcher-overlay" id="user-switcher">
+                <div class="user-switcher-modal">
+                    <div class="user-switcher-header">
+                        <span>👥 Changer d'utilisateur</span>
+                        <button class="user-switcher-close" onclick="TrakioUI.closeUserSwitcher()">×</button>
+                    </div>
+                    <div class="user-switcher-list">
+                        ${this.buildUsersList()}
+                    </div>
+                </div>
             </div>
         `;
     },
-
-    loadTheme() {
-        this.theme = localStorage.getItem('trakio_theme') || 'dark';
-        this.applyTheme();
-    },
-
-    applyTheme() {
-        document.documentElement.setAttribute('data-theme', this.theme);
-        const btn = document.getElementById('theme-toggle');
-        if (btn) btn.textContent = this.theme === 'dark' ? '☀️' : '🌙';
-    },
-
-    toggleTheme() {
-        this.theme = this.theme === 'dark' ? 'light' : 'dark';
-        localStorage.setItem('trakio_theme', this.theme);
-        this.applyTheme();
-        this.showToast(this.theme === 'dark' ? '🌙 Mode sombre' : '☀️ Mode clair', 'info');
-    },
-
-    loadUser() {
-        this.currentUser = TrakioUsers.getCurrentUser();
-        if (!this.currentUser) {
-            TrakioUsers.init();
-            this.currentUser = TrakioUsers.getCurrentUser();
-        }
-    },
-
-    updateUserDisplay() {
-        const nameEl = document.getElementById('user-name-display');
-        const avatarEl = document.getElementById('user-avatar');
-        if (nameEl && this.currentUser) {
-            nameEl.textContent = this.currentUser.name;
-        }
-        if (avatarEl && this.currentUser) {
-            const roleColors = { admin: '#ef4444', manager: '#f59e0b', vendeur: '#10b981', viewer: '#6b7280' };
-            avatarEl.style.background = roleColors[this.currentUser.role] || '#6b7280';
-            avatarEl.textContent = (this.currentUser.name || 'U')[0].toUpperCase();
-        }
-    },
-
-    setFirebaseStatus(status) {
-        this.firebaseStatus = status;
-        const dot = document.getElementById('firebase-dot');
-        const text = document.getElementById('firebase-text');
-        if (!dot || !text) return;
-
-        const states = {
-            connected: { color: '#10b981', text: 'Connecté', pulse: false },
-            connecting: { color: '#f59e0b', text: 'Connexion...', pulse: true },
-            syncing: { color: '#f59e0b', text: 'Sync...', pulse: true },
-            offline: { color: '#ef4444', text: 'Hors ligne', pulse: false },
-            error: { color: '#ef4444', text: 'Erreur', pulse: false }
-        };
-
-        const state = states[status] || states.offline;
-        dot.style.background = state.color;
-        dot.style.animation = state.pulse ? 'pulse 1.5s infinite' : 'none';
-        text.textContent = state.text;
-    },
-
-    showToast(message, type = 'info') {
-        const existing = document.querySelector('.trakio-toast');
-        if (existing) existing.remove();
-
-        const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-        const toast = document.createElement('div');
-        toast.className = 'trakio-toast';
-        toast.innerHTML = `<span>${icons[type] || ''}</span> ${message}`;
-        toast.style.cssText = `
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: var(--trakio-bg-card); border: 1px solid var(--trakio-border);
-            padding: 14px 24px; border-radius: 12px; z-index: 99999;
-            animation: slideUp 0.3s ease; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            display: flex; align-items: center; gap: 10px; font-weight: 500;
-        `;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    },
-
-    getMenuItems() {
-        const allItems = [
+    
+    buildNavItems() {
+        const modules = [
             { id: 'dashboard', name: 'Dashboard', icon: '📊', url: 'index.html' },
             { id: 'articles', name: 'Articles', icon: '📦', url: 'articles.html' },
             { id: 'clients', name: 'Clients', icon: '👥', url: 'clients.html' },
             { id: 'commandes', name: 'Commandes', icon: '📋', url: 'commandes.html' },
             { id: 'myfish', name: 'MyFish', icon: '🛒', url: 'myfish.html' },
             { id: 'caisse', name: 'Caisse', icon: '💵', url: 'caisse.html' },
-            { id: 'separator', name: '', icon: '', url: '' },
             { id: 'tracabilite', name: 'Traçabilité', icon: '🏷️', url: 'tracabilite.html' },
             { id: 'compta', name: 'Compta', icon: '📒', url: 'compta.html' },
             { id: 'shopify', name: 'Shop', icon: '🛍️', url: 'shopify.html' },
-            { id: 'live', name: 'Cours', icon: '📈', url: 'live.html' },
-            { id: 'whatsapp', name: 'WhatsApp', icon: '💬', url: 'whatsapp.html' },
-            { id: 'cloud', name: 'Cloud', icon: '☁️', url: 'cloud.html' }
+            { id: 'parametres', name: 'Paramètres', icon: '⚙️', url: 'parametres.html', adminOnly: true }
         ];
-
-        const myModules = TrakioPermissions.getMyModules();
-        return allItems.filter(item => 
-            item.id === 'separator' || myModules.includes(item.id)
-        );
+        
+        const accessibleModules = TrakioPermissions.getMyModules();
+        const isAdmin = TrakioPermissions.isAdmin();
+        
+        return modules
+            .filter(m => {
+                // Admin-only modules
+                if (m.adminOnly && !isAdmin) return false;
+                // Check module access
+                if (m.adminOnly) return true; // Admin can always see admin modules
+                return accessibleModules.includes(m.id);
+            })
+            .map(m => `
+                <a href="${m.url}" class="nav-item ${this.currentModule === m.id ? 'active' : ''}" data-module="${m.id}">
+                    <span class="nav-icon">${m.icon}</span>
+                    <span class="nav-label">${m.name}</span>
+                </a>
+            `).join('');
     },
-
-    // ==================== USER SWITCHER ====================
-    showUserSwitcher() {
-        // Fermer si déjà ouvert
-        const existing = document.getElementById('user-switcher-modal');
-        if (existing) { existing.remove(); return; }
-
+    
+    buildUsersList() {
         const users = TrakioUsers.getAll().filter(u => u.active !== false);
         const currentId = this.currentUser?.id;
-
-        const roleLabels = { admin: 'Admin', manager: 'Manager', vendeur: 'Vendeur', viewer: 'Viewer' };
-        const roleColors = { admin: '#ef4444', manager: '#f59e0b', vendeur: '#10b981', viewer: '#6b7280' };
-
-        const modal = document.createElement('div');
-        modal.id = 'user-switcher-modal';
-        modal.className = 'user-switcher-overlay';
-        modal.innerHTML = `
-            <div class="user-switcher-modal">
-                <div class="user-switcher-header">
-                    <span>👥 Changer d'utilisateur</span>
-                    <button class="user-switcher-close" onclick="TrakioUI.closeUserSwitcher()">×</button>
-                </div>
-                <div class="user-switcher-list">
-                    ${users.map(u => `
-                        <div class="user-switcher-item ${u.id === currentId ? 'active' : ''}" 
-                             onclick="TrakioUI.switchUser('${u.id}')"
-                             data-userid="${u.id}">
-                            <div class="user-switcher-avatar" style="background:${roleColors[u.role] || '#6b7280'}">
-                                ${(u.name || 'U')[0].toUpperCase()}
-                            </div>
-                            <div class="user-switcher-info">
-                                <div class="user-switcher-name">${u.name}</div>
-                                <div class="user-switcher-role">${roleLabels[u.role] || u.role}</div>
-                            </div>
-                            ${u.id === currentId ? '<span class="user-switcher-check">✓</span>' : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        // Fermer en cliquant à l'extérieur
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) this.closeUserSwitcher();
-        });
-
-        // Fermer avec Escape
-        const escHandler = (e) => {
-            if (e.key === 'Escape') {
-                this.closeUserSwitcher();
-                document.removeEventListener('keydown', escHandler);
-            }
+        
+        const roleLabels = {
+            admin: 'Admin',
+            manager: 'Manager', 
+            vendeur: 'Vendeur',
+            viewer: 'Viewer'
         };
-        document.addEventListener('keydown', escHandler);
-
-        // Animation d'entrée
-        requestAnimationFrame(() => modal.classList.add('active'));
+        
+        const roleColors = {
+            admin: '#ef4444',
+            manager: '#f59e0b',
+            vendeur: '#10b981',
+            viewer: '#6b7280'
+        };
+        
+        return users.map(u => `
+            <div class="user-switcher-item ${u.id === currentId ? 'active' : ''}" onclick="TrakioUI.switchUser('${u.id}')">
+                <div class="user-avatar" style="background:${roleColors[u.role] || '#6b7280'}">
+                    ${(u.name || 'U')[0].toUpperCase()}
+                </div>
+                <div class="user-info">
+                    <div class="user-name">${u.name}</div>
+                    <div class="user-role">${roleLabels[u.role] || u.role}</div>
+                </div>
+                ${u.id === currentId ? '<span class="user-check">✓</span>' : ''}
+            </div>
+        `).join('');
     },
-
+    
+    // ==================== USER SWITCHER ====================
+    openUserSwitcher() {
+        // Refresh users list
+        document.querySelector('.user-switcher-list').innerHTML = this.buildUsersList();
+        document.getElementById('user-switcher').classList.add('active');
+    },
+    
     closeUserSwitcher() {
-        const modal = document.getElementById('user-switcher-modal');
-        if (modal) {
-            modal.classList.remove('active');
-            setTimeout(() => modal.remove(), 200);
-        }
+        document.getElementById('user-switcher').classList.remove('active');
     },
-
+    
     switchUser(userId) {
         console.log('Switching to user:', userId);
         
-        // Mettre à jour l'utilisateur courant
+        // Update current user
         TrakioUsers.setCurrentUser(userId);
         
-        // Recharger l'utilisateur localement
+        // Reload user locally
         this.currentUser = TrakioUsers.getCurrentUser();
         
-        // Fermer le modal
+        // Close modal
         this.closeUserSwitcher();
         
-        // Afficher confirmation
+        // Show confirmation
         this.showToast(`✅ Connecté en tant que ${this.currentUser?.name || 'Utilisateur'}`, 'success');
         
-        // Recharger la page après un court délai pour appliquer les permissions
+        // Reload page after 500ms to apply permissions
         setTimeout(() => {
             window.location.reload();
         }, 500);
     },
-
+    
+    // ==================== THEME ====================
+    applyTheme() {
+        const theme = localStorage.getItem('trakio_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+        
+        const icon = document.querySelector('.theme-icon');
+        if (icon) {
+            icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+    },
+    
+    toggleTheme() {
+        const current = localStorage.getItem('trakio_theme') || 'dark';
+        const newTheme = current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('trakio_theme', newTheme);
+        this.applyTheme();
+        this.showToast(newTheme === 'dark' ? '🌙 Mode sombre' : '☀️ Mode clair', 'info');
+    },
+    
+    // ==================== CONNECTION STATUS ====================
+    updateConnectionStatus() {
+        const statusEl = document.getElementById('connection-status');
+        if (!statusEl) return;
+        
+        const dot = statusEl.querySelector('.status-dot');
+        
+        if (navigator.onLine && typeof firebase !== 'undefined' && firebase.apps?.length) {
+            dot.className = 'status-dot online';
+            statusEl.title = 'Connecté à Firebase';
+        } else if (navigator.onLine) {
+            dot.className = 'status-dot connecting';
+            statusEl.title = 'Connexion en cours...';
+        } else {
+            dot.className = 'status-dot offline';
+            statusEl.title = 'Hors ligne';
+        }
+    },
+    
+    // ==================== TOASTS ====================
+    showToast(message, type = 'info', duration = 3000) {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <span class="toast-message">${message}</span>
+            <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+        `;
+        
+        container.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        // Auto remove
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    },
+    
     // ==================== STYLES ====================
     injectStyles() {
         if (document.getElementById('trakio-ui-styles')) return;
-
-        const style = document.createElement('style');
-        style.id = 'trakio-ui-styles';
-        style.textContent = `
-            :root, [data-theme="dark"] {
+        
+        const styles = document.createElement('style');
+        styles.id = 'trakio-ui-styles';
+        styles.textContent = `
+            :root {
+                --trakio-primary: #0ea5e9;
+                --trakio-primary-dark: #0284c7;
+                --trakio-success: #10b981;
+                --trakio-warning: #f59e0b;
+                --trakio-error: #ef4444;
                 --trakio-bg: #0f172a;
                 --trakio-bg-card: #1e293b;
                 --trakio-bg-input: #334155;
@@ -267,227 +267,368 @@ const TrakioUI = {
                 --trakio-text: #f1f5f9;
                 --trakio-text-muted: #94a3b8;
                 --trakio-border: #334155;
-                --trakio-primary: #0ea5e9;
-                --trakio-success: #10b981;
-                --trakio-warning: #f59e0b;
-                --trakio-error: #ef4444;
             }
+            
             [data-theme="light"] {
                 --trakio-bg: #f1f5f9;
                 --trakio-bg-card: #ffffff;
                 --trakio-bg-input: #e2e8f0;
                 --trakio-bg-hover: #cbd5e1;
-                --trakio-text: #1e293b;
+                --trakio-text: #0f172a;
                 --trakio-text-muted: #64748b;
                 --trakio-border: #cbd5e1;
             }
+            
             * { box-sizing: border-box; margin: 0; padding: 0; }
+            
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 background: var(--trakio-bg);
                 color: var(--trakio-text);
-                padding-top: 65px;
                 min-height: 100vh;
+                padding-top: 60px;
             }
-
+            
             /* Header */
             .trakio-header {
-                position: fixed; top: 0; left: 0; right: 0; height: 65px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 60px;
                 background: var(--trakio-bg-card);
                 border-bottom: 1px solid var(--trakio-border);
-                display: flex; align-items: center;
-                padding: 0 20px; gap: 20px; z-index: 9000;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 20px;
+                z-index: 1000;
             }
-            .trakio-brand {
-                display: flex; align-items: center; gap: 10px;
-                font-weight: 700; font-size: 18px; color: var(--trakio-text);
-                text-decoration: none; flex-shrink: 0;
+            
+            .header-left {
+                display: flex;
+                align-items: center;
+                gap: 20px;
             }
-            .trakio-brand-icon { font-size: 28px; }
-            .trakio-version {
-                font-size: 10px; background: var(--trakio-primary);
-                padding: 2px 6px; border-radius: 4px; color: white;
+            
+            .header-logo {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                text-decoration: none;
+                color: var(--trakio-text);
             }
-
+            
+            .logo-icon { font-size: 24px; }
+            .logo-text { font-weight: 700; font-size: 18px; }
+            .logo-version {
+                font-size: 10px;
+                background: var(--trakio-primary);
+                color: white;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-weight: 600;
+            }
+            
             /* Navigation */
-            .trakio-nav {
-                display: flex; gap: 5px; overflow-x: auto; flex: 1;
-                scrollbar-width: none; -ms-overflow-style: none;
+            .header-nav {
+                display: flex;
+                align-items: center;
+                gap: 4px;
             }
-            .trakio-nav::-webkit-scrollbar { display: none; }
-            .trakio-nav-item {
-                padding: 10px 16px; border-radius: 8px;
+            
+            .nav-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 8px 12px;
+                border-radius: 8px;
+                text-decoration: none;
                 color: var(--trakio-text-muted);
-                text-decoration: none; font-size: 13px; font-weight: 500;
-                white-space: nowrap; transition: all 0.2s;
-                display: flex; align-items: center; gap: 6px;
+                font-size: 13px;
+                font-weight: 500;
+                transition: all 0.2s;
             }
-            .trakio-nav-item:hover { background: var(--trakio-bg-input); color: var(--trakio-text); }
-            .trakio-nav-item.active { background: var(--trakio-primary); color: white; }
-            .trakio-nav-separator { width: 1px; background: var(--trakio-border); margin: 5px 8px; }
-
-            /* Right section */
-            .trakio-header-right {
-                display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+            
+            .nav-item:hover {
+                background: var(--trakio-bg-input);
+                color: var(--trakio-text);
             }
-            .trakio-status {
-                display: flex; align-items: center; gap: 8px;
-                padding: 6px 12px; background: var(--trakio-bg-input);
-                border-radius: 20px; font-size: 12px;
+            
+            .nav-item.active {
+                background: var(--trakio-primary);
+                color: white;
             }
-            #firebase-dot {
-                width: 8px; height: 8px; border-radius: 50%;
-                background: #f59e0b;
+            
+            .nav-icon { font-size: 14px; }
+            
+            /* Header Right */
+            .header-right {
+                display: flex;
+                align-items: center;
+                gap: 12px;
             }
-            .trakio-theme-btn, .trakio-user-btn {
-                background: var(--trakio-bg-input); border: none;
-                border-radius: 10px; cursor: pointer;
-                color: var(--trakio-text); transition: all 0.2s;
+            
+            .header-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                border: none;
+                background: var(--trakio-bg-input);
+                color: var(--trakio-text);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                transition: all 0.2s;
             }
-            .trakio-theme-btn { width: 40px; height: 40px; font-size: 18px; }
-            .trakio-theme-btn:hover { background: var(--trakio-bg-hover); }
-            .trakio-user-btn {
-                display: flex; align-items: center; gap: 10px;
-                padding: 6px 12px 6px 6px;
+            
+            .header-btn:hover {
+                background: var(--trakio-bg-hover);
             }
-            .trakio-user-btn:hover { background: var(--trakio-bg-hover); }
-            .trakio-user-avatar {
-                width: 32px; height: 32px; border-radius: 8px;
-                display: flex; align-items: center; justify-content: center;
-                color: white; font-weight: 700; font-size: 14px;
+            
+            /* Connection Status */
+            .connection-status {
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                background: var(--trakio-bg-input);
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
-            .trakio-user-name { font-size: 13px; font-weight: 500; }
-
-            /* User Switcher Modal */
-            .user-switcher-overlay {
-                position: fixed; inset: 0;
-                background: rgba(0,0,0,0.7);
-                backdrop-filter: blur(4px);
-                display: flex; align-items: center; justify-content: center;
-                z-index: 99998; opacity: 0;
-                transition: opacity 0.2s;
+            
+            .status-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: var(--trakio-text-muted);
             }
-            .user-switcher-overlay.active { opacity: 1; }
-            .user-switcher-modal {
-                background: var(--trakio-bg-card);
-                border: 1px solid var(--trakio-border);
-                border-radius: 20px; width: 100%; max-width: 400px;
-                max-height: 80vh; overflow: hidden;
-                transform: scale(0.9); transition: transform 0.2s;
-            }
-            .user-switcher-overlay.active .user-switcher-modal { transform: scale(1); }
-            .user-switcher-header {
-                padding: 20px; border-bottom: 1px solid var(--trakio-border);
-                display: flex; justify-content: space-between; align-items: center;
-                font-weight: 600; font-size: 16px;
-            }
-            .user-switcher-close {
-                width: 36px; height: 36px; border-radius: 50%;
-                background: var(--trakio-bg-input); border: none;
-                color: var(--trakio-text); cursor: pointer; font-size: 20px;
-            }
-            .user-switcher-close:hover { background: var(--trakio-bg-hover); }
-            .user-switcher-list { padding: 10px; max-height: 400px; overflow-y: auto; }
-            .user-switcher-item {
-                display: flex; align-items: center; gap: 15px;
-                padding: 14px 16px; border-radius: 12px;
-                cursor: pointer; transition: all 0.2s; margin-bottom: 6px;
-            }
-            .user-switcher-item:hover { background: var(--trakio-bg-input); }
-            .user-switcher-item.active {
-                background: rgba(14, 165, 233, 0.15);
-                border: 2px solid var(--trakio-primary);
-            }
-            .user-switcher-avatar {
-                width: 45px; height: 45px; border-radius: 12px;
-                display: flex; align-items: center; justify-content: center;
-                color: white; font-weight: 700; font-size: 18px;
-            }
-            .user-switcher-info { flex: 1; }
-            .user-switcher-name { font-weight: 600; font-size: 15px; }
-            .user-switcher-role { font-size: 12px; color: var(--trakio-text-muted); margin-top: 2px; }
-            .user-switcher-check { color: var(--trakio-primary); font-size: 20px; }
-
-            /* Animations */
-            @keyframes slideUp {
-                from { opacity: 0; transform: translate(-50%, 20px); }
-                to { opacity: 1; transform: translate(-50%, 0); }
-            }
+            
+            .status-dot.online { background: var(--trakio-success); }
+            .status-dot.connecting { background: var(--trakio-warning); animation: pulse 1.5s infinite; }
+            .status-dot.offline { background: var(--trakio-error); }
+            
             @keyframes pulse {
                 0%, 100% { opacity: 1; }
                 50% { opacity: 0.5; }
             }
-
+            
+            /* User Button */
+            .header-user {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 6px 12px 6px 6px;
+                background: var(--trakio-bg-input);
+                border: none;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            
+            .header-user:hover {
+                background: var(--trakio-bg-hover);
+            }
+            
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: 700;
+                font-size: 14px;
+            }
+            
+            .header-user .user-name {
+                color: var(--trakio-text);
+                font-weight: 500;
+                font-size: 14px;
+            }
+            
+            /* User Switcher Modal */
+            .user-switcher-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.7);
+                backdrop-filter: blur(4px);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            }
+            
+            .user-switcher-overlay.active {
+                display: flex;
+            }
+            
+            .user-switcher-modal {
+                background: var(--trakio-bg-card);
+                border-radius: 20px;
+                border: 1px solid var(--trakio-border);
+                width: 90%;
+                max-width: 400px;
+                overflow: hidden;
+            }
+            
+            .user-switcher-header {
+                padding: 20px;
+                border-bottom: 1px solid var(--trakio-border);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-weight: 600;
+                font-size: 16px;
+            }
+            
+            .user-switcher-close {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                border: none;
+                background: var(--trakio-bg-input);
+                color: var(--trakio-text);
+                cursor: pointer;
+                font-size: 18px;
+            }
+            
+            .user-switcher-list {
+                padding: 10px;
+                max-height: 400px;
+                overflow-y: auto;
+            }
+            
+            .user-switcher-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 14px;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.2s;
+                margin-bottom: 6px;
+            }
+            
+            .user-switcher-item:hover {
+                background: var(--trakio-bg-input);
+            }
+            
+            .user-switcher-item.active {
+                background: rgba(14, 165, 233, 0.15);
+                border: 2px solid var(--trakio-primary);
+            }
+            
+            .user-switcher-item .user-avatar {
+                width: 45px;
+                height: 45px;
+                border-radius: 12px;
+                font-size: 18px;
+            }
+            
+            .user-switcher-item .user-info {
+                flex: 1;
+            }
+            
+            .user-switcher-item .user-name {
+                font-weight: 600;
+                font-size: 15px;
+                color: var(--trakio-text);
+            }
+            
+            .user-switcher-item .user-role {
+                font-size: 12px;
+                color: var(--trakio-text-muted);
+                margin-top: 2px;
+            }
+            
+            .user-check {
+                color: var(--trakio-primary);
+                font-size: 18px;
+            }
+            
+            /* Toast Container */
+            .toast-container {
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                z-index: 10001;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .toast {
+                background: var(--trakio-bg-card);
+                border: 1px solid var(--trakio-border);
+                border-radius: 12px;
+                padding: 14px 20px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                transform: translateX(120%);
+                transition: transform 0.3s ease;
+                min-width: 280px;
+            }
+            
+            .toast.show {
+                transform: translateX(0);
+            }
+            
+            .toast-success { border-left: 4px solid var(--trakio-success); }
+            .toast-error { border-left: 4px solid var(--trakio-error); }
+            .toast-warning { border-left: 4px solid var(--trakio-warning); }
+            .toast-info { border-left: 4px solid var(--trakio-primary); }
+            
+            .toast-message {
+                flex: 1;
+                font-size: 14px;
+            }
+            
+            .toast-close {
+                background: none;
+                border: none;
+                color: var(--trakio-text-muted);
+                cursor: pointer;
+                font-size: 18px;
+                padding: 0;
+                line-height: 1;
+            }
+            
             /* Responsive */
-            @media (max-width: 900px) {
-                .trakio-status { display: none; }
-                .trakio-user-name { display: none; }
+            @media (max-width: 1200px) {
+                .nav-label { display: none; }
+                .nav-item { padding: 10px; }
             }
-            @media (max-width: 600px) {
-                .trakio-brand span:not(.trakio-brand-icon) { display: none; }
-                .trakio-nav-item span:first-child { display: none; }
+            
+            @media (max-width: 768px) {
+                .header-nav { display: none; }
+                .logo-text, .logo-version { display: none; }
+                .header-user .user-name { display: none; }
             }
         `;
-        document.head.appendChild(style);
-    },
-
-    // ==================== HEADER ====================
-    injectHeader() {
-        if (document.querySelector('.trakio-header')) return;
-
-        const menuItems = this.getMenuItems();
-        const roleColors = { admin: '#ef4444', manager: '#f59e0b', vendeur: '#10b981', viewer: '#6b7280' };
-
-        const header = document.createElement('header');
-        header.className = 'trakio-header';
-        header.innerHTML = `
-            <a href="index.html" class="trakio-brand">
-                <span class="trakio-brand-icon">🐟</span>
-                <span>TRAKIO</span>
-                <span class="trakio-version">v${this.VERSION}</span>
-            </a>
-            <nav class="trakio-nav">
-                ${menuItems.map(item => {
-                    if (item.id === 'separator') return '<div class="trakio-nav-separator"></div>';
-                    const isActive = item.id === this.currentModule;
-                    return `<a href="${item.url}" class="trakio-nav-item ${isActive ? 'active' : ''}">
-                        <span>${item.icon}</span>
-                        <span>${item.name}</span>
-                    </a>`;
-                }).join('')}
-            </nav>
-            <div class="trakio-header-right">
-                <div class="trakio-status">
-                    <span id="firebase-dot"></span>
-                    <span id="firebase-text">Connexion...</span>
-                </div>
-                <button class="trakio-theme-btn" id="theme-toggle" onclick="TrakioUI.toggleTheme()">
-                    ${this.theme === 'dark' ? '☀️' : '🌙'}
-                </button>
-                <button class="trakio-user-btn" onclick="TrakioUI.showUserSwitcher()">
-                    <div class="trakio-user-avatar" id="user-avatar" style="background:${roleColors[this.currentUser?.role] || '#6b7280'}">
-                        ${(this.currentUser?.name || 'U')[0].toUpperCase()}
-                    </div>
-                    <span class="trakio-user-name" id="user-name-display">${this.currentUser?.name || 'Utilisateur'}</span>
-                </button>
-            </div>
-        `;
-
-        document.body.insertBefore(header, document.body.firstChild);
-
-        // Paramètres link
-        const nav = header.querySelector('.trakio-nav');
-        if (TrakioPermissions.isAdmin()) {
-            const settingsLink = document.createElement('a');
-            settingsLink.href = 'parametres.html';
-            settingsLink.className = `trakio-nav-item ${this.currentModule === 'parametres' ? 'active' : ''}`;
-            settingsLink.innerHTML = '<span>⚙️</span><span>Paramètres</span>';
-            nav.appendChild(settingsLink);
-        }
+        
+        document.head.appendChild(styles);
     }
 };
 
-// Auto-init
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => TrakioUI.init(), 100);
+// Close user switcher on Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        TrakioUI.closeUserSwitcher();
+    }
 });
+
+// Close on click outside
+document.addEventListener('click', (e) => {
+    const overlay = document.getElementById('user-switcher');
+    if (overlay && e.target === overlay) {
+        TrakioUI.closeUserSwitcher();
+    }
+});
+
+console.log('🎨 TrakioUI v4.5.0 loaded');
