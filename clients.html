@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAKIO - Gestion Clients v1.0.0</title>
+    <title>TRAKIO - Gestion Clients v1.1.0</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
     <style>
@@ -609,6 +609,290 @@
             .filters { flex-direction: column; }
             .filters input { min-width: 100%; }
         }
+
+        /* ========================================
+           IMPORT CSV STYLES AVANCÉ
+        ======================================== */
+        .import-modal-large {
+            max-width: 900px !important;
+            width: 95% !important;
+        }
+
+        .import-modal-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            padding: 24px;
+        }
+
+        @media (max-width: 800px) {
+            .import-modal-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .import-panel {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .import-panel h4 {
+            margin-bottom: 16px;
+            color: var(--accent-primary);
+        }
+
+        .drop-zone {
+            border: 3px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--bg-card);
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--accent-primary);
+            background: rgba(6, 214, 160, 0.05);
+        }
+
+        .drop-zone-icon {
+            font-size: 50px;
+            margin-bottom: 12px;
+        }
+
+        .drop-zone-text {
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .drop-zone-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        .file-loaded {
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(6, 214, 160, 0.1);
+            border: 1px solid var(--accent-primary);
+            border-radius: 8px;
+        }
+
+        .file-loaded.visible { display: block; }
+
+        .file-loaded-name {
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 6px;
+        }
+
+        .file-loaded-stats {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            gap: 16px;
+        }
+
+        .import-mode-options {
+            margin-top: 20px;
+        }
+
+        .import-mode-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .import-mode-option:hover {
+            border-color: var(--accent-secondary);
+        }
+
+        .import-mode-option.selected {
+            border-color: var(--accent-primary);
+            background: rgba(6, 214, 160, 0.05);
+        }
+
+        .import-mode-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            accent-color: var(--accent-primary);
+        }
+
+        .import-mode-option h5 {
+            margin-bottom: 2px;
+        }
+
+        .import-mode-option p {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .preview-section {
+            max-height: 280px;
+            overflow: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        .preview-table th {
+            background: var(--bg-hover);
+            padding: 8px 6px;
+            text-align: left;
+            font-size: 10px;
+            color: var(--text-muted);
+            position: sticky;
+            top: 0;
+        }
+
+        .preview-table td {
+            padding: 6px;
+            border-bottom: 1px solid var(--border-color);
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .preview-table tr:nth-child(even) {
+            background: var(--bg-hover);
+        }
+
+        .mapping-section {
+            margin-bottom: 16px;
+        }
+
+        .mapping-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            background: var(--bg-card);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+
+        .mapping-csv-col {
+            flex: 1;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .mapping-arrow {
+            color: var(--accent-primary);
+        }
+
+        .mapping-select {
+            flex: 1;
+            padding: 6px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 11px;
+        }
+
+        .import-footer {
+            display: flex;
+            gap: 12px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .import-result-box {
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .import-result-box.success {
+            display: block;
+            background: rgba(6, 214, 160, 0.1);
+            border: 2px solid var(--accent-primary);
+        }
+
+        .import-result-box.error {
+            display: block;
+            background: rgba(239, 71, 111, 0.1);
+            border: 2px solid var(--accent-danger);
+        }
+
+        .import-stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 12px;
+        }
+
+        .import-stat-item {
+            text-align: center;
+        }
+
+        .import-stat-num {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .import-stat-num.green { color: var(--accent-primary); }
+        .import-stat-num.blue { color: var(--accent-secondary); }
+        .import-stat-num.red { color: var(--accent-danger); }
+
+        .import-stat-lbl {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .no-preview {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .no-preview-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        .format-hint {
+            margin-top: 16px;
+            padding: 12px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            font-size: 11px;
+        }
+
+        .format-hint code {
+            display: block;
+            margin-top: 8px;
+            padding: 8px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            color: var(--accent-secondary);
+            overflow-x: auto;
+        }
     </style>
 </head>
 <body>
@@ -616,7 +900,7 @@
     <div class="header">
         <div class="header-left">
             <a href="index.html" class="back-btn">← Retour TRAKIO</a>
-            <h1>👥 Gestion Clients <span class="version-badge">v1.0.0</span></h1>
+            <h1>👥 Gestion Clients <span class="version-badge">v1.1.0</span></h1>
         </div>
         <div class="header-actions">
             <button class="btn btn-primary" onclick="showForm()">➕ Nouveau client</button>
@@ -790,41 +1074,103 @@
     
     <!-- Modal Import -->
     <div class="modal-overlay" id="import-modal" onclick="if(event.target === this) closeImportModal()">
-        <div class="modal">
+        <div class="modal import-modal-large">
             <div class="modal-header gradient">
                 <div class="modal-icon">📥</div>
-                <h2>Import Clients</h2>
-                <p style="opacity:0.8; margin-top:8px;">Choisissez le mode d'import</p>
+                <h2>Import CSV Clients</h2>
+                <p style="opacity:0.8; margin-top:8px;">Glissez-déposez ou sélectionnez votre fichier</p>
             </div>
-            <div class="modal-body">
-                <div class="import-option selected" id="import-option-replace" onclick="selectImportMode('replace')">
-                    <div class="import-option-content">
-                        <div class="import-option-icon">🔄</div>
-                        <div class="import-option-text">
-                            <h4>Remplacer tout</h4>
-                            <p>Supprime tous les clients existants et importe le fichier</p>
+            
+            <div class="import-modal-body">
+                <!-- Panel gauche: Upload & Options -->
+                <div class="import-panel">
+                    <h4>📁 Fichier CSV</h4>
+                    
+                    <div class="drop-zone" id="dropZoneClients" onclick="document.getElementById('csvFileInputClients').click()">
+                        <div class="drop-zone-icon">📄</div>
+                        <div class="drop-zone-text">Glissez votre fichier ici</div>
+                        <div class="drop-zone-hint">ou cliquez pour sélectionner</div>
+                    </div>
+                    <input type="file" id="csvFileInputClients" accept=".csv,.txt" style="display:none;">
+
+                    <div class="file-loaded" id="fileLoadedClients">
+                        <div class="file-loaded-name" id="fileNameClients"></div>
+                        <div class="file-loaded-stats">
+                            <span>📊 <span id="rowCountClients">0</span> lignes</span>
+                            <span>📋 <span id="colCountClients">0</span> colonnes</span>
                         </div>
-                        <div class="import-check">✓</div>
+                    </div>
+
+                    <div class="import-mode-options">
+                        <h4 style="margin-bottom: 12px;">⚙️ Mode d'import</h4>
+                        
+                        <div class="import-mode-option selected" onclick="selectImportModeCSV('update')">
+                            <input type="radio" name="importModeCSV" value="update" checked>
+                            <div>
+                                <h5>🔄 Mettre à jour</h5>
+                                <p>Ajoute les nouveaux, met à jour les existants</p>
+                            </div>
+                        </div>
+                        
+                        <div class="import-mode-option" onclick="selectImportModeCSV('replace')">
+                            <input type="radio" name="importModeCSV" value="replace">
+                            <div>
+                                <h5>🗑️ Remplacer tout</h5>
+                                <p>Supprime tout et importe le fichier</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="import-result-box" id="importResultClients">
+                        <h4 id="importResultTitleClients">✅ Import terminé !</h4>
+                        <div class="import-stats-row">
+                            <div class="import-stat-item">
+                                <div class="import-stat-num green" id="statAddedClients">0</div>
+                                <div class="import-stat-lbl">Ajoutés</div>
+                            </div>
+                            <div class="import-stat-item">
+                                <div class="import-stat-num blue" id="statUpdatedClients">0</div>
+                                <div class="import-stat-lbl">Mis à jour</div>
+                            </div>
+                            <div class="import-stat-item">
+                                <div class="import-stat-num red" id="statErrorsClients">0</div>
+                                <div class="import-stat-lbl">Erreurs</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="import-option" id="import-option-update" onclick="selectImportMode('update')">
-                    <div class="import-option-content">
-                        <div class="import-option-icon">➕</div>
-                        <div class="import-option-text">
-                            <h4>Mettre à jour / Ajouter</h4>
-                            <p>Met à jour les clients existants, ajoute les nouveaux</p>
-                        </div>
-                        <div class="import-check">✓</div>
+
+                <!-- Panel droit: Preview -->
+                <div class="import-panel">
+                    <h4>👁️ Aperçu & Mapping</h4>
+
+                    <div class="mapping-section" id="mappingContainerClients" style="display:none;">
+                        <div id="mappingRowsClients"></div>
+                    </div>
+
+                    <div class="preview-section" id="previewContainerClients" style="display:none;">
+                        <table class="preview-table" id="previewTableClients">
+                            <thead id="previewHeadClients"></thead>
+                            <tbody id="previewBodyClients"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="no-preview" id="noPreviewClients">
+                        <div class="no-preview-icon">📋</div>
+                        <p>Sélectionnez un fichier pour voir l'aperçu</p>
+                    </div>
+
+                    <div class="format-hint">
+                        <strong>📖 Format CSV attendu :</strong>
+                        <code>N°;Type;Nom;Contact;Adresse;NPA;Ville;Tél;Email</code>
                     </div>
                 </div>
-                <div class="import-info">
-                    <span>Clients actuels : </span>
-                    <strong id="import-count">0</strong>
-                </div>
             </div>
-            <div class="modal-footer">
+
+            <div class="import-footer">
                 <button class="btn btn-secondary" style="flex:1;" onclick="closeImportModal()">Annuler</button>
-                <button class="btn btn-primary" style="flex:2;" onclick="confirmImport()">📂 Choisir fichier</button>
+                <button class="btn btn-secondary" onclick="resetImportClients()">↺ Reset</button>
+                <button class="btn btn-primary" style="flex:2;" onclick="executeImportClients()" id="btnImportClients" disabled>🚀 Lancer l'import</button>
             </div>
         </div>
     </div>
@@ -1120,121 +1466,342 @@
             window.location.href = 'articles.html';
         }
         
-        // ===== IMPORT/EXPORT =====
+        // ===== IMPORT CSV AVANCÉ =====
+        let csvDataClients = null;
+        let csvHeadersClients = [];
+        let importModeCSVClients = 'update';
+        let columnMappingClients = {};
+
+        const CLIENT_FIELDS = [
+            { key: 'num', label: 'N° Client', required: true },
+            { key: 'name', label: 'Nom/Société', required: true },
+            { key: 'clientType', label: 'Type (B2B/B2C)' },
+            { key: 'contact', label: 'Contact' },
+            { key: 'address', label: 'Adresse' },
+            { key: 'address2', label: 'Adresse 2' },
+            { key: 'zip', label: 'Code postal' },
+            { key: 'city', label: 'Ville' },
+            { key: 'phone', label: 'Téléphone' },
+            { key: 'mobile', label: 'Mobile' },
+            { key: 'email', label: 'Email' },
+            { key: 'credit', label: 'Crédit' },
+            { key: 'payment', label: 'Conditions paiement' },
+            { key: 'ignore', label: '— Ignorer —' }
+        ];
+
+        // Initialisation drag & drop
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropZone = document.getElementById('dropZoneClients');
+            const fileInput = document.getElementById('csvFileInputClients');
+
+            if (dropZone) {
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('dragover');
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        handleCSVFileClients(files[0]);
+                    }
+                });
+            }
+
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        handleCSVFileClients(e.target.files[0]);
+                    }
+                });
+            }
+        });
+
         function showImportModal() {
-            document.getElementById('import-count').textContent = ClientsData.clients.length;
-            selectImportMode('replace');
             document.getElementById('import-modal').classList.add('visible');
         }
         
         function closeImportModal() {
             document.getElementById('import-modal').classList.remove('visible');
+            resetImportClients();
         }
-        
-        function selectImportMode(mode) {
-            importMode = mode;
-            
-            const replaceOpt = document.getElementById('import-option-replace');
-            const updateOpt = document.getElementById('import-option-update');
-            
-            if (mode === 'replace') {
-                replaceOpt.classList.add('selected');
-                updateOpt.classList.remove('selected');
-            } else {
-                updateOpt.classList.add('selected');
-                replaceOpt.classList.remove('selected');
+
+        function handleCSVFileClients(file) {
+            if (!file.name.match(/\.(csv|txt)$/i)) {
+                showToast('Format non supporté. Utilisez un fichier CSV.', 'error');
+                return;
             }
-        }
-        
-        function confirmImport() {
-            closeImportModal();
-            document.getElementById('import-file').click();
-        }
-        
-        function importFile(input) {
-            const file = input.files[0];
-            if (!file) return;
-            
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 let content = fixEncoding(e.target.result);
-                const sep = content.includes(';') ? ';' : ',';
-                const lines = content.split('\n').filter(l => l.trim());
-                
-                let added = 0, updated = 0, deleted = 0;
-                
-                if (importMode === 'replace') {
-                    deleted = ClientsData.clients.length;
-                    ClientsData.clients = [];
+                parseCSVClients(content, file.name);
+            };
+            reader.readAsText(file, 'ISO-8859-1');
+        }
+
+        function parseCSVClients(content, fileName) {
+            const separator = content.includes(';') ? ';' : ',';
+            const lines = content.split('\n').filter(l => l.trim());
+            
+            if (lines.length < 2) {
+                showToast('Le fichier doit contenir au moins un en-tête et une ligne', 'error');
+                return;
+            }
+
+            csvHeadersClients = lines[0].split(separator).map(h => h.replace(/"/g, '').trim());
+            csvDataClients = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const cols = lines[i].split(separator).map(c => c.replace(/"/g, '').trim());
+                if (cols.length >= 2 && cols.some(c => c)) {
+                    csvDataClients.push(cols);
                 }
-                
-                for (let i = 1; i < lines.length; i++) {
-                    const cols = lines[i].split(sep).map(c => c.replace(/"/g, '').trim());
-                    if (cols.length >= 2 && cols[1]) {
-                        const clientNum = cols[0] || '';
-                        const clientName = cols[1] || cols[2] || 'Client importé';
-                        
-                        let existingIndex = -1;
-                        if (importMode === 'update') {
-                            if (clientNum) {
-                                existingIndex = ClientsData.clients.findIndex(c => c.num === clientNum);
-                            }
-                            if (existingIndex === -1) {
-                                existingIndex = ClientsData.clients.findIndex(c =>
-                                    c.name && c.name.toLowerCase().trim() === clientName.toLowerCase().trim()
-                                );
-                            }
-                        }
-                        
-                        const clientData = {
-                            num: clientNum || String(Date.now() + i).slice(-6),
-                            name: clientName,
-                            contact: cols[3] || '',
-                            clientType: (cols[1] || '').toLowerCase().includes('b2c') ? 'b2c' : 'b2b',
-                            address: cols[4] || '',
-                            address2: cols[5] || '',
-                            zip: cols[6] || '',
-                            city: cols[7] || '',
-                            phone: cols[8] || '',
-                            mobile: cols[9] || '',
-                            email: cols[10] || '',
-                            credit: parseFloat(cols[11]) || 0,
-                            payment: cols[12] || '30 jours fin de mois'
-                        };
-                        
-                        if (existingIndex !== -1) {
-                            ClientsData.clients[existingIndex] = {
-                                ...ClientsData.clients[existingIndex],
-                                ...clientData
-                            };
-                            updated++;
-                        } else {
-                            ClientsData.clients.push({
-                                id: Date.now() + i,
-                                ...clientData,
-                                ordersCount: 0,
-                                history: []
-                            });
-                            added++;
+            }
+
+            // Afficher infos fichier
+            document.getElementById('fileLoadedClients').classList.add('visible');
+            document.getElementById('fileNameClients').textContent = '📄 ' + fileName;
+            document.getElementById('rowCountClients').textContent = csvDataClients.length;
+            document.getElementById('colCountClients').textContent = csvHeadersClients.length;
+
+            // Auto-mapping
+            autoMapColumnsClients();
+            renderMappingClients();
+            renderPreviewClients();
+
+            // Activer bouton
+            document.getElementById('btnImportClients').disabled = false;
+            document.getElementById('noPreviewClients').style.display = 'none';
+            document.getElementById('previewContainerClients').style.display = 'block';
+            document.getElementById('mappingContainerClients').style.display = 'block';
+        }
+
+        function autoMapColumnsClients() {
+            columnMappingClients = {};
+            
+            const mappings = {
+                'num': ['numéro', 'numero', 'n°', 'client', 'ref', 'code', 'id'],
+                'name': ['nom', 'société', 'societe', 'entreprise', 'raison', 'name', 'client'],
+                'clientType': ['type', 'b2b', 'b2c', 'catégorie'],
+                'contact': ['contact', 'interlocuteur', 'personne'],
+                'address': ['adresse', 'address', 'rue'],
+                'address2': ['adresse2', 'complément'],
+                'zip': ['code', 'postal', 'npa', 'zip', 'cp'],
+                'city': ['ville', 'city', 'localité'],
+                'phone': ['téléphone', 'telephone', 'tel', 'phone', 'fixe'],
+                'mobile': ['mobile', 'portable', 'gsm', 'natel'],
+                'email': ['email', 'mail', 'courriel', 'e-mail'],
+                'credit': ['crédit', 'credit', 'solde'],
+                'payment': ['paiement', 'payment', 'échéance', 'conditions']
+            };
+
+            csvHeadersClients.forEach((header, idx) => {
+                const headerLower = header.toLowerCase();
+                for (const [field, keywords] of Object.entries(mappings)) {
+                    if (keywords.some(kw => headerLower.includes(kw))) {
+                        if (!Object.values(columnMappingClients).includes(field)) {
+                            columnMappingClients[idx] = field;
+                            break;
                         }
                     }
                 }
-                
-                saveData();
-                renderTable();
-                updateStats();
-                
-                let message = '';
-                if (importMode === 'replace') {
-                    message = `🗑️ ${deleted} supprimés, 📥 ${added} importés`;
-                } else {
-                    message = `📥 ${added} ajoutés, 🔄 ${updated} mis à jour`;
+                if (!columnMappingClients[idx]) {
+                    columnMappingClients[idx] = 'ignore';
                 }
-                showToast(message, 'success');
-            };
+            });
+        }
+
+        function renderMappingClients() {
+            const container = document.getElementById('mappingRowsClients');
+            container.innerHTML = '';
+
+            csvHeadersClients.slice(0, 8).forEach((header, idx) => {
+                const options = CLIENT_FIELDS.map(f => 
+                    `<option value="${f.key}" ${columnMappingClients[idx] === f.key ? 'selected' : ''}>${f.label}${f.required ? ' *' : ''}</option>`
+                ).join('');
+
+                container.innerHTML += `
+                    <div class="mapping-row">
+                        <span class="mapping-csv-col" title="${header}">${header}</span>
+                        <span class="mapping-arrow">→</span>
+                        <select class="mapping-select" onchange="updateMappingClients(${idx}, this.value)">
+                            ${options}
+                        </select>
+                    </div>
+                `;
+            });
+
+            if (csvHeadersClients.length > 8) {
+                container.innerHTML += `<p style="font-size:11px; color:var(--text-muted); text-align:center;">+ ${csvHeadersClients.length - 8} autres colonnes</p>`;
+            }
+        }
+
+        function updateMappingClients(idx, value) {
+            columnMappingClients[idx] = value;
+        }
+
+        function renderPreviewClients() {
+            const thead = document.getElementById('previewHeadClients');
+            const tbody = document.getElementById('previewBodyClients');
+
+            thead.innerHTML = '<tr>' + csvHeadersClients.map(h => `<th>${h}</th>`).join('') + '</tr>';
+
+            tbody.innerHTML = csvDataClients.slice(0, 8).map(row => 
+                '<tr>' + row.map(cell => `<td title="${cell}">${cell}</td>`).join('') + '</tr>'
+            ).join('');
+
+            if (csvDataClients.length > 8) {
+                tbody.innerHTML += `<tr><td colspan="${csvHeadersClients.length}" style="text-align:center; color:var(--text-muted);">... + ${csvDataClients.length - 8} lignes</td></tr>`;
+            }
+        }
+
+        function selectImportModeCSV(mode) {
+            importModeCSVClients = mode;
+            document.querySelectorAll('.import-mode-option').forEach(opt => {
+                opt.classList.remove('selected');
+                opt.querySelector('input[type="radio"]').checked = false;
+            });
+            const selected = document.querySelector(`.import-mode-option input[value="${mode}"]`);
+            if (selected) {
+                selected.checked = true;
+                selected.closest('.import-mode-option').classList.add('selected');
+            }
+        }
+
+        function executeImportClients() {
+            if (!csvDataClients || csvDataClients.length === 0) {
+                showToast('Aucune donnée à importer', 'error');
+                return;
+            }
+
+            let added = 0, updated = 0, errors = 0;
+
+            if (importModeCSVClients === 'replace') {
+                ClientsData.clients = [];
+            }
+
+            csvDataClients.forEach((row, rowIndex) => {
+                try {
+                    const clientData = {
+                        id: Date.now() + rowIndex,
+                        num: '',
+                        name: '',
+                        clientType: 'b2b',
+                        contact: '',
+                        address: '',
+                        address2: '',
+                        zip: '',
+                        city: '',
+                        phone: '',
+                        mobile: '',
+                        email: '',
+                        credit: 0,
+                        payment: '30 jours fin de mois',
+                        ordersCount: 0,
+                        history: []
+                    };
+
+                    Object.entries(columnMappingClients).forEach(([colIdx, field]) => {
+                        if (field !== 'ignore' && row[colIdx] !== undefined) {
+                            const value = row[colIdx];
+                            
+                            switch(field) {
+                                case 'clientType':
+                                    clientData.clientType = value.toLowerCase().includes('b2c') ? 'b2c' : 'b2b';
+                                    break;
+                                case 'credit':
+                                    clientData.credit = parseFloat(value.replace(/[^\d.,\-]/g, '').replace(',', '.')) || 0;
+                                    break;
+                                default:
+                                    clientData[field] = value;
+                            }
+                        }
+                    });
+
+                    // Générer N° si vide
+                    if (!clientData.num) {
+                        clientData.num = 'CLI' + String(Date.now() + rowIndex).slice(-6);
+                    }
+
+                    // Générer nom si vide
+                    if (!clientData.name) {
+                        clientData.name = 'Client ' + clientData.num;
+                    }
+
+                    // Chercher doublon
+                    const existingIdx = ClientsData.clients.findIndex(c => c.num === clientData.num);
+                    
+                    if (existingIdx !== -1) {
+                        clientData.id = ClientsData.clients[existingIdx].id;
+                        clientData.ordersCount = ClientsData.clients[existingIdx].ordersCount || 0;
+                        clientData.history = ClientsData.clients[existingIdx].history || [];
+                        ClientsData.clients[existingIdx] = clientData;
+                        updated++;
+                    } else {
+                        ClientsData.clients.push(clientData);
+                        added++;
+                    }
+                } catch(err) {
+                    errors++;
+                    console.error('Erreur ligne ' + (rowIndex + 2), err);
+                }
+            });
+
+            saveData();
+            renderTable();
+            updateStats();
+
+            // Afficher résultat
+            const result = document.getElementById('importResultClients');
+            result.className = 'import-result-box success';
+            document.getElementById('importResultTitleClients').textContent = '✅ Import terminé !';
+            document.getElementById('statAddedClients').textContent = added;
+            document.getElementById('statUpdatedClients').textContent = updated;
+            document.getElementById('statErrorsClients').textContent = errors;
+
+            showToast(`Import: ${added} ajoutés, ${updated} mis à jour`, 'success');
+        }
+
+        function resetImportClients() {
+            csvDataClients = null;
+            csvHeadersClients = [];
+            columnMappingClients = {};
+
+            const fileInput = document.getElementById('csvFileInputClients');
+            if (fileInput) fileInput.value = '';
             
-            reader.readAsText(file, 'ISO-8859-1');
-            input.value = '';
+            document.getElementById('fileLoadedClients').classList.remove('visible');
+            document.getElementById('btnImportClients').disabled = true;
+            document.getElementById('previewContainerClients').style.display = 'none';
+            document.getElementById('mappingContainerClients').style.display = 'none';
+            document.getElementById('noPreviewClients').style.display = 'block';
+            document.getElementById('importResultClients').className = 'import-result-box';
+            document.getElementById('previewHeadClients').innerHTML = '';
+            document.getElementById('previewBodyClients').innerHTML = '';
+            document.getElementById('mappingRowsClients').innerHTML = '';
+        }
+
+        // Anciennes fonctions conservées pour compatibilité
+        function selectImportMode(mode) {
+            selectImportModeCSV(mode);
+        }
+        
+        function confirmImport() {
+            // Pour compatibilité ancienne
+        }
+        
+        function importFile(input) {
+            // Redirige vers le nouveau système
+            if (input.files[0]) {
+                handleCSVFileClients(input.files[0]);
+            }
         }
         
         function fixEncoding(text) {

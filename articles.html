@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAKIO - Articles v1.0.0</title>
+    <title>TRAKIO - Articles v1.1.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -593,6 +593,261 @@
                 white-space: nowrap;
             }
         }
+
+        /* ========================================
+           IMPORT CSV STYLES
+        ======================================== */
+        .import-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 1000px) {
+            .import-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .import-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .import-panel h3 {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .drop-zone {
+            border: 3px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 50px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--bg-primary);
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--accent-primary);
+            background: rgba(6, 214, 160, 0.05);
+        }
+
+        .drop-zone.dragover {
+            transform: scale(1.02);
+        }
+
+        .drop-zone-icon {
+            font-size: 60px;
+            margin-bottom: 16px;
+        }
+
+        .drop-zone-text {
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .drop-zone-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        .file-info {
+            display: none;
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(6, 214, 160, 0.1);
+            border: 1px solid var(--accent-primary);
+            border-radius: 8px;
+        }
+
+        .file-info.visible {
+            display: block;
+        }
+
+        .file-info-name {
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+        }
+
+        .file-info-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .import-options {
+            margin-top: 24px;
+        }
+
+        .import-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .import-option:hover {
+            border-color: var(--accent-secondary);
+        }
+
+        .import-option.selected {
+            border-color: var(--accent-primary);
+            background: rgba(6, 214, 160, 0.05);
+        }
+
+        .import-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            accent-color: var(--accent-primary);
+        }
+
+        .import-option-content h4 {
+            margin-bottom: 4px;
+        }
+
+        .import-option-content p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .preview-table-container {
+            max-height: 350px;
+            overflow: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .preview-table th {
+            background: var(--bg-hover);
+            padding: 10px 8px;
+            text-align: left;
+            font-size: 11px;
+            color: var(--text-muted);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .preview-table td {
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .preview-table tr:nth-child(even) {
+            background: var(--bg-hover);
+        }
+
+        .mapping-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .mapping-csv-col {
+            flex: 1;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .mapping-arrow {
+            color: var(--accent-primary);
+        }
+
+        .mapping-select {
+            flex: 1;
+            padding: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .import-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .import-result {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .import-result.success {
+            display: block;
+            background: rgba(6, 214, 160, 0.1);
+            border: 2px solid var(--accent-primary);
+        }
+
+        .import-result.error {
+            display: block;
+            background: rgba(239, 83, 80, 0.1);
+            border: 2px solid var(--accent-danger);
+        }
+
+        .import-result h4 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .import-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 16px;
+        }
+
+        .import-stat {
+            text-align: center;
+        }
+
+        .import-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .import-stat-value.added { color: var(--accent-primary); }
+        .import-stat-value.updated { color: var(--accent-secondary); }
+        .import-stat-value.errors { color: var(--accent-danger); }
+
+        .import-stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
     </style>
 </head>
 <body>
@@ -602,7 +857,7 @@
             <button class="back-btn" onclick="goBack()">← Retour TRAKIO</button>
             <div class="header-title">
                 📦 Gestion Articles
-                <span class="module-badge">v1.0.0</span>
+                <span class="module-badge">v1.1.0</span>
             </div>
         </div>
         <div class="header-right">
@@ -621,6 +876,7 @@
             <button class="tab-btn" onclick="switchTab('categories')">🏷️ Catégories</button>
             <button class="tab-btn" onclick="switchTab('pricelists')">💰 Listes de Prix</button>
             <button class="tab-btn" onclick="switchTab('discounts')">🏷️ Rabais</button>
+            <button class="tab-btn" onclick="switchTab('import')" style="background:var(--accent-secondary); color:#fff;">📥 Import CSV</button>
         </div>
 
         <!-- Tab: Articles -->
@@ -905,6 +1161,113 @@
             </div>
 
             <div id="discounts-grid"></div>
+        </div>
+
+        <!-- Tab: Import CSV -->
+        <div id="tab-import" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">📥 Import CSV Articles</h2>
+            </div>
+
+            <div class="import-container">
+                <!-- Panel gauche: Upload -->
+                <div class="import-panel">
+                    <h3>📁 Fichier CSV</h3>
+                    
+                    <div class="drop-zone" id="dropZone" onclick="document.getElementById('csvFileInput').click()">
+                        <div class="drop-zone-icon">📄</div>
+                        <div class="drop-zone-text">Glissez votre fichier CSV ici</div>
+                        <div class="drop-zone-hint">ou cliquez pour sélectionner</div>
+                        <input type="file" id="csvFileInput" accept=".csv,.txt" style="display:none;">
+                    </div>
+
+                    <div class="file-info" id="fileInfo">
+                        <div class="file-info-name" id="fileName"></div>
+                        <div class="file-info-stats">
+                            <span>📊 <span id="rowCount">0</span> lignes</span>
+                            <span>📋 <span id="colCount">0</span> colonnes</span>
+                        </div>
+                    </div>
+
+                    <div class="import-options">
+                        <h4 style="margin-bottom: 12px;">⚙️ Mode d'import</h4>
+                        
+                        <div class="import-option selected" onclick="selectImportMode('update')">
+                            <input type="radio" name="importMode" value="update" checked>
+                            <div class="import-option-content">
+                                <h4>🔄 Mettre à jour</h4>
+                                <p>Ajoute les nouveaux articles et met à jour les existants (par N° article)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="import-option" onclick="selectImportMode('replace')">
+                            <input type="radio" name="importMode" value="replace">
+                            <div class="import-option-content">
+                                <h4>🗑️ Remplacer tout</h4>
+                                <p>Supprime tous les articles existants et importe les nouveaux</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="import-actions">
+                        <button class="btn btn-primary" onclick="executeImport()" id="btnImport" disabled style="flex:1;">
+                            🚀 Lancer l'import
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetImport()">
+                            ↺ Réinitialiser
+                        </button>
+                    </div>
+
+                    <div class="import-result" id="importResult">
+                        <h4 id="importResultTitle">✅ Import terminé !</h4>
+                        <p id="importResultMessage"></p>
+                        <div class="import-stats">
+                            <div class="import-stat">
+                                <div class="import-stat-value added" id="statAdded">0</div>
+                                <div class="import-stat-label">Ajoutés</div>
+                            </div>
+                            <div class="import-stat">
+                                <div class="import-stat-value updated" id="statUpdated">0</div>
+                                <div class="import-stat-label">Mis à jour</div>
+                            </div>
+                            <div class="import-stat">
+                                <div class="import-stat-value errors" id="statErrors">0</div>
+                                <div class="import-stat-label">Erreurs</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel droit: Preview -->
+                <div class="import-panel">
+                    <h3>👁️ Aperçu des données</h3>
+                    
+                    <div id="mappingContainer" style="display:none; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 12px;">🔗 Mapping des colonnes</h4>
+                        <div id="mappingRows"></div>
+                    </div>
+
+                    <div class="preview-table-container" id="previewContainer" style="display:none;">
+                        <table class="preview-table" id="previewTable">
+                            <thead id="previewHead"></thead>
+                            <tbody id="previewBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="noPreview" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                        <div style="font-size: 50px; margin-bottom: 16px; opacity: 0.5;">📋</div>
+                        <p>Sélectionnez un fichier CSV pour voir l'aperçu</p>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 16px; background: var(--bg-primary); border-radius: 8px;">
+                        <h4 style="margin-bottom: 10px; color: var(--accent-primary);">📖 Format CSV attendu</h4>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">Colonnes recommandées (séparateur ; ou ,) :</p>
+                        <code style="font-size: 11px; color: var(--accent-secondary); display: block; background: var(--bg-card); padding: 10px; border-radius: 6px; overflow-x: auto;">
+                            N° Article;Désignation;Origine;Unité;Prix HT;Stock;TVA;Code barre
+                        </code>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1780,6 +2143,349 @@
             }
             
             return basePrice;
+        }
+
+        // ============================================
+        // IMPORT CSV AVANCÉ
+        // ============================================
+        let csvData = null;
+        let csvHeaders = [];
+        let importModeCSV = 'update';
+        let columnMapping = {};
+
+        const ARTICLE_FIELDS = [
+            { key: 'num', label: 'N° Article', required: true },
+            { key: 'name', label: 'Désignation', required: true },
+            { key: 'origin', label: 'Origine' },
+            { key: 'latin', label: 'Nom latin' },
+            { key: 'unit', label: 'Unité' },
+            { key: 'priceB2C', label: 'Prix B2C HT' },
+            { key: 'priceB2B', label: 'Prix B2B HT' },
+            { key: 'cost', label: 'Prix achat HT' },
+            { key: 'stock', label: 'Stock' },
+            { key: 'tva', label: 'TVA %' },
+            { key: 'barcode', label: 'Code barre' },
+            { key: 'ignore', label: '— Ignorer —' }
+        ];
+
+        // Initialisation drag & drop
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('csvFileInput');
+
+            if (dropZone) {
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('dragover');
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        handleCSVFile(files[0]);
+                    }
+                });
+            }
+
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        handleCSVFile(e.target.files[0]);
+                    }
+                });
+            }
+        });
+
+        function handleCSVFile(file) {
+            if (!file.name.match(/\.(csv|txt)$/i)) {
+                showToast('Format non supporté. Utilisez un fichier CSV.', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let content = fixEncoding(e.target.result);
+                parseCSV(content, file.name);
+            };
+            reader.readAsText(file, 'ISO-8859-1');
+        }
+
+        function parseCSV(content, fileName) {
+            const separator = content.includes(';') ? ';' : ',';
+            const lines = content.split('\n').filter(l => l.trim());
+            
+            if (lines.length < 2) {
+                showToast('Le fichier doit contenir au moins un en-tête et une ligne de données', 'error');
+                return;
+            }
+
+            csvHeaders = lines[0].split(separator).map(h => h.replace(/"/g, '').trim());
+            csvData = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const cols = lines[i].split(separator).map(c => c.replace(/"/g, '').trim());
+                if (cols.length >= 2 && cols.some(c => c)) {
+                    csvData.push(cols);
+                }
+            }
+
+            // Afficher infos fichier
+            document.getElementById('fileInfo').classList.add('visible');
+            document.getElementById('fileName').textContent = '📄 ' + fileName;
+            document.getElementById('rowCount').textContent = csvData.length;
+            document.getElementById('colCount').textContent = csvHeaders.length;
+
+            // Auto-mapping des colonnes
+            autoMapColumns();
+            
+            // Afficher mapping
+            renderMapping();
+            
+            // Afficher preview
+            renderPreview();
+
+            // Activer bouton import
+            document.getElementById('btnImport').disabled = false;
+            document.getElementById('noPreview').style.display = 'none';
+            document.getElementById('previewContainer').style.display = 'block';
+            document.getElementById('mappingContainer').style.display = 'block';
+        }
+
+        function autoMapColumns() {
+            columnMapping = {};
+            
+            const mappings = {
+                'num': ['numéro', 'numero', 'n°', 'article', 'ref', 'référence', 'code'],
+                'name': ['désignation', 'designation', 'nom', 'name', 'description', 'libellé', 'libelle'],
+                'origin': ['origine', 'origin', 'provenance', 'nom 2'],
+                'latin': ['latin', 'scientifique', 'espèce'],
+                'unit': ['unité', 'unite', 'unit', 'mesure'],
+                'priceB2C': ['prix', 'pv', 'vente', 'b2c', 'ttc', 'ht'],
+                'cost': ['achat', 'pa', 'coût', 'cout'],
+                'stock': ['stock', 'qté', 'quantité', 'quantity'],
+                'tva': ['tva', 'taxe', 'vat'],
+                'barcode': ['barre', 'ean', 'barcode', 'gtin', 'code-barre']
+            };
+
+            csvHeaders.forEach((header, idx) => {
+                const headerLower = header.toLowerCase();
+                for (const [field, keywords] of Object.entries(mappings)) {
+                    if (keywords.some(kw => headerLower.includes(kw))) {
+                        if (!Object.values(columnMapping).includes(field)) {
+                            columnMapping[idx] = field;
+                            break;
+                        }
+                    }
+                }
+                if (!columnMapping[idx]) {
+                    columnMapping[idx] = 'ignore';
+                }
+            });
+        }
+
+        function renderMapping() {
+            const container = document.getElementById('mappingRows');
+            container.innerHTML = '';
+
+            csvHeaders.forEach((header, idx) => {
+                const row = document.createElement('div');
+                row.className = 'mapping-row';
+                
+                const options = ARTICLE_FIELDS.map(f => 
+                    `<option value="${f.key}" ${columnMapping[idx] === f.key ? 'selected' : ''}>${f.label}${f.required ? ' *' : ''}</option>`
+                ).join('');
+
+                row.innerHTML = `
+                    <span class="mapping-csv-col">${header}</span>
+                    <span class="mapping-arrow">→</span>
+                    <select class="mapping-select" onchange="updateMapping(${idx}, this.value)">
+                        ${options}
+                    </select>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function updateMapping(idx, value) {
+            columnMapping[idx] = value;
+        }
+
+        function renderPreview() {
+            const thead = document.getElementById('previewHead');
+            const tbody = document.getElementById('previewBody');
+
+            // Headers
+            thead.innerHTML = '<tr>' + csvHeaders.map(h => `<th>${h}</th>`).join('') + '</tr>';
+
+            // Body (max 10 lignes)
+            tbody.innerHTML = csvData.slice(0, 10).map(row => 
+                '<tr>' + row.map(cell => `<td title="${cell}">${cell}</td>`).join('') + '</tr>'
+            ).join('');
+
+            if (csvData.length > 10) {
+                tbody.innerHTML += `<tr><td colspan="${csvHeaders.length}" style="text-align:center; color:var(--text-muted);">... et ${csvData.length - 10} autres lignes</td></tr>`;
+            }
+        }
+
+        function selectImportMode(mode) {
+            importModeCSV = mode;
+            document.querySelectorAll('.import-option').forEach(opt => {
+                opt.classList.remove('selected');
+                opt.querySelector('input[type="radio"]').checked = false;
+            });
+            const selected = document.querySelector(`.import-option input[value="${mode}"]`);
+            if (selected) {
+                selected.checked = true;
+                selected.closest('.import-option').classList.add('selected');
+            }
+        }
+
+        function executeImport() {
+            if (!csvData || csvData.length === 0) {
+                showToast('Aucune donnée à importer', 'error');
+                return;
+            }
+
+            // Vérifier champs requis
+            const numCol = Object.entries(columnMapping).find(([k, v]) => v === 'num');
+            const nameCol = Object.entries(columnMapping).find(([k, v]) => v === 'name');
+
+            if (!numCol && !nameCol) {
+                showToast('Mappez au moins N° Article ou Désignation', 'error');
+                return;
+            }
+
+            let added = 0, updated = 0, errors = 0;
+
+            if (importModeCSV === 'replace') {
+                ArticlesData.articles = [];
+            }
+
+            csvData.forEach((row, rowIndex) => {
+                try {
+                    const articleData = {
+                        id: Date.now() + rowIndex,
+                        num: '',
+                        name: '',
+                        origin: '',
+                        latin: '',
+                        categoryId: null,
+                        lot: '',
+                        pcs: 1,
+                        unit: 'pce',
+                        priceB2C: 0,
+                        priceB2B: 0,
+                        cost: 0,
+                        stock: 0,
+                        stockDefault: 0,
+                        tva: 2.6,
+                        barcode: '',
+                        active: true
+                    };
+
+                    // Appliquer mapping
+                    Object.entries(columnMapping).forEach(([colIdx, field]) => {
+                        if (field !== 'ignore' && row[colIdx] !== undefined) {
+                            const value = row[colIdx];
+                            
+                            switch(field) {
+                                case 'num':
+                                case 'name':
+                                case 'origin':
+                                case 'latin':
+                                case 'barcode':
+                                    articleData[field] = value;
+                                    break;
+                                case 'unit':
+                                    let unit = value.toLowerCase();
+                                    if (unit.includes('kilo') || unit === 'kg') unit = 'kg';
+                                    else if (unit.includes('litre')) unit = 'l';
+                                    else unit = 'pce';
+                                    articleData.unit = unit;
+                                    break;
+                                case 'priceB2C':
+                                case 'priceB2B':
+                                case 'cost':
+                                case 'stock':
+                                case 'tva':
+                                    const num = parseFloat(value.replace(/[^\d.,\-]/g, '').replace(',', '.'));
+                                    if (!isNaN(num)) articleData[field] = num;
+                                    break;
+                            }
+                        }
+                    });
+
+                    // Générer N° si vide
+                    if (!articleData.num) {
+                        articleData.num = 'IMP' + String(Date.now() + rowIndex).slice(-6);
+                    }
+
+                    // Générer nom si vide
+                    if (!articleData.name) {
+                        articleData.name = 'Article ' + articleData.num;
+                    }
+
+                    // Calculer prix B2B si vide
+                    if (articleData.priceB2C > 0 && articleData.priceB2B === 0) {
+                        articleData.priceB2B = articleData.priceB2C * 0.85;
+                    }
+
+                    // Chercher doublon
+                    const existingIdx = ArticlesData.articles.findIndex(a => a.num === articleData.num);
+                    
+                    if (existingIdx !== -1) {
+                        articleData.id = ArticlesData.articles[existingIdx].id;
+                        ArticlesData.articles[existingIdx] = articleData;
+                        updated++;
+                    } else {
+                        ArticlesData.articles.push(articleData);
+                        added++;
+                    }
+                } catch(err) {
+                    errors++;
+                    console.error('Erreur ligne ' + (rowIndex + 2), err);
+                }
+            });
+
+            // Sauvegarder
+            saveToLocalStorage();
+            renderArticlesTable();
+            updateStats();
+
+            // Afficher résultat
+            const result = document.getElementById('importResult');
+            result.className = 'import-result success';
+            document.getElementById('importResultTitle').textContent = '✅ Import terminé !';
+            document.getElementById('importResultMessage').textContent = 
+                importModeCSV === 'replace' ? 'Base articles remplacée' : 'Articles mis à jour';
+            document.getElementById('statAdded').textContent = added;
+            document.getElementById('statUpdated').textContent = updated;
+            document.getElementById('statErrors').textContent = errors;
+
+            showToast(`Import: ${added} ajoutés, ${updated} mis à jour`, 'success');
+        }
+
+        function resetImport() {
+            csvData = null;
+            csvHeaders = [];
+            columnMapping = {};
+
+            document.getElementById('csvFileInput').value = '';
+            document.getElementById('fileInfo').classList.remove('visible');
+            document.getElementById('btnImport').disabled = true;
+            document.getElementById('previewContainer').style.display = 'none';
+            document.getElementById('mappingContainer').style.display = 'none';
+            document.getElementById('noPreview').style.display = 'block';
+            document.getElementById('importResult').className = 'import-result';
+            document.getElementById('previewHead').innerHTML = '';
+            document.getElementById('previewBody').innerHTML = '';
+            document.getElementById('mappingRows').innerHTML = '';
         }
     </script>
 </body>
