@@ -20,6 +20,31 @@
         .btn-primary:hover { filter: brightness(1.1); }
         .btn-secondary { background: var(--trakio-bg-input); color: var(--trakio-text); border: 1px solid var(--trakio-border); }
         .btn-secondary:hover { background: var(--trakio-bg-hover); }
+        .btn-success { background: var(--trakio-success); color: white; }
+        
+        /* Import Zone */
+        .import-zone {
+            display: none;
+            background: var(--trakio-bg-card);
+            border: 2px dashed var(--trakio-border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 24px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .import-zone.visible { display: block; }
+        .import-zone.dragover { border-color: var(--trakio-primary); background: rgba(14, 165, 233, 0.1); }
+        .import-zone-icon { font-size: 48px; margin-bottom: 15px; }
+        .import-zone-text { font-size: 16px; margin-bottom: 10px; }
+        .import-zone-hint { font-size: 12px; color: var(--trakio-text-muted); }
+        .import-options { display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+        .import-option { padding: 12px 20px; background: var(--trakio-bg-input); border: 2px solid var(--trakio-border); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+        .import-option:hover { border-color: var(--trakio-primary); }
+        .import-option.selected { border-color: var(--trakio-primary); background: rgba(14, 165, 233, 0.1); }
+        .import-option-title { font-weight: 600; font-size: 14px; }
+        .import-option-desc { font-size: 11px; color: var(--trakio-text-muted); margin-top: 4px; }
+        
         .tabs { display: flex; gap: 5px; margin-bottom: 20px; background: var(--trakio-bg-card); padding: 5px; border-radius: 12px; border: 1px solid var(--trakio-border); flex-wrap: wrap; }
         .tab { padding: 10px 20px; background: transparent; border: none; border-radius: 8px; color: var(--trakio-text-muted); font-weight: 500; cursor: pointer; transition: all 0.2s; }
         .tab:hover { background: var(--trakio-bg-input); }
@@ -40,10 +65,6 @@
         .category-badge.coquillages { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
         .category-badge.traiteur { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
         .price { font-weight: 600; color: var(--trakio-success); }
-        .stock-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-        .stock-badge.in-stock { background: rgba(16, 185, 129, 0.2); color: var(--trakio-success); }
-        .stock-badge.low { background: rgba(245, 158, 11, 0.2); color: var(--trakio-warning); }
-        .stock-badge.out { background: rgba(239, 68, 68, 0.2); color: var(--trakio-error); }
         .action-btn { padding: 6px 12px; background: var(--trakio-bg-input); border: none; border-radius: 6px; color: var(--trakio-text); cursor: pointer; margin-right: 5px; }
         .action-btn:hover { background: var(--trakio-primary); }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
@@ -51,13 +72,17 @@
         .modal { background: var(--trakio-bg-card); border-radius: 20px; width: 100%; max-width: 500px; border: 1px solid var(--trakio-border); }
         .modal-header { padding: 20px; border-bottom: 1px solid var(--trakio-border); display: flex; justify-content: space-between; align-items: center; }
         .modal-close { width: 36px; height: 36px; border-radius: 50%; background: var(--trakio-bg-input); border: none; color: var(--trakio-text); cursor: pointer; font-size: 20px; }
-        .modal-body { padding: 20px; }
+        .modal-body { padding: 20px; max-height: 60vh; overflow-y: auto; }
         .modal-footer { padding: 15px 20px; border-top: 1px solid var(--trakio-border); display: flex; justify-content: flex-end; gap: 10px; }
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-size: 13px; color: var(--trakio-text-muted); margin-bottom: 6px; }
         .form-group input, .form-group select { width: 100%; padding: 10px 14px; background: var(--trakio-bg-input); border: 1px solid var(--trakio-border); border-radius: 8px; color: var(--trakio-text); font-size: 14px; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .empty { text-align: center; padding: 60px; color: var(--trakio-text-muted); }
+        .stats-bar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat-item { background: var(--trakio-bg-card); border: 1px solid var(--trakio-border); border-radius: 10px; padding: 12px 20px; }
+        .stat-value { font-size: 20px; font-weight: 700; color: var(--trakio-primary); }
+        .stat-label { font-size: 11px; color: var(--trakio-text-muted); }
     </style>
 </head>
 <body>
@@ -66,8 +91,45 @@
             <h1 class="page-title">📦 Articles</h1>
             <div class="header-actions">
                 <button class="btn btn-primary" onclick="openModal()">➕ Nouvel article</button>
+                <button class="btn btn-secondary" onclick="exportArticles()" id="btn-export">📥 Exporter</button>
+                <button class="btn btn-success" onclick="toggleImportZone()" id="btn-import">📤 Importer CSV</button>
             </div>
         </div>
+        
+        <!-- Zone Import CSV -->
+        <div class="import-zone" id="import-zone"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)">
+            <div class="import-zone-icon">📄</div>
+            <div class="import-zone-text">Glissez votre fichier CSV ici ou cliquez pour sélectionner</div>
+            <div class="import-zone-hint">Format: nom;categorie;prix;tva;unite (séparateur: point-virgule)</div>
+            <input type="file" id="file-input" accept=".csv" style="display:none" onchange="handleFileSelect(event)">
+            <button class="btn btn-primary" style="margin-top:15px" onclick="document.getElementById('file-input').click()">📁 Choisir un fichier</button>
+            
+            <div class="import-options">
+                <div class="import-option selected" onclick="setImportMode('update')" id="mode-update">
+                    <div class="import-option-title">🔄 Mettre à jour</div>
+                    <div class="import-option-desc">Met à jour les articles existants (même nom)</div>
+                </div>
+                <div class="import-option" onclick="setImportMode('skip')" id="mode-skip">
+                    <div class="import-option-title">⏭️ Ignorer doublons</div>
+                    <div class="import-option-desc">N'importe que les nouveaux articles</div>
+                </div>
+                <div class="import-option" onclick="setImportMode('replace')" id="mode-replace">
+                    <div class="import-option-title">🗑️ Remplacer tout</div>
+                    <div class="import-option-desc">Supprime tout et importe le CSV</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-bar">
+            <div class="stat-item"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total articles</div></div>
+            <div class="stat-item"><div class="stat-value" id="stat-poissons">0</div><div class="stat-label">Poissons</div></div>
+            <div class="stat-item"><div class="stat-value" id="stat-crustaces">0</div><div class="stat-label">Crustacés</div></div>
+            <div class="stat-item"><div class="stat-value" id="stat-coquillages">0</div><div class="stat-label">Coquillages</div></div>
+        </div>
+        
         <div class="tabs">
             <button class="tab active" onclick="setTab('all')" data-tab="all">Tous</button>
             <button class="tab" onclick="setTab('poissons')" data-tab="poissons">🐟 Poissons</button>
@@ -80,11 +142,12 @@
         </div>
         <div class="articles-table">
             <table>
-                <thead><tr><th>Article</th><th>Catégorie</th><th>Prix/kg</th><th>TVA</th><th>Stock</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Article</th><th>Catégorie</th><th>Prix/unité</th><th>TVA</th><th>Unité</th><th>Actions</th></tr></thead>
                 <tbody id="articles-body"><tr><td colspan="6" class="empty">Chargement...</td></tr></tbody>
             </table>
         </div>
     </div>
+    
     <div class="modal-overlay" id="article-modal">
         <div class="modal">
             <div class="modal-header"><h3 id="modal-title">➕ Nouvel article</h3><button class="modal-close" onclick="closeModal()">×</button></div>
@@ -92,40 +155,89 @@
                 <div class="form-group"><label>Nom *</label><input type="text" id="art-name" placeholder="Nom de l'article"></div>
                 <div class="form-row">
                     <div class="form-group"><label>Catégorie</label><select id="art-category"><option value="poissons">🐟 Poissons</option><option value="crustaces">🦐 Crustacés</option><option value="coquillages">🦪 Coquillages</option><option value="traiteur">🍽️ Traiteur</option></select></div>
-                    <div class="form-group"><label>Unité</label><select id="art-unit"><option value="kg">kg</option><option value="piece">pièce</option><option value="barquette">barquette</option></select></div>
+                    <div class="form-group"><label>Unité</label><select id="art-unit"><option value="kg">kg</option><option value="piece">pièce</option><option value="barquette">barquette</option><option value="lot">lot</option></select></div>
                 </div>
                 <div class="form-row">
                     <div class="form-group"><label>Prix (CHF)</label><input type="number" id="art-price" step="0.05" placeholder="0.00"></div>
                     <div class="form-group"><label>TVA (%)</label><input type="number" id="art-tva" value="2.6" step="0.1"></div>
                 </div>
+                <div class="form-group"><label>Code / SKU</label><input type="text" id="art-sku" placeholder="Code article (optionnel)"></div>
             </div>
-            <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveArticle()">💾 Enregistrer</button></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="saveArticle()">💾 Enregistrer</button>
+            </div>
         </div>
     </div>
+    
     <script>
         let articlesData = [], filteredData = [], currentTab = 'all', editingId = null;
-        document.addEventListener('DOMContentLoaded', () => setTimeout(loadArticles, 300));
-        async function loadArticles() {
-            try { articlesData = await DataStore.articles.getAll(); filteredData = [...articlesData]; filterArticles(); } catch (e) { console.error(e); }
+        let importMode = 'update'; // update, skip, replace
+        
+        document.addEventListener('DOMContentLoaded', () => setTimeout(init, 300));
+        
+        function init() {
+            // Vérifier permissions import
+            if (!TrakioPermissions.canImport()) {
+                document.getElementById('btn-import').style.display = 'none';
+            }
+            if (!TrakioPermissions.canExport()) {
+                document.getElementById('btn-export').style.display = 'none';
+            }
+            loadArticles();
         }
-        function setTab(tab) { currentTab = tab; document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab)); filterArticles(); }
+        
+        async function loadArticles() {
+            try { 
+                articlesData = await DataStore.articles.getAll(); 
+                filteredData = [...articlesData]; 
+                updateStats();
+                filterArticles(); 
+            } catch (e) { console.error(e); }
+        }
+        
+        function updateStats() {
+            document.getElementById('stat-total').textContent = articlesData.length;
+            document.getElementById('stat-poissons').textContent = articlesData.filter(a => a.category === 'poissons').length;
+            document.getElementById('stat-crustaces').textContent = articlesData.filter(a => a.category === 'crustaces').length;
+            document.getElementById('stat-coquillages').textContent = articlesData.filter(a => a.category === 'coquillages').length;
+        }
+        
+        function setTab(tab) { 
+            currentTab = tab; 
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab)); 
+            filterArticles(); 
+        }
+        
         function filterArticles() {
             const search = document.getElementById('search').value.toLowerCase();
             filteredData = articlesData.filter(a => {
                 if (currentTab !== 'all' && a.category !== currentTab) return false;
-                if (search && !a.name.toLowerCase().includes(search)) return false;
+                if (search && !a.name.toLowerCase().includes(search) && !(a.sku || '').toLowerCase().includes(search)) return false;
                 return true;
             });
             renderArticles();
         }
+        
         function renderArticles() {
             const tbody = document.getElementById('articles-body');
             if (filteredData.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Aucun article</td></tr>'; return; }
             tbody.innerHTML = filteredData.map(a => {
                 const cat = a.category || 'poissons';
-                return '<tr><td><strong>'+a.name+'</strong></td><td><span class="category-badge '+cat+'">'+cat+'</span></td><td class="price">'+formatCHF(a.price)+'</td><td>'+(a.tva || 2.6)+'%</td><td><span class="stock-badge in-stock">Disponible</span></td><td><button class="action-btn" onclick="openModal(\''+a.id+'\')">✏️</button><button class="action-btn" onclick="deleteArticle(\''+a.id+'\')">🗑️</button></td></tr>';
+                return `<tr>
+                    <td><strong>${a.name}</strong>${a.sku ? '<br><small style="color:var(--trakio-text-muted)">' + a.sku + '</small>' : ''}</td>
+                    <td><span class="category-badge ${cat}">${cat}</span></td>
+                    <td class="price">${formatCHF(a.price)}</td>
+                    <td>${a.tva || 2.6}%</td>
+                    <td>${a.unit || 'kg'}</td>
+                    <td>
+                        <button class="action-btn" onclick="openModal('${a.id}')">✏️</button>
+                        <button class="action-btn" onclick="deleteArticle('${a.id}')">🗑️</button>
+                    </td>
+                </tr>`;
             }).join('');
         }
+        
         function openModal(id = null) {
             editingId = id;
             document.getElementById('art-name').value = '';
@@ -133,6 +245,8 @@
             document.getElementById('art-unit').value = 'kg';
             document.getElementById('art-price').value = '';
             document.getElementById('art-tva').value = '2.6';
+            document.getElementById('art-sku').value = '';
+            
             if (id) {
                 const a = articlesData.find(x => x.id === id);
                 if (a) {
@@ -142,20 +256,193 @@
                     document.getElementById('art-unit').value = a.unit || 'kg';
                     document.getElementById('art-price').value = a.price || '';
                     document.getElementById('art-tva').value = a.tva || 2.6;
+                    document.getElementById('art-sku').value = a.sku || '';
                 }
-            } else { document.getElementById('modal-title').textContent = '➕ Nouvel article'; }
+            } else { 
+                document.getElementById('modal-title').textContent = '➕ Nouvel article'; 
+            }
             document.getElementById('article-modal').classList.add('active');
         }
-        function closeModal() { document.getElementById('article-modal').classList.remove('active'); editingId = null; }
+        
+        function closeModal() { 
+            document.getElementById('article-modal').classList.remove('active'); 
+            editingId = null; 
+        }
+        
         async function saveArticle() {
             const name = document.getElementById('art-name').value.trim();
             if (!name) { TrakioUI.showToast('❌ Nom requis', 'error'); return; }
-            const data = { name, category: document.getElementById('art-category').value, unit: document.getElementById('art-unit').value, price: parseFloat(document.getElementById('art-price').value) || 0, tva: parseFloat(document.getElementById('art-tva').value) || 2.6 };
+            
+            const data = { 
+                name, 
+                category: document.getElementById('art-category').value, 
+                unit: document.getElementById('art-unit').value, 
+                price: parseFloat(document.getElementById('art-price').value) || 0, 
+                tva: parseFloat(document.getElementById('art-tva').value) || 2.6,
+                sku: document.getElementById('art-sku').value.trim()
+            };
+            
             await DataStore.articles.save(editingId, data);
             TrakioUI.showToast('✅ Article enregistré', 'success');
-            closeModal(); loadArticles();
+            closeModal(); 
+            loadArticles();
         }
-        async function deleteArticle(id) { if (confirm('Supprimer cet article?')) { await DataStore.articles.delete(id); TrakioUI.showToast('✅ Supprimé', 'success'); loadArticles(); } }
+        
+        async function deleteArticle(id) { 
+            if (confirm('Supprimer cet article?')) { 
+                await DataStore.articles.delete(id); 
+                TrakioUI.showToast('✅ Supprimé', 'success'); 
+                loadArticles(); 
+            } 
+        }
+        
+        // ================== IMPORT CSV ==================
+        function toggleImportZone() {
+            const zone = document.getElementById('import-zone');
+            zone.classList.toggle('visible');
+        }
+        
+        function setImportMode(mode) {
+            importMode = mode;
+            document.querySelectorAll('.import-option').forEach(o => o.classList.remove('selected'));
+            document.getElementById('mode-' + mode).classList.add('selected');
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+        
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('dragover');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.csv')) {
+                importCSV(file);
+            } else {
+                TrakioUI.showToast('❌ Fichier CSV requis', 'error');
+            }
+        }
+        
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) importCSV(file);
+        }
+        
+        async function importCSV(file) {
+            const text = await file.text();
+            const lines = text.split('\n').filter(l => l.trim());
+            
+            if (lines.length < 2) {
+                TrakioUI.showToast('❌ Fichier vide ou invalide', 'error');
+                return;
+            }
+            
+            // Parser les headers
+            const headers = lines[0].toLowerCase().split(';').map(h => h.trim());
+            const nameIdx = headers.findIndex(h => h === 'nom' || h === 'name' || h === 'article');
+            const catIdx = headers.findIndex(h => h === 'categorie' || h === 'category' || h === 'cat');
+            const priceIdx = headers.findIndex(h => h === 'prix' || h === 'price' || h === 'pv' || h === 'tarif');
+            const tvaIdx = headers.findIndex(h => h === 'tva' || h === 'tax');
+            const unitIdx = headers.findIndex(h => h === 'unite' || h === 'unit' || h === 'unité');
+            const skuIdx = headers.findIndex(h => h === 'sku' || h === 'code' || h === 'ref' || h === 'reference');
+            
+            if (nameIdx === -1) {
+                TrakioUI.showToast('❌ Colonne "nom" non trouvée', 'error');
+                return;
+            }
+            
+            // Mode replace: supprimer tous les articles existants
+            if (importMode === 'replace') {
+                for (const art of articlesData) {
+                    await DataStore.articles.delete(art.id);
+                }
+                articlesData = [];
+            }
+            
+            let imported = 0, updated = 0, skipped = 0;
+            
+            for (let i = 1; i < lines.length; i++) {
+                const cols = lines[i].split(';').map(c => c.trim());
+                const name = cols[nameIdx];
+                
+                if (!name) continue;
+                
+                // Chercher si l'article existe (par nom ou SKU)
+                const sku = skuIdx >= 0 ? cols[skuIdx] : '';
+                const existing = articlesData.find(a => 
+                    a.name.toLowerCase() === name.toLowerCase() || 
+                    (sku && a.sku && a.sku.toLowerCase() === sku.toLowerCase())
+                );
+                
+                if (existing) {
+                    if (importMode === 'skip') {
+                        skipped++;
+                        continue;
+                    }
+                    // Mode update: mettre à jour l'article existant
+                    const data = {
+                        name,
+                        category: catIdx >= 0 ? (cols[catIdx] || existing.category) : existing.category,
+                        price: priceIdx >= 0 ? (parseFloat(cols[priceIdx].replace(',', '.')) || existing.price) : existing.price,
+                        tva: tvaIdx >= 0 ? (parseFloat(cols[tvaIdx].replace(',', '.')) || existing.tva) : existing.tva,
+                        unit: unitIdx >= 0 ? (cols[unitIdx] || existing.unit) : existing.unit,
+                        sku: sku || existing.sku
+                    };
+                    await DataStore.articles.save(existing.id, data);
+                    updated++;
+                } else {
+                    // Nouvel article
+                    const data = {
+                        name,
+                        category: catIdx >= 0 ? (cols[catIdx] || 'poissons') : 'poissons',
+                        price: priceIdx >= 0 ? (parseFloat(cols[priceIdx].replace(',', '.')) || 0) : 0,
+                        tva: tvaIdx >= 0 ? (parseFloat(cols[tvaIdx].replace(',', '.')) || 2.6) : 2.6,
+                        unit: unitIdx >= 0 ? (cols[unitIdx] || 'kg') : 'kg',
+                        sku: sku
+                    };
+                    await DataStore.articles.save(null, data);
+                    imported++;
+                }
+            }
+            
+            // Message de résultat
+            let msg = `✅ Import terminé: ${imported} ajouté(s)`;
+            if (updated > 0) msg += `, ${updated} mis à jour`;
+            if (skipped > 0) msg += `, ${skipped} ignoré(s)`;
+            
+            TrakioUI.showToast(msg, 'success');
+            toggleImportZone();
+            loadArticles();
+        }
+        
+        // ================== EXPORT CSV ==================
+        function exportArticles() {
+            const headers = ['nom', 'categorie', 'prix', 'tva', 'unite', 'sku'];
+            const rows = articlesData.map(a => [
+                a.name,
+                a.category || 'poissons',
+                a.price || 0,
+                a.tva || 2.6,
+                a.unit || 'kg',
+                a.sku || ''
+            ]);
+            
+            const csv = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'articles_' + new Date().toISOString().slice(0,10) + '.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            TrakioUI.showToast('✅ Export CSV téléchargé', 'success');
+        }
+        
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
     </script>
 </body>
