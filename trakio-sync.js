@@ -4,43 +4,25 @@
 const TrakioSync = {
     VERSION: '4.3.0',
     isOnline: navigator.onLine,
-    lastSync: null,
 
     init() {
-        window.addEventListener('online', () => this.handleOnline());
-        window.addEventListener('offline', () => this.handleOffline());
-        console.log('🔄 TrakioSync initialisé');
-    },
-
-    handleOnline() {
-        this.isOnline = true;
-        if (typeof TrakioUI !== 'undefined') {
-            TrakioUI.setFirebaseStatus('connected');
-        }
-    },
-
-    handleOffline() {
-        this.isOnline = false;
-        if (typeof TrakioUI !== 'undefined') {
-            TrakioUI.setFirebaseStatus('disconnected');
-        }
+        window.addEventListener('online', () => {
+            this.isOnline = true;
+            if (typeof TrakioUI !== 'undefined') TrakioUI.setFirebaseStatus('connected');
+        });
+        window.addEventListener('offline', () => {
+            this.isOnline = false;
+            if (typeof TrakioUI !== 'undefined') TrakioUI.setFirebaseStatus('disconnected');
+        });
     },
 
     async syncAll() {
-        if (typeof TrakioUI !== 'undefined') {
-            TrakioUI.setFirebaseStatus('syncing');
-        }
-        
-        // Simuler sync
+        if (typeof TrakioUI !== 'undefined') TrakioUI.setFirebaseStatus('syncing');
         await new Promise(r => setTimeout(r, 1000));
-        
-        this.lastSync = new Date();
-        
         if (typeof TrakioUI !== 'undefined') {
             TrakioUI.setFirebaseStatus('connected');
-            TrakioUI.showToast('✅ Synchronisation terminée');
+            TrakioUI.showToast('✅ Synchronisé');
         }
-        
         return { success: true };
     }
 };

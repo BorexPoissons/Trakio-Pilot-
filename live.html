@@ -3,25 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAKIO v4.2.0 - Dashboard Live</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>TRAKIO v4.3.0 - Dashboard Live</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- TRAKIO Core -->
+    <script src="trakio-config.js"></script>
+    <script src="trakio-sync.js"></script>
+    <script src="trakio-ui.js"></script>
+    
     <style>
         :root {
-            --bg-primary: #0a0a0f;
-            --bg-card: #12121a;
-            --bg-hover: #1a1a25;
-            --border-color: #2a2a3a;
-            --text-primary: #ffffff;
-            --text-secondary: #ccccdd;
-            --text-muted: #8888aa;
-            --accent-primary: #06d6a0;
-            --accent-secondary: #118ab2;
-            --accent-warning: #ffd166;
-            --accent-danger: #ef476f;
-            --accent-purple: #9c88ff;
-            --accent-orange: #ff9f43;
-            --accent-live: #ff4757;
+            --bg-primary: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --border-color: #475569;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent-primary: #0ea5e9;
+            --accent-secondary: #0ea5e9;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f59e0b;
+            --accent-live: #ef4444;
             --radius: 16px;
             --radius-sm: 10px;
             --shadow: 0 8px 32px rgba(0,0,0,0.4);
