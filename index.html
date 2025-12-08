@@ -12,110 +12,569 @@
     <script src="trakio-ui.js?v=4.5.0"></script>
     <style>
         .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
-        .welcome { margin-bottom: 30px; }
-        .welcome h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-        .welcome p { color: var(--trakio-text-muted); }
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px; }
-        .kpi-card { background: var(--trakio-bg-card); border: 1px solid var(--trakio-border); border-radius: 16px; padding: 20px; position: relative; overflow: hidden; }
-        .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--kpi-color, var(--trakio-primary)); }
-        .kpi-icon { font-size: 32px; margin-bottom: 12px; }
-        .kpi-value { font-size: 32px; font-weight: 700; color: var(--kpi-color, var(--trakio-primary)); }
-        .kpi-label { font-size: 13px; color: var(--trakio-text-muted); margin-top: 4px; }
-        .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        @media (max-width: 1000px) { .dashboard-grid { grid-template-columns: 1fr; } }
-        .card { background: var(--trakio-bg-card); border: 1px solid var(--trakio-border); border-radius: 16px; padding: 20px; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .card-title { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-        .btn-sm { padding: 8px 16px; background: var(--trakio-bg-input); border: 1px solid var(--trakio-border); border-radius: 8px; color: var(--trakio-text); cursor: pointer; font-size: 13px; text-decoration: none; transition: all 0.2s; }
-        .btn-sm:hover { background: var(--trakio-primary); border-color: var(--trakio-primary); }
-        .orders-list { display: flex; flex-direction: column; gap: 12px; }
-        .order-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--trakio-bg-input); border-radius: 12px; cursor: pointer; transition: all 0.2s; }
-        .order-item:hover { background: var(--trakio-bg-hover); transform: translateX(5px); }
-        .order-avatar { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; flex-shrink: 0; }
-        .order-avatar.pending { background: var(--trakio-warning); }
-        .order-avatar.confirmed { background: var(--trakio-primary); }
-        .order-avatar.ready { background: var(--trakio-success); }
-        .order-info { flex: 1; min-width: 0; }
+        
+        /* Welcome */
+        .welcome-section {
+            margin-bottom: 30px;
+        }
+        .welcome-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .welcome-date {
+            color: var(--trakio-text-muted);
+            font-size: 14px;
+        }
+        
+        /* KPIs */
+        .kpis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .kpi-card {
+            background: var(--trakio-bg-card);
+            border: 1px solid var(--trakio-border);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+        .kpi-card.blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .kpi-card.green::before { background: linear-gradient(90deg, #10b981, #34d399); }
+        .kpi-card.purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .kpi-card.orange::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .kpi-card.cyan::before { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+        .kpi-card.pink::before { background: linear-gradient(90deg, #ec4899, #f472b6); }
+        
+        .kpi-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .kpi-card.blue .kpi-value { color: #3b82f6; }
+        .kpi-card.green .kpi-value { color: #10b981; }
+        .kpi-card.purple .kpi-value { color: #8b5cf6; }
+        .kpi-card.orange .kpi-value { color: #f59e0b; }
+        .kpi-card.cyan .kpi-value { color: #06b6d4; }
+        .kpi-card.pink .kpi-value { color: #ec4899; }
+        
+        .kpi-label {
+            color: var(--trakio-text-muted);
+            font-size: 14px;
+        }
+        .kpi-trend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .kpi-trend.up { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .kpi-trend.down { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 1000px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--trakio-bg-card);
+            border: 1px solid var(--trakio-border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-action {
+            color: var(--trakio-primary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .card-action:hover { text-decoration: underline; }
+        
+        /* Orders List */
+        .orders-list { }
+        .order-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: var(--trakio-bg-input);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+        .order-item:hover { background: var(--trakio-bg-hover); }
+        
+        .order-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: var(--trakio-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .order-info { flex: 1; }
         .order-client { font-weight: 600; font-size: 14px; }
         .order-details { font-size: 12px; color: var(--trakio-text-muted); margin-top: 3px; }
         .order-amount { font-weight: 700; color: var(--trakio-success); }
-        .order-status { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
-        .order-status.pending { background: rgba(245, 158, 11, 0.2); color: var(--trakio-warning); }
-        .order-status.confirmed { background: rgba(14, 165, 233, 0.2); color: var(--trakio-primary); }
-        .order-status.ready { background: rgba(16, 185, 129, 0.2); color: var(--trakio-success); }
-        .modules-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .module-card { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--trakio-bg-input); border-radius: 12px; text-decoration: none; color: var(--trakio-text); transition: all 0.2s; }
-        .module-card:hover { background: var(--trakio-primary); transform: scale(1.02); }
-        .module-icon { font-size: 24px; }
-        .module-name { font-weight: 600; font-size: 14px; }
-        .empty { text-align: center; padding: 40px; color: var(--trakio-text-muted); }
-        .empty-icon { font-size: 48px; margin-bottom: 10px; opacity: 0.5; }
-        .refresh-info { text-align: center; font-size: 11px; color: var(--trakio-text-muted); margin-top: 20px; }
+        .order-status {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        .order-status.pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .order-status.confirmed { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .order-status.delivered { background: rgba(14, 165, 233, 0.2); color: #0ea5e9; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--trakio-text-muted);
+        }
+        .empty-state-icon { font-size: 50px; margin-bottom: 15px; opacity: 0.5; }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            gap: 10px;
+        }
+        .quick-action {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--trakio-bg-input);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--trakio-text);
+            transition: all 0.2s;
+        }
+        .quick-action:hover {
+            background: var(--trakio-bg-hover);
+            transform: translateX(5px);
+        }
+        .quick-action-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .quick-action-icon.blue { background: rgba(59, 130, 246, 0.2); }
+        .quick-action-icon.green { background: rgba(16, 185, 129, 0.2); }
+        .quick-action-icon.purple { background: rgba(139, 92, 246, 0.2); }
+        .quick-action-icon.orange { background: rgba(245, 158, 11, 0.2); }
+        
+        .quick-action-text { font-weight: 500; font-size: 14px; }
+        .quick-action-arrow { margin-left: auto; color: var(--trakio-text-muted); }
+        
+        /* Alerts */
+        .alerts-section { margin-top: 20px; }
+        .alert {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+        .alert-info {
+            background: rgba(14, 165, 233, 0.15);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            color: #0ea5e9;
+        }
+        .alert-icon { font-size: 18px; }
+        .alert-text { flex: 1; }
+        
+        /* Refresh indicator */
+        .refresh-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--trakio-bg-card);
+            border: 1px solid var(--trakio-border);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: var(--trakio-text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .refresh-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--trakio-success);
+            animation: pulse 2s infinite;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="welcome">
-            <h1>👋 Bonjour <span id="user-name">Pascal</span> !</h1>
-            <p id="date-display">Chargement...</p>
+        <!-- Welcome -->
+        <div class="welcome-section">
+            <h1 class="welcome-title">
+                <span>👋</span>
+                <span>Bonjour <span id="user-name">Pascal</span> !</span>
+            </h1>
+            <p class="welcome-date" id="current-date"></p>
         </div>
-        <div class="kpi-grid">
-            <div class="kpi-card" style="--kpi-color: #0ea5e9;"><div class="kpi-icon">📋</div><div class="kpi-value" id="kpi-orders">-</div><div class="kpi-label">Commandes du jour</div></div>
-            <div class="kpi-card" style="--kpi-color: #10b981;"><div class="kpi-icon">💰</div><div class="kpi-value" id="kpi-revenue">-</div><div class="kpi-label">CA aujourd'hui</div></div>
-            <div class="kpi-card" style="--kpi-color: #8b5cf6;"><div class="kpi-icon">👥</div><div class="kpi-value" id="kpi-clients">-</div><div class="kpi-label">Clients</div></div>
-            <div class="kpi-card" style="--kpi-color: #f59e0b;"><div class="kpi-icon">⏳</div><div class="kpi-value" id="kpi-pending">-</div><div class="kpi-label">En attente</div></div>
-        </div>
-        <div class="dashboard-grid">
-            <div class="card">
-                <div class="card-header"><h2 class="card-title">📋 Commandes récentes</h2><a href="commandes.html" class="btn-sm">Voir tout →</a></div>
-                <div class="orders-list" id="orders-list"><div class="empty"><div class="empty-icon">📋</div><p>Chargement...</p></div></div>
+        
+        <!-- KPIs -->
+        <div class="kpis-grid">
+            <div class="kpi-card blue">
+                <div class="kpi-icon">📋</div>
+                <div class="kpi-value" id="kpi-orders">0</div>
+                <div class="kpi-label">Commandes du jour</div>
+                <div class="kpi-trend up" id="kpi-orders-trend">-</div>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="kpi-card green">
+                <div class="kpi-icon">💰</div>
+                <div class="kpi-value" id="kpi-ca">0 CHF</div>
+                <div class="kpi-label">CA aujourd'hui</div>
+                <div class="kpi-trend up" id="kpi-ca-trend">-</div>
+            </div>
+            <div class="kpi-card purple">
+                <div class="kpi-icon">👥</div>
+                <div class="kpi-value" id="kpi-clients">0</div>
+                <div class="kpi-label">Clients</div>
+            </div>
+            <div class="kpi-card orange">
+                <div class="kpi-icon">⏳</div>
+                <div class="kpi-value" id="kpi-pending">0</div>
+                <div class="kpi-label">En attente</div>
+            </div>
+            <div class="kpi-card cyan">
+                <div class="kpi-icon">📦</div>
+                <div class="kpi-value" id="kpi-articles">0</div>
+                <div class="kpi-label">Articles</div>
+            </div>
+            <div class="kpi-card pink">
+                <div class="kpi-icon">🛍️</div>
+                <div class="kpi-value" id="kpi-shopify">0</div>
+                <div class="kpi-label">Commandes Shopify</div>
+            </div>
+        </div>
+        
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Column -->
+            <div>
+                <!-- Recent Orders -->
                 <div class="card">
-                    <div class="card-header"><h2 class="card-title">⚡ Accès rapide</h2></div>
-                    <div class="modules-grid" id="modules-grid"></div>
+                    <div class="card-header">
+                        <h2 class="card-title">📋 Commandes récentes</h2>
+                        <a href="commandes.html" class="card-action">Voir tout →</a>
+                    </div>
+                    <div class="orders-list" id="orders-list">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <p>Aucune commande récente</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Alerts -->
+                <div class="card alerts-section">
+                    <div class="card-header">
+                        <h2 class="card-title">🔔 Alertes</h2>
+                    </div>
+                    <div id="alerts-container">
+                        <div class="alert alert-info">
+                            <span class="alert-icon">ℹ️</span>
+                            <span class="alert-text">Système opérationnel</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div>
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">⚡ Accès rapide</h2>
+                    </div>
+                    <div class="quick-actions" id="quick-actions">
+                        <a href="myfish.html" class="quick-action">
+                            <div class="quick-action-icon green">🛒</div>
+                            <span class="quick-action-text">Nouvelle vente</span>
+                            <span class="quick-action-arrow">→</span>
+                        </a>
+                        <a href="commandes.html" class="quick-action">
+                            <div class="quick-action-icon blue">📋</div>
+                            <span class="quick-action-text">Commandes</span>
+                            <span class="quick-action-arrow">→</span>
+                        </a>
+                        <a href="clients.html" class="quick-action">
+                            <div class="quick-action-icon purple">👥</div>
+                            <span class="quick-action-text">Clients</span>
+                            <span class="quick-action-arrow">→</span>
+                        </a>
+                        <a href="tracabilite.html" class="quick-action">
+                            <div class="quick-action-icon orange">🏷️</div>
+                            <span class="quick-action-text">Étiquettes</span>
+                            <span class="quick-action-arrow">→</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Stats rapides -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">📊 Cette semaine</h2>
+                    </div>
+                    <div style="display:grid;gap:15px">
+                        <div style="display:flex;justify-content:space-between;padding:12px;background:var(--trakio-bg-input);border-radius:10px">
+                            <span style="color:var(--trakio-text-muted)">Commandes</span>
+                            <span style="font-weight:600" id="week-orders">0</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;padding:12px;background:var(--trakio-bg-input);border-radius:10px">
+                            <span style="color:var(--trakio-text-muted)">CA total</span>
+                            <span style="font-weight:600;color:var(--trakio-success)" id="week-ca">0 CHF</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;padding:12px;background:var(--trakio-bg-input);border-radius:10px">
+                            <span style="color:var(--trakio-text-muted)">Nouveaux clients</span>
+                            <span style="font-weight:600" id="week-clients">0</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="refresh-info">Actualisation automatique toutes les 30 secondes • <span id="last-refresh">-</span></div>
     </div>
+    
+    <!-- Refresh Indicator -->
+    <div class="refresh-indicator">
+        <div class="refresh-dot"></div>
+        <span>Live • <span id="last-refresh">--:--</span></span>
+    </div>
+    
     <script>
-        let ordersData = [], clientsData = [];
-        document.addEventListener('DOMContentLoaded', () => setTimeout(init, 300));
-        function init() { updateDateTime(); loadUserName(); loadModules(); loadData(); setInterval(loadData, 30000); }
-        function updateDateTime() { document.getElementById('date-display').textContent = new Date().toLocaleDateString('fr-CH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
-        function loadUserName() { const user = TrakioUsers.getCurrentUser(); document.getElementById('user-name').textContent = user?.name || 'Pascal'; }
-        function loadModules() {
-            const modules = TrakioPermissions.getMyModules();
-            const quickAccess = [{ id: 'commandes', name: 'Commandes', icon: '📋', url: 'commandes.html' },{ id: 'myfish', name: 'MyFish', icon: '🛒', url: 'myfish.html' },{ id: 'clients', name: 'Clients', icon: '👥', url: 'clients.html' },{ id: 'caisse', name: 'Caisse', icon: '💵', url: 'caisse.html' }].filter(m => modules.includes(m.id));
-            document.getElementById('modules-grid').innerHTML = quickAccess.map(m => '<a href="'+m.url+'" class="module-card"><span class="module-icon">'+m.icon+'</span><span class="module-name">'+m.name+'</span></a>').join('');
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            TrakioUI.init('dashboard');
+            loadDashboard();
+            
+            // Auto refresh every 30s
+            setInterval(loadDashboard, 30000);
+        });
+        
+        function loadDashboard() {
+            // User name
+            const user = TrakioUsers.getCurrentUser();
+            document.getElementById('user-name').textContent = user?.name || 'Utilisateur';
+            
+            // Date
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('fr-CH', options);
+            
+            // Load KPIs
+            loadKPIs();
+            
+            // Load orders
+            loadRecentOrders();
+            
+            // Load alerts
+            loadAlerts();
+            
+            // Update refresh time
+            document.getElementById('last-refresh').textContent = now.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
         }
-        async function loadData() {
-            try {
-                [ordersData, clientsData] = await Promise.all([DataStore.commandes.getAll(), DataStore.clients.getAll()]);
-                updateKPIs(); renderOrders();
-                document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString('fr-CH');
-            } catch (e) { console.error('Erreur:', e); }
+        
+        function loadKPIs() {
+            // Get data from localStorage
+            const articles = JSON.parse(localStorage.getItem('trakio_articles_list') || '[]');
+            const clients = JSON.parse(localStorage.getItem('trakio_clients_list') || '[]');
+            const commandes = JSON.parse(localStorage.getItem('trakio_commandes_list') || '[]');
+            const ventes = JSON.parse(localStorage.getItem('trakio_ventes_list') || '[]');
+            
+            const today = new Date().toISOString().slice(0, 10);
+            const todayOrders = commandes.filter(c => c.createdAt?.slice(0, 10) === today || c.date?.slice(0, 10) === today);
+            const pendingOrders = commandes.filter(c => c.status === 'pending' || c.status === 'en_attente');
+            
+            // Calculate CA today
+            let todayCA = 0;
+            todayOrders.forEach(o => todayCA += (o.total || 0));
+            ventes.filter(v => v.date?.slice(0, 10) === today).forEach(v => todayCA += (v.total || 0));
+            
+            // Update KPIs
+            animateValue('kpi-orders', todayOrders.length);
+            document.getElementById('kpi-ca').textContent = formatCHF(todayCA);
+            animateValue('kpi-clients', clients.length);
+            animateValue('kpi-pending', pendingOrders.length);
+            animateValue('kpi-articles', articles.length);
+            
+            // Week stats
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            const weekOrders = commandes.filter(c => new Date(c.createdAt || c.date) >= weekAgo);
+            let weekCA = 0;
+            weekOrders.forEach(o => weekCA += (o.total || 0));
+            
+            document.getElementById('week-orders').textContent = weekOrders.length;
+            document.getElementById('week-ca').textContent = formatCHF(weekCA);
+            
+            const weekClients = clients.filter(c => new Date(c.createdAt) >= weekAgo);
+            document.getElementById('week-clients').textContent = weekClients.length;
         }
-        function updateKPIs() {
-            const today = new Date().toDateString();
-            const todayOrders = ordersData.filter(o => new Date(o.createdAt).toDateString() === today);
-            const pending = ordersData.filter(o => o.status === 'pending' || o.status === 'confirmed');
-            const todayRevenue = todayOrders.reduce((sum, o) => sum + (o.total || 0), 0);
-            document.getElementById('kpi-orders').textContent = todayOrders.length;
-            document.getElementById('kpi-revenue').textContent = Math.round(todayRevenue) + ' CHF';
-            document.getElementById('kpi-clients').textContent = clientsData.length;
-            document.getElementById('kpi-pending').textContent = pending.length;
+        
+        function animateValue(id, value) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            
+            const current = parseInt(el.textContent) || 0;
+            if (current === value) return;
+            
+            const duration = 500;
+            const steps = 20;
+            const increment = (value - current) / steps;
+            let step = 0;
+            
+            const timer = setInterval(() => {
+                step++;
+                el.textContent = Math.round(current + increment * step);
+                if (step >= steps) {
+                    el.textContent = value;
+                    clearInterval(timer);
+                }
+            }, duration / steps);
         }
-        function renderOrders() {
+        
+        function loadRecentOrders() {
+            const commandes = JSON.parse(localStorage.getItem('trakio_commandes_list') || '[]');
+            const recent = commandes
+                .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+                .slice(0, 5);
+            
             const container = document.getElementById('orders-list');
-            const recent = ordersData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
-            if (recent.length === 0) { container.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>Aucune commande</p></div>'; return; }
-            const statusLabels = { pending: 'En attente', confirmed: 'Confirmée', ready: 'Prête', delivered: 'Livrée' };
+            
+            if (recent.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>Aucune commande récente</p>
+                    </div>
+                `;
+                return;
+            }
+            
             container.innerHTML = recent.map(o => {
-                const status = o.status || 'pending';
-                return '<div class="order-item" onclick="window.location.href=\'commandes.html?id='+o.id+'\'"><div class="order-avatar '+status+'">'+(o.clientName || 'C')[0].toUpperCase()+'</div><div class="order-info"><div class="order-client">'+(o.clientName || 'Client')+'</div><div class="order-details">'+(o.items?.length || 0)+' article(s) • '+formatDate(o.createdAt)+'</div></div><div class="order-amount">'+formatCHF(o.total)+'</div><span class="order-status '+status+'">'+statusLabels[status]+'</span></div>';
+                const initial = (o.clientName || o.client || 'C')[0].toUpperCase();
+                const statusClass = o.status === 'pending' || o.status === 'en_attente' ? 'pending' : 
+                                   o.status === 'confirmed' || o.status === 'confirmee' ? 'confirmed' : 'delivered';
+                const statusLabel = o.status === 'pending' || o.status === 'en_attente' ? 'En attente' :
+                                   o.status === 'confirmed' || o.status === 'confirmee' ? 'Confirmée' : 'Livrée';
+                
+                return `
+                    <div class="order-item" onclick="location.href='commandes.html'">
+                        <div class="order-avatar">${initial}</div>
+                        <div class="order-info">
+                            <div class="order-client">${o.clientName || o.client || 'Client'}</div>
+                            <div class="order-details">${o.items?.length || 0} article(s) • ${formatDate(o.deliveryDate || o.date)}</div>
+                        </div>
+                        <div class="order-amount">${formatCHF(o.total || 0)}</div>
+                        <span class="order-status ${statusClass}">${statusLabel}</span>
+                    </div>
+                `;
             }).join('');
+        }
+        
+        function loadAlerts() {
+            const alerts = [];
+            const commandes = JSON.parse(localStorage.getItem('trakio_commandes_list') || '[]');
+            const pending = commandes.filter(c => c.status === 'pending' || c.status === 'en_attente');
+            
+            if (pending.length > 0) {
+                alerts.push({
+                    type: 'warning',
+                    icon: '⚠️',
+                    text: `${pending.length} commande(s) en attente de confirmation`
+                });
+            }
+            
+            // Check stock alerts (if articles have stock)
+            const articles = JSON.parse(localStorage.getItem('trakio_articles_list') || '[]');
+            const lowStock = articles.filter(a => a.stock !== undefined && a.stock < 5);
+            if (lowStock.length > 0) {
+                alerts.push({
+                    type: 'warning',
+                    icon: '📦',
+                    text: `${lowStock.length} article(s) en stock faible`
+                });
+            }
+            
+            if (alerts.length === 0) {
+                alerts.push({
+                    type: 'info',
+                    icon: '✅',
+                    text: 'Tout est en ordre !'
+                });
+            }
+            
+            document.getElementById('alerts-container').innerHTML = alerts.map(a => `
+                <div class="alert alert-${a.type}">
+                    <span class="alert-icon">${a.icon}</span>
+                    <span class="alert-text">${a.text}</span>
+                </div>
+            `).join('');
         }
     </script>
 </body>
