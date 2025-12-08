@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAKIO - Gestion Clients v1.1.0</title>
+    <title>TRAKIO v4.4.0 - Clients</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👥</text></svg>">
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     
-    <!-- TRAKIO Core (à la racine) -->
-    <script src="trakio-config.js"></script>
-    <script src="trakio-sync.js"></script>
-    <script src="trakio-ui.js"></script>
+    <!-- TRAKIO Core -->
+    <script src="trakio-config.js?v=4.4.0"></script>
+    <script src="trakio-sync.js?v=4.4.0"></script>
+    <script src="trakio-ui.js?v=4.4.0"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -32,12 +32,9 @@
             --purple: #8b5cf6;
         }
         
-        body {
-            background: var(--bg-dark);
-            color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
-        }
+        /* ============================================
+           LAYOUT
+        ============================================ */
         
         .container {
             max-width: 1400px;
@@ -45,7 +42,6 @@
             padding: 20px;
         }
         
-        /* HEADER */
         .page-header {
             display: flex;
             justify-content: space-between;
@@ -69,54 +65,10 @@
             flex-wrap: wrap;
         }
         
-        /* TOOLBAR */
-        .toolbar {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
+        /* ============================================
+           BUTTONS
+        ============================================ */
         
-        .search-box {
-            flex: 1;
-            min-width: 250px;
-            position: relative;
-        }
-        
-        .search-box input {
-            width: 100%;
-            padding: 12px 15px 12px 45px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text);
-            font-size: 14px;
-        }
-        
-        .search-box::before {
-            content: '🔍';
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        
-        select, input, textarea {
-            padding: 10px 15px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 14px;
-        }
-        
-        select:focus, input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        /* BUTTONS */
         .btn {
             padding: 10px 20px;
             border: none;
@@ -135,8 +87,12 @@
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--error); color: white; }
         .btn-secondary { background: var(--bg-input); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--border); }
         
-        /* TABS */
+        /* ============================================
+           TABS
+        ============================================ */
+        
         .tabs {
             display: flex;
             gap: 5px;
@@ -171,7 +127,10 @@
             font-size: 12px;
         }
         
-        /* STATS */
+        /* ============================================
+           STATS BAR
+        ============================================ */
+        
         .stats-bar {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -198,7 +157,66 @@
             text-transform: uppercase;
         }
         
-        /* CARDS GRID */
+        /* ============================================
+           TOOLBAR
+        ============================================ */
+        
+        .toolbar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+        }
+        
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        select {
+            padding: 12px 15px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        /* ============================================
+           CLIENTS GRID
+        ============================================ */
+        
         .clients-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -234,9 +252,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 700;
             color: white;
+            flex-shrink: 0;
         }
         
         .client-avatar.b2b { background: linear-gradient(135deg, var(--primary), #06b6d4); }
@@ -253,6 +272,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            margin-top: 3px;
         }
         
         .client-type-badge {
@@ -329,7 +349,10 @@
         .client-action-btn:hover { background: var(--primary); }
         .client-action-btn.whatsapp:hover { background: #25d366; }
         
-        /* MODAL */
+        /* ============================================
+           MODAL
+        ============================================ */
+        
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -378,7 +401,12 @@
             color: var(--text);
             cursor: pointer;
             font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+        
+        .modal-close:hover { background: var(--border); }
         
         .modal-body {
             padding: 20px;
@@ -390,9 +418,23 @@
             padding: 15px 20px;
             border-top: 1px solid var(--border);
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             gap: 10px;
         }
+        
+        .modal-footer-left {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .modal-footer-right {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* ============================================
+           FORM
+        ============================================ */
         
         .form-grid {
             display: grid;
@@ -418,9 +460,30 @@
         .form-group select,
         .form-group textarea {
             width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
         }
         
-        /* Loading */
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        /* ============================================
+           STATES
+        ============================================ */
+        
         .loading {
             text-align: center;
             padding: 60px;
@@ -451,373 +514,52 @@
             opacity: 0.5;
         }
         
-        /* Responsive */
+        /* ============================================
+           NOTIFICATION
+        ============================================ */
+        
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 14px;
+            z-index: 10001;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .notification.success { border-color: var(--success); }
+        .notification.error { border-color: var(--error); }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* ============================================
+           RESPONSIVE
+        ============================================ */
+        
         @media (max-width: 768px) {
             .form-grid { grid-template-columns: 1fr; }
             .clients-grid { grid-template-columns: 1fr; }
             .tabs { flex-wrap: wrap; }
-        }
-
-        /* ========================================
-           IMPORT CSV STYLES AVANCÉ
-        ======================================== */
-        .import-modal-large {
-            max-width: 900px !important;
-            width: 95% !important;
-        }
-
-        .import-modal-body {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            padding: 24px;
-        }
-
-        @media (max-width: 800px) {
-            .import-modal-body {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .import-panel {
-            background: var(--bg-primary);
-            border-radius: 12px;
-            padding: 20px;
-        }
-
-        .import-panel h4 {
-            margin-bottom: 16px;
-            color: var(--accent-primary);
-        }
-
-        .drop-zone {
-            border: 3px dashed var(--border-color);
-            border-radius: 12px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: var(--bg-card);
-        }
-
-        .drop-zone:hover, .drop-zone.dragover {
-            border-color: var(--accent-primary);
-            background: rgba(6, 214, 160, 0.05);
-        }
-
-        .drop-zone-icon {
-            font-size: 50px;
-            margin-bottom: 12px;
-        }
-
-        .drop-zone-text {
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
-        .drop-zone-hint {
-            font-size: 11px;
-            color: var(--text-muted);
-            opacity: 0.7;
-        }
-
-        .file-loaded {
-            display: none;
-            margin-top: 16px;
-            padding: 16px;
-            background: rgba(6, 214, 160, 0.1);
-            border: 1px solid var(--accent-primary);
-            border-radius: 8px;
-        }
-
-        .file-loaded.visible { display: block; }
-
-        .file-loaded-name {
-            font-weight: 700;
-            color: var(--accent-primary);
-            margin-bottom: 6px;
-        }
-
-        .file-loaded-stats {
-            font-size: 12px;
-            color: var(--text-muted);
-            display: flex;
-            gap: 16px;
-        }
-
-        .import-mode-options {
-            margin-top: 20px;
-        }
-
-        .import-mode-option {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 14px;
-            background: var(--bg-card);
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .import-mode-option:hover {
-            border-color: var(--accent-secondary);
-        }
-
-        .import-mode-option.selected {
-            border-color: var(--accent-primary);
-            background: rgba(6, 214, 160, 0.05);
-        }
-
-        .import-mode-option input[type="radio"] {
-            width: 18px;
-            height: 18px;
-            margin-top: 2px;
-            accent-color: var(--accent-primary);
-        }
-
-        .import-mode-option h5 {
-            margin-bottom: 2px;
-        }
-
-        .import-mode-option p {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .preview-section {
-            max-height: 280px;
-            overflow: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-        }
-
-        .preview-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-        }
-
-        .preview-table th {
-            background: var(--bg-hover);
-            padding: 8px 6px;
-            text-align: left;
-            font-size: 10px;
-            color: var(--text-muted);
-            position: sticky;
-            top: 0;
-        }
-
-        .preview-table td {
-            padding: 6px;
-            border-bottom: 1px solid var(--border-color);
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .preview-table tr:nth-child(even) {
-            background: var(--bg-hover);
-        }
-
-        .mapping-section {
-            margin-bottom: 16px;
-        }
-
-        .mapping-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px;
-            background: var(--bg-card);
-            border-radius: 6px;
-            margin-bottom: 6px;
-            font-size: 12px;
-        }
-
-        .mapping-csv-col {
-            flex: 1;
-            font-weight: 600;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .mapping-arrow {
-            color: var(--accent-primary);
-        }
-
-        .mapping-select {
-            flex: 1;
-            padding: 6px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            color: var(--text-primary);
-            font-size: 11px;
-        }
-
-        .import-footer {
-            display: flex;
-            gap: 12px;
-            padding: 16px 24px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .import-result-box {
-            display: none;
-            margin-top: 16px;
-            padding: 16px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .import-result-box.success {
-            display: block;
-            background: rgba(6, 214, 160, 0.1);
-            border: 2px solid var(--accent-primary);
-        }
-
-        .import-result-box.error {
-            display: block;
-            background: rgba(239, 71, 111, 0.1);
-            border: 2px solid var(--accent-danger);
-        }
-
-        .import-stats-row {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin-top: 12px;
-        }
-
-        .import-stat-item {
-            text-align: center;
-        }
-
-        .import-stat-num {
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .import-stat-num.green { color: var(--accent-primary); }
-        .import-stat-num.blue { color: var(--accent-secondary); }
-        .import-stat-num.red { color: var(--accent-danger); }
-
-        .import-stat-lbl {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .no-preview {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-        }
-
-        .no-preview-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-            opacity: 0.5;
-        }
-
-        .format-hint {
-            margin-top: 16px;
-            padding: 12px;
-            background: var(--bg-card);
-            border-radius: 8px;
-            font-size: 11px;
-        }
-
-        .format-hint code {
-            display: block;
-            margin-top: 8px;
-            padding: 8px;
-            background: var(--bg-primary);
-            border-radius: 4px;
-            color: var(--accent-secondary);
-            overflow-x: auto;
-        }
-        
-        /* Ancien header MASQUÉ - géré par trakio-ui.js */
-        .header {
-            display: none !important;
+            .page-header { flex-direction: column; align-items: flex-start; }
+            .header-actions { width: 100%; }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <div class="header-left">
-            <a href="index.html" class="back-btn">← Retour TRAKIO</a>
-            <h1>👥 Gestion Clients <span class="version-badge">v1.1.0</span></h1>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-primary" onclick="showForm()">➕ Nouveau client</button>
-            <button class="btn btn-secondary" onclick="showImportModal()">📥 Importer</button>
-            <button class="btn btn-secondary" onclick="exportCSV()">📤 Exporter</button>
-            <button class="btn btn-dropbox" onclick="saveToDropbox()">☁️ Dropbox</button>
-            <input type="file" id="import-file" accept=".csv" style="display:none;" onchange="importFile(this)">
-        </div>
-    </div>
+    <!-- Header injecté par trakio-ui.js -->
     
-    <!-- Stats -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-value" id="stat-total">0</div>
-            <div class="stat-label">Total clients</div>
-        </div>
-        <div class="stat-card highlight-blue">
-            <div class="stat-value" id="stat-b2b">0</div>
-            <div class="stat-label">🏢 Professionnels</div>
-        </div>
-        <div class="stat-card highlight-orange">
-            <div class="stat-value" id="stat-b2c">0</div>
-            <div class="stat-label">🏠 Particuliers</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" id="stat-active">0</div>
-            <div class="stat-label">Actifs ce mois</div>
-        </div>
-    </div>
-    
-    <!-- Filtres -->
-    <div class="filters">
-        <input type="text" id="search-input" placeholder="🔍 Rechercher par nom, ville, téléphone..." oninput="filterClients()">
-        <select id="type-filter" onchange="filterClients()">
-            <option value="">Tous les types</option>
-            <option value="b2b">🏢 Professionnels (B2B)</option>
-            <option value="b2c">🏠 Particuliers (B2C)</option>
-        </select>
-    </div>
-    
-    <!-- Formulaire -->
-    <div class="form-container" id="client-form">
-        <h3 class="form-title">📝 Fiche Client</h3>
-        <input type="hidden" id="edit-id">
-        
-        <div class="form-grid form-grid-4">
-            <div class="form-group">
-                <label>N° Client</label>
-                <input type="text" id="client-num">
-            </div>
-            <div class="form-group">
-                <label class="required">Nom / Société *</label>
-                <input type="text" id="client-name">
-            </div>
-            <div class="form-group">
-                <label>Contact</label>
-                <input type="text" id="client-contact">
-            </div>
-            <div class="form-group">
-                <label class="required">Type *</label>
-                <select id="client-type">
-                    <option value="b2b">🏢 Professionnel (B2B)</option>
-                    <option value="b2c">🏠 Particulier (B2C)</option>
-                </select>
     <div class="container">
         <!-- HEADER -->
         <div class="page-header">
@@ -901,213 +643,113 @@
     <!-- MODAL CLIENT -->
     <div class="modal-overlay" id="clientModal">
         <div class="modal">
-            <div class="client-modal-header">
-                <div class="modal-icon">👤</div>
-                <h2 id="action-modal-name"></h2>
-                <div id="action-modal-info" style="margin:12px 0;"></div>
-                <div id="action-modal-details" style="font-size:13px; color:var(--text-muted);"></div>
-            </div>
-            <div class="client-modal-actions">
-                <button class="client-modal-action primary" onclick="startOrderFromClient()">
-                    ⚡ Créer une commande
-                </button>
-                <button class="client-modal-action secondary" onclick="editFromModal()">
-                    ✏️ Modifier la fiche
-                </button>
-                <button class="client-modal-action cancel" onclick="closeActionModal()">
-                    Annuler
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Import -->
-    <div class="modal-overlay" id="import-modal" onclick="if(event.target === this) closeImportModal()">
-        <div class="modal import-modal-large">
-            <div class="modal-header gradient">
-                <div class="modal-icon">📥</div>
-                <h2>Import CSV Clients</h2>
-                <p style="opacity:0.8; margin-top:8px;">Glissez-déposez ou sélectionnez votre fichier</p>
-            </div>
-            
-            <div class="import-modal-body">
-                <!-- Panel gauche: Upload & Options -->
-                <div class="import-panel">
-                    <h4>📁 Fichier CSV</h4>
-                    
-                    <div class="drop-zone" id="dropZoneClients" onclick="document.getElementById('csvFileInputClients').click()">
-                        <div class="drop-zone-icon">📄</div>
-                        <div class="drop-zone-text">Glissez votre fichier ici</div>
-                        <div class="drop-zone-hint">ou cliquez pour sélectionner</div>
-                    </div>
-                    <input type="file" id="csvFileInputClients" accept=".csv,.txt" style="display:none;">
-
-                    <div class="file-loaded" id="fileLoadedClients">
-                        <div class="file-loaded-name" id="fileNameClients"></div>
-                        <div class="file-loaded-stats">
-                            <span>📊 <span id="rowCountClients">0</span> lignes</span>
-                            <span>📋 <span id="colCountClients">0</span> colonnes</span>
-                        </div>
-                    </div>
-
-                    <div class="import-mode-options">
-                        <h4 style="margin-bottom: 12px;">⚙️ Mode d'import</h4>
-                        
-                        <div class="import-mode-option selected" onclick="selectImportModeCSV('update')">
-                            <input type="radio" name="importModeCSV" value="update" checked>
-                            <div>
-                                <h5>🔄 Mettre à jour</h5>
-                                <p>Ajoute les nouveaux, met à jour les existants</p>
-                            </div>
-                        </div>
-                        
-                        <div class="import-mode-option" onclick="selectImportModeCSV('replace')">
-                            <input type="radio" name="importModeCSV" value="replace">
-                            <div>
-                                <h5>🗑️ Remplacer tout</h5>
-                                <p>Supprime tout et importe le fichier</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="import-result-box" id="importResultClients">
-                        <h4 id="importResultTitleClients">✅ Import terminé !</h4>
-                        <div class="import-stats-row">
-                            <div class="import-stat-item">
-                                <div class="import-stat-num green" id="statAddedClients">0</div>
-                                <div class="import-stat-lbl">Ajoutés</div>
-                            </div>
-                            <div class="import-stat-item">
-                                <div class="import-stat-num blue" id="statUpdatedClients">0</div>
-                                <div class="import-stat-lbl">Mis à jour</div>
-                            </div>
-                            <div class="import-stat-item">
-                                <div class="import-stat-num red" id="statErrorsClients">0</div>
-                                <div class="import-stat-lbl">Erreurs</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Panel droit: Preview -->
-                <div class="import-panel">
-                    <h4>👁️ Aperçu & Mapping</h4>
-
-                    <div class="mapping-section" id="mappingContainerClients" style="display:none;">
-                        <div id="mappingRowsClients"></div>
-                    </div>
-
-                    <div class="preview-section" id="previewContainerClients" style="display:none;">
-                        <table class="preview-table" id="previewTableClients">
-                            <thead id="previewHeadClients"></thead>
-                            <tbody id="previewBodyClients"></tbody>
-                        </table>
-                    </div>
-
-                    <div class="no-preview" id="noPreviewClients">
-                        <div class="no-preview-icon">📋</div>
-                        <p>Sélectionnez un fichier pour voir l'aperçu</p>
-                    </div>
-
-                    <div class="format-hint">
-                        <strong>📖 Format CSV attendu :</strong>
-                        <code>N°;Type;Nom;Contact;Adresse;NPA;Ville;Tél;Email</code>
-                    </div>
-                </div>
-            </div>
-
-            <div class="import-footer">
-                <button class="btn btn-secondary" style="flex:1;" onclick="closeImportModal()">Annuler</button>
-                <button class="btn btn-secondary" onclick="resetImportClients()">↺ Reset</button>
-                <button class="btn btn-primary" style="flex:2;" onclick="executeImportClients()" id="btnImportClients" disabled>🚀 Lancer l'import</button>
             <div class="modal-header">
                 <h2 id="modal-title">
-                    <span>👤</span>
+                    <span>➕</span>
                     <span>Nouveau client</span>
                 </h2>
                 <button class="modal-close" onclick="closeModal()">×</button>
             </div>
             <div class="modal-body">
-                <form id="clientForm">
+                <form id="clientForm" onsubmit="event.preventDefault(); saveClient();">
                     <input type="hidden" id="clientId">
+                    
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Type de client *</label>
                             <select id="clientType" required onchange="toggleCompanyField()">
-                                <option value="b2b">🏢 Professionnel (B2B)</option>
                                 <option value="b2c">👤 Particulier (B2C)</option>
+                                <option value="b2b">🏢 Professionnel (B2B)</option>
                             </select>
                         </div>
-                        <div class="form-group" id="companyField">
+                        
+                        <div class="form-group" id="companyField" style="display:none;">
                             <label>Entreprise</label>
                             <input type="text" id="clientCompany" placeholder="Nom de l'entreprise">
                         </div>
-                        <div class="form-group">
-                            <label>Nom *</label>
-                            <input type="text" id="clientLastName" required placeholder="Nom">
-                        </div>
+                        
                         <div class="form-group">
                             <label>Prénom *</label>
                             <input type="text" id="clientFirstName" required placeholder="Prénom">
                         </div>
+                        
+                        <div class="form-group">
+                            <label>Nom *</label>
+                            <input type="text" id="clientLastName" required placeholder="Nom de famille">
+                        </div>
+                        
                         <div class="form-group">
                             <label>Email</label>
                             <input type="email" id="clientEmail" placeholder="email@exemple.com">
                         </div>
+                        
                         <div class="form-group">
-                            <label>Téléphone *</label>
-                            <input type="tel" id="clientPhone" required placeholder="+41 79 123 45 67">
+                            <label>Téléphone</label>
+                            <input type="tel" id="clientPhone" placeholder="+41 79 123 45 67">
                         </div>
+                        
                         <div class="form-group full">
                             <label>Adresse</label>
                             <input type="text" id="clientAddress" placeholder="Rue et numéro">
                         </div>
+                        
                         <div class="form-group">
                             <label>NPA</label>
-                            <input type="text" id="clientZip" placeholder="1260">
+                            <input type="text" id="clientZip" placeholder="1000">
                         </div>
+                        
                         <div class="form-group">
                             <label>Ville</label>
-                            <input type="text" id="clientCity" placeholder="Nyon">
+                            <input type="text" id="clientCity" placeholder="Lausanne">
                         </div>
-                        <div class="form-group full">
-                            <label>Notes</label>
-                            <textarea id="clientNotes" rows="3" placeholder="Notes internes..."></textarea>
-                        </div>
+                        
                         <div class="form-group">
-                            <label>Remise client (%)</label>
+                            <label>Remise (%)</label>
                             <input type="number" id="clientDiscount" min="0" max="100" placeholder="0">
                         </div>
+                        
                         <div class="form-group">
                             <label>Source</label>
                             <select id="clientSource">
-                                <option value="">Sélectionner...</option>
-                                <option value="direct">Direct</option>
-                                <option value="myfish">MyFish</option>
-                                <option value="shopify">Shopify</option>
+                                <option value="">-- Sélectionner --</option>
+                                <option value="walk-in">Passage en magasin</option>
+                                <option value="phone">Téléphone</option>
+                                <option value="web">Site web</option>
                                 <option value="referral">Recommandation</option>
+                                <option value="event">Événement</option>
                                 <option value="other">Autre</option>
                             </select>
+                        </div>
+                        
+                        <div class="form-group full">
+                            <label>Notes</label>
+                            <textarea id="clientNotes" placeholder="Notes internes..."></textarea>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-danger" id="deleteBtn" onclick="deleteClient()" style="display:none;">
-                    🗑️ Supprimer
-                </button>
-                <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
-                <button class="btn btn-primary" onclick="saveClient()">💾 Enregistrer</button>
+                <div class="modal-footer-left">
+                    <button type="button" class="btn btn-danger" id="deleteBtn" onclick="deleteClient()" style="display:none;">
+                        <span>🗑️</span>
+                        <span>Supprimer</span>
+                    </button>
+                </div>
+                <div class="modal-footer-right">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary" onclick="saveClient()">
+                        <span>💾</span>
+                        <span>Enregistrer</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
     
     <script>
         // ============================================
-        // INITIALISATION
+        // VARIABLES GLOBALES
         // ============================================
-        
-        initTrakioApp('clients');
         
         let clientsData = [];
         let filteredData = [];
@@ -1116,18 +758,46 @@
         let unsubscribe = null;
         
         // ============================================
-        // CHARGEMENT
+        // UTILITAIRES
+        // ============================================
+        
+        function formatCHF(amount) {
+            return new Intl.NumberFormat('fr-CH', {
+                style: 'currency',
+                currency: 'CHF',
+                minimumFractionDigits: 2
+            }).format(amount || 0);
+        }
+        
+        function showNotification(message, type = 'info') {
+            const existing = document.querySelector('.notification');
+            if (existing) existing.remove();
+            
+            const notif = document.createElement('div');
+            notif.className = `notification ${type}`;
+            notif.innerHTML = `
+                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notif);
+            
+            setTimeout(() => notif.remove(), 3000);
+        }
+        
+        // ============================================
+        // CHARGEMENT DES DONNÉES
         // ============================================
         
         async function loadClients() {
             try {
-                clientsData = await Clients.getAll({
-                    orderBy: { field: 'lastName', direction: 'asc' }
-                });
+                clientsData = await Clients.getAll();
+                filteredData = [...clientsData];
                 
-                filterClients();
-                updateStats();
                 updateTabCounts();
+                updateStats();
+                filterClients();
+                
+                console.log(`👥 ${clientsData.length} clients chargés`);
                 
             } catch (error) {
                 console.error('Erreur chargement clients:', error);
@@ -1136,16 +806,19 @@
         }
         
         function setupRealtimeListener() {
-            unsubscribe = Clients.listen((data, changes) => {
-                clientsData = data;
-                filterClients();
-                updateStats();
-                updateTabCounts();
-            });
+            if (typeof Clients !== 'undefined' && Clients.subscribe) {
+                unsubscribe = Clients.subscribe((data) => {
+                    clientsData = data;
+                    filteredData = [...clientsData];
+                    updateTabCounts();
+                    updateStats();
+                    filterClients();
+                });
+            }
         }
         
         // ============================================
-        // TABS & FILTRAGE
+        // TABS
         // ============================================
         
         function setTab(tab) {
@@ -1158,494 +831,43 @@
             filterClients();
         }
         
+        function updateTabCounts() {
+            const all = clientsData.length;
+            const b2b = clientsData.filter(c => c.type === 'b2b').length;
+            const b2c = clientsData.filter(c => c.type === 'b2c').length;
+            
+            document.getElementById('count-all').textContent = all;
+            document.getElementById('count-b2b').textContent = b2b;
+            document.getElementById('count-b2c').textContent = b2c;
+        }
+        
+        // ============================================
+        // FILTRAGE ET TRI
+        // ============================================
+        
         function filterClients() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const sortBy = document.getElementById('sortBy').value;
             
-            document.getElementById('client-form').classList.add('visible');
-            document.getElementById('edit-id').value = id;
-            document.getElementById('client-num').value = c.num || '';
-            document.getElementById('client-name').value = c.name || '';
-            document.getElementById('client-contact').value = c.contact || '';
-            document.getElementById('client-type').value = c.clientType || 'b2b';
-            document.getElementById('client-address').value = c.address || '';
-            document.getElementById('client-address2').value = c.address2 || '';
-            document.getElementById('client-zip').value = c.zip || '';
-            document.getElementById('client-city').value = c.city || '';
-            document.getElementById('client-phone').value = c.phone || '';
-            document.getElementById('client-mobile').value = c.mobile || '';
-            document.getElementById('client-email').value = c.email || '';
-            document.getElementById('client-credit').value = c.credit || '';
-            document.getElementById('client-payment').value = c.payment || '30 jours fin de mois';
-            document.getElementById('client-pricelist').value = c.pricelistId || '';
-            document.getElementById('client-form').scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        function saveClient() {
-            const id = document.getElementById('edit-id').value;
-            const client = {
-                id: id ? parseInt(id) : Date.now(),
-                num: document.getElementById('client-num').value.trim() || String(Date.now()).slice(-6),
-                name: document.getElementById('client-name').value.trim(),
-                contact: document.getElementById('client-contact').value.trim(),
-                clientType: document.getElementById('client-type').value,
-                address: document.getElementById('client-address').value.trim(),
-                address2: document.getElementById('client-address2').value.trim(),
-                zip: document.getElementById('client-zip').value.trim(),
-                city: document.getElementById('client-city').value.trim(),
-                phone: document.getElementById('client-phone').value.trim(),
-                mobile: document.getElementById('client-mobile').value.trim(),
-                email: document.getElementById('client-email').value.trim(),
-                credit: parseFloat(document.getElementById('client-credit').value) || 0,
-                payment: document.getElementById('client-payment').value,
-                pricelistId: parseInt(document.getElementById('client-pricelist').value) || null,
-                ordersCount: 0,
-                history: []
-            };
-            
-            if (!client.name) {
-                showToast('Le nom/société est requis', 'error');
-                return;
-            }
-            
-            if (id) {
-                const index = ClientsData.clients.findIndex(c => c.id === parseInt(id));
-                if (index !== -1) {
-                    client.ordersCount = ClientsData.clients[index].ordersCount || 0;
-                    client.history = ClientsData.clients[index].history || [];
-                    ClientsData.clients[index] = client;
-                }
-            } else {
-                ClientsData.clients.push(client);
-            }
-            
-            saveData();
-            hideForm();
-            renderTable();
-            updateStats();
-            showToast('Client enregistré', 'success');
-        }
-        
-        function deleteClient(id) {
-            if (!confirm('Supprimer ce client ?')) return;
-            ClientsData.clients = ClientsData.clients.filter(c => c.id !== id);
-            saveData();
-            renderTable(document.getElementById('search-input').value, document.getElementById('type-filter').value);
-            updateStats();
-            showToast('Client supprimé', 'success');
-        }
-        
-        function toggleType(id) {
-            const client = ClientsData.clients.find(c => c.id === id);
-            if (!client) return;
-            client.clientType = (client.clientType || 'b2b') === 'b2c' ? 'b2b' : 'b2c';
-            saveData();
-            renderTable(document.getElementById('search-input').value, document.getElementById('type-filter').value);
-            updateStats();
-        }
-        
-        // ===== MODAL ACTION =====
-        function showActionModal(clientId) {
-            const client = ClientsData.clients.find(c => c.id === clientId);
-            if (!client) return;
-            
-            currentActionClientId = clientId;
-            const type = client.clientType || 'b2b';
-            const typeIcon = type === 'b2c' ? '🏠' : '🏢';
-            const typeLabel = type === 'b2c' ? 'Particulier' : 'Professionnel';
-            const typeColor = type === 'b2c' ? 'var(--accent-warning)' : 'var(--accent-secondary)';
-            const pricelist = client.pricelistId ? Pricelists.find(p => p.id === client.pricelistId) : null;
-            
-            document.getElementById('action-modal-name').textContent = client.name;
-            document.getElementById('action-modal-info').innerHTML = `
-                <span style="padding:4px 10px; background:${typeColor}20; color:${typeColor}; border-radius:20px; font-size:12px;">${typeIcon} ${typeLabel}</span>
-                ${pricelist ? `<span style="padding:4px 10px; background:var(--accent-warning)20; color:var(--accent-warning); border-radius:20px; font-size:12px; margin-left:8px;">💰 ${pricelist.name}</span>` : ''}
-            `;
-            document.getElementById('action-modal-details').innerHTML = `
-                ${client.address ? `📍 ${client.address}, ${client.zip} ${client.city}` : ''}
-                ${client.phone ? `<br>📞 ${client.phone}` : ''}
-                ${client.email ? `<br>✉️ ${client.email}` : ''}
-            `;
-            
-            document.getElementById('client-action-modal').classList.add('visible');
-        }
-        
-        function closeActionModal() {
-            document.getElementById('client-action-modal').classList.remove('visible');
-            currentActionClientId = null;
-        }
-        
-        function startOrderFromClient() {
-            if (!currentActionClientId) return;
-            closeActionModal();
-            // Rediriger vers TRAKIO avec le client pré-sélectionné
-            window.location.href = `index.html?action=order&clientId=${currentActionClientId}`;
-        }
-        
-        function startOrder(clientId) {
-            window.location.href = `index.html?action=order&clientId=${clientId}`;
-        }
-        
-        function editFromModal() {
-            if (!currentActionClientId) return;
-            closeActionModal();
-            editClient(currentActionClientId);
-        }
-        
-        function goToPricelist(pricelistId) {
-            window.location.href = 'articles.html';
-        }
-        
-        // ===== IMPORT CSV AVANCÉ =====
-        let csvDataClients = null;
-        let csvHeadersClients = [];
-        let importModeCSVClients = 'update';
-        let columnMappingClients = {};
-
-        const CLIENT_FIELDS = [
-            { key: 'num', label: 'N° Client', required: true },
-            { key: 'name', label: 'Nom/Société', required: true },
-            { key: 'clientType', label: 'Type (B2B/B2C)' },
-            { key: 'contact', label: 'Contact' },
-            { key: 'address', label: 'Adresse' },
-            { key: 'address2', label: 'Adresse 2' },
-            { key: 'zip', label: 'Code postal' },
-            { key: 'city', label: 'Ville' },
-            { key: 'phone', label: 'Téléphone' },
-            { key: 'mobile', label: 'Mobile' },
-            { key: 'email', label: 'Email' },
-            { key: 'credit', label: 'Crédit' },
-            { key: 'payment', label: 'Conditions paiement' },
-            { key: 'ignore', label: '— Ignorer —' }
-        ];
-
-        // Initialisation drag & drop
-        document.addEventListener('DOMContentLoaded', () => {
-            const dropZone = document.getElementById('dropZoneClients');
-            const fileInput = document.getElementById('csvFileInputClients');
-
-            if (dropZone) {
-                dropZone.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    dropZone.classList.add('dragover');
-                });
-
-                dropZone.addEventListener('dragleave', () => {
-                    dropZone.classList.remove('dragover');
-                });
-
-                dropZone.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    dropZone.classList.remove('dragover');
-                    const files = e.dataTransfer.files;
-                    if (files.length > 0) {
-                        handleCSVFileClients(files[0]);
-                    }
-                });
-            }
-
-            if (fileInput) {
-                fileInput.addEventListener('change', (e) => {
-                    if (e.target.files.length > 0) {
-                        handleCSVFileClients(e.target.files[0]);
-                    }
-                });
-            }
-        });
-
-        function showImportModal() {
-            document.getElementById('import-modal').classList.add('visible');
-        }
-        
-        function closeImportModal() {
-            document.getElementById('import-modal').classList.remove('visible');
-            resetImportClients();
-        }
-
-        function handleCSVFileClients(file) {
-            if (!file.name.match(/\.(csv|txt)$/i)) {
-                showToast('Format non supporté. Utilisez un fichier CSV.', 'error');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                let content = fixEncoding(e.target.result);
-                parseCSVClients(content, file.name);
-            };
-            reader.readAsText(file, 'ISO-8859-1');
-        }
-
-        function parseCSVClients(content, fileName) {
-            const separator = content.includes(';') ? ';' : ',';
-            const lines = content.split('\n').filter(l => l.trim());
-            
-            if (lines.length < 2) {
-                showToast('Le fichier doit contenir au moins un en-tête et une ligne', 'error');
-                return;
-            }
-
-            csvHeadersClients = lines[0].split(separator).map(h => h.replace(/"/g, '').trim());
-            csvDataClients = [];
-
-            for (let i = 1; i < lines.length; i++) {
-                const cols = lines[i].split(separator).map(c => c.replace(/"/g, '').trim());
-                if (cols.length >= 2 && cols.some(c => c)) {
-                    csvDataClients.push(cols);
-                }
-            }
-
-            // Afficher infos fichier
-            document.getElementById('fileLoadedClients').classList.add('visible');
-            document.getElementById('fileNameClients').textContent = '📄 ' + fileName;
-            document.getElementById('rowCountClients').textContent = csvDataClients.length;
-            document.getElementById('colCountClients').textContent = csvHeadersClients.length;
-
-            // Auto-mapping
-            autoMapColumnsClients();
-            renderMappingClients();
-            renderPreviewClients();
-
-            // Activer bouton
-            document.getElementById('btnImportClients').disabled = false;
-            document.getElementById('noPreviewClients').style.display = 'none';
-            document.getElementById('previewContainerClients').style.display = 'block';
-            document.getElementById('mappingContainerClients').style.display = 'block';
-        }
-
-        function autoMapColumnsClients() {
-            columnMappingClients = {};
-            
-            const mappings = {
-                'num': ['numéro', 'numero', 'n°', 'client', 'ref', 'code', 'id'],
-                'name': ['nom', 'société', 'societe', 'entreprise', 'raison', 'name', 'client'],
-                'clientType': ['type', 'b2b', 'b2c', 'catégorie'],
-                'contact': ['contact', 'interlocuteur', 'personne'],
-                'address': ['adresse', 'address', 'rue'],
-                'address2': ['adresse2', 'complément'],
-                'zip': ['code', 'postal', 'npa', 'zip', 'cp'],
-                'city': ['ville', 'city', 'localité'],
-                'phone': ['téléphone', 'telephone', 'tel', 'phone', 'fixe'],
-                'mobile': ['mobile', 'portable', 'gsm', 'natel'],
-                'email': ['email', 'mail', 'courriel', 'e-mail'],
-                'credit': ['crédit', 'credit', 'solde'],
-                'payment': ['paiement', 'payment', 'échéance', 'conditions']
-            };
-
-            csvHeadersClients.forEach((header, idx) => {
-                const headerLower = header.toLowerCase();
-                for (const [field, keywords] of Object.entries(mappings)) {
-                    if (keywords.some(kw => headerLower.includes(kw))) {
-                        if (!Object.values(columnMappingClients).includes(field)) {
-                            columnMappingClients[idx] = field;
-                            break;
-                        }
-                    }
-                }
-                if (!columnMappingClients[idx]) {
-                    columnMappingClients[idx] = 'ignore';
-                }
-            });
-        }
-
-        function renderMappingClients() {
-            const container = document.getElementById('mappingRowsClients');
-            container.innerHTML = '';
-
-            csvHeadersClients.slice(0, 8).forEach((header, idx) => {
-                const options = CLIENT_FIELDS.map(f => 
-                    `<option value="${f.key}" ${columnMappingClients[idx] === f.key ? 'selected' : ''}>${f.label}${f.required ? ' *' : ''}</option>`
-                ).join('');
-
-                container.innerHTML += `
-                    <div class="mapping-row">
-                        <span class="mapping-csv-col" title="${header}">${header}</span>
-                        <span class="mapping-arrow">→</span>
-                        <select class="mapping-select" onchange="updateMappingClients(${idx}, this.value)">
-                            ${options}
-                        </select>
-                    </div>
-                `;
-            });
-
-            if (csvHeadersClients.length > 8) {
-                container.innerHTML += `<p style="font-size:11px; color:var(--text-muted); text-align:center;">+ ${csvHeadersClients.length - 8} autres colonnes</p>`;
-            }
-        }
-
-        function updateMappingClients(idx, value) {
-            columnMappingClients[idx] = value;
-        }
-
-        function renderPreviewClients() {
-            const thead = document.getElementById('previewHeadClients');
-            const tbody = document.getElementById('previewBodyClients');
-
-            thead.innerHTML = '<tr>' + csvHeadersClients.map(h => `<th>${h}</th>`).join('') + '</tr>';
-
-            tbody.innerHTML = csvDataClients.slice(0, 8).map(row => 
-                '<tr>' + row.map(cell => `<td title="${cell}">${cell}</td>`).join('') + '</tr>'
-            ).join('');
-
-            if (csvDataClients.length > 8) {
-                tbody.innerHTML += `<tr><td colspan="${csvHeadersClients.length}" style="text-align:center; color:var(--text-muted);">... + ${csvDataClients.length - 8} lignes</td></tr>`;
-            }
-        }
-
-        function selectImportModeCSV(mode) {
-            importModeCSVClients = mode;
-            document.querySelectorAll('.import-mode-option').forEach(opt => {
-                opt.classList.remove('selected');
-                opt.querySelector('input[type="radio"]').checked = false;
-            });
-            const selected = document.querySelector(`.import-mode-option input[value="${mode}"]`);
-            if (selected) {
-                selected.checked = true;
-                selected.closest('.import-mode-option').classList.add('selected');
-            }
-        }
-
-        function executeImportClients() {
-            if (!csvDataClients || csvDataClients.length === 0) {
-                showToast('Aucune donnée à importer', 'error');
-                return;
-            }
-
-            let added = 0, updated = 0, errors = 0;
-
-            if (importModeCSVClients === 'replace') {
-                ClientsData.clients = [];
-            }
-
-            csvDataClients.forEach((row, rowIndex) => {
-                try {
-                    const clientData = {
-                        id: Date.now() + rowIndex,
-                        num: '',
-                        name: '',
-                        clientType: 'b2b',
-                        contact: '',
-                        address: '',
-                        address2: '',
-                        zip: '',
-                        city: '',
-                        phone: '',
-                        mobile: '',
-                        email: '',
-                        credit: 0,
-                        payment: '30 jours fin de mois',
-                        ordersCount: 0,
-                        history: []
-                    };
-
-                    Object.entries(columnMappingClients).forEach(([colIdx, field]) => {
-                        if (field !== 'ignore' && row[colIdx] !== undefined) {
-                            const value = row[colIdx];
-                            
-                            switch(field) {
-                                case 'clientType':
-                                    clientData.clientType = value.toLowerCase().includes('b2c') ? 'b2c' : 'b2b';
-                                    break;
-                                case 'credit':
-                                    clientData.credit = parseFloat(value.replace(/[^\d.,\-]/g, '').replace(',', '.')) || 0;
-                                    break;
-                                default:
-                                    clientData[field] = value;
-                            }
-                        }
-                    });
-
-                    // Générer N° si vide
-                    if (!clientData.num) {
-                        clientData.num = 'CLI' + String(Date.now() + rowIndex).slice(-6);
-                    }
-
-                    // Générer nom si vide
-                    if (!clientData.name) {
-                        clientData.name = 'Client ' + clientData.num;
-                    }
-
-                    // Chercher doublon
-                    const existingIdx = ClientsData.clients.findIndex(c => c.num === clientData.num);
-                    
-                    if (existingIdx !== -1) {
-                        clientData.id = ClientsData.clients[existingIdx].id;
-                        clientData.ordersCount = ClientsData.clients[existingIdx].ordersCount || 0;
-                        clientData.history = ClientsData.clients[existingIdx].history || [];
-                        ClientsData.clients[existingIdx] = clientData;
-                        updated++;
-                    } else {
-                        ClientsData.clients.push(clientData);
-                        added++;
-                    }
-                } catch(err) {
-                    errors++;
-                    console.error('Erreur ligne ' + (rowIndex + 2), err);
-                }
-            });
-
-            saveData();
-            renderTable();
-            updateStats();
-
-            // Afficher résultat
-            const result = document.getElementById('importResultClients');
-            result.className = 'import-result-box success';
-            document.getElementById('importResultTitleClients').textContent = '✅ Import terminé !';
-            document.getElementById('statAddedClients').textContent = added;
-            document.getElementById('statUpdatedClients').textContent = updated;
-            document.getElementById('statErrorsClients').textContent = errors;
-
-            showToast(`Import: ${added} ajoutés, ${updated} mis à jour`, 'success');
-        }
-
-        function resetImportClients() {
-            csvDataClients = null;
-            csvHeadersClients = [];
-            columnMappingClients = {};
-
-            const fileInput = document.getElementById('csvFileInputClients');
-            if (fileInput) fileInput.value = '';
-            
-            document.getElementById('fileLoadedClients').classList.remove('visible');
-            document.getElementById('btnImportClients').disabled = true;
-            document.getElementById('previewContainerClients').style.display = 'none';
-            document.getElementById('mappingContainerClients').style.display = 'none';
-            document.getElementById('noPreviewClients').style.display = 'block';
-            document.getElementById('importResultClients').className = 'import-result-box';
-            document.getElementById('previewHeadClients').innerHTML = '';
-            document.getElementById('previewBodyClients').innerHTML = '';
-            document.getElementById('mappingRowsClients').innerHTML = '';
-        }
-
-        // Anciennes fonctions conservées pour compatibilité
-        function selectImportMode(mode) {
-            selectImportModeCSV(mode);
-        }
-        
-        function confirmImport() {
-            // Pour compatibilité ancienne
-        }
-        
-        function importFile(input) {
-            // Redirige vers le nouveau système
-            if (input.files[0]) {
-                handleCSVFileClients(input.files[0]);
-            }
             filteredData = clientsData.filter(client => {
                 // Filtre par tab
-                if (currentTab === 'b2b' && client.type !== 'b2b') return false;
-                if (currentTab === 'b2c' && client.type !== 'b2c') return false;
+                if (currentTab !== 'all' && client.type !== currentTab) {
+                    return false;
+                }
                 
                 // Filtre par recherche
                 if (search) {
-                    const fullName = `${client.firstName || ''} ${client.lastName || ''}`.toLowerCase();
-                    const company = (client.company || '').toLowerCase();
-                    const phone = (client.phone || '').toLowerCase();
-                    const email = (client.email || '').toLowerCase();
+                    const searchFields = [
+                        client.firstName,
+                        client.lastName,
+                        client.company,
+                        client.email,
+                        client.phone,
+                        client.city,
+                        client.zip
+                    ].filter(Boolean).join(' ').toLowerCase();
                     
-                    if (!fullName.includes(search) && !company.includes(search) && 
-                        !phone.includes(search) && !email.includes(search)) {
+                    if (!searchFields.includes(search)) {
                         return false;
                     }
                 }
@@ -1670,16 +892,6 @@
             });
             
             renderClients();
-        }
-        
-        function updateTabCounts() {
-            const all = clientsData.length;
-            const b2b = clientsData.filter(c => c.type === 'b2b').length;
-            const b2c = clientsData.filter(c => c.type === 'b2c').length;
-            
-            document.getElementById('count-all').textContent = all;
-            document.getElementById('count-b2b').textContent = b2b;
-            document.getElementById('count-b2c').textContent = b2c;
         }
         
         // ============================================
@@ -1755,7 +967,6 @@
         function updateStats() {
             const total = clientsData.length;
             
-            // Clients actifs ce mois (avec commandes)
             const monthStart = new Date();
             monthStart.setDate(1);
             monthStart.setHours(0, 0, 0, 0);
@@ -1765,7 +976,6 @@
                 return lastOrder >= monthStart;
             }).length;
             
-            // CA et commandes totaux
             const totalRevenue = clientsData.reduce((sum, c) => sum + (c.totalRevenue || 0), 0);
             const totalOrders = clientsData.reduce((sum, c) => sum + (c.ordersCount || 0), 0);
             
@@ -1856,7 +1066,6 @@
                 source: document.getElementById('clientSource').value
             };
             
-            // Nom complet pour recherche facile
             data.fullName = `${data.firstName} ${data.lastName}`.trim();
             
             try {
@@ -1909,12 +1118,10 @@
         }
         
         function openWhatsApp(phone) {
-            // Nettoyer le numéro
             let cleanPhone = phone.replace(/\s+/g, '').replace(/[^0-9+]/g, '');
             if (cleanPhone.startsWith('0')) {
                 cleanPhone = '+41' + cleanPhone.substring(1);
             }
-            
             window.open(`https://wa.me/${cleanPhone.replace('+', '')}`, '_blank');
         }
         
