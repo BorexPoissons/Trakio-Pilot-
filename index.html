@@ -2,1079 +2,121 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TRAKIO v4.4.0 - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRAKIO v4.5.0 - Dashboard</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    
-    <!-- TRAKIO Core -->
-    <script src="trakio-config.js?v=4.4.0"></script>
-    <script src="trakio-sync.js?v=4.4.0"></script>
-    <script src="trakio-ui.js?v=4.4.0"></script>
-    
+    <script src="trakio-config.js?v=4.5.0"></script>
+    <script src="trakio-sync.js?v=4.5.0"></script>
+    <script src="trakio-ui.js?v=4.5.0"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        :root {
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --bg-input: #334155;
-            --border: #475569;
-            --text: #f1f5f9;
-            --text-muted: #94a3b8;
-            --primary: #0ea5e9;
-            --primary-dark: #0284c7;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --purple: #8b5cf6;
-        }
-        
-        /* ============================================
-           DASHBOARD LAYOUT
-        ============================================ */
-        
-        .dashboard {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .dashboard-title {
-            font-size: 28px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .dashboard-title .live-dot {
-            width: 12px;
-            height: 12px;
-            background: var(--success);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-            box-shadow: 0 0 10px var(--success);
-        }
-        
-        .dashboard-date {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-        
-        .quick-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .quick-btn {
-            padding: 10px 18px;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text);
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-        
-        .quick-btn:hover {
-            background: var(--primary);
-            border-color: var(--primary);
-            transform: translateY(-2px);
-        }
-        
-        .quick-btn.primary {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-        
-        /* ============================================
-           KPI CARDS
-        ============================================ */
-        
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        
-        .kpi-card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid var(--border);
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .kpi-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-        
-        .kpi-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--kpi-color, var(--primary));
-        }
-        
-        .kpi-icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-        
-        .kpi-value {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 5px;
-            font-variant-numeric: tabular-nums;
-        }
-        
-        .kpi-label {
-            font-size: 13px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .kpi-trend {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-        
-        .kpi-trend.up {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--success);
-        }
-        
-        .kpi-trend.down {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--error);
-        }
-        
-        /* ============================================
-           MAIN CONTENT GRID
-        ============================================ */
-        
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 20px;
-        }
-        
-        @media (max-width: 1100px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-        
-        .card-header {
-            padding: 18px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0,0,0,0.2);
-        }
-        
-        .card-title {
-            font-size: 16px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .card-badge {
-            background: var(--primary);
-            color: white;
-            font-size: 12px;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-        
-        .card-body {
-            padding: 20px;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        
-        /* ============================================
-           ORDERS LIST
-        ============================================ */
-        
-        .order-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background: var(--bg-input);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            gap: 15px;
-        }
-        
-        .order-item:hover {
-            background: var(--border);
-            transform: translateX(5px);
-        }
-        
-        .order-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .order-source {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-        
-        .order-source.trakio { background: linear-gradient(135deg, #0ea5e9, #06b6d4); }
-        .order-source.shopify { background: linear-gradient(135deg, #95bf47, #5e8e3e); }
-        .order-source.myfish { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
-        
-        .order-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .order-client {
-            font-weight: 600;
-            font-size: 15px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .order-details {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 3px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .order-amount {
-            font-weight: 700;
-            font-size: 16px;
-            color: var(--success);
-            white-space: nowrap;
-        }
-        
-        .order-status {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        
-        .order-status.pending { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
-        .order-status.confirmed { background: rgba(14, 165, 233, 0.2); color: var(--primary); }
-        .order-status.ready { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-        .order-status.delivered { background: rgba(100, 116, 139, 0.2); color: var(--text-muted); }
-        
-        /* ============================================
-           ALERTS PANEL
-        ============================================ */
-        
-        .alert-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 15px;
-            background: var(--bg-input);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border-left: 4px solid var(--warning);
-        }
-        
-        .alert-item.urgent {
-            border-left-color: var(--error);
-            background: rgba(239, 68, 68, 0.1);
-        }
-        
-        .alert-item.info {
-            border-left-color: var(--primary);
-        }
-        
-        .alert-item.success {
-            border-left-color: var(--success);
-        }
-        
-        .alert-icon {
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-        
-        .alert-content {
-            flex: 1;
-        }
-        
-        .alert-title {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-        
-        .alert-text {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-        
-        .alert-time {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 6px;
-        }
-        
-        /* ============================================
-           MODULES GRID
-        ============================================ */
-        
-        .modules-section {
-            margin-top: 25px;
-        }
-        
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .modules-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 15px;
-        }
-        
-        .module-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 25px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            color: var(--text);
-        }
-        
-        .module-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border-color: var(--primary);
-        }
-        
-        .module-icon {
-            font-size: 40px;
-            margin-bottom: 12px;
-        }
-        
-        .module-name {
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 5px;
-        }
-        
-        .module-desc {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-        
-        /* ============================================
-           LOADING & EMPTY STATES
-        ============================================ */
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-muted);
-        }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--bg-input);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.1); }
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-muted);
-        }
-        
-        .empty-state-icon {
-            font-size: 50px;
-            margin-bottom: 15px;
-            opacity: 0.5;
-        }
-        
-        /* ============================================
-           RESPONSIVE
-        ============================================ */
-        
-        @media (max-width: 768px) {
-            .dashboard {
-                padding: 15px;
-            }
-            
-            .dashboard-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .kpi-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .kpi-card {
-                padding: 15px;
-            }
-            
-            .kpi-value {
-                font-size: 22px;
-            }
-            
-            .order-item {
-                flex-wrap: wrap;
-            }
-            
-            .order-amount {
-                width: 100%;
-                text-align: right;
-                margin-top: 10px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .kpi-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .quick-actions {
-                width: 100%;
-            }
-            
-            .quick-btn {
-                flex: 1;
-                justify-content: center;
-            }
-        }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-dark); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+        .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+        .welcome { margin-bottom: 30px; }
+        .welcome h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .welcome p { color: var(--trakio-text-muted); }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px; }
+        .kpi-card { background: var(--trakio-bg-card); border: 1px solid var(--trakio-border); border-radius: 16px; padding: 20px; position: relative; overflow: hidden; }
+        .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--kpi-color, var(--trakio-primary)); }
+        .kpi-icon { font-size: 32px; margin-bottom: 12px; }
+        .kpi-value { font-size: 32px; font-weight: 700; color: var(--kpi-color, var(--trakio-primary)); }
+        .kpi-label { font-size: 13px; color: var(--trakio-text-muted); margin-top: 4px; }
+        .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        @media (max-width: 1000px) { .dashboard-grid { grid-template-columns: 1fr; } }
+        .card { background: var(--trakio-bg-card); border: 1px solid var(--trakio-border); border-radius: 16px; padding: 20px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .card-title { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .btn-sm { padding: 8px 16px; background: var(--trakio-bg-input); border: 1px solid var(--trakio-border); border-radius: 8px; color: var(--trakio-text); cursor: pointer; font-size: 13px; text-decoration: none; transition: all 0.2s; }
+        .btn-sm:hover { background: var(--trakio-primary); border-color: var(--trakio-primary); }
+        .orders-list { display: flex; flex-direction: column; gap: 12px; }
+        .order-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--trakio-bg-input); border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        .order-item:hover { background: var(--trakio-bg-hover); transform: translateX(5px); }
+        .order-avatar { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; flex-shrink: 0; }
+        .order-avatar.pending { background: var(--trakio-warning); }
+        .order-avatar.confirmed { background: var(--trakio-primary); }
+        .order-avatar.ready { background: var(--trakio-success); }
+        .order-info { flex: 1; min-width: 0; }
+        .order-client { font-weight: 600; font-size: 14px; }
+        .order-details { font-size: 12px; color: var(--trakio-text-muted); margin-top: 3px; }
+        .order-amount { font-weight: 700; color: var(--trakio-success); }
+        .order-status { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+        .order-status.pending { background: rgba(245, 158, 11, 0.2); color: var(--trakio-warning); }
+        .order-status.confirmed { background: rgba(14, 165, 233, 0.2); color: var(--trakio-primary); }
+        .order-status.ready { background: rgba(16, 185, 129, 0.2); color: var(--trakio-success); }
+        .modules-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .module-card { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--trakio-bg-input); border-radius: 12px; text-decoration: none; color: var(--trakio-text); transition: all 0.2s; }
+        .module-card:hover { background: var(--trakio-primary); transform: scale(1.02); }
+        .module-icon { font-size: 24px; }
+        .module-name { font-weight: 600; font-size: 14px; }
+        .empty { text-align: center; padding: 40px; color: var(--trakio-text-muted); }
+        .empty-icon { font-size: 48px; margin-bottom: 10px; opacity: 0.5; }
+        .refresh-info { text-align: center; font-size: 11px; color: var(--trakio-text-muted); margin-top: 20px; }
     </style>
 </head>
 <body>
-    <!-- Header injecté par trakio-ui.js -->
-    
-    <div class="dashboard">
-        <!-- HEADER -->
-        <div class="dashboard-header">
-            <div>
-                <h1 class="dashboard-title">
-                    <span>📊</span>
-                    <span>Dashboard</span>
-                    <span class="live-dot" title="Temps réel actif"></span>
-                </h1>
-                <p class="dashboard-date" id="current-date">Chargement...</p>
-            </div>
-            <div class="quick-actions">
-                <a href="commandes.html" class="quick-btn primary">
-                    <span>➕</span>
-                    <span>Nouvelle commande</span>
-                </a>
-                <a href="myfish.html" class="quick-btn">
-                    <span>🛒</span>
-                    <span>MyFish</span>
-                </a>
-                <a href="caisse.html" class="quick-btn">
-                    <span>💵</span>
-                    <span>Caisse</span>
-                </a>
-                <button class="quick-btn" onclick="TrakioSync.syncAll()">
-                    <span>🔄</span>
-                    <span>Sync</span>
-                </button>
-            </div>
+    <div class="container">
+        <div class="welcome">
+            <h1>👋 Bonjour <span id="user-name">Pascal</span> !</h1>
+            <p id="date-display">Chargement...</p>
         </div>
-        
-        <!-- KPIs -->
         <div class="kpi-grid">
-            <div class="kpi-card" style="--kpi-color: #0ea5e9;">
-                <span class="kpi-icon">📦</span>
-                <div class="kpi-value" id="kpi-orders-today">-</div>
-                <div class="kpi-label">Commandes aujourd'hui</div>
-                <span class="kpi-trend up" id="kpi-orders-trend">-</span>
-            </div>
-            <div class="kpi-card" style="--kpi-color: #10b981;">
-                <span class="kpi-icon">💰</span>
-                <div class="kpi-value" id="kpi-revenue-today">-</div>
-                <div class="kpi-label">CA du jour</div>
-                <span class="kpi-trend up" id="kpi-revenue-trend">-</span>
-            </div>
-            <div class="kpi-card" style="--kpi-color: #8b5cf6;">
-                <span class="kpi-icon">🛒</span>
-                <div class="kpi-value" id="kpi-myfish">-</div>
-                <div class="kpi-label">Commandes MyFish</div>
-            </div>
-            <div class="kpi-card" style="--kpi-color: #95bf47;">
-                <span class="kpi-icon">🛍️</span>
-                <div class="kpi-value" id="kpi-shopify">-</div>
-                <div class="kpi-label">Commandes Shopify</div>
-            </div>
-            <div class="kpi-card" style="--kpi-color: #f59e0b;">
-                <span class="kpi-icon">⏳</span>
-                <div class="kpi-value" id="kpi-pending">-</div>
-                <div class="kpi-label">En attente</div>
-            </div>
-            <div class="kpi-card" style="--kpi-color: #06b6d4;">
-                <span class="kpi-icon">👥</span>
-                <div class="kpi-value" id="kpi-clients">-</div>
-                <div class="kpi-label">Clients actifs</div>
-            </div>
+            <div class="kpi-card" style="--kpi-color: #0ea5e9;"><div class="kpi-icon">📋</div><div class="kpi-value" id="kpi-orders">-</div><div class="kpi-label">Commandes du jour</div></div>
+            <div class="kpi-card" style="--kpi-color: #10b981;"><div class="kpi-icon">💰</div><div class="kpi-value" id="kpi-revenue">-</div><div class="kpi-label">CA aujourd'hui</div></div>
+            <div class="kpi-card" style="--kpi-color: #8b5cf6;"><div class="kpi-icon">👥</div><div class="kpi-value" id="kpi-clients">-</div><div class="kpi-label">Clients</div></div>
+            <div class="kpi-card" style="--kpi-color: #f59e0b;"><div class="kpi-icon">⏳</div><div class="kpi-value" id="kpi-pending">-</div><div class="kpi-label">En attente</div></div>
         </div>
-        
-        <!-- MAIN CONTENT -->
-        <div class="content-grid">
-            <!-- Commandes du jour -->
+        <div class="dashboard-grid">
             <div class="card">
-                <div class="card-header">
-                    <span class="card-title">
-                        <span>📋</span>
-                        <span>Commandes du jour</span>
-                    </span>
-                    <span class="card-badge" id="orders-count">0</span>
-                </div>
-                <div class="card-body" id="orders-list">
-                    <div class="loading">
-                        <div class="loading-spinner"></div>
-                        <p>Chargement des commandes...</p>
-                    </div>
-                </div>
+                <div class="card-header"><h2 class="card-title">📋 Commandes récentes</h2><a href="commandes.html" class="btn-sm">Voir tout →</a></div>
+                <div class="orders-list" id="orders-list"><div class="empty"><div class="empty-icon">📋</div><p>Chargement...</p></div></div>
             </div>
-            
-            <!-- Alertes & Notifications -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">
-                        <span>🔔</span>
-                        <span>Alertes</span>
-                    </span>
-                    <span class="card-badge" id="alerts-count">0</span>
-                </div>
-                <div class="card-body" id="alerts-list">
-                    <div class="loading">
-                        <div class="loading-spinner"></div>
-                        <p>Chargement...</p>
-                    </div>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="card">
+                    <div class="card-header"><h2 class="card-title">⚡ Accès rapide</h2></div>
+                    <div class="modules-grid" id="modules-grid"></div>
                 </div>
             </div>
         </div>
-        
-        <!-- MODULES -->
-        <div class="modules-section">
-            <h2 class="section-title">
-                <span>🧩</span>
-                <span>Modules</span>
-            </h2>
-            <div class="modules-grid">
-                <a href="articles.html" class="module-card">
-                    <div class="module-icon">🐟</div>
-                    <div class="module-name">Articles</div>
-                    <div class="module-desc">Gestion produits</div>
-                </a>
-                <a href="clients.html" class="module-card">
-                    <div class="module-icon">👥</div>
-                    <div class="module-name">Clients</div>
-                    <div class="module-desc">B2B & B2C</div>
-                </a>
-                <a href="commandes.html" class="module-card">
-                    <div class="module-icon">📋</div>
-                    <div class="module-name">Commandes</div>
-                    <div class="module-desc">Commandes PRO</div>
-                </a>
-                <a href="myfish.html" class="module-card">
-                    <div class="module-icon">🛒</div>
-                    <div class="module-name">MyFish</div>
-                    <div class="module-desc">Vente B2C</div>
-                </a>
-                <a href="caisse.html" class="module-card">
-                    <div class="module-icon">💵</div>
-                    <div class="module-name">Caisse</div>
-                    <div class="module-desc">Point de vente</div>
-                </a>
-                <a href="tracabilite.html" class="module-card">
-                    <div class="module-icon">🏷️</div>
-                    <div class="module-name">Traçabilité</div>
-                    <div class="module-desc">Étiquettes & lots</div>
-                </a>
-                <a href="compta.html" class="module-card">
-                    <div class="module-icon">🧾</div>
-                    <div class="module-name">Compta</div>
-                    <div class="module-desc">Comptabilité</div>
-                </a>
-                <a href="#shophub" class="module-card" onclick="openModule('shophub')">
-                    <div class="module-icon">🛍️</div>
-                    <div class="module-name">Shop Hub</div>
-                    <div class="module-desc">Shopify sync</div>
-                </a>
-            </div>
-        </div>
+        <div class="refresh-info">Actualisation automatique toutes les 30 secondes • <span id="last-refresh">-</span></div>
     </div>
-    
     <script>
-        // ============================================
-        // INITIALISATION
-        // ============================================
-        
-        initTrakioApp('dashboard');
-        
-        // Variables globales
-        let ordersData = [];
-        let alertsData = [];
-        let unsubscribeOrders = null;
-        let unsubscribeMyfish = null;
-        
-        // ============================================
-        // DATE COURANTE
-        // ============================================
-        
-        function updateCurrentDate() {
-            const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            document.getElementById('current-date').textContent = 
-                now.toLocaleDateString('fr-CH', options);
+        let ordersData = [], clientsData = [];
+        document.addEventListener('DOMContentLoaded', () => setTimeout(init, 300));
+        function init() { updateDateTime(); loadUserName(); loadModules(); loadData(); setInterval(loadData, 30000); }
+        function updateDateTime() { document.getElementById('date-display').textContent = new Date().toLocaleDateString('fr-CH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
+        function loadUserName() { const user = TrakioUsers.getCurrentUser(); document.getElementById('user-name').textContent = user?.name || 'Pascal'; }
+        function loadModules() {
+            const modules = TrakioPermissions.getMyModules();
+            const quickAccess = [{ id: 'commandes', name: 'Commandes', icon: '📋', url: 'commandes.html' },{ id: 'myfish', name: 'MyFish', icon: '🛒', url: 'myfish.html' },{ id: 'clients', name: 'Clients', icon: '👥', url: 'clients.html' },{ id: 'caisse', name: 'Caisse', icon: '💵', url: 'caisse.html' }].filter(m => modules.includes(m.id));
+            document.getElementById('modules-grid').innerHTML = quickAccess.map(m => '<a href="'+m.url+'" class="module-card"><span class="module-icon">'+m.icon+'</span><span class="module-name">'+m.name+'</span></a>').join('');
         }
-        
-        updateCurrentDate();
-        setInterval(updateCurrentDate, 60000);
-        
-        // ============================================
-        // CHARGEMENT DES DONNÉES
-        // ============================================
-        
-        async function loadDashboardData() {
-            console.log('📊 Chargement dashboard...');
-            
-            // Charger en parallèle
-            await Promise.all([
-                loadOrders(),
-                loadKPIs(),
-                loadAlerts()
-            ]);
-            
-            // Activer les listeners temps réel
-            setupRealtimeListeners();
-        }
-        
-        // ============================================
-        // COMMANDES
-        // ============================================
-        
-        async function loadOrders() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
+        async function loadData() {
             try {
-                // Charger commandes TRAKIO
-                const trakioOrders = await Commandes.getAll({
-                    orderBy: { field: 'createdAt', direction: 'desc' },
-                    limit: 50
-                });
-                
-                // Charger commandes MyFish
-                const myfishOrders = await MyFishOrders.getAll({
-                    orderBy: { field: 'createdAt', direction: 'desc' },
-                    limit: 50
-                });
-                
-                // Combiner et filtrer pour aujourd'hui
-                ordersData = [
-                    ...trakioOrders.map(o => ({ ...o, source: 'trakio' })),
-                    ...myfishOrders.map(o => ({ ...o, source: 'myfish' }))
-                ].filter(o => {
-                    const orderDate = o.createdAt?.toDate?.() || new Date(o.createdAt);
-                    return orderDate >= today;
-                }).sort((a, b) => {
-                    const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt);
-                    const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt);
-                    return dateB - dateA;
-                });
-                
-                renderOrders();
-                
-            } catch (error) {
-                console.error('Erreur chargement commandes:', error);
-                document.getElementById('orders-list').innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">⚠️</div>
-                        <p>Erreur de chargement</p>
-                    </div>
-                `;
-            }
+                [ordersData, clientsData] = await Promise.all([DataStore.commandes.getAll(), DataStore.clients.getAll()]);
+                updateKPIs(); renderOrders();
+                document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString('fr-CH');
+            } catch (e) { console.error('Erreur:', e); }
         }
-        
+        function updateKPIs() {
+            const today = new Date().toDateString();
+            const todayOrders = ordersData.filter(o => new Date(o.createdAt).toDateString() === today);
+            const pending = ordersData.filter(o => o.status === 'pending' || o.status === 'confirmed');
+            const todayRevenue = todayOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+            document.getElementById('kpi-orders').textContent = todayOrders.length;
+            document.getElementById('kpi-revenue').textContent = Math.round(todayRevenue) + ' CHF';
+            document.getElementById('kpi-clients').textContent = clientsData.length;
+            document.getElementById('kpi-pending').textContent = pending.length;
+        }
         function renderOrders() {
             const container = document.getElementById('orders-list');
-            const badge = document.getElementById('orders-count');
-            
-            badge.textContent = ordersData.length;
-            
-            if (ordersData.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <p>Aucune commande aujourd'hui</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = ordersData.map(order => {
-                const sourceIcons = {
-                    trakio: '📋',
-                    shopify: '🛍️',
-                    myfish: '🛒'
-                };
-                
-                const statusLabels = {
-                    pending: 'En attente',
-                    confirmed: 'Confirmée',
-                    ready: 'Prête',
-                    delivered: 'Livrée'
-                };
-                
-                const clientName = order.clientName || order.client?.name || 'Client inconnu';
-                const amount = order.total || order.amount || 0;
-                const status = order.status || 'pending';
-                const orderNum = order.orderNumber || order.num || order.id.slice(-6);
-                
-                return `
-                    <div class="order-item" onclick="openOrder('${order.id}', '${order.source}')">
-                        <div class="order-source ${order.source}">
-                            ${sourceIcons[order.source] || '📦'}
-                        </div>
-                        <div class="order-info">
-                            <div class="order-client">${clientName}</div>
-                            <div class="order-details">
-                                <span>#${orderNum}</span>
-                                <span>${order.items?.length || 0} article(s)</span>
-                            </div>
-                        </div>
-                        <div class="order-status ${status}">${statusLabels[status]}</div>
-                        <div class="order-amount">${formatCHF(amount)}</div>
-                    </div>
-                `;
+            const recent = ordersData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+            if (recent.length === 0) { container.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>Aucune commande</p></div>'; return; }
+            const statusLabels = { pending: 'En attente', confirmed: 'Confirmée', ready: 'Prête', delivered: 'Livrée' };
+            container.innerHTML = recent.map(o => {
+                const status = o.status || 'pending';
+                return '<div class="order-item" onclick="window.location.href=\'commandes.html?id='+o.id+'\'"><div class="order-avatar '+status+'">'+(o.clientName || 'C')[0].toUpperCase()+'</div><div class="order-info"><div class="order-client">'+(o.clientName || 'Client')+'</div><div class="order-details">'+(o.items?.length || 0)+' article(s) • '+formatDate(o.createdAt)+'</div></div><div class="order-amount">'+formatCHF(o.total)+'</div><span class="order-status '+status+'">'+statusLabels[status]+'</span></div>';
             }).join('');
         }
-        
-        function openOrder(id, source) {
-            if (source === 'myfish') {
-                window.location.href = `myfish.html?order=${id}`;
-            } else {
-                window.location.href = `commandes.html?order=${id}`;
-            }
-        }
-        
-        // ============================================
-        // KPIs
-        // ============================================
-        
-        async function loadKPIs() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            try {
-                // Toutes les commandes
-                const allOrders = await Commandes.getAll();
-                const allMyfish = await MyFishOrders.getAll();
-                const allClients = await Clients.getAll();
-                
-                // Filtrer pour aujourd'hui
-                const todayOrders = allOrders.filter(o => {
-                    const d = o.createdAt?.toDate?.() || new Date(o.createdAt);
-                    return d >= today;
-                });
-                
-                const todayMyfish = allMyfish.filter(o => {
-                    const d = o.createdAt?.toDate?.() || new Date(o.createdAt);
-                    return d >= today;
-                });
-                
-                // Calculer les totaux
-                const totalOrdersToday = todayOrders.length + todayMyfish.length;
-                const revenueToday = [...todayOrders, ...todayMyfish]
-                    .reduce((sum, o) => sum + (o.total || o.amount || 0), 0);
-                
-                const pendingCount = [...allOrders, ...allMyfish]
-                    .filter(o => o.status === 'pending').length;
-                
-                // Clients actifs (avec commandes ce mois)
-                const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-                const activeClients = new Set([
-                    ...allOrders.filter(o => {
-                        const d = o.createdAt?.toDate?.() || new Date(o.createdAt);
-                        return d >= monthStart;
-                    }).map(o => o.clientId),
-                    ...allMyfish.filter(o => {
-                        const d = o.createdAt?.toDate?.() || new Date(o.createdAt);
-                        return d >= monthStart;
-                    }).map(o => o.clientId)
-                ]).size;
-                
-                // Mettre à jour l'UI
-                animateValue('kpi-orders-today', totalOrdersToday);
-                document.getElementById('kpi-revenue-today').textContent = formatCHF(revenueToday);
-                animateValue('kpi-myfish', todayMyfish.length);
-                animateValue('kpi-shopify', 0); // TODO: intégrer Shopify
-                animateValue('kpi-pending', pendingCount);
-                animateValue('kpi-clients', activeClients || allClients.length);
-                
-                // Trends (comparaison avec hier - simplifié)
-                document.getElementById('kpi-orders-trend').textContent = `+${totalOrdersToday}`;
-                document.getElementById('kpi-revenue-trend').textContent = revenueToday > 0 ? '↑' : '-';
-                
-            } catch (error) {
-                console.error('Erreur KPIs:', error);
-            }
-        }
-        
-        function animateValue(elementId, value) {
-            const el = document.getElementById(elementId);
-            if (!el) return;
-            
-            const duration = 500;
-            const start = parseInt(el.textContent) || 0;
-            const diff = value - start;
-            const startTime = performance.now();
-            
-            function update(currentTime) {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const eased = 1 - Math.pow(1 - progress, 3);
-                el.textContent = Math.round(start + diff * eased);
-                
-                if (progress < 1) {
-                    requestAnimationFrame(update);
-                }
-            }
-            
-            requestAnimationFrame(update);
-        }
-        
-        // ============================================
-        // ALERTES
-        // ============================================
-        
-        async function loadAlerts() {
-            const container = document.getElementById('alerts-list');
-            const badge = document.getElementById('alerts-count');
-            
-            // Générer des alertes basées sur les données
-            alertsData = [];
-            
-            try {
-                // Vérifier les commandes en attente
-                const allOrders = await Commandes.getAll();
-                const pendingOrders = allOrders.filter(o => o.status === 'pending');
-                
-                if (pendingOrders.length > 0) {
-                    alertsData.push({
-                        type: 'warning',
-                        icon: '⏳',
-                        title: `${pendingOrders.length} commande(s) en attente`,
-                        text: 'Des commandes attendent d\'être traitées',
-                        time: 'Maintenant'
-                    });
-                }
-                
-                // Vérifier la connexion Firebase
-                if (!TRAKIO_STATE.firebaseConnected) {
-                    alertsData.push({
-                        type: 'urgent',
-                        icon: '🔴',
-                        title: 'Firebase déconnecté',
-                        text: 'Les données ne sont pas synchronisées en temps réel',
-                        time: 'Maintenant'
-                    });
-                }
-                
-                // Ajouter une alerte de bienvenue si pas d'autres alertes
-                if (alertsData.length === 0) {
-                    alertsData.push({
-                        type: 'success',
-                        icon: '✅',
-                        title: 'Tout est en ordre',
-                        text: 'Aucune alerte à signaler',
-                        time: 'Maintenant'
-                    });
-                }
-                
-            } catch (error) {
-                alertsData.push({
-                    type: 'urgent',
-                    icon: '⚠️',
-                    title: 'Erreur de chargement',
-                    text: error.message,
-                    time: 'Maintenant'
-                });
-            }
-            
-            badge.textContent = alertsData.filter(a => a.type === 'urgent' || a.type === 'warning').length;
-            
-            container.innerHTML = alertsData.map(alert => `
-                <div class="alert-item ${alert.type}">
-                    <span class="alert-icon">${alert.icon}</span>
-                    <div class="alert-content">
-                        <div class="alert-title">${alert.title}</div>
-                        <div class="alert-text">${alert.text}</div>
-                        <div class="alert-time">${alert.time}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        // ============================================
-        // TEMPS RÉEL
-        // ============================================
-        
-        function setupRealtimeListeners() {
-            // Écouter les nouvelles commandes
-            unsubscribeOrders = Commandes.listen((data, changes) => {
-                changes.forEach(change => {
-                    if (change.type === 'added') {
-                        showNotification(`Nouvelle commande: ${change.doc.clientName || 'Client'}`, 'info');
-                    }
-                });
-                
-                // Recharger les données
-                loadOrders();
-                loadKPIs();
-                loadAlerts();
-            });
-            
-            // Écouter MyFish
-            unsubscribeMyfish = MyFishOrders.listen((data, changes) => {
-                changes.forEach(change => {
-                    if (change.type === 'added') {
-                        showNotification(`Nouvelle commande MyFish!`, 'success');
-                    }
-                });
-                
-                loadOrders();
-                loadKPIs();
-            });
-        }
-        
-        // ============================================
-        // MODULE NAVIGATION
-        // ============================================
-        
-        function openModule(moduleId) {
-            // Pour les modules intégrés dans index.html
-            console.log('Open module:', moduleId);
-            // TODO: implémenter navigation interne si nécessaire
-        }
-        
-        // ============================================
-        // CLEANUP
-        // ============================================
-        
-        window.addEventListener('beforeunload', () => {
-            if (unsubscribeOrders) unsubscribeOrders();
-            if (unsubscribeMyfish) unsubscribeMyfish();
-        });
-        
-        // ============================================
-        // DÉMARRAGE
-        // ============================================
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(loadDashboardData, 300);
-        });
-        
-        // Refresh automatique toutes les 30 secondes
-        setInterval(() => {
-            if (TRAKIO_STATE.firebaseConnected) {
-                loadKPIs();
-            }
-        }, 30000);
     </script>
 </body>
 </html>

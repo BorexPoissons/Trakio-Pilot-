@@ -1,17 +1,14 @@
 /**
- * ═══════════════════════════════════════════════════════════════
- * TRAKIO Sync v4.4.0 - Synchronisation Firebase & Offline
- * Fichier à placer à la RACINE du projet
- * ═══════════════════════════════════════════════════════════════
+ * ╔═══════════════════════════════════════════════════════════════╗
+ * ║  TRAKIO SYNC v4.5.0 - Synchronisation Firebase + Offline      ║
+ * ║  Queue offline + Temps réel + Cache local                     ║
+ * ╚═══════════════════════════════════════════════════════════════╝
  */
 
 const TrakioSync = {
-    VERSION: '4.4.0',
+    VERSION: '4.5.0',
     
-    // ═══════════════════════════════════════════════════════════
-    // ÉTAT
-    // ═══════════════════════════════════════════════════════════
-    
+    // État
     isOnline: navigator.onLine,
     isSyncing: false,
     lastSync: null,
@@ -36,17 +33,16 @@ const TrakioSync = {
             this.lastSync = new Date(lastSyncStr);
         }
         
-        console.log(`🔄 TRAKIO Sync v${this.VERSION} initialisé`);
-        console.log(`📡 Statut: ${this.isOnline ? 'En ligne' : 'Hors ligne'}`);
+        console.log(`🔄 TrakioSync v${this.VERSION} initialisé - ${this.isOnline ? 'En ligne' : 'Hors ligne'}`);
         
-        // Sync automatique si en ligne
+        // Traiter la queue si en ligne
         if (this.isOnline) {
             setTimeout(() => this.processOfflineQueue(), 2000);
         }
     },
     
     // ═══════════════════════════════════════════════════════════
-    // GESTION DE LA CONNEXION
+    // GESTION CONNEXION
     // ═══════════════════════════════════════════════════════════
     
     handleOnline() {
@@ -58,17 +54,16 @@ const TrakioSync = {
             TrakioUI.showToast('📡 Connexion rétablie', 'success');
         }
         
-        // Traiter la queue offline
         this.processOfflineQueue();
     },
     
     handleOffline() {
-        console.log('📡 Connexion perdue');
+        console.log('📡 Mode hors ligne');
         this.isOnline = false;
         
         if (typeof TrakioUI !== 'undefined') {
-            TrakioUI.setFirebaseStatus('disconnected');
-            TrakioUI.showToast('📡 Mode hors ligne', 'warning');
+            TrakioUI.setFirebaseStatus('offline');
+            TrakioUI.showToast('📡 Mode hors ligne activé', 'warning');
         }
     },
     
@@ -79,38 +74,36 @@ const TrakioSync = {
     loadOfflineQueue() {
         try {
             const stored = localStorage.getItem('trakio_offline_queue');
-            if (stored) {
-                this.offlineQueue = JSON.parse(stored);
+            this.offlineQueue = stored ? JSON.parse(stored) : [];
+            if (this.offlineQueue.length > 0) {
                 console.log(`📦 ${this.offlineQueue.length} opération(s) en attente`);
             }
         } catch (e) {
-            console.error('Erreur chargement queue offline:', e);
             this.offlineQueue = [];
         }
     },
     
     saveOfflineQueue() {
-        try {
-            localStorage.setItem('trakio_offline_queue', JSON.stringify(this.offlineQueue));
-        } catch (e) {
-            console.error('Erreur sauvegarde queue offline:', e);
-        }
+        localStorage.setItem('trakio_offline_queue', JSON.stringify(this.offlineQueue));
     },
     
     addToQueue(operation) {
         this.offlineQueue.push({
             ...operation,
-            timestamp: new Date().toISOString(),
-            id: `op_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            id: generateId('op'),
+            timestamp: new Date().toISOString()
         });
         this.saveOfflineQueue();
-        console.log(`📦 Opération ajoutée à la queue: ${operation.type}`);
+        console.log(`📦 +1 opération en queue (total: ${this.offlineQueue.length})`);
     },
     
     async processOfflineQueue() {
         if (!this.isOnline || this.isSyncing || this.offlineQueue.length === 0) {
             return;
         }
+        
+        const db = getDb();
+        if (!db) return;
         
         console.log(`🔄 Traitement de ${this.offlineQueue.length} opération(s)...`);
         this.isSyncing = true;
@@ -119,28 +112,30 @@ const TrakioSync = {
             TrakioUI.setFirebaseStatus('syncing');
         }
         
-        const db = typeof getDb === 'function' ? getDb() : window.db;
-        if (!db) {
-            console.warn('⚠️ Firebase non disponible');
-            this.isSyncing = false;
-            return;
-        }
-        
         const failed = [];
         
         for (const op of this.offlineQueue) {
             try {
-                await this.executeOperation(db, op);
-                console.log(`✅ Opération ${op.id} réussie`);
+                switch (op.type) {
+                    case 'set':
+                        await db.collection(op.collection).doc(op.docId).set(op.data, { merge: true });
+                        break;
+                    case 'update':
+                        await db.collection(op.collection).doc(op.docId).update(op.data);
+                        break;
+                    case 'delete':
+                        await db.collection(op.collection).doc(op.docId).delete();
+                        break;
+                }
+                console.log(`✅ Sync: ${op.type} ${op.collection}/${op.docId}`);
             } catch (e) {
-                console.error(`❌ Opération ${op.id} échouée:`, e);
+                console.error(`❌ Échec sync:`, e);
                 failed.push(op);
             }
         }
         
         this.offlineQueue = failed;
         this.saveOfflineQueue();
-        
         this.isSyncing = false;
         this.lastSync = new Date();
         localStorage.setItem('trakio_last_sync', this.lastSync.toISOString());
@@ -150,154 +145,166 @@ const TrakioSync = {
             if (failed.length === 0) {
                 TrakioUI.showToast('✅ Synchronisation terminée', 'success');
             } else {
-                TrakioUI.showToast(`⚠️ ${failed.length} opération(s) échouée(s)`, 'warning');
+                TrakioUI.showToast(`⚠️ ${failed.length} opération(s) en attente`, 'warning');
             }
         }
     },
     
-    async executeOperation(db, operation) {
-        const { type, collection, docId, data } = operation;
-        
-        switch (type) {
-            case 'set':
-                await db.collection(collection).doc(docId).set(data, { merge: true });
-                break;
-            case 'update':
-                await db.collection(collection).doc(docId).update(data);
-                break;
-            case 'delete':
-                await db.collection(collection).doc(docId).delete();
-                break;
-            case 'add':
-                await db.collection(collection).add(data);
-                break;
-            default:
-                throw new Error(`Type d'opération inconnu: ${type}`);
-        }
-    },
-    
     // ═══════════════════════════════════════════════════════════
-    // API PUBLIQUE - CRUD AVEC SYNC
+    // API CRUD
     // ═══════════════════════════════════════════════════════════
     
-    /**
-     * Sauvegarder un document (crée ou met à jour)
-     */
     async save(collection, docId, data) {
-        // Ajouter métadonnées
+        const id = docId || generateId(collection.substring(0, 3));
         const enrichedData = {
             ...data,
+            id,
             updatedAt: new Date().toISOString(),
-            updatedBy: this.getCurrentUserId()
+            updatedBy: TrakioUsers.getCurrentUser()?.id || 'unknown'
         };
         
-        // Sauvegarder en local d'abord
-        this.saveLocal(collection, docId, enrichedData);
+        // Toujours sauvegarder en local d'abord
+        this.saveLocal(collection, id, enrichedData);
         
-        // Essayer de sync vers Firebase
+        // Essayer Firebase si en ligne
         if (this.isOnline) {
-            try {
-                const db = typeof getDb === 'function' ? getDb() : window.db;
-                if (db) {
-                    await db.collection(collection).doc(docId).set(enrichedData, { merge: true });
-                    console.log(`✅ ${collection}/${docId} synchronisé`);
-                    return { success: true, synced: true };
+            const db = getDb();
+            if (db) {
+                try {
+                    await db.collection(collection).doc(id).set(enrichedData, { merge: true });
+                    return { success: true, id, synced: true };
+                } catch (e) {
+                    console.warn('⚠️ Ajout à la queue offline');
                 }
-            } catch (e) {
-                console.warn(`⚠️ Sync échouée, ajout à la queue:`, e);
             }
         }
         
-        // Ajouter à la queue offline
-        this.addToQueue({
-            type: 'set',
-            collection,
-            docId,
-            data: enrichedData
-        });
-        
-        return { success: true, synced: false };
+        // Ajouter à la queue
+        this.addToQueue({ type: 'set', collection, docId: id, data: enrichedData });
+        return { success: true, id, synced: false };
     },
     
-    /**
-     * Supprimer un document
-     */
     async delete(collection, docId) {
         // Supprimer en local
         this.deleteLocal(collection, docId);
         
-        // Essayer de sync vers Firebase
+        // Essayer Firebase
         if (this.isOnline) {
-            try {
-                const db = typeof getDb === 'function' ? getDb() : window.db;
-                if (db) {
+            const db = getDb();
+            if (db) {
+                try {
                     await db.collection(collection).doc(docId).delete();
-                    console.log(`✅ ${collection}/${docId} supprimé`);
                     return { success: true, synced: true };
+                } catch (e) {
+                    console.warn('⚠️ Suppression ajoutée à la queue');
                 }
-            } catch (e) {
-                console.warn(`⚠️ Suppression sync échouée:`, e);
             }
         }
         
-        // Ajouter à la queue offline
-        this.addToQueue({
-            type: 'delete',
-            collection,
-            docId
-        });
-        
+        this.addToQueue({ type: 'delete', collection, docId });
         return { success: true, synced: false };
     },
     
-    /**
-     * Charger un document
-     */
     async get(collection, docId) {
         // Essayer Firebase d'abord si en ligne
         if (this.isOnline) {
-            try {
-                const db = typeof getDb === 'function' ? getDb() : window.db;
-                if (db) {
+            const db = getDb();
+            if (db) {
+                try {
                     const doc = await db.collection(collection).doc(docId).get();
                     if (doc.exists) {
                         const data = { id: doc.id, ...doc.data() };
-                        // Mettre en cache local
                         this.saveLocal(collection, docId, data);
                         return data;
                     }
+                } catch (e) {
+                    console.warn('⚠️ Lecture locale fallback');
                 }
-            } catch (e) {
-                console.warn(`⚠️ Lecture Firebase échouée:`, e);
             }
         }
         
-        // Fallback vers le local
         return this.getLocal(collection, docId);
     },
     
-    /**
-     * Charger tous les documents d'une collection
-     */
-    async getAll(collection) {
-        // Essayer Firebase d'abord si en ligne
+    async getAll(collection, options = {}) {
+        let results = [];
+        
+        // Essayer Firebase si en ligne
         if (this.isOnline) {
-            try {
-                const db = typeof getDb === 'function' ? getDb() : window.db;
-                if (db) {
-                    const snapshot = await db.collection(collection).get();
-                    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    // Mettre en cache local
-                    this.saveAllLocal(collection, data);
-                    return data;
+            const db = getDb();
+            if (db) {
+                try {
+                    let query = db.collection(collection);
+                    
+                    if (options.orderBy) {
+                        query = query.orderBy(options.orderBy.field, options.orderBy.direction || 'asc');
+                    }
+                    if (options.limit) {
+                        query = query.limit(options.limit);
+                    }
+                    if (options.where) {
+                        query = query.where(options.where.field, options.where.op, options.where.value);
+                    }
+                    
+                    const snapshot = await query.get();
+                    results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    
+                    // Cache local
+                    this.saveAllLocal(collection, results);
+                    return results;
+                    
+                } catch (e) {
+                    console.warn('⚠️ Lecture Firebase échouée, fallback local');
                 }
-            } catch (e) {
-                console.warn(`⚠️ Lecture Firebase échouée:`, e);
             }
         }
         
-        // Fallback vers le local
         return this.getAllLocal(collection);
+    },
+    
+    // ═══════════════════════════════════════════════════════════
+    // LISTENERS TEMPS RÉEL
+    // ═══════════════════════════════════════════════════════════
+    
+    subscribe(collection, callback, options = {}) {
+        const db = getDb();
+        
+        if (!db) {
+            // Pas de Firebase, retourner les données locales
+            callback(this.getAllLocal(collection));
+            return () => {};
+        }
+        
+        let query = db.collection(collection);
+        
+        if (options.orderBy) {
+            query = query.orderBy(options.orderBy.field, options.orderBy.direction || 'desc');
+        }
+        if (options.limit) {
+            query = query.limit(options.limit);
+        }
+        
+        const unsubscribe = query.onSnapshot(
+            (snapshot) => {
+                const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                this.saveAllLocal(collection, data);
+                callback(data, snapshot.docChanges());
+            },
+            (error) => {
+                console.error(`❌ Erreur listener ${collection}:`, error);
+                callback(this.getAllLocal(collection), []);
+            }
+        );
+        
+        this.listeners.push(unsubscribe);
+        return unsubscribe;
+    },
+    
+    unsubscribeAll() {
+        this.listeners.forEach(unsub => {
+            try { unsub(); } catch (e) {}
+        });
+        this.listeners = [];
     },
     
     // ═══════════════════════════════════════════════════════════
@@ -305,15 +312,11 @@ const TrakioSync = {
     // ═══════════════════════════════════════════════════════════
     
     getStorageKey(collection, docId = null) {
-        if (docId) {
-            return `trakio_${collection}_${docId}`;
-        }
-        return `trakio_${collection}_all`;
+        return docId ? `trakio_${collection}_${docId}` : `trakio_${collection}_all`;
     },
     
     saveLocal(collection, docId, data) {
         try {
-            // Sauvegarder le document individuel
             localStorage.setItem(this.getStorageKey(collection, docId), JSON.stringify(data));
             
             // Mettre à jour la liste
@@ -325,7 +328,6 @@ const TrakioSync = {
                 all.push(data);
             }
             localStorage.setItem(this.getStorageKey(collection), JSON.stringify(all));
-            
         } catch (e) {
             console.error('Erreur sauvegarde locale:', e);
         }
@@ -334,8 +336,6 @@ const TrakioSync = {
     saveAllLocal(collection, data) {
         try {
             localStorage.setItem(this.getStorageKey(collection), JSON.stringify(data));
-            
-            // Sauvegarder aussi individuellement
             data.forEach(item => {
                 if (item.id) {
                     localStorage.setItem(this.getStorageKey(collection, item.id), JSON.stringify(item));
@@ -366,67 +366,17 @@ const TrakioSync = {
     
     deleteLocal(collection, docId) {
         try {
-            // Supprimer le document individuel
             localStorage.removeItem(this.getStorageKey(collection, docId));
-            
-            // Mettre à jour la liste
             const all = this.getAllLocal(collection);
             const filtered = all.filter(item => item.id !== docId);
             localStorage.setItem(this.getStorageKey(collection), JSON.stringify(filtered));
-            
         } catch (e) {
             console.error('Erreur suppression locale:', e);
         }
     },
     
     // ═══════════════════════════════════════════════════════════
-    // LISTENERS TEMPS RÉEL
-    // ═══════════════════════════════════════════════════════════
-    
-    /**
-     * Écouter les changements d'une collection en temps réel
-     */
-    subscribe(collection, callback) {
-        const db = typeof getDb === 'function' ? getDb() : window.db;
-        if (!db) {
-            console.warn('⚠️ Firebase non disponible pour subscribe');
-            // Retourner les données locales
-            callback(this.getAllLocal(collection));
-            return () => {};
-        }
-        
-        const unsubscribe = db.collection(collection).onSnapshot(
-            (snapshot) => {
-                const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                // Mettre en cache local
-                this.saveAllLocal(collection, data);
-                callback(data);
-            },
-            (error) => {
-                console.error(`❌ Erreur listener ${collection}:`, error);
-                // Fallback vers le local
-                callback(this.getAllLocal(collection));
-            }
-        );
-        
-        // Stocker pour cleanup
-        this.listeners.push(unsubscribe);
-        
-        return unsubscribe;
-    },
-    
-    /**
-     * Désinscrire tous les listeners
-     */
-    unsubscribeAll() {
-        this.listeners.forEach(unsub => {
-            try { unsub(); } catch (e) {}
-        });
-        this.listeners = [];
-    },
-    
-    // ═══════════════════════════════════════════════════════════
-    // SYNC MANUELLE
+    // UTILITAIRES
     // ═══════════════════════════════════════════════════════════
     
     async syncAll() {
@@ -437,31 +387,10 @@ const TrakioSync = {
             return { success: false, reason: 'offline' };
         }
         
-        if (typeof TrakioUI !== 'undefined') {
-            TrakioUI.setFirebaseStatus('syncing');
-        }
-        
-        // Traiter la queue
         await this.processOfflineQueue();
-        
         return { success: true };
     },
     
-    // ═══════════════════════════════════════════════════════════
-    // UTILITAIRES
-    // ═══════════════════════════════════════════════════════════
-    
-    getCurrentUserId() {
-        if (typeof TrakioUsers !== 'undefined') {
-            const user = TrakioUsers.getCurrentUser();
-            return user?.id || 'unknown';
-        }
-        return 'unknown';
-    },
-    
-    /**
-     * Obtenir le statut de synchronisation
-     */
     getStatus() {
         return {
             isOnline: this.isOnline,
@@ -471,11 +400,8 @@ const TrakioSync = {
         };
     },
     
-    /**
-     * Vider le cache local
-     */
     clearCache() {
-        const keys = Object.keys(localStorage).filter(k => k.startsWith('trakio_'));
+        const keys = Object.keys(localStorage).filter(k => k.startsWith('trakio_') && !k.includes('user') && !k.includes('theme'));
         keys.forEach(k => localStorage.removeItem(k));
         console.log(`🗑️ ${keys.length} entrées de cache supprimées`);
         
@@ -486,81 +412,68 @@ const TrakioSync = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// HELPERS POUR LES COLLECTIONS SPÉCIFIQUES
+// HELPERS COLLECTIONS
 // ═══════════════════════════════════════════════════════════════
 
-const Articles = {
-    collection: 'articles',
-    
-    async getAll() {
-        return TrakioSync.getAll(this.collection);
+const DataStore = {
+    // Articles
+    articles: {
+        collection: 'articles',
+        getAll: (options) => TrakioSync.getAll('articles', options),
+        get: (id) => TrakioSync.get('articles', id),
+        save: (id, data) => TrakioSync.save('articles', id, data),
+        delete: (id) => TrakioSync.delete('articles', id),
+        subscribe: (callback, options) => TrakioSync.subscribe('articles', callback, options)
     },
     
-    async get(id) {
-        return TrakioSync.get(this.collection, id);
+    // Clients
+    clients: {
+        collection: 'clients',
+        getAll: (options) => TrakioSync.getAll('clients', options),
+        get: (id) => TrakioSync.get('clients', id),
+        save: (id, data) => TrakioSync.save('clients', id, data),
+        delete: (id) => TrakioSync.delete('clients', id),
+        subscribe: (callback, options) => TrakioSync.subscribe('clients', callback, options)
     },
     
-    async save(id, data) {
-        const docId = id || `art_${Date.now()}`;
-        return TrakioSync.save(this.collection, docId, { ...data, id: docId });
+    // Commandes
+    commandes: {
+        collection: 'commandes',
+        getAll: (options) => TrakioSync.getAll('commandes', options),
+        get: (id) => TrakioSync.get('commandes', id),
+        save: (id, data) => TrakioSync.save('commandes', id, data),
+        delete: (id) => TrakioSync.delete('commandes', id),
+        subscribe: (callback, options) => TrakioSync.subscribe('commandes', callback, options)
     },
     
-    async delete(id) {
-        return TrakioSync.delete(this.collection, id);
+    // Ventes (MyFish/Caisse)
+    ventes: {
+        collection: 'ventes',
+        getAll: (options) => TrakioSync.getAll('ventes', options),
+        get: (id) => TrakioSync.get('ventes', id),
+        save: (id, data) => TrakioSync.save('ventes', id, data),
+        delete: (id) => TrakioSync.delete('ventes', id),
+        subscribe: (callback, options) => TrakioSync.subscribe('ventes', callback, options)
     },
     
-    subscribe(callback) {
-        return TrakioSync.subscribe(this.collection, callback);
-    }
-};
-
-const Clients = {
-    collection: 'clients',
-    
-    async getAll() {
-        return TrakioSync.getAll(this.collection);
+    // Étiquettes
+    etiquettes: {
+        collection: 'etiquettes',
+        getAll: (options) => TrakioSync.getAll('etiquettes', options),
+        get: (id) => TrakioSync.get('etiquettes', id),
+        save: (id, data) => TrakioSync.save('etiquettes', id, data),
+        delete: (id) => TrakioSync.delete('etiquettes', id),
+        subscribe: (callback, options) => TrakioSync.subscribe('etiquettes', callback, options)
     },
     
-    async get(id) {
-        return TrakioSync.get(this.collection, id);
-    },
-    
-    async save(id, data) {
-        const docId = id || `cli_${Date.now()}`;
-        return TrakioSync.save(this.collection, docId, { ...data, id: docId });
-    },
-    
-    async delete(id) {
-        return TrakioSync.delete(this.collection, id);
-    },
-    
-    subscribe(callback) {
-        return TrakioSync.subscribe(this.collection, callback);
-    }
-};
-
-const Commandes = {
-    collection: 'commandes',
-    
-    async getAll() {
-        return TrakioSync.getAll(this.collection);
-    },
-    
-    async get(id) {
-        return TrakioSync.get(this.collection, id);
-    },
-    
-    async save(id, data) {
-        const docId = id || `cmd_${Date.now()}`;
-        return TrakioSync.save(this.collection, docId, { ...data, id: docId });
-    },
-    
-    async delete(id) {
-        return TrakioSync.delete(this.collection, id);
-    },
-    
-    subscribe(callback) {
-        return TrakioSync.subscribe(this.collection, callback);
+    // Comptabilité
+    compta: {
+        collection: 'compta',
+        getAll: (options) => TrakioSync.getAll('compta', options),
+        get: (id) => TrakioSync.get('compta', id),
+        save: (id, data) => TrakioSync.save('compta', id, data),
+        delete: (id) => TrakioSync.delete('compta', id),
+        subscribe: (callback, options) => TrakioSync.subscribe('compta', callback, options)
     }
 };
 
@@ -572,18 +485,12 @@ document.addEventListener('DOMContentLoaded', () => {
     TrakioSync.init();
 });
 
-// Cleanup à la fermeture
 window.addEventListener('beforeunload', () => {
     TrakioSync.unsubscribeAll();
 });
 
-// ═══════════════════════════════════════════════════════════════
-// EXPORTS GLOBAUX
-// ═══════════════════════════════════════════════════════════════
-
+// Exports
 window.TrakioSync = TrakioSync;
-window.Articles = Articles;
-window.Clients = Clients;
-window.Commandes = Commandes;
+window.DataStore = DataStore;
 
-console.log(`🔄 TRAKIO Sync v${TrakioSync.VERSION} chargé`);
+console.log(`🔄 TrakioSync v${TrakioSync.VERSION} chargé`);
