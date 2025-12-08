@@ -1,26 +1,19 @@
 /**
- * ╔═══════════════════════════════════════════════════════════════╗
- * ║  TRAKIO CONFIG v4.5.0 - Configuration Centrale                ║
- * ║  Firebase + Users + Permissions + Modules                     ║
- * ╚═══════════════════════════════════════════════════════════════╝
+ * TRAKIO Config v4.5.0
+ * Configuration centrale + Users + Permissions
  */
 
-const TRAKIO_VERSION = '4.5.0';
-
-// ═══════════════════════════════════════════════════════════════
-// CONFIGURATION FIREBASE
-// ═══════════════════════════════════════════════════════════════
-
+// ==================== CONFIG ====================
 const TrakioConfig = {
-    VERSION: TRAKIO_VERSION,
+    VERSION: '4.5.0',
     
     FIREBASE: {
-        apiKey: "AIzaSyCdVQrjMtezIG3eBxsqO2ViDi_tRbY8hdE",
+        apiKey: "AIzaSyBoGescolWTpGdm0SZh-Wk7blu8RwL2n4I",
         authDomain: "trakio-pilot-6e97a.firebaseapp.com",
         projectId: "trakio-pilot-6e97a",
         storageBucket: "trakio-pilot-6e97a.firebasestorage.app",
         messagingSenderId: "256841216130",
-        appId: "1:256841216130:web:4ea5a967ba39c120d8849b"
+        appId: "1:256841216130:web:abc123def456"
     },
     
     COMPANY: {
@@ -30,456 +23,283 @@ const TrakioConfig = {
         locale: 'fr-CH'
     },
     
-    // Définition des modules
     MODULES: {
-        dashboard:    { id: 'dashboard',    name: 'Dashboard',    icon: '📊', url: 'index.html',        category: 'main' },
-        articles:     { id: 'articles',     name: 'Articles',     icon: '📦', url: 'articles.html',     category: 'main' },
-        clients:      { id: 'clients',      name: 'Clients',      icon: '👥', url: 'clients.html',      category: 'main' },
-        commandes:    { id: 'commandes',    name: 'Commandes',    icon: '📋', url: 'commandes.html',    category: 'sales' },
-        myfish:       { id: 'myfish',       name: 'MyFish',       icon: '🛒', url: 'myfish.html',       category: 'sales' },
-        caisse:       { id: 'caisse',       name: 'Caisse',       icon: '💵', url: 'caisse.html',       category: 'sales' },
-        tracabilite:  { id: 'tracabilite',  name: 'Traçabilité',  icon: '🏷️', url: 'tracabilite.html',  category: 'tools' },
-        compta:       { id: 'compta',       name: 'Compta',       icon: '📒', url: 'compta.html',       category: 'admin' },
-        shopify:      { id: 'shopify',      name: 'Shop Hub',     icon: '🛍️', url: 'shopify.html',      category: 'tools' },
-        parametres:   { id: 'parametres',   name: 'Paramètres',   icon: '⚙️', url: 'parametres.html',   category: 'admin' }
+        dashboard: { name: 'Dashboard', icon: '📊', url: 'index.html' },
+        articles: { name: 'Articles', icon: '📦', url: 'articles.html' },
+        clients: { name: 'Clients', icon: '👥', url: 'clients.html' },
+        commandes: { name: 'Commandes', icon: '📋', url: 'commandes.html' },
+        myfish: { name: 'MyFish', icon: '🛒', url: 'myfish.html' },
+        caisse: { name: 'Caisse', icon: '💵', url: 'caisse.html' },
+        tracabilite: { name: 'Traçabilité', icon: '🏷️', url: 'tracabilite.html' },
+        compta: { name: 'Compta', icon: '📒', url: 'compta.html' },
+        shopify: { name: 'Shop Hub', icon: '🛍️', url: 'shopify.html' },
+        parametres: { name: 'Paramètres', icon: '⚙️', url: 'parametres.html' }
     },
     
-    // Définition des rôles
     ROLES: {
-        admin: {
-            name: 'Administrateur',
-            color: '#ef4444',
+        admin: { 
+            label: '👑 Admin', 
+            color: '#ef4444', 
             allAccess: true,
             canImport: true,
             canExport: true,
             canManageUsers: true
         },
-        manager: {
-            name: 'Manager',
+        manager: { 
+            label: '📊 Manager', 
             color: '#f59e0b',
-            allAccess: false,
+            defaultModules: ['dashboard', 'articles', 'clients', 'commandes', 'myfish', 'caisse', 'compta', 'tracabilite'],
             canImport: false,
             canExport: true,
-            canManageUsers: false,
-            defaultModules: ['dashboard', 'articles', 'clients', 'commandes', 'myfish', 'caisse', 'tracabilite', 'compta']
+            canManageUsers: false
         },
-        vendeur: {
-            name: 'Vendeur',
+        vendeur: { 
+            label: '🛒 Vendeur', 
             color: '#10b981',
-            allAccess: false,
+            defaultModules: ['dashboard', 'myfish', 'caisse', 'clients', 'commandes'],
             canImport: false,
             canExport: false,
-            canManageUsers: false,
-            defaultModules: ['dashboard', 'clients', 'commandes', 'myfish', 'caisse']
+            canManageUsers: false
         },
-        viewer: {
-            name: 'Consultation',
+        viewer: { 
+            label: '👁️ Viewer', 
             color: '#6b7280',
-            allAccess: false,
+            defaultModules: ['dashboard'],
             canImport: false,
             canExport: false,
-            canManageUsers: false,
-            defaultModules: ['dashboard']
+            canManageUsers: false
         }
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// GESTION DES UTILISATEURS
-// ═══════════════════════════════════════════════════════════════
-
+// ==================== USERS ====================
 const TrakioUsers = {
     STORAGE_KEY: 'trakio_users',
     CURRENT_KEY: 'trakio_current_user',
     
-    // Utilisateurs par défaut
     DEFAULT_USERS: [
-        { id: 'pascal', name: 'Pascal', role: 'admin', pin: '1234', email: '', active: true, modules: [] },
-        { id: 'celine', name: 'Céline', role: 'manager', pin: '0000', email: '', active: true, modules: ['dashboard', 'articles', 'clients', 'commandes', 'myfish', 'caisse', 'tracabilite', 'compta'] },
-        { id: 'hayat', name: 'Hayat', role: 'vendeur', pin: '0000', email: '', active: true, modules: ['dashboard', 'clients', 'commandes', 'myfish', 'caisse'] }
+        { id: 'pascal', name: 'Pascal', role: 'admin', pin: '1234', active: true, modules: [] },
+        { id: 'celine', name: 'Céline', role: 'manager', pin: '0000', active: true, modules: ['dashboard', 'articles', 'clients', 'commandes', 'myfish', 'caisse', 'compta', 'tracabilite'] },
+        { id: 'hayat', name: 'Hayat', role: 'vendeur', pin: '0000', active: true, modules: ['dashboard', 'myfish', 'caisse', 'clients', 'commandes'] }
     ],
     
-    // Initialiser les utilisateurs
     init() {
-        const stored = localStorage.getItem(this.STORAGE_KEY);
-        if (!stored) {
-            this.saveAll(this.DEFAULT_USERS);
+        if (!localStorage.getItem(this.STORAGE_KEY)) {
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.DEFAULT_USERS));
         }
-        
-        // S'assurer qu'il y a un utilisateur courant
-        if (!this.getCurrentUser()) {
-            this.setCurrentUser('pascal');
+        if (!localStorage.getItem(this.CURRENT_KEY)) {
+            localStorage.setItem(this.CURRENT_KEY, 'pascal');
         }
+        return this.getAll();
     },
     
-    // Obtenir tous les utilisateurs
     getAll() {
-        try {
-            const stored = localStorage.getItem(this.STORAGE_KEY);
-            return stored ? JSON.parse(stored) : this.DEFAULT_USERS;
-        } catch (e) {
-            console.error('Erreur lecture utilisateurs:', e);
-            return this.DEFAULT_USERS;
-        }
+        const users = localStorage.getItem(this.STORAGE_KEY);
+        return users ? JSON.parse(users) : this.DEFAULT_USERS;
     },
     
-    // Sauvegarder tous les utilisateurs
-    saveAll(users) {
-        try {
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(users));
-            return true;
-        } catch (e) {
-            console.error('Erreur sauvegarde utilisateurs:', e);
-            return false;
-        }
-    },
-    
-    // Obtenir un utilisateur par ID
     getById(id) {
-        const users = this.getAll();
-        return users.find(u => u.id === id) || null;
+        return this.getAll().find(u => u.id === id);
     },
     
-    // Créer un nouvel utilisateur
+    getCurrentUser() {
+        const currentId = localStorage.getItem(this.CURRENT_KEY);
+        return this.getById(currentId) || this.getById('pascal');
+    },
+    
+    setCurrentUser(userId) {
+        localStorage.setItem(this.CURRENT_KEY, userId);
+    },
+    
     create(userData) {
         const users = this.getAll();
         const id = 'user_' + Date.now();
-        const role = TrakioConfig.ROLES[userData.role];
+        const role = userData.role || 'vendeur';
+        const roleConfig = TrakioConfig.ROLES[role];
         
         const newUser = {
             id,
-            name: userData.name || 'Nouvel utilisateur',
-            role: userData.role || 'vendeur',
+            name: userData.name,
+            role,
             pin: userData.pin || '0000',
             email: userData.email || '',
-            active: true,
-            modules: userData.modules || (role ? role.defaultModules || [] : []),
+            active: userData.active !== false,
+            modules: userData.modules || roleConfig?.defaultModules || ['dashboard'],
             createdAt: new Date().toISOString()
         };
         
         users.push(newUser);
-        this.saveAll(users);
-        
-        console.log('✅ Utilisateur créé:', newUser.name);
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(users));
         return newUser;
     },
     
-    // Mettre à jour un utilisateur
     update(id, updates) {
         const users = this.getAll();
         const index = users.findIndex(u => u.id === id);
+        if (index === -1) return null;
         
-        if (index === -1) {
-            console.error('Utilisateur non trouvé:', id);
-            return null;
-        }
-        
-        // Protéger Pascal
+        // Protection Pascal
         if (id === 'pascal' && updates.role && updates.role !== 'admin') {
-            console.warn('⚠️ Impossible de changer le rôle de Pascal');
-            delete updates.role;
+            updates.role = 'admin';
         }
         
         users[index] = { ...users[index], ...updates, updatedAt: new Date().toISOString() };
-        this.saveAll(users);
-        
-        // Mettre à jour l'utilisateur courant si c'est lui
-        const current = this.getCurrentUser();
-        if (current && current.id === id) {
-            localStorage.setItem(this.CURRENT_KEY, JSON.stringify(users[index]));
-        }
-        
-        console.log('✅ Utilisateur mis à jour:', users[index].name);
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(users));
         return users[index];
     },
     
-    // Supprimer un utilisateur
     delete(id) {
-        if (id === 'pascal') {
-            console.warn('⚠️ Impossible de supprimer Pascal');
-            return false;
-        }
-        
-        const users = this.getAll();
-        const filtered = users.filter(u => u.id !== id);
-        
-        if (filtered.length === users.length) {
-            return false;
-        }
-        
-        this.saveAll(filtered);
-        
-        // Si c'était l'utilisateur courant, passer à Pascal
-        const current = this.getCurrentUser();
-        if (current && current.id === id) {
-            this.setCurrentUser('pascal');
-        }
-        
-        console.log('✅ Utilisateur supprimé:', id);
+        if (id === 'pascal') return false; // Protection
+        const users = this.getAll().filter(u => u.id !== id);
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(users));
         return true;
     },
     
-    // Obtenir l'utilisateur courant
-    getCurrentUser() {
-        try {
-            const stored = localStorage.getItem(this.CURRENT_KEY);
-            if (stored) {
-                const user = JSON.parse(stored);
-                // Rafraîchir depuis la liste pour avoir les données à jour
-                return this.getById(user.id) || user;
-            }
-            return null;
-        } catch (e) {
-            return null;
-        }
-    },
-    
-    // Définir l'utilisateur courant
-    setCurrentUser(userId) {
-        const user = this.getById(userId);
-        if (user) {
-            localStorage.setItem(this.CURRENT_KEY, JSON.stringify(user));
-            console.log('👤 Utilisateur actif:', user.name);
-            return user;
-        }
-        return null;
-    },
-    
-    // Vérifier le PIN
     verifyPin(userId, pin) {
         const user = this.getById(userId);
         return user && user.pin === pin;
     },
     
-    // Changer le PIN
     changePin(userId, newPin) {
-        if (!/^\d{4}$/.test(newPin)) {
-            console.error('PIN invalide (4 chiffres requis)');
-            return false;
-        }
-        return this.update(userId, { pin: newPin }) !== null;
+        if (!/^\d{4}$/.test(newPin)) return false;
+        return this.update(userId, { pin: newPin });
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// GESTION DES PERMISSIONS
-// ═══════════════════════════════════════════════════════════════
-
+// ==================== PERMISSIONS ====================
 const TrakioPermissions = {
-    
-    // Vérifier si un utilisateur a accès à un module
     hasAccess(userId, moduleId) {
         const user = TrakioUsers.getById(userId);
         if (!user) return false;
         
-        const role = TrakioConfig.ROLES[user.role];
-        if (!role) return false;
+        const roleConfig = TrakioConfig.ROLES[user.role];
+        if (roleConfig?.allAccess) return true;
         
-        // Admin a accès à tout
-        if (role.allAccess) return true;
-        
-        // Vérifier les modules de l'utilisateur
-        return user.modules && user.modules.includes(moduleId);
+        return (user.modules || []).includes(moduleId);
     },
     
-    // Vérifier si l'utilisateur courant a accès
     canAccess(moduleId) {
         const user = TrakioUsers.getCurrentUser();
         if (!user) return false;
-        return this.hasAccess(user.id, moduleId);
+        
+        const roleConfig = TrakioConfig.ROLES[user.role];
+        if (roleConfig?.allAccess) return true;
+        
+        return (user.modules || []).includes(moduleId);
     },
     
-    // Obtenir les modules accessibles d'un utilisateur
     getAccessibleModules(userId) {
         const user = TrakioUsers.getById(userId);
         if (!user) return [];
         
-        const role = TrakioConfig.ROLES[user.role];
-        if (!role) return [];
-        
-        if (role.allAccess) {
+        const roleConfig = TrakioConfig.ROLES[user.role];
+        if (roleConfig?.allAccess) {
             return Object.keys(TrakioConfig.MODULES);
         }
         
         return user.modules || [];
     },
     
-    // Obtenir les modules de l'utilisateur courant
     getMyModules() {
         const user = TrakioUsers.getCurrentUser();
         if (!user) return ['dashboard'];
-        return this.getAccessibleModules(user.id);
+        
+        const roleConfig = TrakioConfig.ROLES[user.role];
+        if (roleConfig?.allAccess) {
+            return Object.keys(TrakioConfig.MODULES);
+        }
+        
+        return user.modules || ['dashboard'];
     },
     
-    // Définir les modules d'un utilisateur
     setUserModules(userId, modules) {
         return TrakioUsers.update(userId, { modules });
     },
     
-    // Vérifier si l'utilisateur peut importer
     canImport() {
         const user = TrakioUsers.getCurrentUser();
         if (!user) return false;
-        const role = TrakioConfig.ROLES[user.role];
-        return role && role.canImport === true;
+        const roleConfig = TrakioConfig.ROLES[user.role];
+        return roleConfig?.canImport || roleConfig?.allAccess || false;
     },
     
-    // Vérifier si l'utilisateur peut exporter
     canExport() {
         const user = TrakioUsers.getCurrentUser();
         if (!user) return false;
-        const role = TrakioConfig.ROLES[user.role];
-        return role && role.canExport === true;
+        const roleConfig = TrakioConfig.ROLES[user.role];
+        return roleConfig?.canExport || roleConfig?.allAccess || false;
     },
     
-    // Vérifier si l'utilisateur peut gérer les utilisateurs
     canManageUsers() {
         const user = TrakioUsers.getCurrentUser();
         if (!user) return false;
-        const role = TrakioConfig.ROLES[user.role];
-        return role && role.canManageUsers === true;
+        const roleConfig = TrakioConfig.ROLES[user.role];
+        return roleConfig?.canManageUsers || roleConfig?.allAccess || false;
     },
     
-    // Vérifier si l'utilisateur est admin
     isAdmin() {
         const user = TrakioUsers.getCurrentUser();
-        if (!user) return false;
-        return user.role === 'admin';
+        return user?.role === 'admin';
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// INITIALISATION FIREBASE
-// ═══════════════════════════════════════════════════════════════
-
+// ==================== FIREBASE INIT ====================
 let db = null;
 let firebaseReady = false;
 
-function initFirebase() {
-    return new Promise((resolve, reject) => {
-        try {
-            if (typeof firebase === 'undefined') {
-                console.warn('⚠️ Firebase SDK non chargé');
-                resolve(false);
-                return;
-            }
-            
-            // Initialiser si pas déjà fait
-            if (!firebase.apps.length) {
-                firebase.initializeApp(TrakioConfig.FIREBASE);
-            }
-            
-            db = firebase.firestore();
-            
-            // Activer la persistence offline
-            db.enablePersistence({ synchronizeTabs: true })
-                .then(() => console.log('💾 Persistence offline activée'))
-                .catch(err => {
-                    if (err.code === 'failed-precondition') {
-                        console.warn('⚠️ Persistence: plusieurs onglets ouverts');
-                    } else if (err.code === 'unimplemented') {
-                        console.warn('⚠️ Persistence non supportée');
-                    }
-                });
-            
-            // Test de connexion
-            db.collection('_ping').doc('test').get()
-                .then(() => {
-                    firebaseReady = true;
-                    console.log('🟢 Firebase connecté');
-                    if (typeof TrakioUI !== 'undefined') {
-                        TrakioUI.setFirebaseStatus('connected');
-                    }
-                    resolve(true);
-                })
-                .catch(err => {
-                    console.warn('🟡 Firebase en mode offline:', err.message);
-                    firebaseReady = true;
-                    if (typeof TrakioUI !== 'undefined') {
-                        TrakioUI.setFirebaseStatus('offline');
-                    }
-                    resolve(true);
-                });
-                
-        } catch (error) {
-            console.error('❌ Erreur Firebase:', error);
-            reject(error);
+async function initFirebase() {
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(TrakioConfig.FIREBASE);
         }
-    });
+        db = firebase.firestore();
+        
+        // Activer persistence
+        try {
+            await db.enablePersistence({ synchronizeTabs: true });
+        } catch (e) {
+            console.log('Persistence déjà active ou non supportée');
+        }
+        
+        firebaseReady = true;
+        console.log('✅ Firebase initialisé');
+        return db;
+    } catch (e) {
+        console.error('❌ Firebase error:', e);
+        firebaseReady = false;
+        return null;
+    }
 }
 
-function getDb() {
-    return db;
-}
+function getDb() { return db; }
+function isFirebaseReady() { return firebaseReady; }
 
-function isFirebaseReady() {
-    return firebaseReady;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// UTILITAIRES GLOBAUX
-// ═══════════════════════════════════════════════════════════════
-
+// ==================== UTILS ====================
 function formatCHF(amount) {
-    return new Intl.NumberFormat('fr-CH', {
-        style: 'currency',
-        currency: 'CHF'
+    return new Intl.NumberFormat('fr-CH', { 
+        style: 'currency', 
+        currency: 'CHF' 
     }).format(amount || 0);
 }
 
-function formatDate(date, options = {}) {
-    const d = date instanceof Date ? date : new Date(date);
-    return d.toLocaleDateString('fr-CH', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        ...options
-    });
+function formatDate(date) {
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('fr-CH');
 }
 
 function formatDateTime(date) {
-    const d = date instanceof Date ? date : new Date(date);
-    return d.toLocaleString('fr-CH', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    if (!date) return '-';
+    return new Date(date).toLocaleString('fr-CH');
 }
 
-function generateId(prefix = 'id') {
-    return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+function generateId(prefix = '') {
+    return prefix + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// INITIALISATION AU CHARGEMENT
-// ═══════════════════════════════════════════════════════════════
-
+// ==================== AUTO INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialiser les utilisateurs
     TrakioUsers.init();
-    
-    // Initialiser Firebase avec délai
-    setTimeout(() => {
-        initFirebase().then(success => {
-            if (success) {
-                console.log(`🐟 TRAKIO v${TRAKIO_VERSION} prêt`);
-            }
-        });
-    }, 100);
+    setTimeout(initFirebase, 100);
 });
 
-// Exports globaux
-window.TrakioConfig = TrakioConfig;
-window.TrakioUsers = TrakioUsers;
-window.TrakioPermissions = TrakioPermissions;
-window.getDb = getDb;
-window.isFirebaseReady = isFirebaseReady;
-window.formatCHF = formatCHF;
-window.formatDate = formatDate;
-window.formatDateTime = formatDateTime;
-window.generateId = generateId;
-window.TRAKIO_VERSION = TRAKIO_VERSION;
-
-console.log(`⚙️ TRAKIO Config v${TRAKIO_VERSION} chargé`);
+console.log('🐟 TRAKIO Config v' + TrakioConfig.VERSION + ' loaded');
