@@ -3,48 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAKIO v4.5.0 - Dashboard</title>
+    <title>TRAKIO v4.2.2 - Dashboard</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
+    <link rel="manifest" href="manifest.json">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="trakio-config.js?v=4.5.0"></script>
-    <script src="trakio-sync.js?v=4.5.0"></script>
-    <script src="trakio-ui.js?v=4.5.0"></script>
     <style>
-        .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* Welcome */
-        .welcome-section {
-            margin-bottom: 30px;
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #0ea5e9;
+            --accent-hover: #38bdf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: #334155;
         }
-        .welcome-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+        
+        /* ============ SIDEBAR ============ */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        .welcome-date {
-            color: var(--trakio-text-muted);
-            font-size: 14px;
+        
+        .logo { font-size: 32px; }
+        .logo-text { font-size: 24px; font-weight: 700; }
+        .logo-version {
+            font-size: 10px;
+            background: var(--accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
         }
         
-        /* KPIs */
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 0;
+        }
+        
+        .nav-section {
+            padding: 0 15px;
+            margin-bottom: 20px;
+        }
+        
+        .nav-section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            padding: 10px 12px;
+            letter-spacing: 1px;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+        }
+        
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .nav-item.active {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .nav-icon { font-size: 18px; width: 24px; text-align: center; }
+        .nav-text { font-size: 14px; font-weight: 500; }
+        
+        /* User section at bottom */
+        .sidebar-user {
+            padding: 15px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .sidebar-user:hover { background: var(--bg-tertiary); }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+        .user-info { flex: 1; }
+        .user-name { font-weight: 600; font-size: 14px; }
+        .user-role { font-size: 11px; color: var(--text-secondary); }
+        
+        /* ============ MAIN CONTENT ============ */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: none;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+        
+        .header-btn:hover { background: var(--bg-primary); }
+        
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            font-size: 13px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .status-dot.online { background: var(--success); }
+        .status-dot.offline { background: var(--danger); }
+        .status-dot.syncing { background: var(--warning); animation: pulse 1.5s infinite; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Page Content */
+        .page-content {
+            padding: 30px;
+        }
+        
+        /* Welcome */
+        .welcome-section { margin-bottom: 30px; }
+        .welcome-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .welcome-date { color: var(--text-secondary); font-size: 14px; }
+        
+        /* KPIs Grid */
         .kpis-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
+        
         .kpi-card {
-            background: var(--trakio-bg-card);
-            border: 1px solid var(--trakio-border);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
             border-radius: 16px;
             padding: 24px;
             position: relative;
             overflow: hidden;
         }
+        
         .kpi-card::before {
             content: '';
             position: absolute;
@@ -53,6 +258,7 @@
             right: 0;
             height: 4px;
         }
+        
         .kpi-card.blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
         .kpi-card.green::before { background: linear-gradient(90deg, #10b981, #34d399); }
         .kpi-card.purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
@@ -60,61 +266,41 @@
         .kpi-card.cyan::before { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
         .kpi-card.pink::before { background: linear-gradient(90deg, #ec4899, #f472b6); }
         
-        .kpi-icon {
-            font-size: 40px;
-            margin-bottom: 15px;
-        }
-        .kpi-value {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
+        .kpi-icon { font-size: 36px; margin-bottom: 15px; }
+        .kpi-value { font-size: 32px; font-weight: 700; margin-bottom: 5px; }
         .kpi-card.blue .kpi-value { color: #3b82f6; }
         .kpi-card.green .kpi-value { color: #10b981; }
         .kpi-card.purple .kpi-value { color: #8b5cf6; }
         .kpi-card.orange .kpi-value { color: #f59e0b; }
         .kpi-card.cyan .kpi-value { color: #06b6d4; }
         .kpi-card.pink .kpi-value { color: #ec4899; }
+        .kpi-label { color: var(--text-secondary); font-size: 14px; }
         
-        .kpi-label {
-            color: var(--trakio-text-muted);
-            font-size: 14px;
-        }
-        .kpi-trend {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
-        .kpi-trend.up { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .kpi-trend.down { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        
-        /* Main Grid */
-        .main-grid {
+        /* Cards Grid */
+        .cards-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 20px;
         }
-        @media (max-width: 1000px) {
-            .main-grid { grid-template-columns: 1fr; }
+        
+        @media (max-width: 1200px) {
+            .cards-grid { grid-template-columns: 1fr; }
         }
         
-        /* Cards */
         .card {
-            background: var(--trakio-bg-card);
-            border: 1px solid var(--trakio-border);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
             border-radius: 16px;
             padding: 24px;
-            margin-bottom: 20px;
         }
+        
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
+        
         .card-title {
             font-size: 18px;
             font-weight: 600;
@@ -122,44 +308,41 @@
             align-items: center;
             gap: 10px;
         }
+        
         .card-action {
-            color: var(--trakio-primary);
+            color: var(--accent);
             text-decoration: none;
             font-size: 13px;
-            font-weight: 500;
         }
-        .card-action:hover { text-decoration: underline; }
         
         /* Orders List */
-        .orders-list { }
         .order-item {
             display: flex;
             align-items: center;
             gap: 15px;
-            padding: 15px;
-            background: var(--trakio-bg-input);
+            padding: 14px;
+            background: var(--bg-tertiary);
             border-radius: 12px;
             margin-bottom: 10px;
-            transition: all 0.2s;
         }
-        .order-item:hover { background: var(--trakio-bg-hover); }
         
         .order-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            background: var(--trakio-primary);
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 700;
-            font-size: 18px;
         }
+        
         .order-info { flex: 1; }
         .order-client { font-weight: 600; font-size: 14px; }
-        .order-details { font-size: 12px; color: var(--trakio-text-muted); margin-top: 3px; }
-        .order-amount { font-weight: 700; color: var(--trakio-success); }
+        .order-details { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+        .order-amount { font-weight: 700; color: var(--success); }
+        
         .order-status {
             font-size: 11px;
             padding: 4px 10px;
@@ -167,368 +350,593 @@
         }
         .order-status.pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
         .order-status.confirmed { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .order-status.delivered { background: rgba(14, 165, 233, 0.2); color: #0ea5e9; }
         
         .empty-state {
             text-align: center;
             padding: 40px;
-            color: var(--trakio-text-muted);
+            color: var(--text-secondary);
         }
-        .empty-state-icon { font-size: 50px; margin-bottom: 15px; opacity: 0.5; }
+        .empty-icon { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
         
         /* Quick Actions */
-        .quick-actions {
-            display: grid;
-            gap: 10px;
-        }
         .quick-action {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 16px;
-            background: var(--trakio-bg-input);
+            padding: 14px;
+            background: var(--bg-tertiary);
             border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
             text-decoration: none;
-            color: var(--trakio-text);
+            color: var(--text-primary);
             transition: all 0.2s;
         }
+        
         .quick-action:hover {
-            background: var(--trakio-bg-hover);
+            background: var(--bg-primary);
             transform: translateX(5px);
         }
+        
         .quick-action-icon {
-            width: 42px;
-            height: 42px;
+            width: 40px;
+            height: 40px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
         }
-        .quick-action-icon.blue { background: rgba(59, 130, 246, 0.2); }
+        
         .quick-action-icon.green { background: rgba(16, 185, 129, 0.2); }
+        .quick-action-icon.blue { background: rgba(59, 130, 246, 0.2); }
         .quick-action-icon.purple { background: rgba(139, 92, 246, 0.2); }
         .quick-action-icon.orange { background: rgba(245, 158, 11, 0.2); }
         
-        .quick-action-text { font-weight: 500; font-size: 14px; }
-        .quick-action-arrow { margin-left: auto; color: var(--trakio-text-muted); }
+        .quick-action-text { flex: 1; font-weight: 500; }
+        .quick-action-arrow { color: var(--text-secondary); }
         
-        /* Alerts */
-        .alerts-section { margin-top: 20px; }
-        .alert {
+        /* User Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-overlay.active { display: flex; }
+        
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title { font-weight: 600; font-size: 18px; }
+        
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .modal-body { padding: 15px; }
+        
+        .user-option {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 14px 18px;
+            padding: 14px;
             border-radius: 12px;
-            margin-bottom: 10px;
-            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: all 0.2s;
         }
-        .alert-warning {
-            background: rgba(245, 158, 11, 0.15);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            color: #f59e0b;
-        }
-        .alert-success {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #10b981;
-        }
-        .alert-info {
-            background: rgba(14, 165, 233, 0.15);
-            border: 1px solid rgba(14, 165, 233, 0.3);
-            color: #0ea5e9;
-        }
-        .alert-icon { font-size: 18px; }
-        .alert-text { flex: 1; }
         
-        /* Refresh indicator */
-        .refresh-indicator {
+        .user-option:hover { background: var(--bg-tertiary); }
+        .user-option.active { background: rgba(14, 165, 233, 0.2); border: 2px solid var(--accent); }
+        
+        .user-option .user-avatar { width: 45px; height: 45px; font-size: 18px; }
+        .user-option .user-info { flex: 1; }
+        .user-option .user-name { font-weight: 600; }
+        .user-option .user-role { font-size: 12px; color: var(--text-secondary); }
+        .user-check { color: var(--accent); font-size: 18px; }
+        
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+        }
+        
+        .toast {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+        .toast.info { border-left: 4px solid var(--accent); }
+        
+        /* Live indicator */
+        .live-indicator {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: var(--trakio-bg-card);
-            border: 1px solid var(--trakio-border);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
             padding: 10px 16px;
             border-radius: 10px;
             font-size: 12px;
-            color: var(--trakio-text-muted);
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .refresh-dot {
+        
+        .live-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--trakio-success);
+            background: var(--success);
             animation: pulse 2s infinite;
+        }
+        
+        /* Mobile */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .mobile-menu-btn { display: flex !important; }
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Welcome -->
-        <div class="welcome-section">
-            <h1 class="welcome-title">
-                <span>👋</span>
-                <span>Bonjour <span id="user-name">Pascal</span> !</span>
-            </h1>
-            <p class="welcome-date" id="current-date"></p>
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="logo">🐟</span>
+            <span class="logo-text">TRAKIO</span>
+            <span class="logo-version">v4.2.2</span>
         </div>
         
-        <!-- KPIs -->
-        <div class="kpis-grid">
-            <div class="kpi-card blue">
-                <div class="kpi-icon">📋</div>
-                <div class="kpi-value" id="kpi-orders">0</div>
-                <div class="kpi-label">Commandes du jour</div>
-                <div class="kpi-trend up" id="kpi-orders-trend">-</div>
-            </div>
-            <div class="kpi-card green">
-                <div class="kpi-icon">💰</div>
-                <div class="kpi-value" id="kpi-ca">0 CHF</div>
-                <div class="kpi-label">CA aujourd'hui</div>
-                <div class="kpi-trend up" id="kpi-ca-trend">-</div>
-            </div>
-            <div class="kpi-card purple">
-                <div class="kpi-icon">👥</div>
-                <div class="kpi-value" id="kpi-clients">0</div>
-                <div class="kpi-label">Clients</div>
-            </div>
-            <div class="kpi-card orange">
-                <div class="kpi-icon">⏳</div>
-                <div class="kpi-value" id="kpi-pending">0</div>
-                <div class="kpi-label">En attente</div>
-            </div>
-            <div class="kpi-card cyan">
-                <div class="kpi-icon">📦</div>
-                <div class="kpi-value" id="kpi-articles">0</div>
-                <div class="kpi-label">Articles</div>
-            </div>
-            <div class="kpi-card pink">
-                <div class="kpi-icon">🛍️</div>
-                <div class="kpi-value" id="kpi-shopify">0</div>
-                <div class="kpi-label">Commandes Shopify</div>
-            </div>
-        </div>
+        <nav class="sidebar-nav" id="sidebar-nav">
+            <!-- Navigation générée par JS selon les permissions -->
+        </nav>
         
-        <!-- Main Grid -->
-        <div class="main-grid">
-            <!-- Left Column -->
-            <div>
-                <!-- Recent Orders -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">📋 Commandes récentes</h2>
-                        <a href="commandes.html" class="card-action">Voir tout →</a>
-                    </div>
-                    <div class="orders-list" id="orders-list">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📋</div>
-                            <p>Aucune commande récente</p>
-                        </div>
-                    </div>
+        <div class="sidebar-user" onclick="openUserModal()">
+            <div class="user-avatar" id="current-user-avatar" style="background:#ef4444">P</div>
+            <div class="user-info">
+                <div class="user-name" id="current-user-name">Pascal</div>
+                <div class="user-role" id="current-user-role">Admin</div>
+            </div>
+            <span>⚙️</span>
+        </div>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <header class="header">
+            <div class="header-left">
+                <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                <h1 class="page-title">📊 Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <div class="status-badge">
+                    <span class="status-dot" id="firebase-dot"></span>
+                    <span id="firebase-status">Connexion...</span>
                 </div>
-                
-                <!-- Alerts -->
-                <div class="card alerts-section">
-                    <div class="card-header">
-                        <h2 class="card-title">🔔 Alertes</h2>
-                    </div>
-                    <div id="alerts-container">
-                        <div class="alert alert-info">
-                            <span class="alert-icon">ℹ️</span>
-                            <span class="alert-text">Système opérationnel</span>
-                        </div>
-                    </div>
+                <button class="header-btn" onclick="toggleTheme()" title="Thème">🌙</button>
+                <button class="header-btn" onclick="location.reload()" title="Actualiser">🔄</button>
+            </div>
+        </header>
+        
+        <div class="page-content">
+            <!-- Welcome -->
+            <div class="welcome-section">
+                <h2 class="welcome-title">👋 Bonjour <span id="welcome-name">Pascal</span> !</h2>
+                <p class="welcome-date" id="current-date"></p>
+            </div>
+            
+            <!-- KPIs -->
+            <div class="kpis-grid">
+                <div class="kpi-card blue">
+                    <div class="kpi-icon">📋</div>
+                    <div class="kpi-value" id="kpi-orders">0</div>
+                    <div class="kpi-label">Commandes du jour</div>
+                </div>
+                <div class="kpi-card green">
+                    <div class="kpi-icon">💰</div>
+                    <div class="kpi-value" id="kpi-ca">0 CHF</div>
+                    <div class="kpi-label">CA aujourd'hui</div>
+                </div>
+                <div class="kpi-card purple">
+                    <div class="kpi-icon">👥</div>
+                    <div class="kpi-value" id="kpi-clients">0</div>
+                    <div class="kpi-label">Clients</div>
+                </div>
+                <div class="kpi-card orange">
+                    <div class="kpi-icon">⏳</div>
+                    <div class="kpi-value" id="kpi-pending">0</div>
+                    <div class="kpi-label">En attente</div>
+                </div>
+                <div class="kpi-card cyan">
+                    <div class="kpi-icon">📦</div>
+                    <div class="kpi-value" id="kpi-articles">0</div>
+                    <div class="kpi-label">Articles</div>
+                </div>
+                <div class="kpi-card pink">
+                    <div class="kpi-icon">🛍️</div>
+                    <div class="kpi-value" id="kpi-ventes">0</div>
+                    <div class="kpi-label">Ventes caisse</div>
                 </div>
             </div>
             
-            <!-- Right Column -->
-            <div>
-                <!-- Quick Actions -->
+            <!-- Cards Grid -->
+            <div class="cards-grid">
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">⚡ Accès rapide</h2>
+                        <h3 class="card-title">📋 Commandes récentes</h3>
+                        <a href="commandes.html" class="card-action">Voir tout →</a>
                     </div>
-                    <div class="quick-actions" id="quick-actions">
-                        <a href="myfish.html" class="quick-action">
-                            <div class="quick-action-icon green">🛒</div>
-                            <span class="quick-action-text">Nouvelle vente</span>
-                            <span class="quick-action-arrow">→</span>
-                        </a>
-                        <a href="commandes.html" class="quick-action">
-                            <div class="quick-action-icon blue">📋</div>
-                            <span class="quick-action-text">Commandes</span>
-                            <span class="quick-action-arrow">→</span>
-                        </a>
-                        <a href="clients.html" class="quick-action">
-                            <div class="quick-action-icon purple">👥</div>
-                            <span class="quick-action-text">Clients</span>
-                            <span class="quick-action-arrow">→</span>
-                        </a>
-                        <a href="tracabilite.html" class="quick-action">
-                            <div class="quick-action-icon orange">🏷️</div>
-                            <span class="quick-action-text">Étiquettes</span>
-                            <span class="quick-action-arrow">→</span>
-                        </a>
+                    <div id="orders-list">
+                        <div class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <p>Aucune commande</p>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Stats rapides -->
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">📊 Cette semaine</h2>
+                        <h3 class="card-title">⚡ Accès rapide</h3>
                     </div>
-                    <div style="display:grid;gap:15px">
-                        <div style="display:flex;justify-content:space-between;padding:12px;background:var(--trakio-bg-input);border-radius:10px">
-                            <span style="color:var(--trakio-text-muted)">Commandes</span>
-                            <span style="font-weight:600" id="week-orders">0</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;padding:12px;background:var(--trakio-bg-input);border-radius:10px">
-                            <span style="color:var(--trakio-text-muted)">CA total</span>
-                            <span style="font-weight:600;color:var(--trakio-success)" id="week-ca">0 CHF</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;padding:12px;background:var(--trakio-bg-input);border-radius:10px">
-                            <span style="color:var(--trakio-text-muted)">Nouveaux clients</span>
-                            <span style="font-weight:600" id="week-clients">0</span>
-                        </div>
+                    <div id="quick-actions">
+                        <!-- Généré par JS selon permissions -->
                     </div>
                 </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- User Modal -->
+    <div class="modal-overlay" id="user-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">👥 Changer d'utilisateur</span>
+                <button class="modal-close" onclick="closeUserModal()">×</button>
+            </div>
+            <div class="modal-body" id="users-list">
+                <!-- Généré par JS -->
             </div>
         </div>
     </div>
     
-    <!-- Refresh Indicator -->
-    <div class="refresh-indicator">
-        <div class="refresh-dot"></div>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+    
+    <!-- Live Indicator -->
+    <div class="live-indicator">
+        <div class="live-dot"></div>
         <span>Live • <span id="last-refresh">--:--</span></span>
     </div>
     
     <script>
-        // Init
-        document.addEventListener('DOMContentLoaded', () => {
-            TrakioUI.init('dashboard');
-            loadDashboard();
-            
-            // Auto refresh every 30s
-            setInterval(loadDashboard, 30000);
-        });
+        // ============ CONFIG ============
+        const APP_VERSION = '4.2.2';
         
-        function loadDashboard() {
-            // User name
-            const user = TrakioUsers.getCurrentUser();
-            document.getElementById('user-name').textContent = user?.name || 'Utilisateur';
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyBoGescolWTpGdm0SZh-Wk7blu8RwL2n4I",
+            authDomain: "trakio-pilot-6e97a.firebaseapp.com",
+            projectId: "trakio-pilot-6e97a",
+            storageBucket: "trakio-pilot-6e97a.firebasestorage.app",
+            messagingSenderId: "256841216130",
+            appId: "1:256841216130:web:abc123"
+        };
+        
+        const ROLES = {
+            admin: { label: 'Admin', color: '#ef4444', allAccess: true },
+            manager: { label: 'Manager', color: '#f59e0b', modules: ['dashboard','articles','clients','commandes','myfish','caisse','compta','tracabilite'] },
+            vendeur: { label: 'Vendeur', color: '#10b981', modules: ['dashboard','myfish','caisse','clients','commandes'] },
+            viewer: { label: 'Viewer', color: '#6b7280', modules: ['dashboard'] }
+        };
+        
+        const MODULES = [
+            { id: 'dashboard', name: 'Dashboard', icon: '📊', url: 'index.html', section: 'principal' },
+            { id: 'articles', name: 'Articles', icon: '📦', url: 'articles.html', section: 'principal' },
+            { id: 'clients', name: 'Clients', icon: '👥', url: 'clients.html', section: 'principal' },
+            { id: 'commandes', name: 'Commandes', icon: '📋', url: 'commandes.html', section: 'ventes' },
+            { id: 'myfish', name: 'MyFish', icon: '🛒', url: 'myfish.html', section: 'ventes' },
+            { id: 'caisse', name: 'Caisse', icon: '💵', url: 'caisse.html', section: 'ventes' },
+            { id: 'tracabilite', name: 'Traçabilité', icon: '🏷️', url: 'tracabilite.html', section: 'outils' },
+            { id: 'compta', name: 'Compta', icon: '📒', url: 'compta.html', section: 'outils' },
+            { id: 'shopify', name: 'Shop Hub', icon: '🛍️', url: 'shopify.html', section: 'outils' },
+            { id: 'parametres', name: 'Paramètres', icon: '⚙️', url: 'parametres.html', section: 'systeme', adminOnly: true }
+        ];
+        
+        const DEFAULT_USERS = [
+            { id: 'pascal', name: 'Pascal', role: 'admin', pin: '1234' },
+            { id: 'celine', name: 'Céline', role: 'manager', pin: '0000' },
+            { id: 'hayat', name: 'Hayat', role: 'vendeur', pin: '0000' }
+        ];
+        
+        // ============ USERS ============
+        function getUsers() {
+            const users = localStorage.getItem('trakio_users');
+            if (!users) {
+                localStorage.setItem('trakio_users', JSON.stringify(DEFAULT_USERS));
+                return DEFAULT_USERS;
+            }
+            return JSON.parse(users);
+        }
+        
+        function getCurrentUser() {
+            const userId = localStorage.getItem('trakio_current_user') || 'pascal';
+            return getUsers().find(u => u.id === userId) || getUsers()[0];
+        }
+        
+        function setCurrentUser(userId) {
+            localStorage.setItem('trakio_current_user', userId);
+            location.reload();
+        }
+        
+        function hasAccess(moduleId) {
+            const user = getCurrentUser();
+            const role = ROLES[user.role];
+            if (role.allAccess) return true;
+            return (role.modules || []).includes(moduleId);
+        }
+        
+        function isAdmin() {
+            return getCurrentUser().role === 'admin';
+        }
+        
+        // ============ NAVIGATION ============
+        function buildNavigation() {
+            const user = getCurrentUser();
+            const nav = document.getElementById('sidebar-nav');
             
-            // Date
+            const sections = {
+                principal: { title: 'Principal', items: [] },
+                ventes: { title: '🛒 Ventes', items: [] },
+                outils: { title: '🔧 Outils', items: [] },
+                systeme: { title: '⚙️ Système', items: [] }
+            };
+            
+            MODULES.forEach(m => {
+                // Check access
+                if (m.adminOnly && !isAdmin()) return;
+                if (!hasAccess(m.id) && !m.adminOnly) return;
+                
+                sections[m.section].items.push(m);
+            });
+            
+            let html = '';
+            Object.keys(sections).forEach(key => {
+                const section = sections[key];
+                if (section.items.length === 0) return;
+                
+                html += `<div class="nav-section">`;
+                html += `<div class="nav-section-title">${section.title}</div>`;
+                
+                section.items.forEach(m => {
+                    const isActive = m.id === 'dashboard' ? true : false;
+                    html += `
+                        <a href="${m.url}" class="nav-item ${isActive ? 'active' : ''}">
+                            <span class="nav-icon">${m.icon}</span>
+                            <span class="nav-text">${m.name}</span>
+                        </a>
+                    `;
+                });
+                
+                html += `</div>`;
+            });
+            
+            nav.innerHTML = html;
+        }
+        
+        function buildQuickActions() {
+            const container = document.getElementById('quick-actions');
+            const actions = [
+                { module: 'myfish', icon: '🛒', text: 'Nouvelle vente', color: 'green' },
+                { module: 'commandes', icon: '📋', text: 'Commandes', color: 'blue' },
+                { module: 'clients', icon: '👥', text: 'Clients', color: 'purple' },
+                { module: 'tracabilite', icon: '🏷️', text: 'Étiquettes', color: 'orange' }
+            ];
+            
+            container.innerHTML = actions
+                .filter(a => hasAccess(a.module))
+                .map(a => {
+                    const m = MODULES.find(mod => mod.id === a.module);
+                    return `
+                        <a href="${m?.url || '#'}" class="quick-action">
+                            <div class="quick-action-icon ${a.color}">${a.icon}</div>
+                            <span class="quick-action-text">${a.text}</span>
+                            <span class="quick-action-arrow">→</span>
+                        </a>
+                    `;
+                }).join('');
+        }
+        
+        // ============ USER MODAL ============
+        function openUserModal() {
+            const users = getUsers();
+            const current = getCurrentUser();
+            
+            document.getElementById('users-list').innerHTML = users.map(u => {
+                const role = ROLES[u.role];
+                return `
+                    <div class="user-option ${u.id === current.id ? 'active' : ''}" onclick="setCurrentUser('${u.id}')">
+                        <div class="user-avatar" style="background:${role.color}">${u.name[0]}</div>
+                        <div class="user-info">
+                            <div class="user-name">${u.name}</div>
+                            <div class="user-role">${role.label}</div>
+                        </div>
+                        ${u.id === current.id ? '<span class="user-check">✓</span>' : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('user-modal').classList.add('active');
+        }
+        
+        function closeUserModal() {
+            document.getElementById('user-modal').classList.remove('active');
+        }
+        
+        // ============ UI ============
+        function updateUserDisplay() {
+            const user = getCurrentUser();
+            const role = ROLES[user.role];
+            
+            document.getElementById('current-user-avatar').textContent = user.name[0];
+            document.getElementById('current-user-avatar').style.background = role.color;
+            document.getElementById('current-user-name').textContent = user.name;
+            document.getElementById('current-user-role').textContent = role.label;
+            document.getElementById('welcome-name').textContent = user.name;
+        }
+        
+        function updateDate() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('current-date').textContent = now.toLocaleDateString('fr-CH', options);
-            
-            // Load KPIs
-            loadKPIs();
-            
-            // Load orders
-            loadRecentOrders();
-            
-            // Load alerts
-            loadAlerts();
-            
-            // Update refresh time
-            document.getElementById('last-refresh').textContent = now.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
         }
         
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+        
+        function toggleTheme() {
+            // Pour une future implémentation
+            showToast('🌙 Thème sombre actif', 'info');
+        }
+        
+        // ============ FIREBASE ============
+        let db = null;
+        
+        async function initFirebase() {
+            try {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(FIREBASE_CONFIG);
+                }
+                db = firebase.firestore();
+                
+                document.getElementById('firebase-dot').classList.add('online');
+                document.getElementById('firebase-status').textContent = 'Connecté';
+                
+                return true;
+            } catch (e) {
+                console.error('Firebase error:', e);
+                document.getElementById('firebase-dot').classList.add('offline');
+                document.getElementById('firebase-status').textContent = 'Hors ligne';
+                return false;
+            }
+        }
+        
+        // ============ KPIs ============
         function loadKPIs() {
-            // Get data from localStorage
             const articles = JSON.parse(localStorage.getItem('trakio_articles_list') || '[]');
             const clients = JSON.parse(localStorage.getItem('trakio_clients_list') || '[]');
             const commandes = JSON.parse(localStorage.getItem('trakio_commandes_list') || '[]');
             const ventes = JSON.parse(localStorage.getItem('trakio_ventes_list') || '[]');
             
             const today = new Date().toISOString().slice(0, 10);
-            const todayOrders = commandes.filter(c => c.createdAt?.slice(0, 10) === today || c.date?.slice(0, 10) === today);
+            const todayOrders = commandes.filter(c => (c.createdAt || c.date || '').slice(0, 10) === today);
             const pendingOrders = commandes.filter(c => c.status === 'pending' || c.status === 'en_attente');
+            const todayVentes = ventes.filter(v => (v.date || '').slice(0, 10) === today);
             
-            // Calculate CA today
-            let todayCA = 0;
-            todayOrders.forEach(o => todayCA += (o.total || 0));
-            ventes.filter(v => v.date?.slice(0, 10) === today).forEach(v => todayCA += (v.total || 0));
+            let ca = 0;
+            todayOrders.forEach(o => ca += (o.total || 0));
+            todayVentes.forEach(v => ca += (v.total || 0));
             
-            // Update KPIs
-            animateValue('kpi-orders', todayOrders.length);
-            document.getElementById('kpi-ca').textContent = formatCHF(todayCA);
-            animateValue('kpi-clients', clients.length);
-            animateValue('kpi-pending', pendingOrders.length);
-            animateValue('kpi-articles', articles.length);
+            document.getElementById('kpi-orders').textContent = todayOrders.length;
+            document.getElementById('kpi-ca').textContent = formatCHF(ca);
+            document.getElementById('kpi-clients').textContent = clients.length;
+            document.getElementById('kpi-pending').textContent = pendingOrders.length;
+            document.getElementById('kpi-articles').textContent = articles.length;
+            document.getElementById('kpi-ventes').textContent = todayVentes.length;
             
-            // Week stats
-            const weekAgo = new Date();
-            weekAgo.setDate(weekAgo.getDate() - 7);
-            const weekOrders = commandes.filter(c => new Date(c.createdAt || c.date) >= weekAgo);
-            let weekCA = 0;
-            weekOrders.forEach(o => weekCA += (o.total || 0));
-            
-            document.getElementById('week-orders').textContent = weekOrders.length;
-            document.getElementById('week-ca').textContent = formatCHF(weekCA);
-            
-            const weekClients = clients.filter(c => new Date(c.createdAt) >= weekAgo);
-            document.getElementById('week-clients').textContent = weekClients.length;
-        }
-        
-        function animateValue(id, value) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            
-            const current = parseInt(el.textContent) || 0;
-            if (current === value) return;
-            
-            const duration = 500;
-            const steps = 20;
-            const increment = (value - current) / steps;
-            let step = 0;
-            
-            const timer = setInterval(() => {
-                step++;
-                el.textContent = Math.round(current + increment * step);
-                if (step >= steps) {
-                    el.textContent = value;
-                    clearInterval(timer);
-                }
-            }, duration / steps);
+            document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
         }
         
         function loadRecentOrders() {
             const commandes = JSON.parse(localStorage.getItem('trakio_commandes_list') || '[]');
-            const recent = commandes
-                .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
-                .slice(0, 5);
+            const recent = commandes.sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)).slice(0, 5);
             
             const container = document.getElementById('orders-list');
             
             if (recent.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📋</div>
-                        <p>Aucune commande récente</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>Aucune commande</p></div>`;
                 return;
             }
             
             container.innerHTML = recent.map(o => {
                 const initial = (o.clientName || o.client || 'C')[0].toUpperCase();
-                const statusClass = o.status === 'pending' || o.status === 'en_attente' ? 'pending' : 
-                                   o.status === 'confirmed' || o.status === 'confirmee' ? 'confirmed' : 'delivered';
-                const statusLabel = o.status === 'pending' || o.status === 'en_attente' ? 'En attente' :
-                                   o.status === 'confirmed' || o.status === 'confirmee' ? 'Confirmée' : 'Livrée';
+                const statusClass = (o.status === 'pending' || o.status === 'en_attente') ? 'pending' : 'confirmed';
+                const statusLabel = (o.status === 'pending' || o.status === 'en_attente') ? 'En attente' : 'Confirmée';
                 
                 return `
-                    <div class="order-item" onclick="location.href='commandes.html'">
+                    <div class="order-item">
                         <div class="order-avatar">${initial}</div>
                         <div class="order-info">
                             <div class="order-client">${o.clientName || o.client || 'Client'}</div>
-                            <div class="order-details">${o.items?.length || 0} article(s) • ${formatDate(o.deliveryDate || o.date)}</div>
+                            <div class="order-details">${o.items?.length || 0} article(s)</div>
                         </div>
                         <div class="order-amount">${formatCHF(o.total || 0)}</div>
                         <span class="order-status ${statusClass}">${statusLabel}</span>
@@ -537,45 +945,36 @@
             }).join('');
         }
         
-        function loadAlerts() {
-            const alerts = [];
-            const commandes = JSON.parse(localStorage.getItem('trakio_commandes_list') || '[]');
-            const pending = commandes.filter(c => c.status === 'pending' || c.status === 'en_attente');
-            
-            if (pending.length > 0) {
-                alerts.push({
-                    type: 'warning',
-                    icon: '⚠️',
-                    text: `${pending.length} commande(s) en attente de confirmation`
-                });
-            }
-            
-            // Check stock alerts (if articles have stock)
-            const articles = JSON.parse(localStorage.getItem('trakio_articles_list') || '[]');
-            const lowStock = articles.filter(a => a.stock !== undefined && a.stock < 5);
-            if (lowStock.length > 0) {
-                alerts.push({
-                    type: 'warning',
-                    icon: '📦',
-                    text: `${lowStock.length} article(s) en stock faible`
-                });
-            }
-            
-            if (alerts.length === 0) {
-                alerts.push({
-                    type: 'info',
-                    icon: '✅',
-                    text: 'Tout est en ordre !'
-                });
-            }
-            
-            document.getElementById('alerts-container').innerHTML = alerts.map(a => `
-                <div class="alert alert-${a.type}">
-                    <span class="alert-icon">${a.icon}</span>
-                    <span class="alert-text">${a.text}</span>
-                </div>
-            `).join('');
+        function formatCHF(amount) {
+            return new Intl.NumberFormat('fr-CH', { style: 'currency', currency: 'CHF' }).format(amount || 0);
         }
+        
+        // ============ INIT ============
+        document.addEventListener('DOMContentLoaded', async () => {
+            updateUserDisplay();
+            updateDate();
+            buildNavigation();
+            buildQuickActions();
+            
+            await initFirebase();
+            
+            loadKPIs();
+            loadRecentOrders();
+            
+            // Auto refresh every 30s
+            setInterval(() => {
+                loadKPIs();
+                loadRecentOrders();
+            }, 30000);
+        });
+        
+        // Close modal on Escape
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeUserModal(); });
+        
+        // Close modal on click outside
+        document.getElementById('user-modal').addEventListener('click', e => {
+            if (e.target.id === 'user-modal') closeUserModal();
+        });
     </script>
 </body>
 </html>
