@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRAKIO v5.0.3 - Paramètres</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --bg-deep: #030712;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --bg-input: #0f172a;
+            --border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #06b6d4;
+            --accent-teal: #14b8a6;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f97316;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gradient-main: linear-gradient(135deg, #06b6d4 0%, #14b8a6 50%, #10b981 100%);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .top-nav {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 0 15px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .nav-left { display: flex; align-items: center; gap: 15px; }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .nav-logo {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-main);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .nav-title {
+            font-size: 18px;
+            font-weight: 800;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-version {
+            font-size: 9px;
+            padding: 2px 6px;
+            background: rgba(6, 182, 212, 0.2);
+            border-radius: 4px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+        .back-btn {
+            padding: 8px 16px;
+            background: var(--gradient-main);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .back-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(6, 182, 212, 0.3); }
+
+        /* Main Layout */
+        .main-container { display: flex; min-height: calc(100vh - 50px); }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 20px 0;
+        }
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 15px;
+        }
+        .sidebar-title {
+            font-size: 20px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+        .sidebar-nav { padding: 0 10px; }
+        .sidebar-section { margin-bottom: 20px; }
+        .sidebar-section-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 10px;
+            margin-bottom: 8px;
+        }
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .sidebar-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        .sidebar-item.active {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--accent-cyan);
+            border-left: 3px solid var(--accent-cyan);
+        }
+        .sidebar-item-icon { font-size: 18px; }
+        .sidebar-item-badge {
+            margin-left: auto;
+            padding: 2px 8px;
+            background: var(--accent-cyan);
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+        }
+        .content-header { margin-bottom: 25px; }
+        .content-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .content-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Cards */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .settings-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 18px 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-badge {
+            padding: 3px 10px;
+            background: var(--accent-cyan);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .card-body { padding: 20px; }
+
+        /* Users */
+        .users-list { display: flex; flex-direction: column; gap: 10px; }
+        .user-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: var(--bg-input);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.15s;
+        }
+        .user-row:hover { border-color: var(--accent-cyan); }
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+        }
+        .user-info { flex: 1; }
+        .user-name { font-weight: 600; font-size: 15px; }
+        .user-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+        .user-role-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .user-role-tag.admin { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+        .user-role-tag.manager { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .user-role-tag.employee { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .user-actions { display: flex; gap: 8px; }
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+        .btn-icon:hover { background: var(--accent-cyan); color: white; border-color: var(--accent-cyan); }
+        .btn-icon.danger:hover { background: var(--danger); border-color: var(--danger); }
+
+        /* Permissions */
+        .permissions-grid { display: grid; gap: 8px; }
+        .permission-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: var(--bg-input);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        .permission-module {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        .permission-module-icon { font-size: 18px; }
+        .toggle {
+            width: 40px;
+            height: 22px;
+            background: var(--bg-hover);
+            border-radius: 11px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .toggle.active { background: var(--accent-cyan); }
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.2s;
+        }
+        .toggle.active::after { left: 20px; }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            border: none;
+        }
+        .btn-primary { background: var(--gradient-main); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(6, 182, 212, 0.3); }
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { background: var(--bg-card); }
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .btn-danger:hover { background: var(--danger); color: white; }
+
+        /* Forms */
+        .form-group { margin-bottom: 18px; }
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        /* System Info */
+        .system-info { display: grid; gap: 12px; }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: var(--bg-input);
+            border-radius: 10px;
+        }
+        .info-label { color: var(--text-secondary); font-size: 13px; }
+        .info-value { font-weight: 600; font-size: 14px; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow: hidden;
+        }
+        .modal-header {
+            padding: 20px 25px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .modal-close:hover { background: var(--danger); color: white; }
+        .modal-body {
+            padding: 25px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Color picker */
+        .color-options { display: flex; gap: 8px; flex-wrap: wrap; }
+        .color-option {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.15s;
+        }
+        .color-option:hover { transform: scale(1.1); }
+        .color-option.selected { border-color: white; box-shadow: 0 0 0 2px var(--accent-cyan); }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+        .toast {
+            padding: 14px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            margin-top: 8px;
+            animation: toastIn 0.3s;
+        }
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+        @keyframes toastIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-container { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 15px 0;
+            }
+            .sidebar-nav {
+                display: flex;
+                overflow-x: auto;
+                padding: 0 15px;
+                gap: 5px;
+            }
+            .sidebar-section { margin-bottom: 0; }
+            .sidebar-section-title { display: none; }
+            .sidebar-item { padding: 10px 15px; white-space: nowrap; }
+            .content { padding: 15px; }
+            .settings-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .nav-title { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <a href="index.html" class="nav-brand">
+                <div class="nav-logo">🐟</div>
+                <span class="nav-title">TRAKIO</span>
+                <span class="nav-version">v5.0.3</span>
+            </a>
+        </div>
+        <a href="index.html" class="back-btn">← Retour au Dashboard</a>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="sidebar-title">⚙️ Paramètres</h1>
+                <p class="sidebar-subtitle">Configuration système</p>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Gestion</div>
+                    <div class="sidebar-item active" onclick="showSection('users')">
+                        <span class="sidebar-item-icon">👥</span>
+                        Utilisateurs
+                        <span class="sidebar-item-badge" id="userCount">3</span>
+                    </div>
+                    <div class="sidebar-item" onclick="showSection('roles')">
+                        <span class="sidebar-item-icon">🔐</span>
+                        Rôles & Permissions
+                    </div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Système</div>
+                    <div class="sidebar-item" onclick="showSection('system')">
+                        <span class="sidebar-item-icon">💻</span>
+                        Informations
+                    </div>
+                    <div class="sidebar-item" onclick="showSection('backup')">
+                        <span class="sidebar-item-icon">💾</span>
+                        Sauvegarde
+                    </div>
+                    <div class="sidebar-item" onclick="showSection('danger')">
+                        <span class="sidebar-item-icon">⚠️</span>
+                        Zone Danger
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Content -->
+        <main class="content">
+            <!-- USERS SECTION -->
+            <section id="section-users" class="section-content">
+                <div class="content-header">
+                    <h2 class="content-title">👥 Gestion des Utilisateurs</h2>
+                    <p class="content-desc">Créez et gérez les comptes utilisateurs</p>
+                </div>
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div class="card-title">Utilisateurs actifs</div>
+                        <button class="btn btn-primary" onclick="openUserModal()">➕ Nouvel utilisateur</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="users-list" id="usersList"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ROLES SECTION -->
+            <section id="section-roles" class="section-content" style="display:none;">
+                <div class="content-header">
+                    <h2 class="content-title">🔐 Rôles & Permissions</h2>
+                    <p class="content-desc">Définissez les accès pour chaque rôle</p>
+                </div>
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <div class="card-title">👑 Admin</div>
+                            <span style="color: var(--danger); font-size: 12px;">Accès total</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="permissions-grid" id="permAdmin"></div>
+                        </div>
+                    </div>
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <div class="card-title">⭐ Manager</div>
+                            <span style="color: var(--warning); font-size: 12px;">Gestion avancée</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="permissions-grid" id="permManager"></div>
+                        </div>
+                    </div>
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <div class="card-title">👤 Employé</div>
+                            <span style="color: var(--success); font-size: 12px;">Accès limité</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="permissions-grid" id="permEmployee"></div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; text-align: right;">
+                    <button class="btn btn-primary" onclick="savePermissions()">💾 Enregistrer</button>
+                </div>
+            </section>
+
+            <!-- SYSTEM SECTION -->
+            <section id="section-system" class="section-content" style="display:none;">
+                <div class="content-header">
+                    <h2 class="content-title">💻 Informations Système</h2>
+                    <p class="content-desc">Détails de l'application</p>
+                </div>
+                <div class="settings-card">
+                    <div class="card-body">
+                        <div class="system-info">
+                            <div class="info-row">
+                                <span class="info-label">Version</span>
+                                <span class="info-value">TRAKIO v5.0.3</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Entreprise</span>
+                                <span class="info-value">Borex Poissons</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Utilisateur</span>
+                                <span class="info-value" id="currentUserInfo">-</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Articles</span>
+                                <span class="info-value" id="statsArticles">0</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Clients</span>
+                                <span class="info-value" id="statsClients">0</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Commandes</span>
+                                <span class="info-value" id="statsCommandes">0</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Stockage local</span>
+                                <span class="info-value" id="localStorageSize">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BACKUP SECTION -->
+            <section id="section-backup" class="section-content" style="display:none;">
+                <div class="content-header">
+                    <h2 class="content-title">💾 Sauvegarde</h2>
+                    <p class="content-desc">Exportez et importez vos données</p>
+                </div>
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <div class="card-title">📤 Exporter</div>
+                        </div>
+                        <div class="card-body">
+                            <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 15px;">
+                                Téléchargez une copie de toutes vos données
+                            </p>
+                            <button class="btn btn-primary" onclick="exportData()" style="width: 100%;">
+                                📥 Télécharger
+                            </button>
+                        </div>
+                    </div>
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <div class="card-title">📥 Importer</div>
+                        </div>
+                        <div class="card-body">
+                            <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 15px;">
+                                Restaurez depuis une sauvegarde
+                            </p>
+                            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+                            <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" style="width: 100%;">
+                                📂 Choisir un fichier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DANGER SECTION -->
+            <section id="section-danger" class="section-content" style="display:none;">
+                <div class="content-header">
+                    <h2 class="content-title">⚠️ Zone Danger</h2>
+                    <p class="content-desc">Actions irréversibles</p>
+                </div>
+                <div class="settings-card" style="border-color: rgba(239, 68, 68, 0.3);">
+                    <div class="card-body">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 10px; margin-bottom: 10px;">
+                            <div>
+                                <div style="font-weight: 600;">Réinitialiser localStorage</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Supprime toutes les données locales</div>
+                            </div>
+                            <button class="btn btn-danger" onclick="clearLocalStorage()">Réinitialiser</button>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 10px;">
+                            <div>
+                                <div style="font-weight: 600;">Supprimer les commandes</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Efface l'historique</div>
+                            </div>
+                            <button class="btn btn-danger" onclick="clearCommandes()">Supprimer</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- User Modal -->
+    <div class="modal-overlay" id="userModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">➕ Nouvel utilisateur</h3>
+                <button class="modal-close" onclick="closeUserModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label class="form-label">Nom complet</label>
+                    <input type="text" class="form-input" id="userName" placeholder="Ex: Marie Dupont">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Code PIN (4 chiffres)</label>
+                        <input type="text" class="form-input" id="userPin" placeholder="1234" maxlength="4">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Rôle</label>
+                        <select class="form-select" id="userRole">
+                            <option value="employee">👤 Employé</option>
+                            <option value="manager">⭐ Manager</option>
+                            <option value="admin">👑 Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Couleur</label>
+                    <div class="color-options" id="colorOptions">
+                        <div class="color-option selected" style="background: #ef4444;" data-color="#ef4444"></div>
+                        <div class="color-option" style="background: #f97316;" data-color="#f97316"></div>
+                        <div class="color-option" style="background: #f59e0b;" data-color="#f59e0b"></div>
+                        <div class="color-option" style="background: #10b981;" data-color="#10b981"></div>
+                        <div class="color-option" style="background: #06b6d4;" data-color="#06b6d4"></div>
+                        <div class="color-option" style="background: #3b82f6;" data-color="#3b82f6"></div>
+                        <div class="color-option" style="background: #8b5cf6;" data-color="#8b5cf6"></div>
+                        <div class="color-option" style="background: #ec4899;" data-color="#ec4899"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeUserModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="saveUser()">💾 Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // Default users
+        const DEFAULT_USERS = [
+            { id: 'admin_pascal', name: 'Pascal Admin', pin: '1277', role: 'admin', avatar: 'PA', color: '#ef4444', active: true, isDefault: true },
+            { id: 'manager_celine', name: 'Céline', pin: '1277', role: 'manager', avatar: 'CE', color: '#f59e0b', active: true, isDefault: true },
+            { id: 'employee_hayat', name: 'Hayat', pin: '1260', role: 'employee', avatar: 'HA', color: '#10b981', active: true, isDefault: true }
+        ];
+
+        const ROLES = {
+            admin: { label: 'Admin', badge: '👑', color: '#ef4444' },
+            manager: { label: 'Manager', badge: '⭐', color: '#f59e0b' },
+            employee: { label: 'Employé', badge: '👤', color: '#10b981' }
+        };
+
+        const MODULES = [
+            { id: 'dashboard', name: 'Dashboard', icon: '🏠' },
+            { id: 'articles', name: 'Articles', icon: '📦' },
+            { id: 'clients', name: 'Clients', icon: '👥' },
+            { id: 'commandes', name: 'Commandes', icon: '📋' },
+            { id: 'myfish', name: 'MyFish', icon: '🐟' },
+            { id: 'caisse', name: 'Caisse', icon: '💳' },
+            { id: 'tracabilite', name: 'Traçabilité', icon: '🏷️' },
+            { id: 'compta', name: 'Compta', icon: '💰' },
+            { id: 'parametres', name: 'Paramètres', icon: '⚙️' }
+        ];
+
+        const DEFAULT_PERMS = {
+            admin: { dashboard: true, articles: true, clients: true, commandes: true, myfish: true, caisse: true, tracabilite: true, compta: true, parametres: true },
+            manager: { dashboard: true, articles: true, clients: true, commandes: true, myfish: true, caisse: true, tracabilite: true, compta: true, parametres: false },
+            employee: { dashboard: true, articles: false, clients: false, commandes: true, myfish: true, caisse: true, tracabilite: true, compta: false, parametres: false }
+        };
+
+        // Storage
+        function getUsers() {
+            let stored = [];
+            try { stored = JSON.parse(localStorage.getItem('trakio_users') || '[]'); } catch(e) {}
+            const ids = DEFAULT_USERS.map(u => u.id);
+            const custom = stored.filter(u => !ids.includes(u.id));
+            return [...DEFAULT_USERS, ...custom];
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem('trakio_users', JSON.stringify(users));
+        }
+
+        function getCurrentUser() {
+            try { return JSON.parse(localStorage.getItem('trakio_current_user')); } catch(e) { return null; }
+        }
+
+        function getPerms() {
+            try { return JSON.parse(localStorage.getItem('trakio_permissions')) || DEFAULT_PERMS; } catch(e) { return DEFAULT_PERMS; }
+        }
+
+        function savePerms(p) {
+            localStorage.setItem('trakio_permissions', JSON.stringify(p));
+        }
+
+        // Check admin
+        function checkAdmin() {
+            const user = getCurrentUser();
+            if (!user) { window.location.href = 'index.html'; return false; }
+            if (user.role !== 'admin') {
+                showToast('Accès réservé aux administrateurs', 'error');
+                setTimeout(() => window.location.href = 'index.html', 1500);
+                return false;
+            }
+            return true;
+        }
+
+        // Sections
+        function showSection(id) {
+            document.querySelectorAll('.section-content').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            document.getElementById('section-' + id).style.display = 'block';
+            event.target.closest('.sidebar-item').classList.add('active');
+            if (id === 'roles') loadPerms();
+            if (id === 'system') loadSystem();
+        }
+
+        // Users
+        function loadUsers() {
+            const users = getUsers();
+            const list = document.getElementById('usersList');
+            list.innerHTML = users.map(u => {
+                const r = ROLES[u.role] || ROLES.employee;
+                return `
+                    <div class="user-row">
+                        <div class="user-avatar" style="background:${u.color || r.color}">${u.avatar || u.name.substring(0,2).toUpperCase()}</div>
+                        <div class="user-info">
+                            <div class="user-name">${u.name}</div>
+                            <div class="user-meta">${u.isDefault ? '🔒 Système' : 'Personnalisé'}</div>
+                        </div>
+                        <div class="user-role-tag ${u.role}">${r.badge} ${r.label}</div>
+                        <div class="user-actions">
+                            <button class="btn-icon" onclick="editUser('${u.id}')">✏️</button>
+                            ${!u.isDefault ? `<button class="btn-icon danger" onclick="deleteUser('${u.id}')">🗑️</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('userCount').textContent = users.length;
+        }
+
+        let selectedColor = '#ef4444';
+
+        function openUserModal(id = null) {
+            document.getElementById('userModal').classList.add('open');
+            if (id) {
+                const u = getUsers().find(x => x.id === id);
+                if (u) {
+                    document.getElementById('modalTitle').textContent = '✏️ Modifier';
+                    document.getElementById('editUserId').value = id;
+                    document.getElementById('userName').value = u.name;
+                    document.getElementById('userPin').value = u.pin;
+                    document.getElementById('userRole').value = u.role;
+                    selectedColor = u.color || '#ef4444';
+                    updateColor();
+                }
+            } else {
+                document.getElementById('modalTitle').textContent = '➕ Nouvel utilisateur';
+                document.getElementById('editUserId').value = '';
+                document.getElementById('userName').value = '';
+                document.getElementById('userPin').value = '';
+                document.getElementById('userRole').value = 'employee';
+                selectedColor = '#ef4444';
+                updateColor();
+            }
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.remove('open');
+        }
+
+        function updateColor() {
+            document.querySelectorAll('.color-option').forEach(o => {
+                o.classList.toggle('selected', o.dataset.color === selectedColor);
+            });
+        }
+
+        document.querySelectorAll('.color-option').forEach(o => {
+            o.onclick = () => { selectedColor = o.dataset.color; updateColor(); };
+        });
+
+        function editUser(id) { openUserModal(id); }
+
+        function saveUser() {
+            const id = document.getElementById('editUserId').value;
+            const name = document.getElementById('userName').value.trim();
+            const pin = document.getElementById('userPin').value.trim();
+            const role = document.getElementById('userRole').value;
+            if (!name || pin.length !== 4) {
+                showToast('Remplissez tous les champs (PIN = 4 chiffres)', 'error');
+                return;
+            }
+            let users = getUsers();
+            const avatar = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            if (id) {
+                users = users.map(u => u.id === id ? { ...u, name, pin, role, color: selectedColor, avatar } : u);
+            } else {
+                users.push({ id: 'user_' + Date.now(), name, pin, role, avatar, color: selectedColor, active: true });
+            }
+            saveUsers(users);
+            loadUsers();
+            closeUserModal();
+            showToast(id ? 'Utilisateur modifié' : 'Utilisateur créé', 'success');
+        }
+
+        function deleteUser(id) {
+            if (!confirm('Supprimer cet utilisateur ?')) return;
+            saveUsers(getUsers().filter(u => u.id !== id));
+            loadUsers();
+            showToast('Supprimé', 'success');
+        }
+
+        // Permissions
+        function loadPerms() {
+            const perms = getPerms();
+            ['admin', 'manager', 'employee'].forEach(role => {
+                const el = document.getElementById('perm' + role.charAt(0).toUpperCase() + role.slice(1));
+                el.innerHTML = MODULES.map(m => `
+                    <div class="permission-row">
+                        <div class="permission-module">
+                            <span class="permission-module-icon">${m.icon}</span>
+                            <span>${m.name}</span>
+                        </div>
+                        <div class="toggle ${perms[role][m.id] ? 'active' : ''}" data-role="${role}" data-mod="${m.id}" onclick="togglePerm(this)"></div>
+                    </div>
+                `).join('');
+            });
+        }
+
+        function togglePerm(el) {
+            if (el.dataset.role === 'admin') return;
+            el.classList.toggle('active');
+        }
+
+        function savePermissions() {
+            const perms = { admin: {}, manager: {}, employee: {} };
+            document.querySelectorAll('.toggle[data-role]').forEach(t => {
+                perms[t.dataset.role][t.dataset.mod] = t.classList.contains('active');
+            });
+            MODULES.forEach(m => perms.admin[m.id] = true);
+            savePerms(perms);
+            showToast('Permissions enregistrées', 'success');
+        }
+
+        // System
+        function loadSystem() {
+            const user = getCurrentUser();
+            document.getElementById('currentUserInfo').textContent = user ? user.name : '-';
+            document.getElementById('statsArticles').textContent = JSON.parse(localStorage.getItem('trakio_articles') || '[]').length;
+            document.getElementById('statsClients').textContent = JSON.parse(localStorage.getItem('trakio_quickorder') || '[]').length;
+            document.getElementById('statsCommandes').textContent = JSON.parse(localStorage.getItem('trakio_commandes') || '[]').length;
+            let size = 0;
+            for (let k in localStorage) { if (localStorage.hasOwnProperty(k)) size += localStorage[k].length * 2; }
+            document.getElementById('localStorageSize').textContent = (size / 1024).toFixed(2) + ' KB';
+        }
+
+        // Backup
+        function exportData() {
+            const data = {
+                version: '5.0.3',
+                date: new Date().toISOString(),
+                users: getUsers(),
+                articles: JSON.parse(localStorage.getItem('trakio_articles') || '[]'),
+                clients: JSON.parse(localStorage.getItem('trakio_quickorder') || '[]'),
+                commandes: JSON.parse(localStorage.getItem('trakio_commandes') || '[]'),
+                permissions: getPerms()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'trakio-backup-' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            showToast('Sauvegarde téléchargée', 'success');
+        }
+
+        function importData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const d = JSON.parse(ev.target.result);
+                    if (d.articles) localStorage.setItem('trakio_articles', JSON.stringify(d.articles));
+                    if (d.clients) localStorage.setItem('trakio_quickorder', JSON.stringify(d.clients));
+                    if (d.commandes) localStorage.setItem('trakio_commandes', JSON.stringify(d.commandes));
+                    if (d.users) saveUsers(d.users);
+                    if (d.permissions) savePerms(d.permissions);
+                    showToast('Import réussi', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } catch (err) {
+                    showToast('Erreur import', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Danger
+        function clearLocalStorage() {
+            if (!confirm('⚠️ Supprimer TOUTES les données ?')) return;
+            if (!confirm('VRAIMENT tout supprimer ?')) return;
+            localStorage.clear();
+            showToast('Données supprimées', 'success');
+            setTimeout(() => window.location.href = 'index.html', 1000);
+        }
+
+        function clearCommandes() {
+            if (!confirm('Supprimer toutes les commandes ?')) return;
+            localStorage.removeItem('trakio_commandes');
+            localStorage.removeItem('trakio_myfish');
+            showToast('Commandes supprimées', 'success');
+        }
+
+        // Toast
+        function showToast(msg, type = 'success') {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = 'toast ' + type;
+            t.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span><span>${msg}</span>`;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkAdmin()) return;
+            loadUsers();
+        });
+    </script>
+</body>
+</html>
