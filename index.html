@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>TRAKIO v5.0.1 - Gestion Poissonnerie</title>
+    <title>TRAKIO v5.0.2 - Gestion Poissonnerie</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -441,99 +441,120 @@
         .nav-menu {
             display: flex;
             align-items: center;
-            gap: 3px;
+            gap: 2px;
+            flex: 1;
+            justify-content: center;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 0 10px;
         }
 
+        .nav-menu::-webkit-scrollbar { display: none; }
+
         .nav-link {
-            padding: 8px 12px;
+            padding: 6px 8px;
             border-radius: 8px;
             color: var(--text-secondary);
             text-decoration: none;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .nav-link:hover {
             background: var(--bg-hover);
             color: var(--text-primary);
+            transform: translateY(-1px);
         }
 
         .nav-link.active {
-            background: var(--accent-cyan);
+            background: var(--gradient-main);
             color: white;
+            box-shadow: 0 2px 8px rgba(6, 182, 212, 0.3);
         }
+
+        .nav-link .nav-icon { font-size: 14px; }
+        .nav-link .nav-text { }
 
         .nav-divider {
             width: 1px;
-            height: 24px;
+            height: 20px;
             background: var(--border);
-            margin: 0 6px;
+            margin: 0 4px;
+            flex-shrink: 0;
+            opacity: 0.5;
         }
 
         .nav-right {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
         .nav-status {
             display: flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
+            gap: 5px;
+            padding: 5px 10px;
             background: var(--bg-hover);
             border-radius: 8px;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .status-indicator {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
         }
 
-        .status-indicator.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+        .status-indicator.online { background: var(--success); box-shadow: 0 0 6px var(--success); }
         .status-indicator.offline { background: var(--danger); }
 
         .user-menu {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 10px;
+            gap: 6px;
+            padding: 4px 8px;
             background: var(--bg-hover);
-            border-radius: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
         }
 
+        .user-menu:hover { background: var(--bg-card); }
+
         .user-avatar-small {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 12px;
+            font-size: 11px;
             color: white;
         }
 
         .user-details { text-align: left; }
-        .user-details-name { font-weight: 600; font-size: 13px; }
+        .user-details-name { font-weight: 600; font-size: 12px; }
         .user-details-role {
-            font-size: 10px;
+            font-size: 9px;
             color: var(--text-muted);
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
         }
 
         .role-badge {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
         }
 
@@ -542,14 +563,14 @@
         .role-badge.employee { background: var(--success); }
 
         .logout-btn {
-            padding: 8px 14px;
+            padding: 6px 10px;
             background: transparent;
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 6px;
             color: var(--text-secondary);
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
             font-family: inherit;
         }
 
@@ -564,9 +585,30 @@
             background: none;
             border: none;
             color: var(--text-primary);
-            font-size: 22px;
+            font-size: 20px;
             cursor: pointer;
-            padding: 6px;
+            padding: 4px;
+        }
+
+        /* Desktop large - tout visible */
+        @media (min-width: 1400px) {
+            .nav-link { padding: 7px 10px; font-size: 13px; }
+            .nav-link .nav-icon { font-size: 15px; }
+        }
+
+        /* Desktop medium - texte plus court */
+        @media (max-width: 1399px) and (min-width: 1100px) {
+            .nav-link { padding: 6px 7px; font-size: 11px; }
+            .nav-divider { margin: 0 2px; }
+        }
+
+        /* Tablette - icônes seulement */
+        @media (max-width: 1099px) and (min-width: 769px) {
+            .nav-link { padding: 8px; }
+            .nav-link .nav-text { display: none; }
+            .nav-link .nav-icon { font-size: 16px; }
+            .nav-divider { display: none; }
+            .user-details { display: none; }
         }
 
         /* Dashboard */
@@ -725,28 +767,40 @@
         .activity-time { font-size: 11px; color: var(--text-muted); }
 
         /* Responsive */
-        @media (max-width: 1200px) {
-            .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+        @media (max-width: 768px) {
+            .top-nav {
+                padding: 0 10px;
+                height: 55px;
+            }
             .nav-menu {
                 display: none;
-                position: absolute;
-                top: 60px;
+                position: fixed;
+                top: 55px;
                 left: 0;
                 right: 0;
+                bottom: 0;
                 background: var(--bg-secondary);
-                border-bottom: 1px solid var(--border);
-                padding: 10px;
                 flex-direction: column;
-                max-height: 70vh;
+                padding: 15px;
+                gap: 5px;
                 overflow-y: auto;
+                z-index: 999;
             }
             .nav-menu.open { display: flex; }
-            .nav-link { padding: 12px 15px; }
-            .nav-divider { height: 1px; width: 100%; margin: 5px 0; }
+            .nav-link {
+                padding: 14px 16px;
+                font-size: 15px;
+                border-radius: 10px;
+                background: var(--bg-card);
+            }
+            .nav-link .nav-text { display: inline; }
+            .nav-link .nav-icon { font-size: 18px; }
+            .nav-divider { display: none; }
             .mobile-menu-btn { display: block; }
-        }
-
-        @media (max-width: 768px) {
+            .nav-status { display: none; }
+            .user-details { display: none; }
+            .logout-btn { padding: 6px 8px; font-size: 10px; }
+            
             .kpi-grid { grid-template-columns: repeat(2, 1fr); }
             .quick-actions { grid-template-columns: 1fr; }
             .intro-title { font-size: 38px; }
@@ -755,7 +809,6 @@
             .dashboard { padding: 15px; }
             .welcome-title { font-size: 22px; }
             .kpi-value { font-size: 20px; }
-            .nav-status, .user-details, .nav-title { display: none; }
         }
 
         @media (max-width: 480px) {
@@ -767,6 +820,7 @@
             .logo-icon { width: 80px; height: 80px; }
             .pin-box { width: 44px; height: 54px; font-size: 20px; }
             .pin-boxes { gap: 8px; }
+            .nav-title { display: none; }
         }
 
         .toast-container {
@@ -827,7 +881,7 @@
             </div>
             <h1 class="intro-title">TRAKIO</h1>
             <p class="intro-subtitle">Système de Gestion Poissonnerie</p>
-            <span class="intro-version">v5.0.1</span>
+            <span class="intro-version">v5.0.2</span>
         </div>
 
         <div class="login-container">
@@ -875,26 +929,26 @@
                 <a href="index.html" class="nav-brand">
                     <div class="nav-logo">🐟</div>
                     <span class="nav-title">TRAKIO</span>
-                    <span class="nav-version">v5.0.1</span>
+                    <span class="nav-version">v5.0.2</span>
                 </a>
 
                 <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
 
                 <div class="nav-menu" id="navMenu">
-                    <a href="index.html" class="nav-link active"><span>🏠</span><span>Dashboard</span></a>
+                    <a href="index.html" class="nav-link active"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
                     <div class="nav-divider"></div>
-                    <a href="articles.html" class="nav-link"><span>📦</span><span>Articles</span></a>
-                    <a href="clients.html" class="nav-link"><span>👥</span><span>Clients</span></a>
-                    <a href="commandes.html" class="nav-link"><span>📋</span><span>Commandes</span></a>
-                    <a href="myfish.html" class="nav-link"><span>🐟</span><span>MyFish</span></a>
+                    <a href="articles.html" class="nav-link"><span class="nav-icon">📦</span><span class="nav-text">Articles</span></a>
+                    <a href="clients.html" class="nav-link"><span class="nav-icon">👥</span><span class="nav-text">Clients</span></a>
+                    <a href="commandes.html" class="nav-link"><span class="nav-icon">📋</span><span class="nav-text">Commandes</span></a>
+                    <a href="myfish.html" class="nav-link"><span class="nav-icon">🐟</span><span class="nav-text">MyFish</span></a>
                     <div class="nav-divider"></div>
-                    <a href="caisse.html" class="nav-link"><span>💳</span><span>Caisse</span></a>
-                    <a href="live.html" class="nav-link"><span>📊</span><span>Cours</span></a>
-                    <a href="tracabilite.html" class="nav-link"><span>🏷️</span><span>Traçabilité</span></a>
+                    <a href="caisse.html" class="nav-link"><span class="nav-icon">💳</span><span class="nav-text">Caisse</span></a>
+                    <a href="live.html" class="nav-link"><span class="nav-icon">📊</span><span class="nav-text">Cours</span></a>
+                    <a href="tracabilite.html" class="nav-link"><span class="nav-icon">🏷️</span><span class="nav-text">Traçabilité</span></a>
                     <div class="nav-divider"></div>
-                    <a href="shopify.html" class="nav-link"><span>🛍️</span><span>Shop</span></a>
-                    <a href="compta.html" class="nav-link"><span>💰</span><span>Compta</span></a>
-                    <a href="whatsapp.html" class="nav-link"><span>💬</span><span>WhatsApp</span></a>
+                    <a href="shopify.html" class="nav-link"><span class="nav-icon">🛍️</span><span class="nav-text">Shop</span></a>
+                    <a href="compta.html" class="nav-link"><span class="nav-icon">💰</span><span class="nav-text">Compta</span></a>
+                    <a href="whatsapp.html" class="nav-link"><span class="nav-icon">💬</span><span class="nav-text">WhatsApp</span></a>
                 </div>
             </div>
 
