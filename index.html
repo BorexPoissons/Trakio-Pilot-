@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>TRAKIO v5.0.3 - Gestion Poissonnerie</title>
+    <title>TRAKIO v5.0.4 - Gestion Poissonnerie</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1011,7 +1011,7 @@
             </div>
             <h1 class="intro-title">TRAKIO</h1>
             <p class="intro-subtitle">Système de Gestion Poissonnerie</p>
-            <span class="intro-version">v5.0.3</span>
+            <span class="intro-version">v5.0.4</span>
         </div>
 
         <div class="login-container">
@@ -1059,7 +1059,7 @@
                 <a href="index.html" class="nav-brand">
                     <div class="nav-logo">🐟</div>
                     <span class="nav-title">TRAKIO</span>
-                    <span class="nav-version">v5.0.3</span>
+                    <span class="nav-version">v5.0.4</span>
                 </a>
 
                 <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
@@ -1079,8 +1079,8 @@
                     <a href="shopify.html" class="nav-link"><span class="nav-icon">🛍️</span><span class="nav-text">Shop</span></a>
                     <a href="compta.html" class="nav-link"><span class="nav-icon">💰</span><span class="nav-text">Compta</span></a>
                     <a href="whatsapp.html" class="nav-link"><span class="nav-icon">💬</span><span class="nav-text">WhatsApp</span></a>
-                    <div class="nav-divider"></div>
-                    <a href="parametres.html" class="nav-link"><span class="nav-icon">⚙️</span><span class="nav-text">Paramètres</span></a>
+                    <div class="nav-divider" id="paramDivider"></div>
+                    <a href="parametres.html" class="nav-link" id="paramNavLink"><span class="nav-icon">⚙️</span><span class="nav-text">Paramètres</span></a>
                 </div>
             </div>
 
@@ -1106,7 +1106,7 @@
                         <div class="dropdown-header">Changer d'utilisateur</div>
                         <div class="dropdown-users" id="dropdownUsers"></div>
                         <div class="dropdown-divider"></div>
-                        <a href="parametres.html" class="dropdown-item">
+                        <a href="parametres.html" class="dropdown-item" id="paramDropdownLink">
                             <span>⚙️</span> Paramètres
                         </a>
                         <div class="dropdown-item" onclick="logout()">
@@ -1267,8 +1267,19 @@
         };
 
         function getUsers() {
-            // Toujours retourner au moins les utilisateurs par défaut
-            return DEFAULT_USERS;
+            let stored = [];
+            try { stored = JSON.parse(localStorage.getItem('trakio_users') || '[]'); } catch(e) {}
+            
+            // Filtrer les doublons
+            const defaultIds = DEFAULT_USERS.map(u => u.id);
+            const defaultNames = DEFAULT_USERS.map(u => u.name.toLowerCase());
+            const custom = stored.filter(u => {
+                const isDefaultId = defaultIds.includes(u.id);
+                const isDefaultName = defaultNames.includes(u.name.toLowerCase());
+                return !isDefaultId && !isDefaultName && !u.isDefault;
+            });
+            
+            return [...DEFAULT_USERS, ...custom];
         }
 
         function getCurrentUser() {
@@ -1376,6 +1387,15 @@
             document.getElementById('userRoleDisplay').textContent = role.label;
             document.getElementById('roleBadge').className = 'role-badge ' + user.role;
             document.getElementById('welcomeTitle').textContent = `Bonjour, ${user.name.split(' ')[0]} ! 👋`;
+
+            // Cacher Paramètres pour les non-admins
+            const isAdmin = user.role === 'admin';
+            const paramNavLink = document.getElementById('paramNavLink');
+            const paramDropdownLink = document.getElementById('paramDropdownLink');
+            const paramDivider = document.getElementById('paramDivider');
+            if (paramNavLink) paramNavLink.style.display = isAdmin ? '' : 'none';
+            if (paramDropdownLink) paramDropdownLink.style.display = isAdmin ? '' : 'none';
+            if (paramDivider) paramDivider.style.display = isAdmin ? '' : 'none';
 
             updateDate();
             loadKPIs();
@@ -1591,7 +1611,27 @@
             setTimeout(() => t.remove(), 3000);
         }
 
+        // Nettoyer les doublons dans localStorage
+        function cleanupDuplicateUsers() {
+            let stored = [];
+            try { stored = JSON.parse(localStorage.getItem('trakio_users') || '[]'); } catch(e) {}
+            
+            const defaultIds = DEFAULT_USERS.map(u => u.id);
+            const defaultNames = DEFAULT_USERS.map(u => u.name.toLowerCase());
+            
+            const cleaned = stored.filter(u => {
+                const isDefaultId = defaultIds.includes(u.id);
+                const isDefaultName = defaultNames.includes(u.name.toLowerCase());
+                return !isDefaultId && !isDefaultName && !u.isDefault;
+            });
+            
+            if (cleaned.length !== stored.length) {
+                localStorage.setItem('trakio_users', JSON.stringify(cleaned));
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            cleanupDuplicateUsers();
             createParticles();
             initLogin();
             setInterval(updateDate, 60000);
