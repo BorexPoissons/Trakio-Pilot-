@@ -1,14 +1,16 @@
 /**
- * TRAKIO Configuration Centralisée
- * Version: 4.5.0
- * Fichier: trakio-config.js (RACINE)
+ * TRAKIO Configuration v5.0.0
+ * Configuration Firebase et utilitaires globaux
+ * Ce fichier doit être chargé en premier par tous les modules
  */
 
-// ==========================================
-// FIREBASE CONFIGURATION
-// ==========================================
+// ============ VERSION ============
+const TRAKIO_VERSION = '5.0.0';
+const TRAKIO_VERSION_DATE = '2025-12-09';
+
+// ============ FIREBASE CONFIG ============
 const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyDummy-REPLACE-WITH-REAL-KEY",
+    apiKey: "AIzaSyD8WPESTVJ9mMLHCSvnhv0xiUvbgT6lPLA",
     authDomain: "trakio-pilot-6e97a.firebaseapp.com",
     projectId: "trakio-pilot-6e97a",
     storageBucket: "trakio-pilot-6e97a.firebasestorage.app",
@@ -16,237 +18,365 @@ const FIREBASE_CONFIG = {
     appId: "1:256841216130:web:4ea5a967ba39c120d8849b"
 };
 
-// ==========================================
-// APPLICATION SETTINGS
-// ==========================================
-const TRAKIO_CONFIG = {
-    version: "4.5.0",
-    appName: "TRAKIO",
-    company: "Borex Poissons",
-    syncInterval: 300000,
-    autoRefreshInterval: 30000,
-    maxHistoryItems: 50,
-    
-    dropboxPaths: {
-        root: "/TRAKIO",
-        system: "/TRAKIO/System",
-        version: "/TRAKIO/System/version.json",
-        articles: "/TRAKIO/Articles",
-        clients: "/TRAKIO/Clients",
-        commandes: "/TRAKIO/Commandes",
-        compta: "/TRAKIO/Compta",
-        tracabilite: "/TRAKIO/Tracabilite"
-    },
-    
-    firebaseCollections: {
-        articles: "articles",
-        clients: "clients",
-        commandes: "commandes",
-        compta: "compta",
-        users: "settings/app/users",
-        settings: "settings",
-        activities: "activities",
-        tracabilite: "tracabilite"
-    },
-    
-    storageKeys: {
-        articles: "trakio_articles",
-        clients: "trakio_quickorder",
-        commandes: "trakio_commandes",
-        compta: "trakio_compta",
-        currentUser: "trakio_current_user",
-        users: "trakio_users",
-        settings: "trakio_settings",
-        theme: "trakio_theme",
-        coursPoissons: "trakio_cours_poissons",
-        tracabilite: "trakio_tracabilite",
-        caisse: "trakio_caisse",
-        shopify: "trakio_shopify"
-    }
-};
+// ============ INITIALIZE FIREBASE ============
+let trakioDb = null;
+let trakioFirebaseReady = false;
 
-// ==========================================
-// CONSTANTES MÉTIER SUISSE
-// ==========================================
-const SWISS_CONFIG = {
-    tva: {
-        standard: 8.1,
-        reduit: 2.6,
-        hebergement: 3.8
-    },
-    currency: {
-        code: "CHF",
-        symbol: "CHF",
-        locale: "fr-CH",
-        decimals: 2
-    },
-    rounding: 0.05
-};
+function initTrakioFirebase() {
+    return new Promise((resolve) => {
+        // Vérifier si Firebase SDK est chargé
+        if (typeof firebase === 'undefined') {
+            console.warn('⚠️ TRAKIO: Firebase SDK non chargé - Mode local activé');
+            trakioFirebaseReady = false;
+            resolve(false);
+            return;
+        }
+        
+        try {
+            if (!firebase.apps || !firebase.apps.length) {
+                firebase.initializeApp(FIREBASE_CONFIG);
+            }
+            trakioDb = firebase.firestore();
+            
+            // Enable offline persistence
+            trakioDb.enablePersistence({ synchronizeTabs: true })
+                .then(() => {
+                    console.log('✅ TRAKIO Firebase: Persistence enabled');
+                })
+                .catch(err => {
+                    if (err.code === 'failed-precondition') {
+                        console.log('⚠️ TRAKIO Firebase: Multiple tabs open');
+                    } else if (err.code === 'unimplemented') {
+                        console.log('⚠️ TRAKIO Firebase: Persistence not available');
+                    }
+                });
+            
+            trakioFirebaseReady = true;
+            console.log('✅ TRAKIO Firebase: Initialized (App ID: 1:256841216130:web:4ea5a967ba39c120d8849b)');
+            resolve(true);
+        } catch (error) {
+            console.warn('⚠️ TRAKIO Firebase: Init error - Mode local activé', error.message);
+            trakioFirebaseReady = false;
+            resolve(false);
+        }
+    });
+}
 
-// ==========================================
-// RÔLES ET PERMISSIONS
-// ==========================================
-const ROLES_CONFIG = {
+// ============ ROLES CONFIGURATION ============
+const TRAKIO_ROLES = {
     admin: {
-        label: "Administrateur",
-        color: "#ef4444",
-        icon: "👑",
-        permissions: ["all"],
-        modules: ["all"]
+        label: 'Admin',
+        badge: '👑',
+        color: '#ef4444',
+        permissions: ['all']
     },
     manager: {
-        label: "Manager",
-        color: "#f59e0b",
-        icon: "⭐",
-        permissions: ["read", "write", "manage"],
-        modules: ["dashboard", "articles", "clients", "commandes", "myfish", "caisse", "tracabilite", "compta", "cours", "shopify", "whatsapp"]
+        label: 'Manager',
+        badge: '⭐',
+        color: '#f59e0b',
+        permissions: ['articles', 'clients', 'commandes', 'myfish', 'caisse', 'live', 'tracabilite', 'shopify', 'compta', 'whatsapp']
     },
     employee: {
-        label: "Employé",
-        color: "#22c55e",
-        icon: "👤",
-        permissions: ["read", "write"],
-        modules: ["dashboard", "commandes", "myfish", "caisse", "tracabilite"]
+        label: 'Employé',
+        badge: '👤',
+        color: '#10b981',
+        permissions: ['commandes', 'myfish', 'caisse', 'tracabilite']
     }
 };
 
-// ==========================================
-// MODULES TRAKIO
-// ==========================================
-const MODULES_CONFIG = {
-    dashboard: { name: "Dashboard", icon: "📊", file: "index.html", section: "ventes", roles: ["admin", "manager", "employee"] },
-    myfish: { name: "MyFish B2C", icon: "🐟", file: "myfish.html", section: "ventes", roles: ["admin", "manager", "employee"] },
-    commandes: { name: "Commandes PRO", icon: "📋", file: "commandes.html", section: "ventes", roles: ["admin", "manager", "employee"] },
-    caisse: { name: "Caisse POS", icon: "💳", file: "caisse.html", section: "ventes", roles: ["admin", "manager", "employee"] },
-    articles: { name: "Articles", icon: "📦", file: "articles.html", section: "donnees", roles: ["admin", "manager"] },
-    clients: { name: "Clients", icon: "👥", file: "clients.html", section: "donnees", roles: ["admin", "manager"] },
-    cours: { name: "Cours Poissons", icon: "💰", file: "live.html", section: "outils", roles: ["admin", "manager"] },
-    tracabilite: { name: "Traçabilité", icon: "🏷️", file: "tracabilite.html", section: "outils", roles: ["admin", "manager", "employee"] },
-    shopify: { name: "Shop Hub", icon: "🛒", file: "shopify.html", section: "outils", roles: ["admin", "manager"] },
-    whatsapp: { name: "WhatsApp", icon: "💬", file: "whatsapp.html", section: "outils", roles: ["admin", "manager"] },
-    compta: { name: "Comptabilité", icon: "🧾", file: "compta.html", section: "systeme", roles: ["admin", "manager"] },
-    cloud: { name: "Cloud Sync", icon: "☁️", file: "cloud.html", section: "systeme", roles: ["admin"] },
-    parametres: { name: "Paramètres", icon: "⚙️", file: "parametres.html", section: "systeme", roles: ["admin"] }
+// ============ DEFAULT USERS ============
+const TRAKIO_DEFAULT_USERS = [
+    {
+        id: 'admin_pascal',
+        name: 'Pascal Admin',
+        pin: '1277',
+        role: 'admin',
+        avatar: 'PA',
+        color: '#ef4444',
+        active: true
+    },
+    {
+        id: 'manager_celine',
+        name: 'Céline',
+        pin: '1277',
+        role: 'manager',
+        avatar: 'CE',
+        color: '#f59e0b',
+        active: true
+    },
+    {
+        id: 'employee_hayat',
+        name: 'Hayat',
+        pin: '1260',
+        role: 'employee',
+        avatar: 'HA',
+        color: '#10b981',
+        active: true
+    }
+];
+
+// ============ STORAGE KEYS ============
+const TRAKIO_STORAGE = {
+    USERS: 'trakio_users',
+    CURRENT_USER: 'trakio_current_user',
+    ARTICLES: 'trakio_articles',
+    CLIENTS: 'trakio_quickorder',
+    COMMANDES: 'trakio_commandes',
+    MYFISH: 'trakio_myfish',
+    CAISSE: 'trakio_caisse',
+    SETTINGS: 'trakio_settings'
 };
 
-const SECTIONS_CONFIG = {
-    ventes: { label: "🛒 VENTES", order: 1 },
-    donnees: { label: "📁 DONNÉES", order: 2 },
-    outils: { label: "🔧 OUTILS", order: 3 },
-    systeme: { label: "⚙️ SYSTÈME", order: 4 }
+// ============ STORAGE HELPERS ============
+const TrakioStorage = {
+    get(key, defaultValue = null) {
+        try {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : defaultValue;
+        } catch (e) {
+            console.error('Storage get error:', e);
+            return defaultValue;
+        }
+    },
+    
+    set(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+            return true;
+        } catch (e) {
+            console.error('Storage set error:', e);
+            return false;
+        }
+    },
+    
+    remove(key) {
+        try {
+            localStorage.removeItem(key);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
 };
 
-const STORES_CONFIG = {
-    livraison: { id: "livraison", name: "Livraison Pro", email: "livraison@borexpoissons.ch", icon: "🚚" },
-    facture: { id: "facture", name: "Facture Pro", email: "facture@borexpoissons.ch", icon: "📄" },
-    magasin: { id: "magasin", name: "Lightspeed Magasin", email: "magasin@borexpoissons.ch", icon: "🏪" },
-    coinsins: { id: "coinsins", name: "Lightspeed Coinsins", email: "coinsins@borexpoissons.ch", icon: "🏠" }
+// ============ USER MANAGEMENT ============
+const TrakioAuth = {
+    getUsers() {
+        const stored = TrakioStorage.get(TRAKIO_STORAGE.USERS);
+        if (stored && stored.length > 0) {
+            return stored;
+        }
+        // Initialize with default users
+        TrakioStorage.set(TRAKIO_STORAGE.USERS, TRAKIO_DEFAULT_USERS);
+        return TRAKIO_DEFAULT_USERS;
+    },
+    
+    getCurrentUser() {
+        return TrakioStorage.get(TRAKIO_STORAGE.CURRENT_USER);
+    },
+    
+    setCurrentUser(user) {
+        return TrakioStorage.set(TRAKIO_STORAGE.CURRENT_USER, user);
+    },
+    
+    logout() {
+        TrakioStorage.remove(TRAKIO_STORAGE.CURRENT_USER);
+    },
+    
+    isLoggedIn() {
+        return this.getCurrentUser() !== null;
+    },
+    
+    hasPermission(module) {
+        const user = this.getCurrentUser();
+        if (!user) return false;
+        
+        const role = TRAKIO_ROLES[user.role];
+        if (!role) return false;
+        
+        return role.permissions.includes('all') || role.permissions.includes(module);
+    },
+    
+    requireLogin() {
+        if (!this.isLoggedIn()) {
+            window.location.href = 'index.html';
+            return false;
+        }
+        return true;
+    }
 };
 
-// ==========================================
-// FONCTIONS UTILITAIRES
-// ==========================================
-function swiss(value) {
-    return Math.round(value / SWISS_CONFIG.rounding) * SWISS_CONFIG.rounding;
-}
+// ============ UTILITY FUNCTIONS ============
+const TrakioUtils = {
+    // Swiss rounding (5 centimes)
+    swiss(amount) {
+        return (Math.round(amount * 20) / 20).toFixed(2);
+    },
+    
+    // Format currency
+    formatCHF(amount) {
+        return this.swiss(amount) + ' CHF';
+    },
+    
+    // Format date
+    formatDate(date, options = {}) {
+        const d = date instanceof Date ? date : new Date(date);
+        const defaultOptions = { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric' 
+        };
+        return d.toLocaleDateString('fr-CH', { ...defaultOptions, ...options });
+    },
+    
+    // Format time
+    formatTime(date) {
+        const d = date instanceof Date ? date : new Date(date);
+        return d.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
+    },
+    
+    // Format datetime
+    formatDateTime(date) {
+        return `${this.formatDate(date)} ${this.formatTime(date)}`;
+    },
+    
+    // Generate unique ID
+    generateId(prefix = '') {
+        const timestamp = Date.now().toString(36);
+        const random = Math.random().toString(36).substring(2, 8);
+        return prefix ? `${prefix}_${timestamp}${random}` : `${timestamp}${random}`;
+    },
+    
+    // Debounce function
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    },
+    
+    // Deep clone object
+    clone(obj) {
+        return JSON.parse(JSON.stringify(obj));
+    }
+};
 
-function formatCHF(value) {
-    return new Intl.NumberFormat(SWISS_CONFIG.currency.locale, {
-        style: 'currency',
-        currency: SWISS_CONFIG.currency.code,
-        minimumFractionDigits: SWISS_CONFIG.currency.decimals
-    }).format(swiss(value));
-}
+// ============ DATA ACCESS ============
+const TrakioData = {
+    // Articles
+    getArticles() {
+        return TrakioStorage.get(TRAKIO_STORAGE.ARTICLES, []);
+    },
+    
+    setArticles(articles) {
+        return TrakioStorage.set(TRAKIO_STORAGE.ARTICLES, articles);
+    },
+    
+    // Clients
+    getClients() {
+        return TrakioStorage.get(TRAKIO_STORAGE.CLIENTS, []);
+    },
+    
+    setClients(clients) {
+        return TrakioStorage.set(TRAKIO_STORAGE.CLIENTS, clients);
+    },
+    
+    // Commandes
+    getCommandes() {
+        return TrakioStorage.get(TRAKIO_STORAGE.COMMANDES, []);
+    },
+    
+    setCommandes(commandes) {
+        return TrakioStorage.set(TRAKIO_STORAGE.COMMANDES, commandes);
+    },
+    
+    addCommande(commande) {
+        const commandes = this.getCommandes();
+        commande.id = commande.id || TrakioUtils.generateId('CMD');
+        commande.date = commande.date || new Date().toISOString();
+        commandes.push(commande);
+        this.setCommandes(commandes);
+        return commande;
+    },
+    
+    // MyFish
+    getMyfish() {
+        return TrakioStorage.get(TRAKIO_STORAGE.MYFISH, []);
+    },
+    
+    setMyfish(myfish) {
+        return TrakioStorage.set(TRAKIO_STORAGE.MYFISH, myfish);
+    }
+};
 
-function formatDate(date) {
-    return new Date(date).toLocaleDateString('fr-CH', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
+// ============ FIREBASE SYNC ============
+const TrakioSync = {
+    async syncToFirebase(collection, data) {
+        if (!trakioFirebaseReady || !trakioDb) {
+            console.warn('Firebase not ready');
+            return false;
+        }
+        
+        try {
+            const batch = trakioDb.batch();
+            const collectionRef = trakioDb.collection(collection);
+            
+            // Clear existing
+            const existing = await collectionRef.get();
+            existing.forEach(doc => batch.delete(doc.ref));
+            
+            // Add new
+            data.forEach(item => {
+                const docRef = collectionRef.doc(item.id || TrakioUtils.generateId());
+                batch.set(docRef, { ...item, updatedAt: new Date().toISOString() });
+            });
+            
+            await batch.commit();
+            console.log(`✅ Synced ${data.length} items to ${collection}`);
+            return true;
+        } catch (error) {
+            console.error('Sync error:', error);
+            return false;
+        }
+    },
+    
+    async fetchFromFirebase(collection) {
+        if (!trakioFirebaseReady || !trakioDb) {
+            console.warn('Firebase not ready');
+            return null;
+        }
+        
+        try {
+            const snapshot = await trakioDb.collection(collection).get();
+            const data = [];
+            snapshot.forEach(doc => data.push({ id: doc.id, ...doc.data() }));
+            console.log(`✅ Fetched ${data.length} items from ${collection}`);
+            return data;
+        } catch (error) {
+            console.error('Fetch error:', error);
+            return null;
+        }
+    }
+};
 
-function formatTime(date) {
-    return new Date(date).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
-}
-
-function formatDateTime(date) {
-    return `${formatDate(date)} ${formatTime(date)}`;
-}
-
-function generateId(prefix = '') {
-    const ts = Date.now().toString(36);
-    const rand = Math.random().toString(36).substr(2, 5);
-    return prefix ? `${prefix}-${ts}-${rand}` : `${ts}-${rand}`;
-}
-
-function hasModuleAccess(moduleId, userRole) {
-    if (userRole === 'admin') return true;
-    const mod = MODULES_CONFIG[moduleId];
-    return mod ? mod.roles.includes(userRole) : false;
-}
-
-function getCurrentUser() {
-    const data = localStorage.getItem(TRAKIO_CONFIG.storageKeys.currentUser);
-    return data ? JSON.parse(data) : null;
-}
-
-function saveToStorage(key, data) {
-    try { localStorage.setItem(key, JSON.stringify(data)); return true; }
-    catch (e) { console.error('Storage error:', e); return false; }
-}
-
-function loadFromStorage(key, defaultValue = null) {
-    try {
-        const data = localStorage.getItem(key);
-        return data ? JSON.parse(data) : defaultValue;
-    } catch (e) { return defaultValue; }
-}
-
-function generateLotNumber(location = 'LC') {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const seq = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
-    return `${location}-${y}${m}${d}-${seq}`;
-}
-
-function calculateTVA(montantHT, type = 'reduit') {
-    const taux = SWISS_CONFIG.tva[type] || SWISS_CONFIG.tva.reduit;
-    const tva = montantHT * (taux / 100);
-    return { ht: swiss(montantHT), tva: swiss(tva), ttc: swiss(montantHT + tva), taux };
-}
-
-function debounce(func, wait = 300) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func(...args), wait);
-    };
-}
-
-function showToast(message, type = 'info', duration = 3000) {
-    document.querySelectorAll('.trakio-toast').forEach(t => t.remove());
-    const toast = document.createElement('div');
-    toast.className = `trakio-toast trakio-toast-${type}`;
-    const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
-    const colors = { success: '#22c55e', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
-    toast.innerHTML = `<span style="margin-right:8px">${icons[type]}</span>${message}`;
-    Object.assign(toast.style, {
-        position: 'fixed', bottom: '20px', right: '20px', padding: '12px 20px',
-        borderRadius: '8px', color: 'white', fontWeight: '500', zIndex: '10000',
-        animation: 'toastSlideIn 0.3s ease', boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-        backgroundColor: colors[type]
+// ============ AUTO-INIT ============
+// Attendre que le DOM soit prêt avant d'initialiser Firebase
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof firebase !== 'undefined') {
+            initTrakioFirebase();
+        }
     });
-    document.body.appendChild(toast);
-    setTimeout(() => { toast.style.animation = 'toastSlideOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, duration);
+} else {
+    // DOM déjà prêt
+    if (typeof firebase !== 'undefined') {
+        initTrakioFirebase();
+    }
 }
 
-if (!document.getElementById('trakio-toast-styles')) {
-    const style = document.createElement('style');
-    style.id = 'trakio-toast-styles';
-    style.textContent = `
-        @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes toastSlideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-    `;
-    document.head.appendChild(style);
-}
-
-console.log(`✅ TRAKIO Config v${TRAKIO_CONFIG.version} chargé`);
+console.log(`🐟 TRAKIO Config v${TRAKIO_VERSION} loaded`);
