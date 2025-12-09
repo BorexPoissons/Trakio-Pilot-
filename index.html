@@ -5,14 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TRAKIO v4.5.0 - Dashboard</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
-    <link rel="manifest" href="manifest.json">
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    
-    <!-- TRAKIO Core JS -->
-    <script src="trakio-config.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -21,17 +17,19 @@
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
             --bg-tertiary: #334155;
-            --bg-card: #1e293b;
+            --bg-card: #1a2332;
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
-            --accent: #0ea5e9;
-            --accent-hover: #38bdf8;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --purple: #8b5cf6;
-            --pink: #ec4899;
+            --accent-cyan: #22d3ee;
+            --accent-teal: #14b8a6;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-green: #22c55e;
+            --accent-yellow: #eab308;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --accent-pink: #ec4899;
             --border: #334155;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
@@ -41,12 +39,155 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
+        }
+        
+        /* ============ LOGIN OVERLAY ============ */
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
             display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .login-overlay.hidden {
+            display: none;
+        }
+        
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px 50px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .login-logo-container {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: 0 8px 30px rgba(34, 211, 238, 0.3);
+        }
+        
+        .login-logo-fish {
+            font-size: 50px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        .login-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+        
+        .login-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+        
+        .login-field-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        
+        .login-select-wrapper {
+            position: relative;
+            margin-bottom: 28px;
+        }
+        
+        .login-select {
+            width: 100%;
+            padding: 16px 20px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+            cursor: pointer;
+            appearance: none;
+            transition: all 0.2s;
+        }
+        
+        .login-select:hover, .login-select:focus {
+            border-color: var(--accent-cyan);
+            outline: none;
+        }
+        
+        .login-select-arrow {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-teal) 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .login-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(34, 211, 238, 0.35);
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .login-version {
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        
+        /* ============ MAIN LAYOUT ============ */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
         }
         
         /* ============ SIDEBAR ============ */
         .sidebar {
-            width: 280px;
+            width: 260px;
             background: var(--bg-secondary);
             border-right: 1px solid var(--border);
             height: 100vh;
@@ -56,7 +197,6 @@
             display: flex;
             flex-direction: column;
             z-index: 100;
-            transition: transform 0.3s;
         }
         
         .sidebar-header {
@@ -67,32 +207,39 @@
             gap: 12px;
         }
         
-        .logo { font-size: 36px; }
-        .logo-text { 
-            font-size: 26px; 
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent), var(--purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .sidebar-logo {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
         }
-        .logo-version {
-            font-size: 11px;
-            background: linear-gradient(135deg, var(--accent), var(--purple));
+        
+        .sidebar-brand {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: 1px;
+        }
+        
+        .sidebar-version {
+            font-size: 10px;
+            background: var(--accent-purple);
             padding: 3px 8px;
             border-radius: 6px;
             color: white;
             font-weight: 600;
+            margin-left: auto;
         }
         
         .sidebar-nav {
             flex: 1;
             overflow-y: auto;
-            padding: 15px 0;
+            padding: 12px 0;
         }
-        
-        .sidebar-nav::-webkit-scrollbar { width: 4px; }
-        .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
-        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
         
         .nav-section { padding: 0 12px; margin-bottom: 8px; }
         
@@ -100,7 +247,7 @@
             font-size: 10px;
             text-transform: uppercase;
             color: var(--text-muted);
-            padding: 12px 12px 8px;
+            padding: 12px 14px 8px;
             letter-spacing: 1.5px;
             font-weight: 600;
         }
@@ -109,35 +256,32 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 11px 14px;
+            padding: 12px 14px;
             border-radius: 10px;
             color: var(--text-secondary);
             text-decoration: none;
             cursor: pointer;
             transition: all 0.2s;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
             font-size: 14px;
         }
         
         .nav-item:hover {
             background: var(--bg-tertiary);
             color: var(--text-primary);
-            transform: translateX(4px);
         }
         
         .nav-item.active {
-            background: linear-gradient(135deg, var(--accent), #0284c7);
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
             color: white;
             font-weight: 500;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
         }
         
-        .nav-icon { font-size: 18px; width: 26px; text-align: center; }
-        .nav-text { font-weight: 500; }
+        .nav-icon { font-size: 18px; width: 24px; text-align: center; }
         
         .nav-badge {
             margin-left: auto;
-            background: var(--danger);
+            background: var(--accent-red);
             color: white;
             font-size: 10px;
             padding: 2px 7px;
@@ -145,9 +289,8 @@
             font-weight: 600;
         }
         
-        /* User section */
         .sidebar-user {
-            padding: 15px;
+            padding: 16px;
             border-top: 1px solid var(--border);
             display: flex;
             align-items: center;
@@ -159,69 +302,75 @@
         .sidebar-user:hover { background: var(--bg-tertiary); }
         
         .user-avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
             font-weight: 700;
-            font-size: 17px;
-            box-shadow: var(--shadow);
+            color: white;
+            font-size: 16px;
         }
         
         .user-info { flex: 1; }
         .user-name { font-weight: 600; font-size: 14px; }
-        .user-role { font-size: 11px; color: var(--text-secondary); }
-        .user-arrow { color: var(--text-muted); }
+        .user-role { font-size: 12px; color: var(--text-muted); }
         
         /* ============ MAIN CONTENT ============ */
         .main-content {
             flex: 1;
-            margin-left: 280px;
-            min-height: 100vh;
+            margin-left: 260px;
+            padding: 24px;
         }
         
-        /* Header */
-        .header {
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 30px;
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+        
+        .main-title {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header-actions {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 50;
+            gap: 16px;
         }
         
-        .header-left { display: flex; align-items: center; gap: 20px; }
-        
-        .menu-toggle {
-            display: none;
-            width: 40px;
-            height: 40px;
-            border: none;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
             border-radius: 10px;
-            cursor: pointer;
-            font-size: 20px;
+            padding: 10px 16px;
+            width: 280px;
         }
         
-        .page-title { font-size: 26px; font-weight: 700; }
-        .page-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+        .search-box input {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+        }
         
-        .header-right { display: flex; align-items: center; gap: 12px; }
+        .search-box input::placeholder { color: var(--text-muted); }
         
         .header-btn {
             width: 42px;
             height: 42px;
-            border-radius: 12px;
-            border: none;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -230,942 +379,552 @@
             transition: all 0.2s;
         }
         
-        .header-btn:hover { 
-            background: var(--accent); 
-            transform: scale(1.05);
-        }
-        
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 16px;
+        .header-btn:hover {
             background: var(--bg-tertiary);
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-        
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-        
-        .status-dot.online { background: var(--success); }
-        .status-dot.offline { background: var(--danger); }
-        .status-dot.syncing { background: var(--warning); }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        /* ============ DASHBOARD ============ */
-        .dashboard {
-            padding: 30px;
-            max-width: 1600px;
-        }
-        
-        /* Welcome */
-        .welcome-card {
-            background: linear-gradient(135deg, var(--accent), var(--purple));
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 10px 40px rgba(14, 165, 233, 0.2);
-        }
-        
-        .welcome-text h2 {
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-        
-        .welcome-text p {
-            opacity: 0.9;
-            font-size: 15px;
-        }
-        
-        .welcome-date {
-            text-align: right;
-            opacity: 0.9;
-        }
-        
-        .welcome-date .date { font-size: 18px; font-weight: 600; }
-        .welcome-date .time { font-size: 14px; margin-top: 4px; }
-        
-        /* Quick Actions */
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 30px;
-        }
-        
-        .quick-action {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            text-decoration: none;
             color: var(--text-primary);
-            transition: all 0.3s;
+        }
+        
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 12px 6px 6px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
             cursor: pointer;
         }
         
-        .quick-action:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent);
-            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.15);
+        .header-user:hover { border-color: var(--accent-cyan); }
+        
+        .header-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 14px;
         }
         
-        .quick-action-icon {
-            width: 50px;
-            height: 50px;
+        /* ============ KPI CARDS ============ */
+        .kpi-section {
+            background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-red) 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 28px;
+        }
+        
+        .kpi-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .kpi-subtitle { font-size: 12px; opacity: 0.8; font-weight: 400; }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        
+        .kpi-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .kpi-icon { font-size: 28px; margin-bottom: 10px; }
+        .kpi-value { font-size: 32px; font-weight: 800; }
+        .kpi-label { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+        
+        /* ============ QUICK ACTIONS ============ */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        
+        .action-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-cyan);
+        }
+        
+        .action-card.green { background: linear-gradient(135deg, #166534, #15803d); border: none; }
+        .action-card.yellow { background: linear-gradient(135deg, #a16207, #ca8a04); border: none; }
+        .action-card.red { background: linear-gradient(135deg, #991b1b, #dc2626); border: none; }
+        .action-card.cyan { background: linear-gradient(135deg, #0e7490, #06b6d4); border: none; }
+        .action-card.teal { background: linear-gradient(135deg, #115e59, #14b8a6); border: none; }
+        .action-card.purple { background: linear-gradient(135deg, #6b21a8, #9333ea); border: none; }
+        
+        .action-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(255,255,255,0.15);
             border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 14px;
+        }
+        
+        .action-title { font-weight: 600; font-size: 15px; }
+        .action-sub { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+        
+        /* ============ TOOLS SECTION ============ */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        
+        .tool-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .tool-card:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-cyan);
+        }
+        
+        .tool-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
+            margin: 0 auto 12px;
         }
         
-        .quick-action-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
-        .quick-action-icon.blue { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
-        .quick-action-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-        .quick-action-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .quick-action-icon.pink { background: linear-gradient(135deg, #ec4899, #db2777); }
-        .quick-action-icon.cyan { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .tool-icon.blue { background: rgba(59, 130, 246, 0.2); }
+        .tool-icon.yellow { background: rgba(234, 179, 8, 0.2); }
+        .tool-icon.green { background: rgba(34, 197, 94, 0.2); }
+        .tool-icon.orange { background: rgba(249, 115, 22, 0.2); }
+        .tool-icon.purple { background: rgba(139, 92, 246, 0.2); }
+        .tool-icon.pink { background: rgba(236, 72, 153, 0.2); }
+        .tool-icon.cyan { background: rgba(34, 211, 238, 0.2); }
+        .tool-icon.red { background: rgba(239, 68, 68, 0.2); }
         
-        .quick-action-content { flex: 1; }
-        .quick-action-text { font-weight: 600; font-size: 15px; }
-        .quick-action-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-        .quick-action-arrow { color: var(--text-muted); font-size: 18px; }
+        .tool-title { font-weight: 600; font-size: 14px; }
         
-        /* KPIs */
-        .kpis-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-            margin-bottom: 30px;
-        }
-        
-        .kpi-card {
-            background: var(--bg-card);
+        /* ============ REVENUE CARD ============ */
+        .revenue-card {
+            background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 20px;
-            transition: all 0.3s;
-        }
-        
-        .kpi-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--accent);
-        }
-        
-        .kpi-header {
+            padding: 24px;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
         }
         
-        .kpi-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
+        .revenue-left { display: flex; align-items: center; gap: 14px; }
+        .revenue-icon { font-size: 28px; }
+        .revenue-label { color: var(--text-muted); font-size: 14px; }
+        .revenue-value { font-size: 32px; font-weight: 800; color: var(--accent-green); }
         
-        .kpi-icon.blue { background: rgba(14, 165, 233, 0.15); }
-        .kpi-icon.green { background: rgba(16, 185, 129, 0.15); }
-        .kpi-icon.purple { background: rgba(139, 92, 246, 0.15); }
-        .kpi-icon.orange { background: rgba(245, 158, 11, 0.15); }
-        .kpi-icon.pink { background: rgba(236, 72, 153, 0.15); }
-        .kpi-icon.cyan { background: rgba(6, 182, 212, 0.15); }
-        
-        .kpi-trend {
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-        
-        .kpi-trend.up { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-        .kpi-trend.down { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
-        
-        .kpi-value {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-        
-        .kpi-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-        
-        /* Content Grid */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
-        
-        @media (max-width: 1200px) {
-            .content-grid { grid-template-columns: 1fr; }
-        }
-        
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-        }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .card-title { font-size: 16px; font-weight: 600; }
-        
-        .card-action {
-            font-size: 12px;
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .card-action:hover { text-decoration: underline; }
-        
-        /* Orders list */
-        .order-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .order-item:last-child { border-bottom: none; }
-        
-        .order-avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent), var(--purple));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 16px;
-        }
-        
-        .order-info { flex: 1; }
-        .order-client { font-weight: 600; font-size: 14px; }
-        .order-details { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-        
-        .order-amount {
-            font-weight: 700;
-            font-size: 15px;
-        }
-        
-        .order-status {
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-        
-        .order-status.pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
-        .order-status.confirmed { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-        
-        /* Activity */
-        .activity-item {
-            display: flex;
-            gap: 12px;
-            padding: 10px 0;
-            font-size: 13px;
-        }
-        
-        .activity-time {
-            color: var(--text-muted);
-            white-space: nowrap;
-            font-size: 11px;
-            min-width: 50px;
-        }
-        
-        .activity-text { color: var(--text-secondary); }
-        .activity-text strong { color: var(--text-primary); }
-        
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-        }
-        
-        .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
-        
-        /* ============ USER MODAL ============ */
-        .modal {
+        /* ============ WELCOME TOAST ============ */
+        .welcome-toast {
             position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+            color: white;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 10px 40px rgba(34, 211, 238, 0.3);
+            animation: slideUp 0.5s ease;
             z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
         }
         
-        .modal.active { opacity: 1; visibility: visible; }
+        .welcome-toast.hidden { display: none; }
         
-        .modal-content {
-            background: var(--bg-secondary);
-            border-radius: 20px;
-            width: 90%;
-            max-width: 420px;
-            max-height: 85vh;
-            overflow: hidden;
-            transform: scale(0.9);
-            transition: transform 0.3s;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-        }
-        
-        .modal.active .modal-content { transform: scale(1); }
-        
-        .modal-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-title { font-size: 18px; font-weight: 700; }
-        
-        .modal-close {
-            width: 36px;
-            height: 36px;
-            border: none;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.2s;
-        }
-        
-        .modal-close:hover { background: var(--danger); }
-        
-        .modal-body { padding: 20px 24px; max-height: 400px; overflow-y: auto; }
-        
-        .user-option {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-            margin-bottom: 8px;
-        }
-        
-        .user-option:hover { background: var(--bg-tertiary); }
-        
-        .user-option.active {
-            background: rgba(14, 165, 233, 0.1);
-            border-color: var(--accent);
-        }
-        
-        .user-check { color: var(--success); font-size: 20px; }
-        
-        .modal-footer {
-            padding: 16px 24px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 10px;
-        }
-        
-        .modal-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 12px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-        
-        .modal-btn.secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-        
-        .modal-btn.primary {
-            background: linear-gradient(135deg, var(--accent), #0284c7);
-            color: white;
-        }
-        
-        .modal-btn:hover { transform: translateY(-2px); }
-        
-        /* ============ LOGIN MODAL ============ */
-        .login-overlay {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-        
-        .login-card {
-            background: var(--bg-secondary);
-            border-radius: 24px;
-            padding: 40px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-        }
-        
-        .login-logo { font-size: 64px; margin-bottom: 16px; }
-        .login-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-        .login-subtitle { color: var(--text-secondary); margin-bottom: 30px; }
-        
-        .login-users { margin-bottom: 24px; }
-        
-        .login-user {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 16px;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid var(--border);
-            margin-bottom: 10px;
-            text-align: left;
-        }
-        
-        .login-user:hover {
-            border-color: var(--accent);
-            background: rgba(14, 165, 233, 0.1);
-        }
-        
-        .login-user.selected {
-            border-color: var(--accent);
-            background: rgba(14, 165, 233, 0.15);
-        }
-        
-        .login-btn {
-            width: 100%;
-            padding: 16px;
-            border-radius: 14px;
-            border: none;
-            background: linear-gradient(135deg, var(--accent), var(--purple));
-            color: white;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);
-        }
-        
-        .login-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        /* ============ TOAST ============ */
-        .toast-container {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 3000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .toast {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.3s ease;
-            min-width: 280px;
-        }
-        
-        .toast.success { border-left: 4px solid var(--success); }
-        .toast.error { border-left: 4px solid var(--danger); }
-        .toast.warning { border-left: 4px solid var(--warning); }
-        .toast.info { border-left: 4px solid var(--accent); }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
         
         /* ============ RESPONSIVE ============ */
+        @media (max-width: 1200px) {
+            .kpi-grid, .actions-grid, .tools-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
         @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
+            .sidebar { transform: translateX(-100%); }
             .sidebar.open { transform: translateX(0); }
-            
             .main-content { margin-left: 0; }
-            
-            .menu-toggle { display: flex; }
-            
-            .welcome-card {
-                flex-direction: column;
-                text-align: center;
-                gap: 20px;
-            }
-            
-            .welcome-date { text-align: center; }
-            
-            .kpis-grid { grid-template-columns: repeat(2, 1fr); }
-            
-            .header { padding: 12px 16px; }
-            .dashboard { padding: 16px; }
-        }
-        
-        /* Sync indicator */
-        .sync-indicator {
-            position: fixed;
-            bottom: 20px;
-            left: 300px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .sync-indicator.active { opacity: 1; }
-        
-        @media (max-width: 768px) {
-            .sync-indicator { left: 20px; }
+            .kpi-grid, .actions-grid, .tools-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <!-- Login Overlay -->
-    <div class="login-overlay" id="login-overlay">
+    <!-- LOGIN OVERLAY -->
+    <div class="login-overlay" id="loginOverlay">
         <div class="login-card">
-            <div class="login-logo">🐟</div>
+            <div class="login-logo-container">
+                <span class="login-logo-fish">🐟</span>
+            </div>
             <h1 class="login-title">TRAKIO</h1>
-            <p class="login-subtitle">Sélectionnez votre profil pour continuer</p>
-            <div class="login-users" id="login-users"></div>
-            <button class="login-btn" id="login-btn" disabled onclick="confirmLogin()">
-                Se connecter
+            <p class="login-subtitle">Gestion Borex Poissons</p>
+            
+            <div class="login-field-label">
+                <span>👤</span>
+                <span>UTILISATEUR</span>
+            </div>
+            
+            <div class="login-select-wrapper">
+                <select class="login-select" id="userSelect" onchange="onUserSelect()">
+                    <option value="">Sélectionnez...</option>
+                </select>
+                <span class="login-select-arrow">▼</span>
+            </div>
+            
+            <button class="login-btn" id="loginBtn" disabled onclick="doLogin()">
+                <span>🚀</span>
+                <span>Se connecter</span>
             </button>
+            
+            <div class="login-version">
+                v4.5.0 • Déconnexion auto après 1h
+            </div>
         </div>
     </div>
-
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <span class="logo">🐟</span>
-            <span class="logo-text">TRAKIO</span>
-            <span class="logo-version">v4.5.0</span>
-        </div>
-        
-        <nav class="sidebar-nav" id="sidebar-nav"></nav>
-        
-        <div class="sidebar-user" onclick="openUserModal()">
-            <div class="user-avatar" id="current-user-avatar">P</div>
-            <div class="user-info">
-                <div class="user-name" id="current-user-name">Utilisateur</div>
-                <div class="user-role" id="current-user-role">Rôle</div>
-            </div>
-            <span class="user-arrow">⌄</span>
-        </div>
-    </aside>
     
-    <!-- Main Content -->
-    <main class="main-content">
-        <header class="header">
-            <div class="header-left">
-                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-                <div>
-                    <h1 class="page-title">Dashboard</h1>
-                    <p class="page-subtitle" id="current-date"></p>
+    <!-- APP CONTAINER -->
+    <div class="app-container" id="appContainer" style="display:none;">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">🐟</div>
+                <span class="sidebar-brand">TRAKIO</span>
+                <span class="sidebar-version">v4.5.0</span>
+            </div>
+            
+            <nav class="sidebar-nav" id="sidebarNav"></nav>
+            
+            <div class="sidebar-user" onclick="showUserSwitcher()">
+                <div class="user-avatar" id="sidebarAvatar" style="background:#ef4444">PA</div>
+                <div class="user-info">
+                    <div class="user-name" id="sidebarName">Pascal</div>
+                    <div class="user-role" id="sidebarRole">Administrateur</div>
                 </div>
             </div>
-            <div class="header-right">
-                <div class="status-badge">
-                    <span class="status-dot" id="firebase-dot"></span>
-                    <span id="firebase-status">Connexion...</span>
-                </div>
-                <button class="header-btn" onclick="toggleTheme()" title="Thème">🌙</button>
-                <button class="header-btn" onclick="refreshData()" title="Actualiser">🔄</button>
-                <button class="header-btn" onclick="openSettings()" title="Paramètres">⚙️</button>
-            </div>
-        </header>
+        </aside>
         
-        <div class="dashboard">
-            <!-- Welcome -->
-            <div class="welcome-card">
-                <div class="welcome-text">
-                    <h2>Bonjour, <span id="welcome-name">Utilisateur</span> 👋</h2>
-                    <p>Bienvenue sur TRAKIO - Votre assistant de gestion</p>
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <div class="main-header">
+                <h1 class="main-title">Accueil</h1>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <span>🔍</span>
+                        <input type="text" placeholder="Rechercher clients, articles, commandes...">
+                    </div>
+                    <button class="header-btn" title="Sync">🔄</button>
+                    <button class="header-btn" title="Notifications">🔔</button>
+                    <div class="header-user" onclick="showUserSwitcher()">
+                        <div class="header-avatar" id="headerAvatar" style="background:#ef4444">PA</div>
+                        <span id="headerName">Pascal</span>
+                    </div>
                 </div>
-                <div class="welcome-date">
-                    <div class="date" id="welcome-date"></div>
-                    <div class="time" id="welcome-time"></div>
+            </div>
+            
+            <!-- KPIs -->
+            <div class="kpi-section">
+                <div class="kpi-title">
+                    <span>🔔</span>
+                    <span>Commandes en cours</span>
+                    <span class="kpi-subtitle">À traiter aujourd'hui</span>
+                </div>
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon">📥</div>
+                        <div class="kpi-value" id="kpiNouvelles">0</div>
+                        <div class="kpi-label">NOUVELLES</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">📦</div>
+                        <div class="kpi-value" id="kpiPrepa">0</div>
+                        <div class="kpi-label">PRÉPA</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">✅</div>
+                        <div class="kpi-value" id="kpiPrets">0</div>
+                        <div class="kpi-label">PRÊTS</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon">🚚</div>
+                        <div class="kpi-value" id="kpiLivrer">0</div>
+                        <div class="kpi-label">À LIVRER</div>
+                    </div>
                 </div>
             </div>
             
             <!-- Quick Actions -->
-            <h3 class="section-title">⚡ Actions rapides</h3>
-            <div class="quick-actions" id="quick-actions"></div>
+            <div class="section-header">
+                <span>⚡</span>
+                <span>Accès rapides</span>
+            </div>
+            <div class="actions-grid" id="quickActions"></div>
             
-            <!-- KPIs -->
-            <h3 class="section-title">📊 Indicateurs du jour <span style="font-size:12px;color:var(--text-muted);font-weight:400">Mis à jour: <span id="last-refresh">--:--</span></span></h3>
-            <div class="kpis-grid">
-                <div class="kpi-card">
-                    <div class="kpi-header">
-                        <div class="kpi-icon blue">📋</div>
-                        <span class="kpi-trend up" id="kpi-orders-trend">↑</span>
-                    </div>
-                    <div class="kpi-value" id="kpi-orders">0</div>
-                    <div class="kpi-label">Commandes du jour</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-header">
-                        <div class="kpi-icon green">💰</div>
-                        <span class="kpi-trend up">↑</span>
-                    </div>
-                    <div class="kpi-value" id="kpi-ca">CHF 0</div>
-                    <div class="kpi-label">Chiffre d'affaires</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-header">
-                        <div class="kpi-icon purple">👥</div>
-                    </div>
-                    <div class="kpi-value" id="kpi-clients">0</div>
-                    <div class="kpi-label">Clients actifs</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-header">
-                        <div class="kpi-icon orange">⏳</div>
-                    </div>
-                    <div class="kpi-value" id="kpi-pending">0</div>
-                    <div class="kpi-label">En attente</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-header">
-                        <div class="kpi-icon pink">🐟</div>
-                    </div>
-                    <div class="kpi-value" id="kpi-articles">0</div>
-                    <div class="kpi-label">Articles catalogue</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-header">
-                        <div class="kpi-icon cyan">🛒</div>
-                    </div>
-                    <div class="kpi-value" id="kpi-ventes">0</div>
-                    <div class="kpi-label">Ventes caisse</div>
-                </div>
+            <!-- Tools -->
+            <div class="section-header">
+                <span>🔧</span>
+                <span>Outils & Configuration</span>
             </div>
+            <div class="tools-grid" id="toolsGrid"></div>
             
-            <!-- Content Grid -->
-            <div class="content-grid">
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">📋 Dernières commandes</span>
-                        <a href="commandes.html" class="card-action">Voir tout →</a>
-                    </div>
-                    <div id="orders-list">
-                        <div class="empty-state">
-                            <div class="empty-icon">📋</div>
-                            <p>Chargement...</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">🕐 Activité récente</span>
-                    </div>
-                    <div id="activity-list">
-                        <div class="empty-state">
-                            <div class="empty-icon">🕐</div>
-                            <p>Aucune activité</p>
-                        </div>
+            <!-- Revenue -->
+            <div class="revenue-card">
+                <div class="revenue-left">
+                    <span class="revenue-icon">💰</span>
+                    <div>
+                        <div class="revenue-label">Chiffre d'affaires du jour</div>
+                        <div class="revenue-value" id="revenueValue">CHF 0.00</div>
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
-    
-    <!-- User Modal -->
-    <div class="modal" id="user-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="modal-title">👤 Changer d'utilisateur</span>
-                <button class="modal-close" onclick="closeUserModal()">✕</button>
-            </div>
-            <div class="modal-body" id="users-list"></div>
-            <div class="modal-footer">
-                <button class="modal-btn secondary" onclick="closeUserModal()">Annuler</button>
-                <button class="modal-btn primary" onclick="manageUsers()">⚙️ Gérer</button>
-            </div>
-        </div>
+        </main>
     </div>
     
-    <!-- Toast Container -->
-    <div class="toast-container" id="toast-container"></div>
-    
-    <!-- Sync Indicator -->
-    <div class="sync-indicator" id="sync-indicator">
-        <span>🔄</span>
-        <span id="sync-text">Synchronisation...</span>
+    <!-- Welcome Toast -->
+    <div class="welcome-toast hidden" id="welcomeToast">
+        <span>👋</span>
+        <span id="welcomeText">Bienvenue Pascal !</span>
     </div>
 
     <script>
-        // ============ APP CONFIG ============
+        // ============ CONFIGURATION ============
         const APP_VERSION = '4.5.0';
         
-        // Firebase Config (loaded from trakio-config.js)
-        const FIREBASE_CONFIG = typeof TRAKIO_FIREBASE_CONFIG !== 'undefined' 
-            ? TRAKIO_FIREBASE_CONFIG 
-            : {
-                apiKey: "AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                authDomain: "trakio-pilot-6e97a.firebaseapp.com",
-                projectId: "trakio-pilot-6e97a",
-                storageBucket: "trakio-pilot-6e97a.appspot.com",
-                messagingSenderId: "000000000000",
-                appId: "1:000000000000:web:xxxxxxxxxxxxxxxx"
-            };
-        
-        // ============ ROLES & PERMISSIONS ============
         const ROLES = {
-            admin: {
-                label: 'Administrateur',
-                color: '#ef4444',
-                permissions: ['all']
-            },
-            manager: {
-                label: 'Gérant',
-                color: '#8b5cf6',
-                permissions: ['dashboard', 'articles', 'clients', 'commandes', 'myfish', 'caisse', 'tracabilite', 'compta', 'cours', 'shopify']
-            },
-            employee: {
-                label: 'Employé',
-                color: '#0ea5e9',
-                permissions: ['dashboard', 'commandes', 'myfish', 'caisse', 'tracabilite']
-            }
+            admin: { label: 'Administrateur', color: '#ef4444', icon: '👑' },
+            manager: { label: 'Manager', color: '#f59e0b', icon: '⭐' },
+            employee: { label: 'Employé', color: '#22c55e', icon: '👤' }
         };
         
-        // Default Users (will be synced with Firebase)
         const DEFAULT_USERS = [
-            { id: 'pascal', name: 'Pascal', role: 'admin', pin: '1234' },
-            { id: 'celine', name: 'Céline', role: 'manager', pin: '2345' },
-            { id: 'hayat', name: 'Hayat', role: 'employee', pin: '3456' }
+            { id: 'pascal', name: 'Pascal', initials: 'PA', role: 'admin' },
+            { id: 'celine', name: 'Céline', initials: 'CE', role: 'manager' },
+            { id: 'hayat', name: 'Hayat', initials: 'HA', role: 'employee' }
         ];
         
-        // ============ MODULES ============
         const MODULES = [
-            // VENTES
-            { id: 'dashboard', name: 'Dashboard', icon: '📊', url: 'index.html', section: 'ventes' },
-            { id: 'myfish', name: 'MyFish B2C', icon: '🛒', url: 'myfish.html', section: 'ventes' },
-            { id: 'commandes', name: 'Commandes PRO', icon: '📋', url: 'commandes.html', section: 'ventes' },
-            { id: 'caisse', name: 'Caisse POS', icon: '💳', url: 'caisse.html', section: 'ventes' },
-            
-            // DONNÉES
-            { id: 'articles', name: 'Articles', icon: '🐟', url: 'articles.html', section: 'donnees' },
-            { id: 'clients', name: 'Clients', icon: '👥', url: 'clients.html', section: 'donnees' },
-            
-            // PRIX & OUTILS
-            { id: 'cours', name: 'Cours Poissons', icon: '📈', url: 'live.html', section: 'outils' },
+            { id: 'dashboard', name: 'Accueil', icon: '🏠', url: 'index.html', section: 'principal' },
+            { id: 'myfish', name: 'MyFish', icon: '🛒', url: 'myfish.html', section: 'ventes', color: 'green', quick: true },
+            { id: 'commandes', name: 'Commandes', icon: '📋', url: 'commandes.html', section: 'ventes', color: 'yellow', quick: true },
+            { id: 'caisse', name: 'Caisse', icon: '💳', url: 'caisse.html', section: 'ventes', color: 'purple' },
+            { id: 'articles', name: 'Articles', icon: '📦', url: 'articles.html', section: 'donnees', color: 'red', quick: true },
+            { id: 'clients', name: 'Clients', icon: '👥', url: 'clients.html', section: 'donnees', color: 'cyan', quick: true },
+            { id: 'cours', name: 'Cours Poissons', icon: '📈', url: 'live.html', section: 'outils', color: 'teal', quick: true },
             { id: 'tracabilite', name: 'Traçabilité', icon: '🏷️', url: 'tracabilite.html', section: 'outils' },
             { id: 'shopify', name: 'Shop Hub', icon: '🛍️', url: 'shopify.html', section: 'outils' },
-            { id: 'whatsapp', name: 'WhatsApp', icon: '💬', url: 'whatsapp.html', section: 'outils' },
-            
-            // SYSTÈME
             { id: 'compta', name: 'Comptabilité', icon: '💰', url: 'compta.html', section: 'systeme' },
-            { id: 'cloud', name: 'Cloud Sync', icon: '☁️', url: 'cloud.html', section: 'systeme' },
-            { id: 'parametres', name: 'Paramètres', icon: '⚙️', url: 'parametres.html', section: 'systeme' }
+            { id: 'parametres', name: 'Paramètres', icon: '⚙️', url: 'parametres.html', section: 'systeme', adminOnly: true }
         ];
         
-        const SECTIONS = [
+        const NAV_SECTIONS = [
+            { id: 'principal', title: 'PRINCIPAL' },
             { id: 'ventes', title: '🛒 VENTES' },
             { id: 'donnees', title: '📂 DONNÉES' },
-            { id: 'outils', title: '🔧 PRIX & OUTILS' },
+            { id: 'outils', title: '🔧 OUTILS' },
             { id: 'systeme', title: '⚙️ SYSTÈME' }
         ];
         
         // ============ STATE ============
-        let db = null;
         let currentUser = null;
-        let selectedLoginUser = null;
         
-        // ============ USERS MANAGEMENT ============
+        // ============ INIT ============
+        document.addEventListener('DOMContentLoaded', () => {
+            populateUserSelect();
+            checkExistingSession();
+        });
+        
+        // ============ LOGIN ============
+        function populateUserSelect() {
+            const users = getUsers();
+            const select = document.getElementById('userSelect');
+            
+            select.innerHTML = '<option value="">Sélectionnez...</option>';
+            
+            users.forEach(user => {
+                const role = ROLES[user.role];
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.name} ${role.icon}`;
+                select.appendChild(option);
+            });
+        }
+        
+        function onUserSelect() {
+            const select = document.getElementById('userSelect');
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = !select.value;
+        }
+        
+        function doLogin() {
+            const select = document.getElementById('userSelect');
+            const userId = select.value;
+            
+            if (!userId) return;
+            
+            const users = getUsers();
+            const user = users.find(u => u.id === userId);
+            
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('trakio_current_user', JSON.stringify(user));
+                
+                hideLogin();
+                showApp();
+                showWelcome(user.name);
+            }
+        }
+        
+        function checkExistingSession() {
+            const stored = localStorage.getItem('trakio_current_user');
+            if (stored) {
+                try {
+                    currentUser = JSON.parse(stored);
+                    hideLogin();
+                    showApp();
+                } catch (e) {
+                    showLogin();
+                }
+            } else {
+                showLogin();
+            }
+        }
+        
+        function showLogin() {
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            document.getElementById('appContainer').style.display = 'none';
+        }
+        
+        function hideLogin() {
+            document.getElementById('loginOverlay').classList.add('hidden');
+        }
+        
+        function showApp() {
+            document.getElementById('appContainer').style.display = 'flex';
+            updateUserDisplays();
+            buildNavigation();
+            buildQuickActions();
+            buildTools();
+            loadKPIs();
+        }
+        
+        function showUserSwitcher() {
+            // Logout and show login again
+            localStorage.removeItem('trakio_current_user');
+            currentUser = null;
+            showLogin();
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('userSelect').value = '';
+            document.getElementById('loginBtn').disabled = true;
+        }
+        
+        function showWelcome(name) {
+            const toast = document.getElementById('welcomeToast');
+            document.getElementById('welcomeText').textContent = `Bienvenue ${name} !`;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 4000);
+        }
+        
+        // ============ USERS ============
         function getUsers() {
             const stored = localStorage.getItem('trakio_users');
             if (stored) {
-                return JSON.parse(stored);
+                try {
+                    return JSON.parse(stored);
+                } catch (e) {
+                    return DEFAULT_USERS;
+                }
             }
-            // Initialize with defaults
             localStorage.setItem('trakio_users', JSON.stringify(DEFAULT_USERS));
             return DEFAULT_USERS;
         }
         
-        function saveUsers(users) {
-            localStorage.setItem('trakio_users', JSON.stringify(users));
-            // Sync to Firebase
-            if (db) {
-                db.collection('settings').doc('users').set({ users, updatedAt: new Date().toISOString() })
-                    .catch(e => console.error('Firebase save users error:', e));
-            }
-        }
-        
-        function getCurrentUser() {
-            if (currentUser) return currentUser;
-            const stored = localStorage.getItem('trakio_current_user');
-            if (stored) {
-                currentUser = JSON.parse(stored);
-                return currentUser;
-            }
-            return null;
-        }
-        
-        function setCurrentUser(userId) {
-            const users = getUsers();
-            const user = users.find(u => u.id === userId);
-            if (user) {
-                currentUser = user;
-                localStorage.setItem('trakio_current_user', JSON.stringify(user));
-                updateUserDisplay();
-                closeUserModal();
-                showToast(`Connecté en tant que ${user.name}`, 'success');
-                
-                // Log activity
-                logActivity('login', `${user.name} s'est connecté`);
-                
-                // If admin, trigger version publish
-                if (user.role === 'admin') {
-                    publishVersion();
-                }
-                
-                // Rebuild navigation for permissions
-                buildNavigation();
-                buildQuickActions();
-            }
-        }
-        
-        function hasAccess(moduleId) {
-            const user = getCurrentUser();
-            if (!user) return false;
+        function updateUserDisplays() {
+            if (!currentUser) return;
             
-            const role = ROLES[user.role];
-            if (!role) return false;
+            const role = ROLES[currentUser.role];
+            const initials = currentUser.initials || currentUser.name.substring(0, 2).toUpperCase();
             
-            if (role.permissions.includes('all')) return true;
-            return role.permissions.includes(moduleId);
-        }
-        
-        // ============ LOGIN ============
-        function showLogin() {
-            const overlay = document.getElementById('login-overlay');
-            const container = document.getElementById('login-users');
-            const users = getUsers();
+            // Sidebar
+            document.getElementById('sidebarAvatar').textContent = initials;
+            document.getElementById('sidebarAvatar').style.background = role.color;
+            document.getElementById('sidebarName').textContent = currentUser.name;
+            document.getElementById('sidebarRole').textContent = role.label;
             
-            container.innerHTML = users.map(u => {
-                const role = ROLES[u.role];
-                return `
-                    <div class="login-user" data-user-id="${u.id}" onclick="selectLoginUser('${u.id}')">
-                        <div class="user-avatar" style="background:${role.color}">${u.name[0]}</div>
-                        <div class="user-info">
-                            <div class="user-name">${u.name}</div>
-                            <div class="user-role">${role.label}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            overlay.style.display = 'flex';
-        }
-        
-        function selectLoginUser(userId) {
-            selectedLoginUser = userId;
-            
-            // Update UI
-            document.querySelectorAll('.login-user').forEach(el => {
-                el.classList.toggle('selected', el.dataset.userId === userId);
-            });
-            
-            document.getElementById('login-btn').disabled = false;
-        }
-        
-        function confirmLogin() {
-            if (selectedLoginUser) {
-                setCurrentUser(selectedLoginUser);
-                document.getElementById('login-overlay').style.display = 'none';
-            }
-        }
-        
-        function hideLogin() {
-            document.getElementById('login-overlay').style.display = 'none';
+            // Header
+            document.getElementById('headerAvatar').textContent = initials;
+            document.getElementById('headerAvatar').style.background = role.color;
+            document.getElementById('headerName').textContent = currentUser.name;
         }
         
         // ============ NAVIGATION ============
         function buildNavigation() {
-            const nav = document.getElementById('sidebar-nav');
+            const nav = document.getElementById('sidebarNav');
             let html = '';
             
-            SECTIONS.forEach(section => {
-                const items = MODULES.filter(m => m.section === section.id && hasAccess(m.id));
+            NAV_SECTIONS.forEach(section => {
+                const items = MODULES.filter(m => {
+                    if (m.section !== section.id) return false;
+                    if (m.adminOnly && currentUser?.role !== 'admin') return false;
+                    return true;
+                });
+                
                 if (items.length === 0) return;
                 
                 html += `<div class="nav-section">`;
@@ -1176,7 +935,7 @@
                     html += `
                         <a href="${m.url}" class="nav-item ${isActive ? 'active' : ''}">
                             <span class="nav-icon">${m.icon}</span>
-                            <span class="nav-text">${m.name}</span>
+                            <span>${m.name}</span>
                         </a>
                     `;
                 });
@@ -1188,399 +947,79 @@
         }
         
         function buildQuickActions() {
-            const container = document.getElementById('quick-actions');
-            const actions = [
-                { module: 'myfish', icon: '🛒', text: 'Nouvelle vente B2C', sub: 'MyFish', color: 'green' },
-                { module: 'commandes', icon: '📋', text: 'Commande PRO', sub: 'Professionnels', color: 'blue' },
-                { module: 'caisse', icon: '💳', text: 'Ouvrir Caisse', sub: 'Point de vente', color: 'purple' },
-                { module: 'clients', icon: '👥', text: 'Clients', sub: 'Gestion', color: 'cyan' },
-                { module: 'tracabilite', icon: '🏷️', text: 'Étiquettes', sub: 'QR Codes', color: 'orange' },
-                { module: 'articles', icon: '🐟', text: 'Articles', sub: 'Catalogue', color: 'pink' }
+            const container = document.getElementById('quickActions');
+            const actions = MODULES.filter(m => m.quick);
+            
+            container.innerHTML = actions.map(m => `
+                <a href="${m.url}" class="action-card ${m.color || ''}">
+                    <div class="action-icon">${m.icon}</div>
+                    <div class="action-title">${m.name}</div>
+                    <div class="action-sub">${getActionSub(m.id)}</div>
+                </a>
+            `).join('');
+        }
+        
+        function getActionSub(id) {
+            const subs = {
+                myfish: 'Clients B2C',
+                commandes: 'Nouvelle prise',
+                articles: 'Catalogue',
+                clients: 'Gestion',
+                cours: 'Prix du jour'
+            };
+            return subs[id] || '';
+        }
+        
+        function buildTools() {
+            const container = document.getElementById('toolsGrid');
+            const tools = [
+                { name: 'Commandes', icon: '📋', color: 'blue', url: 'commandes.html' },
+                { name: 'Suivi', icon: '📊', color: 'yellow', url: '#' },
+                { name: 'Prix Vente', icon: '💲', color: 'green', url: '#' },
+                { name: 'Fournisseurs', icon: '🏭', color: 'orange', url: '#' },
+                { name: 'Shop Hub', icon: '🛍️', color: 'purple', url: 'shopify.html' },
+                { name: 'Rapports', icon: '📈', color: 'pink', url: '#' },
+                { name: 'Paramètres', icon: '⚙️', color: 'cyan', url: 'parametres.html' },
+                { name: 'RH', icon: '👥', color: 'red', url: '#' }
             ];
             
-            container.innerHTML = actions
-                .filter(a => hasAccess(a.module))
-                .map(a => {
-                    const m = MODULES.find(mod => mod.id === a.module);
-                    return `
-                        <a href="${m?.url || '#'}" class="quick-action">
-                            <div class="quick-action-icon ${a.color}">${a.icon}</div>
-                            <div class="quick-action-content">
-                                <div class="quick-action-text">${a.text}</div>
-                                <div class="quick-action-sub">${a.sub}</div>
-                            </div>
-                            <span class="quick-action-arrow">→</span>
-                        </a>
-                    `;
-                }).join('');
-        }
-        
-        // ============ USER MODAL ============
-        function openUserModal() {
-            const users = getUsers();
-            const current = getCurrentUser();
-            
-            document.getElementById('users-list').innerHTML = users.map(u => {
-                const role = ROLES[u.role];
-                return `
-                    <div class="user-option ${u.id === current?.id ? 'active' : ''}" onclick="setCurrentUser('${u.id}')">
-                        <div class="user-avatar" style="background:${role.color}">${u.name[0]}</div>
-                        <div class="user-info">
-                            <div class="user-name">${u.name}</div>
-                            <div class="user-role">${role.label}</div>
-                        </div>
-                        ${u.id === current?.id ? '<span class="user-check">✓</span>' : ''}
-                    </div>
-                `;
-            }).join('');
-            
-            document.getElementById('user-modal').classList.add('active');
-        }
-        
-        function closeUserModal() {
-            document.getElementById('user-modal').classList.remove('active');
-        }
-        
-        function manageUsers() {
-            const user = getCurrentUser();
-            if (user?.role === 'admin') {
-                window.location.href = 'parametres.html#users';
-            } else {
-                showToast('Accès réservé aux administrateurs', 'error');
-            }
-        }
-        
-        // ============ UI ============
-        function updateUserDisplay() {
-            const user = getCurrentUser();
-            if (!user) return;
-            
-            const role = ROLES[user.role];
-            
-            document.getElementById('current-user-avatar').textContent = user.name[0];
-            document.getElementById('current-user-avatar').style.background = role.color;
-            document.getElementById('current-user-name').textContent = user.name;
-            document.getElementById('current-user-role').textContent = role.label;
-            document.getElementById('welcome-name').textContent = user.name;
-        }
-        
-        function updateDateTime() {
-            const now = new Date();
-            const dateOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-            const timeOptions = { hour: '2-digit', minute: '2-digit' };
-            
-            const dateStr = now.toLocaleDateString('fr-CH', dateOptions);
-            const timeStr = now.toLocaleTimeString('fr-CH', timeOptions);
-            
-            document.getElementById('current-date').textContent = dateStr;
-            document.getElementById('welcome-date').textContent = dateStr;
-            document.getElementById('welcome-time').textContent = timeStr;
-        }
-        
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            
-            const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-            toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
-            
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
-        }
-        
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-        }
-        
-        function toggleTheme() {
-            showToast('Thème sombre actif', 'info');
-        }
-        
-        function openSettings() {
-            window.location.href = 'parametres.html';
-        }
-        
-        function refreshData() {
-            showSyncIndicator('Actualisation...');
-            loadKPIs();
-            loadRecentOrders();
-            loadActivity();
-            setTimeout(() => {
-                hideSyncIndicator();
-                showToast('Données actualisées', 'success');
-            }, 1000);
-        }
-        
-        function showSyncIndicator(text) {
-            const el = document.getElementById('sync-indicator');
-            document.getElementById('sync-text').textContent = text || 'Synchronisation...';
-            el.classList.add('active');
-        }
-        
-        function hideSyncIndicator() {
-            document.getElementById('sync-indicator').classList.remove('active');
-        }
-        
-        // ============ FIREBASE ============
-        async function initFirebase() {
-            try {
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(FIREBASE_CONFIG);
-                }
-                db = firebase.firestore();
-                
-                document.getElementById('firebase-dot').classList.remove('offline', 'syncing');
-                document.getElementById('firebase-dot').classList.add('online');
-                document.getElementById('firebase-status').textContent = 'Connecté';
-                
-                // Sync users from Firebase
-                await syncUsersFromFirebase();
-                
-                // Listen for real-time updates
-                setupRealtimeListeners();
-                
-                return true;
-            } catch (e) {
-                console.error('Firebase error:', e);
-                document.getElementById('firebase-dot').classList.remove('online', 'syncing');
-                document.getElementById('firebase-dot').classList.add('offline');
-                document.getElementById('firebase-status').textContent = 'Hors ligne';
-                return false;
-            }
-        }
-        
-        async function syncUsersFromFirebase() {
-            if (!db) return;
-            
-            try {
-                const doc = await db.collection('settings').doc('users').get();
-                if (doc.exists) {
-                    const data = doc.data();
-                    if (data.users && data.users.length > 0) {
-                        localStorage.setItem('trakio_users', JSON.stringify(data.users));
-                        console.log('Users synced from Firebase');
-                    }
-                } else {
-                    // First time - push local users to Firebase
-                    const users = getUsers();
-                    await db.collection('settings').doc('users').set({
-                        users,
-                        updatedAt: new Date().toISOString()
-                    });
-                    console.log('Users pushed to Firebase');
-                }
-            } catch (e) {
-                console.error('Sync users error:', e);
-            }
-        }
-        
-        function setupRealtimeListeners() {
-            if (!db) return;
-            
-            // Listen for orders changes
-            db.collection('commandes').orderBy('createdAt', 'desc').limit(10)
-                .onSnapshot(snapshot => {
-                    if (!snapshot.empty) {
-                        const orders = [];
-                        snapshot.forEach(doc => {
-                            orders.push({ id: doc.id, ...doc.data() });
-                        });
-                        // Update localStorage
-                        const existing = JSON.parse(localStorage.getItem('trakio_commandes_list') || '[]');
-                        const merged = mergeOrders(existing, orders);
-                        localStorage.setItem('trakio_commandes_list', JSON.stringify(merged));
-                        loadRecentOrders();
-                        loadKPIs();
-                    }
-                }, error => {
-                    console.error('Orders listener error:', error);
-                });
-        }
-        
-        function mergeOrders(local, remote) {
-            const map = new Map();
-            local.forEach(o => map.set(o.id, o));
-            remote.forEach(o => map.set(o.id, o));
-            return Array.from(map.values());
-        }
-        
-        async function publishVersion() {
-            // Publish version for other users
-            if (!db) return;
-            
-            try {
-                await db.collection('settings').doc('version').set({
-                    version: APP_VERSION,
-                    publishedAt: new Date().toISOString(),
-                    publishedBy: getCurrentUser()?.name || 'Admin'
-                });
-                console.log('Version published:', APP_VERSION);
-            } catch (e) {
-                console.error('Publish version error:', e);
-            }
-        }
-        
-        // ============ ACTIVITY LOG ============
-        function logActivity(type, message) {
-            const activities = JSON.parse(localStorage.getItem('trakio_activities') || '[]');
-            activities.unshift({
-                type,
-                message,
-                timestamp: new Date().toISOString()
-            });
-            // Keep last 50
-            localStorage.setItem('trakio_activities', JSON.stringify(activities.slice(0, 50)));
-            
-            // Sync to Firebase
-            if (db) {
-                db.collection('activities').add({
-                    type,
-                    message,
-                    timestamp: new Date().toISOString(),
-                    user: getCurrentUser()?.name || 'Unknown'
-                }).catch(e => console.error('Log activity error:', e));
-            }
-        }
-        
-        function loadActivity() {
-            const activities = JSON.parse(localStorage.getItem('trakio_activities') || '[]');
-            const container = document.getElementById('activity-list');
-            
-            if (activities.length === 0) {
-                container.innerHTML = `<div class="empty-state"><div class="empty-icon">🕐</div><p>Aucune activité</p></div>`;
-                return;
-            }
-            
-            container.innerHTML = activities.slice(0, 8).map(a => {
-                const time = new Date(a.timestamp);
-                const timeStr = time.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
-                return `
-                    <div class="activity-item">
-                        <span class="activity-time">${timeStr}</span>
-                        <span class="activity-text">${a.message}</span>
-                    </div>
-                `;
-            }).join('');
+            container.innerHTML = tools.map(t => `
+                <a href="${t.url}" class="tool-card">
+                    <div class="tool-icon ${t.color}">${t.icon}</div>
+                    <div class="tool-title">${t.name}</div>
+                </a>
+            `).join('');
         }
         
         // ============ KPIs ============
         function loadKPIs() {
-            const articles = JSON.parse(localStorage.getItem('trakio_articles_list') || '[]');
-            const clients = JSON.parse(localStorage.getItem('trakio_clients_list') || 
-                           localStorage.getItem('trakio_quickorder') || '[]');
-            const commandes = JSON.parse(localStorage.getItem('trakio_commandes_list') || '[]');
-            const ventes = JSON.parse(localStorage.getItem('trakio_ventes_list') || '[]');
+            // Load from localStorage
+            const commandes = JSON.parse(localStorage.getItem('trakio_commandes') || '[]');
             
-            const today = new Date().toISOString().slice(0, 10);
-            const todayOrders = commandes.filter(c => (c.createdAt || c.date || '').slice(0, 10) === today);
-            const pendingOrders = commandes.filter(c => c.status === 'pending' || c.status === 'en_attente');
-            const todayVentes = ventes.filter(v => (v.date || '').slice(0, 10) === today);
+            let nouvelles = 0, prepa = 0, prets = 0, livrer = 0, revenue = 0;
             
-            let ca = 0;
-            todayOrders.forEach(o => ca += (o.total || 0));
-            todayVentes.forEach(v => ca += (v.total || 0));
-            
-            document.getElementById('kpi-orders').textContent = todayOrders.length;
-            document.getElementById('kpi-ca').textContent = formatCHF(ca);
-            document.getElementById('kpi-clients').textContent = clients.length;
-            document.getElementById('kpi-pending').textContent = pendingOrders.length;
-            document.getElementById('kpi-articles').textContent = articles.length;
-            document.getElementById('kpi-ventes').textContent = todayVentes.length;
-            
-            document.getElementById('last-refresh').textContent = 
-                new Date().toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
-        }
-        
-        function loadRecentOrders() {
-            const commandes = JSON.parse(localStorage.getItem('trakio_commandes_list') || '[]');
-            const recent = commandes
-                .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
-                .slice(0, 5);
-            
-            const container = document.getElementById('orders-list');
-            
-            if (recent.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📋</div>
-                        <p>Aucune commande</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = recent.map(o => {
-                const initial = (o.clientName || o.client || 'C')[0].toUpperCase();
-                const isPending = o.status === 'pending' || o.status === 'en_attente';
-                const statusClass = isPending ? 'pending' : 'confirmed';
-                const statusLabel = isPending ? 'En attente' : 'Confirmée';
+            commandes.forEach(c => {
+                if (c.status === 'nouvelle' || c.status === 'pending') nouvelles++;
+                else if (c.status === 'preparation') prepa++;
+                else if (c.status === 'pret') prets++;
+                else if (c.status === 'livraison') livrer++;
                 
-                return `
-                    <div class="order-item">
-                        <div class="order-avatar">${initial}</div>
-                        <div class="order-info">
-                            <div class="order-client">${o.clientName || o.client || 'Client'}</div>
-                            <div class="order-details">${o.items?.length || 0} article(s)</div>
-                        </div>
-                        <div class="order-amount">${formatCHF(o.total || 0)}</div>
-                        <span class="order-status ${statusClass}">${statusLabel}</span>
-                    </div>
-                `;
-            }).join('');
+                if (c.total) revenue += c.total;
+            });
+            
+            document.getElementById('kpiNouvelles').textContent = nouvelles;
+            document.getElementById('kpiPrepa').textContent = prepa;
+            document.getElementById('kpiPrets').textContent = prets;
+            document.getElementById('kpiLivrer').textContent = livrer;
+            document.getElementById('revenueValue').textContent = formatCHF(revenue);
         }
         
         function formatCHF(amount) {
             return new Intl.NumberFormat('fr-CH', { 
                 style: 'currency', 
-                currency: 'CHF',
-                minimumFractionDigits: 2
+                currency: 'CHF' 
             }).format(amount || 0);
         }
-        
-        // ============ INIT ============
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Update date/time
-            updateDateTime();
-            setInterval(updateDateTime, 60000);
-            
-            // Check if user is logged in
-            const user = getCurrentUser();
-            if (!user) {
-                showLogin();
-            } else {
-                hideLogin();
-                updateUserDisplay();
-                buildNavigation();
-                buildQuickActions();
-            }
-            
-            // Init Firebase
-            await initFirebase();
-            
-            // Load data
-            loadKPIs();
-            loadRecentOrders();
-            loadActivity();
-            
-            // Auto refresh every 30s
-            setInterval(() => {
-                loadKPIs();
-                loadRecentOrders();
-            }, 30000);
-        });
-        
-        // Keyboard shortcuts
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') {
-                closeUserModal();
-            }
-        });
-        
-        // Close modal on click outside
-        document.getElementById('user-modal').addEventListener('click', e => {
-            if (e.target.id === 'user-modal') closeUserModal();
-        });
     </script>
 </body>
 </html>
