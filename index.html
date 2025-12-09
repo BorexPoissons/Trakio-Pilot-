@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAKIO v4.2.2 - Dashboard</title>
+    <title>TRAKIO v4.5.0 - Dashboard</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link rel="manifest" href="manifest.json">
+    
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- TRAKIO Core JS -->
+    <script src="trakio-config.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -15,14 +21,19 @@
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
             --bg-tertiary: #334155;
+            --bg-card: #1e293b;
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
+            --text-muted: #64748b;
             --accent: #0ea5e9;
             --accent-hover: #38bdf8;
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
+            --purple: #8b5cf6;
+            --pink: #ec4899;
             --border: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
         
         body {
@@ -35,7 +46,7 @@
         
         /* ============ SIDEBAR ============ */
         .sidebar {
-            width: 260px;
+            width: 280px;
             background: var(--bg-secondary);
             border-right: 1px solid var(--border);
             height: 100vh;
@@ -56,14 +67,21 @@
             gap: 12px;
         }
         
-        .logo { font-size: 32px; }
-        .logo-text { font-size: 24px; font-weight: 700; }
+        .logo { font-size: 36px; }
+        .logo-text { 
+            font-size: 26px; 
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
         .logo-version {
-            font-size: 10px;
-            background: var(--accent);
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 5px;
+            font-size: 11px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            padding: 3px 8px;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
         }
         
         .sidebar-nav {
@@ -72,46 +90,62 @@
             padding: 15px 0;
         }
         
-        .nav-section {
-            padding: 0 15px;
-            margin-bottom: 20px;
-        }
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        
+        .nav-section { padding: 0 12px; margin-bottom: 8px; }
         
         .nav-section-title {
-            font-size: 11px;
+            font-size: 10px;
             text-transform: uppercase;
-            color: var(--text-secondary);
-            padding: 10px 12px;
-            letter-spacing: 1px;
+            color: var(--text-muted);
+            padding: 12px 12px 8px;
+            letter-spacing: 1.5px;
+            font-weight: 600;
         }
         
         .nav-item {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 15px;
+            padding: 11px 14px;
             border-radius: 10px;
             color: var(--text-secondary);
             text-decoration: none;
             cursor: pointer;
             transition: all 0.2s;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
+            font-size: 14px;
         }
         
         .nav-item:hover {
             background: var(--bg-tertiary);
             color: var(--text-primary);
+            transform: translateX(4px);
         }
         
         .nav-item.active {
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--accent), #0284c7);
             color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
         }
         
-        .nav-icon { font-size: 18px; width: 24px; text-align: center; }
-        .nav-text { font-size: 14px; font-weight: 500; }
+        .nav-icon { font-size: 18px; width: 26px; text-align: center; }
+        .nav-text { font-weight: 500; }
         
-        /* User section at bottom */
+        .nav-badge {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        /* User section */
         .sidebar-user {
             padding: 15px;
             border-top: 1px solid var(--border);
@@ -125,25 +159,27 @@
         .sidebar-user:hover { background: var(--bg-tertiary); }
         
         .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 17px;
+            box-shadow: var(--shadow);
         }
         
         .user-info { flex: 1; }
         .user-name { font-weight: 600; font-size: 14px; }
         .user-role { font-size: 11px; color: var(--text-secondary); }
+        .user-arrow { color: var(--text-muted); }
         
         /* ============ MAIN CONTENT ============ */
         .main-content {
             flex: 1;
-            margin-left: 260px;
+            margin-left: 280px;
             min-height: 100vh;
         }
         
@@ -151,7 +187,7 @@
         .header {
             background: var(--bg-secondary);
             border-bottom: 1px solid var(--border);
-            padding: 15px 30px;
+            padding: 16px 30px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -160,27 +196,29 @@
             z-index: 50;
         }
         
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+        .header-left { display: flex; align-items: center; gap: 20px; }
         
-        .page-title {
-            font-size: 24px;
-            font-weight: 700;
-        }
-        
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .header-btn {
+        .menu-toggle {
+            display: none;
             width: 40px;
             height: 40px;
+            border: none;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
             border-radius: 10px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .page-title { font-size: 26px; font-weight: 700; }
+        .page-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+        
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        
+        .header-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
             border: none;
             background: var(--bg-tertiary);
             color: var(--text-primary);
@@ -192,381 +230,616 @@
             transition: all 0.2s;
         }
         
-        .header-btn:hover { background: var(--bg-primary); }
+        .header-btn:hover { 
+            background: var(--accent); 
+            transform: scale(1.05);
+        }
         
         .status-badge {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 14px;
+            padding: 10px 16px;
             background: var(--bg-tertiary);
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 13px;
+            font-weight: 500;
         }
         
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
+            animation: pulse 2s infinite;
         }
         
         .status-dot.online { background: var(--success); }
         .status-dot.offline { background: var(--danger); }
-        .status-dot.syncing { background: var(--warning); animation: pulse 1.5s infinite; }
+        .status-dot.syncing { background: var(--warning); }
         
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
         
-        /* Page Content */
-        .page-content {
+        /* ============ DASHBOARD ============ */
+        .dashboard {
             padding: 30px;
+            max-width: 1600px;
         }
         
         /* Welcome */
-        .welcome-section { margin-bottom: 30px; }
-        .welcome-title {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 5px;
+        .welcome-card {
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(14, 165, 233, 0.2);
         }
-        .welcome-date { color: var(--text-secondary); font-size: 14px; }
         
-        /* KPIs Grid */
+        .welcome-text h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .welcome-text p {
+            opacity: 0.9;
+            font-size: 15px;
+        }
+        
+        .welcome-date {
+            text-align: right;
+            opacity: 0.9;
+        }
+        
+        .welcome-date .date { font-size: 18px; font-weight: 600; }
+        .welcome-date .time { font-size: 14px; margin-top: 4px; }
+        
+        /* Quick Actions */
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .quick-action {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .quick-action:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.15);
+        }
+        
+        .quick-action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .quick-action-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+        .quick-action-icon.blue { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+        .quick-action-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .quick-action-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .quick-action-icon.pink { background: linear-gradient(135deg, #ec4899, #db2777); }
+        .quick-action-icon.cyan { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        
+        .quick-action-content { flex: 1; }
+        .quick-action-text { font-weight: 600; font-size: 15px; }
+        .quick-action-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+        .quick-action-arrow { color: var(--text-muted); font-size: 18px; }
+        
+        /* KPIs */
         .kpis-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
             margin-bottom: 30px;
         }
         
         .kpi-card {
-            background: var(--bg-secondary);
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 24px;
-            position: relative;
-            overflow: hidden;
+            padding: 20px;
+            transition: all 0.3s;
         }
         
-        .kpi-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
         }
         
-        .kpi-card.blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-        .kpi-card.green::before { background: linear-gradient(90deg, #10b981, #34d399); }
-        .kpi-card.purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
-        .kpi-card.orange::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-        .kpi-card.cyan::before { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
-        .kpi-card.pink::before { background: linear-gradient(90deg, #ec4899, #f472b6); }
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
         
-        .kpi-icon { font-size: 36px; margin-bottom: 15px; }
-        .kpi-value { font-size: 32px; font-weight: 700; margin-bottom: 5px; }
-        .kpi-card.blue .kpi-value { color: #3b82f6; }
-        .kpi-card.green .kpi-value { color: #10b981; }
-        .kpi-card.purple .kpi-value { color: #8b5cf6; }
-        .kpi-card.orange .kpi-value { color: #f59e0b; }
-        .kpi-card.cyan .kpi-value { color: #06b6d4; }
-        .kpi-card.pink .kpi-value { color: #ec4899; }
-        .kpi-label { color: var(--text-secondary); font-size: 14px; }
+        .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
         
-        /* Cards Grid */
-        .cards-grid {
+        .kpi-icon.blue { background: rgba(14, 165, 233, 0.15); }
+        .kpi-icon.green { background: rgba(16, 185, 129, 0.15); }
+        .kpi-icon.purple { background: rgba(139, 92, 246, 0.15); }
+        .kpi-icon.orange { background: rgba(245, 158, 11, 0.15); }
+        .kpi-icon.pink { background: rgba(236, 72, 153, 0.15); }
+        .kpi-icon.cyan { background: rgba(6, 182, 212, 0.15); }
+        
+        .kpi-trend {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        
+        .kpi-trend.up { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .kpi-trend.down { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+        
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .kpi-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        /* Content Grid */
+        .content-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 20px;
         }
         
         @media (max-width: 1200px) {
-            .cards-grid { grid-template-columns: 1fr; }
+            .content-grid { grid-template-columns: 1fr; }
         }
         
         .card {
-            background: var(--bg-secondary);
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 24px;
+            padding: 20px;
         }
         
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
         }
         
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .card-title { font-size: 16px; font-weight: 600; }
         
         .card-action {
+            font-size: 12px;
             color: var(--accent);
             text-decoration: none;
-            font-size: 13px;
+            font-weight: 500;
         }
         
-        /* Orders List */
+        .card-action:hover { text-decoration: underline; }
+        
+        /* Orders list */
         .order-item {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 14px;
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-            margin-bottom: 10px;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
         }
+        
+        .order-item:last-child { border-bottom: none; }
         
         .order-avatar {
             width: 42px;
             height: 42px;
-            border-radius: 10px;
-            background: var(--accent);
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
             font-weight: 700;
+            font-size: 16px;
         }
         
         .order-info { flex: 1; }
         .order-client { font-weight: 600; font-size: 14px; }
-        .order-details { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
-        .order-amount { font-weight: 700; color: var(--success); }
+        .order-details { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+        
+        .order-amount {
+            font-weight: 700;
+            font-size: 15px;
+        }
         
         .order-status {
             font-size: 11px;
             padding: 4px 10px;
-            border-radius: 6px;
+            border-radius: 8px;
+            font-weight: 600;
         }
-        .order-status.pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-        .order-status.confirmed { background: rgba(16, 185, 129, 0.2); color: #10b981; }
         
+        .order-status.pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .order-status.confirmed { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        
+        /* Activity */
+        .activity-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px 0;
+            font-size: 13px;
+        }
+        
+        .activity-time {
+            color: var(--text-muted);
+            white-space: nowrap;
+            font-size: 11px;
+            min-width: 50px;
+        }
+        
+        .activity-text { color: var(--text-secondary); }
+        .activity-text strong { color: var(--text-primary); }
+        
+        /* Empty state */
         .empty-state {
             text-align: center;
-            padding: 40px;
+            padding: 40px 20px;
             color: var(--text-secondary);
         }
-        .empty-icon { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
         
-        /* Quick Actions */
-        .quick-action {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px;
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            text-decoration: none;
-            color: var(--text-primary);
-            transition: all 0.2s;
-        }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
         
-        .quick-action:hover {
-            background: var(--bg-primary);
-            transform: translateX(5px);
-        }
-        
-        .quick-action-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-        
-        .quick-action-icon.green { background: rgba(16, 185, 129, 0.2); }
-        .quick-action-icon.blue { background: rgba(59, 130, 246, 0.2); }
-        .quick-action-icon.purple { background: rgba(139, 92, 246, 0.2); }
-        .quick-action-icon.orange { background: rgba(245, 158, 11, 0.2); }
-        
-        .quick-action-text { flex: 1; font-weight: 500; }
-        .quick-action-arrow { color: var(--text-secondary); }
-        
-        /* User Modal */
-        .modal-overlay {
+        /* ============ USER MODAL ============ */
+        .modal {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(4px);
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
         }
         
-        .modal-overlay.active { display: flex; }
+        .modal.active { opacity: 1; visibility: visible; }
         
-        .modal {
+        .modal-content {
             background: var(--bg-secondary);
-            border: 1px solid var(--border);
             border-radius: 20px;
             width: 90%;
-            max-width: 400px;
+            max-width: 420px;
+            max-height: 85vh;
             overflow: hidden;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
         }
         
+        .modal.active .modal-content { transform: scale(1); }
+        
         .modal-header {
-            padding: 20px;
+            padding: 20px 24px;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .modal-title { font-weight: 600; font-size: 18px; }
+        .modal-title { font-size: 18px; font-weight: 700; }
         
         .modal-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+            width: 36px;
+            height: 36px;
             border: none;
             background: var(--bg-tertiary);
             color: var(--text-primary);
+            border-radius: 10px;
             cursor: pointer;
             font-size: 18px;
+            transition: all 0.2s;
         }
         
-        .modal-body { padding: 15px; }
+        .modal-close:hover { background: var(--danger); }
+        
+        .modal-body { padding: 20px 24px; max-height: 400px; overflow-y: auto; }
         
         .user-option {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             padding: 14px;
-            border-radius: 12px;
+            border-radius: 14px;
             cursor: pointer;
-            margin-bottom: 8px;
             transition: all 0.2s;
+            border: 2px solid transparent;
+            margin-bottom: 8px;
         }
         
         .user-option:hover { background: var(--bg-tertiary); }
-        .user-option.active { background: rgba(14, 165, 233, 0.2); border: 2px solid var(--accent); }
         
-        .user-option .user-avatar { width: 45px; height: 45px; font-size: 18px; }
-        .user-option .user-info { flex: 1; }
-        .user-option .user-name { font-weight: 600; }
-        .user-option .user-role { font-size: 12px; color: var(--text-secondary); }
-        .user-check { color: var(--accent); font-size: 18px; }
+        .user-option.active {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: var(--accent);
+        }
         
-        /* Toast */
+        .user-check { color: var(--success); font-size: 20px; }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .modal-btn.secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .modal-btn.primary {
+            background: linear-gradient(135deg, var(--accent), #0284c7);
+            color: white;
+        }
+        
+        .modal-btn:hover { transform: translateY(-2px); }
+        
+        /* ============ LOGIN MODAL ============ */
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        
+        .login-card {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .login-logo { font-size: 64px; margin-bottom: 16px; }
+        .login-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .login-subtitle { color: var(--text-secondary); margin-bottom: 30px; }
+        
+        .login-users { margin-bottom: 24px; }
+        
+        .login-user {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid var(--border);
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        
+        .login-user:hover {
+            border-color: var(--accent);
+            background: rgba(14, 165, 233, 0.1);
+        }
+        
+        .login-user.selected {
+            border-color: var(--accent);
+            background: rgba(14, 165, 233, 0.15);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* ============ TOAST ============ */
         .toast-container {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 2000;
+            bottom: 24px;
+            right: 24px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
         
         .toast {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 14px 20px;
-            margin-bottom: 10px;
+            border-radius: 14px;
+            padding: 16px 20px;
             display: flex;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             animation: slideIn 0.3s ease;
+            min-width: 280px;
         }
+        
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+        .toast.warning { border-left: 4px solid var(--warning); }
+        .toast.info { border-left: 4px solid var(--accent); }
         
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
         
-        .toast.success { border-left: 4px solid var(--success); }
-        .toast.error { border-left: 4px solid var(--danger); }
-        .toast.info { border-left: 4px solid var(--accent); }
-        
-        /* Live indicator */
-        .live-indicator {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            padding: 10px 16px;
-            border-radius: 10px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-            animation: pulse 2s infinite;
-        }
-        
-        /* Mobile */
+        /* ============ RESPONSIVE ============ */
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
             }
+            
             .sidebar.open { transform: translateX(0); }
+            
             .main-content { margin-left: 0; }
-            .mobile-menu-btn { display: flex !important; }
+            
+            .menu-toggle { display: flex; }
+            
+            .welcome-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .welcome-date { text-align: center; }
+            
+            .kpis-grid { grid-template-columns: repeat(2, 1fr); }
+            
+            .header { padding: 12px 16px; }
+            .dashboard { padding: 16px; }
         }
         
-        .mobile-menu-btn {
-            display: none;
-            width: 40px;
-            height: 40px;
-            border: none;
-            background: var(--bg-tertiary);
-            border-radius: 10px;
-            color: var(--text-primary);
-            cursor: pointer;
-            font-size: 20px;
+        /* Sync indicator */
+        .sync-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 300px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .sync-indicator.active { opacity: 1; }
+        
+        @media (max-width: 768px) {
+            .sync-indicator { left: 20px; }
         }
     </style>
 </head>
 <body>
-    <!-- SIDEBAR -->
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="login-overlay">
+        <div class="login-card">
+            <div class="login-logo">🐟</div>
+            <h1 class="login-title">TRAKIO</h1>
+            <p class="login-subtitle">Sélectionnez votre profil pour continuer</p>
+            <div class="login-users" id="login-users"></div>
+            <button class="login-btn" id="login-btn" disabled onclick="confirmLogin()">
+                Se connecter
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <span class="logo">🐟</span>
             <span class="logo-text">TRAKIO</span>
-            <span class="logo-version">v4.2.2</span>
+            <span class="logo-version">v4.5.0</span>
         </div>
         
-        <nav class="sidebar-nav" id="sidebar-nav">
-            <!-- Navigation générée par JS selon les permissions -->
-        </nav>
+        <nav class="sidebar-nav" id="sidebar-nav"></nav>
         
         <div class="sidebar-user" onclick="openUserModal()">
-            <div class="user-avatar" id="current-user-avatar" style="background:#ef4444">P</div>
+            <div class="user-avatar" id="current-user-avatar">P</div>
             <div class="user-info">
-                <div class="user-name" id="current-user-name">Pascal</div>
-                <div class="user-role" id="current-user-role">Admin</div>
+                <div class="user-name" id="current-user-name">Utilisateur</div>
+                <div class="user-role" id="current-user-role">Rôle</div>
             </div>
-            <span>⚙️</span>
+            <span class="user-arrow">⌄</span>
         </div>
     </aside>
     
-    <!-- MAIN CONTENT -->
+    <!-- Main Content -->
     <main class="main-content">
         <header class="header">
             <div class="header-left">
-                <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
-                <h1 class="page-title">📊 Dashboard</h1>
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                <div>
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle" id="current-date"></p>
+                </div>
             </div>
             <div class="header-right">
                 <div class="status-badge">
@@ -574,72 +847,101 @@
                     <span id="firebase-status">Connexion...</span>
                 </div>
                 <button class="header-btn" onclick="toggleTheme()" title="Thème">🌙</button>
-                <button class="header-btn" onclick="location.reload()" title="Actualiser">🔄</button>
+                <button class="header-btn" onclick="refreshData()" title="Actualiser">🔄</button>
+                <button class="header-btn" onclick="openSettings()" title="Paramètres">⚙️</button>
             </div>
         </header>
         
-        <div class="page-content">
+        <div class="dashboard">
             <!-- Welcome -->
-            <div class="welcome-section">
-                <h2 class="welcome-title">👋 Bonjour <span id="welcome-name">Pascal</span> !</h2>
-                <p class="welcome-date" id="current-date"></p>
+            <div class="welcome-card">
+                <div class="welcome-text">
+                    <h2>Bonjour, <span id="welcome-name">Utilisateur</span> 👋</h2>
+                    <p>Bienvenue sur TRAKIO - Votre assistant de gestion</p>
+                </div>
+                <div class="welcome-date">
+                    <div class="date" id="welcome-date"></div>
+                    <div class="time" id="welcome-time"></div>
+                </div>
             </div>
             
+            <!-- Quick Actions -->
+            <h3 class="section-title">⚡ Actions rapides</h3>
+            <div class="quick-actions" id="quick-actions"></div>
+            
             <!-- KPIs -->
+            <h3 class="section-title">📊 Indicateurs du jour <span style="font-size:12px;color:var(--text-muted);font-weight:400">Mis à jour: <span id="last-refresh">--:--</span></span></h3>
             <div class="kpis-grid">
-                <div class="kpi-card blue">
-                    <div class="kpi-icon">📋</div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon blue">📋</div>
+                        <span class="kpi-trend up" id="kpi-orders-trend">↑</span>
+                    </div>
                     <div class="kpi-value" id="kpi-orders">0</div>
                     <div class="kpi-label">Commandes du jour</div>
                 </div>
-                <div class="kpi-card green">
-                    <div class="kpi-icon">💰</div>
-                    <div class="kpi-value" id="kpi-ca">0 CHF</div>
-                    <div class="kpi-label">CA aujourd'hui</div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon green">💰</div>
+                        <span class="kpi-trend up">↑</span>
+                    </div>
+                    <div class="kpi-value" id="kpi-ca">CHF 0</div>
+                    <div class="kpi-label">Chiffre d'affaires</div>
                 </div>
-                <div class="kpi-card purple">
-                    <div class="kpi-icon">👥</div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon purple">👥</div>
+                    </div>
                     <div class="kpi-value" id="kpi-clients">0</div>
-                    <div class="kpi-label">Clients</div>
+                    <div class="kpi-label">Clients actifs</div>
                 </div>
-                <div class="kpi-card orange">
-                    <div class="kpi-icon">⏳</div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon orange">⏳</div>
+                    </div>
                     <div class="kpi-value" id="kpi-pending">0</div>
                     <div class="kpi-label">En attente</div>
                 </div>
-                <div class="kpi-card cyan">
-                    <div class="kpi-icon">📦</div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon pink">🐟</div>
+                    </div>
                     <div class="kpi-value" id="kpi-articles">0</div>
-                    <div class="kpi-label">Articles</div>
+                    <div class="kpi-label">Articles catalogue</div>
                 </div>
-                <div class="kpi-card pink">
-                    <div class="kpi-icon">🛍️</div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-icon cyan">🛒</div>
+                    </div>
                     <div class="kpi-value" id="kpi-ventes">0</div>
                     <div class="kpi-label">Ventes caisse</div>
                 </div>
             </div>
             
-            <!-- Cards Grid -->
-            <div class="cards-grid">
+            <!-- Content Grid -->
+            <div class="content-grid">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">📋 Commandes récentes</h3>
+                        <span class="card-title">📋 Dernières commandes</span>
                         <a href="commandes.html" class="card-action">Voir tout →</a>
                     </div>
                     <div id="orders-list">
                         <div class="empty-state">
                             <div class="empty-icon">📋</div>
-                            <p>Aucune commande</p>
+                            <p>Chargement...</p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">⚡ Accès rapide</h3>
+                        <span class="card-title">🕐 Activité récente</span>
                     </div>
-                    <div id="quick-actions">
-                        <!-- Généré par JS selon permissions -->
+                    <div id="activity-list">
+                        <div class="empty-state">
+                            <div class="empty-icon">🕐</div>
+                            <p>Aucune activité</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -647,14 +949,16 @@
     </main>
     
     <!-- User Modal -->
-    <div class="modal-overlay" id="user-modal">
-        <div class="modal">
+    <div class="modal" id="user-modal">
+        <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-title">👥 Changer d'utilisateur</span>
-                <button class="modal-close" onclick="closeUserModal()">×</button>
+                <span class="modal-title">👤 Changer d'utilisateur</span>
+                <button class="modal-close" onclick="closeUserModal()">✕</button>
             </div>
-            <div class="modal-body" id="users-list">
-                <!-- Généré par JS -->
+            <div class="modal-body" id="users-list"></div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" onclick="closeUserModal()">Annuler</button>
+                <button class="modal-btn primary" onclick="manageUsers()">⚙️ Gérer</button>
             </div>
         </div>
     </div>
@@ -662,112 +966,213 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
     
-    <!-- Live Indicator -->
-    <div class="live-indicator">
-        <div class="live-dot"></div>
-        <span>Live • <span id="last-refresh">--:--</span></span>
+    <!-- Sync Indicator -->
+    <div class="sync-indicator" id="sync-indicator">
+        <span>🔄</span>
+        <span id="sync-text">Synchronisation...</span>
     </div>
-    
+
     <script>
-        // ============ CONFIG ============
-        const APP_VERSION = '4.2.2';
+        // ============ APP CONFIG ============
+        const APP_VERSION = '4.5.0';
         
-        const FIREBASE_CONFIG = {
-            apiKey: "AIzaSyBoGescolWTpGdm0SZh-Wk7blu8RwL2n4I",
-            authDomain: "trakio-pilot-6e97a.firebaseapp.com",
-            projectId: "trakio-pilot-6e97a",
-            storageBucket: "trakio-pilot-6e97a.firebasestorage.app",
-            messagingSenderId: "256841216130",
-            appId: "1:256841216130:web:abc123"
-        };
+        // Firebase Config (loaded from trakio-config.js)
+        const FIREBASE_CONFIG = typeof TRAKIO_FIREBASE_CONFIG !== 'undefined' 
+            ? TRAKIO_FIREBASE_CONFIG 
+            : {
+                apiKey: "AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                authDomain: "trakio-pilot-6e97a.firebaseapp.com",
+                projectId: "trakio-pilot-6e97a",
+                storageBucket: "trakio-pilot-6e97a.appspot.com",
+                messagingSenderId: "000000000000",
+                appId: "1:000000000000:web:xxxxxxxxxxxxxxxx"
+            };
         
+        // ============ ROLES & PERMISSIONS ============
         const ROLES = {
-            admin: { label: 'Admin', color: '#ef4444', allAccess: true },
-            manager: { label: 'Manager', color: '#f59e0b', modules: ['dashboard','articles','clients','commandes','myfish','caisse','compta','tracabilite'] },
-            vendeur: { label: 'Vendeur', color: '#10b981', modules: ['dashboard','myfish','caisse','clients','commandes'] },
-            viewer: { label: 'Viewer', color: '#6b7280', modules: ['dashboard'] }
+            admin: {
+                label: 'Administrateur',
+                color: '#ef4444',
+                permissions: ['all']
+            },
+            manager: {
+                label: 'Gérant',
+                color: '#8b5cf6',
+                permissions: ['dashboard', 'articles', 'clients', 'commandes', 'myfish', 'caisse', 'tracabilite', 'compta', 'cours', 'shopify']
+            },
+            employee: {
+                label: 'Employé',
+                color: '#0ea5e9',
+                permissions: ['dashboard', 'commandes', 'myfish', 'caisse', 'tracabilite']
+            }
         };
         
-        const MODULES = [
-            { id: 'dashboard', name: 'Dashboard', icon: '📊', url: 'index.html', section: 'principal' },
-            { id: 'articles', name: 'Articles', icon: '📦', url: 'articles.html', section: 'principal' },
-            { id: 'clients', name: 'Clients', icon: '👥', url: 'clients.html', section: 'principal' },
-            { id: 'commandes', name: 'Commandes', icon: '📋', url: 'commandes.html', section: 'ventes' },
-            { id: 'myfish', name: 'MyFish', icon: '🛒', url: 'myfish.html', section: 'ventes' },
-            { id: 'caisse', name: 'Caisse', icon: '💵', url: 'caisse.html', section: 'ventes' },
-            { id: 'tracabilite', name: 'Traçabilité', icon: '🏷️', url: 'tracabilite.html', section: 'outils' },
-            { id: 'compta', name: 'Compta', icon: '📒', url: 'compta.html', section: 'outils' },
-            { id: 'shopify', name: 'Shop Hub', icon: '🛍️', url: 'shopify.html', section: 'outils' },
-            { id: 'parametres', name: 'Paramètres', icon: '⚙️', url: 'parametres.html', section: 'systeme', adminOnly: true }
-        ];
-        
+        // Default Users (will be synced with Firebase)
         const DEFAULT_USERS = [
             { id: 'pascal', name: 'Pascal', role: 'admin', pin: '1234' },
-            { id: 'celine', name: 'Céline', role: 'manager', pin: '0000' },
-            { id: 'hayat', name: 'Hayat', role: 'vendeur', pin: '0000' }
+            { id: 'celine', name: 'Céline', role: 'manager', pin: '2345' },
+            { id: 'hayat', name: 'Hayat', role: 'employee', pin: '3456' }
         ];
         
-        // ============ USERS ============
+        // ============ MODULES ============
+        const MODULES = [
+            // VENTES
+            { id: 'dashboard', name: 'Dashboard', icon: '📊', url: 'index.html', section: 'ventes' },
+            { id: 'myfish', name: 'MyFish B2C', icon: '🛒', url: 'myfish.html', section: 'ventes' },
+            { id: 'commandes', name: 'Commandes PRO', icon: '📋', url: 'commandes.html', section: 'ventes' },
+            { id: 'caisse', name: 'Caisse POS', icon: '💳', url: 'caisse.html', section: 'ventes' },
+            
+            // DONNÉES
+            { id: 'articles', name: 'Articles', icon: '🐟', url: 'articles.html', section: 'donnees' },
+            { id: 'clients', name: 'Clients', icon: '👥', url: 'clients.html', section: 'donnees' },
+            
+            // PRIX & OUTILS
+            { id: 'cours', name: 'Cours Poissons', icon: '📈', url: 'live.html', section: 'outils' },
+            { id: 'tracabilite', name: 'Traçabilité', icon: '🏷️', url: 'tracabilite.html', section: 'outils' },
+            { id: 'shopify', name: 'Shop Hub', icon: '🛍️', url: 'shopify.html', section: 'outils' },
+            { id: 'whatsapp', name: 'WhatsApp', icon: '💬', url: 'whatsapp.html', section: 'outils' },
+            
+            // SYSTÈME
+            { id: 'compta', name: 'Comptabilité', icon: '💰', url: 'compta.html', section: 'systeme' },
+            { id: 'cloud', name: 'Cloud Sync', icon: '☁️', url: 'cloud.html', section: 'systeme' },
+            { id: 'parametres', name: 'Paramètres', icon: '⚙️', url: 'parametres.html', section: 'systeme' }
+        ];
+        
+        const SECTIONS = [
+            { id: 'ventes', title: '🛒 VENTES' },
+            { id: 'donnees', title: '📂 DONNÉES' },
+            { id: 'outils', title: '🔧 PRIX & OUTILS' },
+            { id: 'systeme', title: '⚙️ SYSTÈME' }
+        ];
+        
+        // ============ STATE ============
+        let db = null;
+        let currentUser = null;
+        let selectedLoginUser = null;
+        
+        // ============ USERS MANAGEMENT ============
         function getUsers() {
-            const users = localStorage.getItem('trakio_users');
-            if (!users) {
-                localStorage.setItem('trakio_users', JSON.stringify(DEFAULT_USERS));
-                return DEFAULT_USERS;
+            const stored = localStorage.getItem('trakio_users');
+            if (stored) {
+                return JSON.parse(stored);
             }
-            return JSON.parse(users);
+            // Initialize with defaults
+            localStorage.setItem('trakio_users', JSON.stringify(DEFAULT_USERS));
+            return DEFAULT_USERS;
+        }
+        
+        function saveUsers(users) {
+            localStorage.setItem('trakio_users', JSON.stringify(users));
+            // Sync to Firebase
+            if (db) {
+                db.collection('settings').doc('users').set({ users, updatedAt: new Date().toISOString() })
+                    .catch(e => console.error('Firebase save users error:', e));
+            }
         }
         
         function getCurrentUser() {
-            const userId = localStorage.getItem('trakio_current_user') || 'pascal';
-            return getUsers().find(u => u.id === userId) || getUsers()[0];
+            if (currentUser) return currentUser;
+            const stored = localStorage.getItem('trakio_current_user');
+            if (stored) {
+                currentUser = JSON.parse(stored);
+                return currentUser;
+            }
+            return null;
         }
         
         function setCurrentUser(userId) {
-            localStorage.setItem('trakio_current_user', userId);
-            location.reload();
+            const users = getUsers();
+            const user = users.find(u => u.id === userId);
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('trakio_current_user', JSON.stringify(user));
+                updateUserDisplay();
+                closeUserModal();
+                showToast(`Connecté en tant que ${user.name}`, 'success');
+                
+                // Log activity
+                logActivity('login', `${user.name} s'est connecté`);
+                
+                // If admin, trigger version publish
+                if (user.role === 'admin') {
+                    publishVersion();
+                }
+                
+                // Rebuild navigation for permissions
+                buildNavigation();
+                buildQuickActions();
+            }
         }
         
         function hasAccess(moduleId) {
             const user = getCurrentUser();
+            if (!user) return false;
+            
             const role = ROLES[user.role];
-            if (role.allAccess) return true;
-            return (role.modules || []).includes(moduleId);
+            if (!role) return false;
+            
+            if (role.permissions.includes('all')) return true;
+            return role.permissions.includes(moduleId);
         }
         
-        function isAdmin() {
-            return getCurrentUser().role === 'admin';
+        // ============ LOGIN ============
+        function showLogin() {
+            const overlay = document.getElementById('login-overlay');
+            const container = document.getElementById('login-users');
+            const users = getUsers();
+            
+            container.innerHTML = users.map(u => {
+                const role = ROLES[u.role];
+                return `
+                    <div class="login-user" data-user-id="${u.id}" onclick="selectLoginUser('${u.id}')">
+                        <div class="user-avatar" style="background:${role.color}">${u.name[0]}</div>
+                        <div class="user-info">
+                            <div class="user-name">${u.name}</div>
+                            <div class="user-role">${role.label}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            overlay.style.display = 'flex';
+        }
+        
+        function selectLoginUser(userId) {
+            selectedLoginUser = userId;
+            
+            // Update UI
+            document.querySelectorAll('.login-user').forEach(el => {
+                el.classList.toggle('selected', el.dataset.userId === userId);
+            });
+            
+            document.getElementById('login-btn').disabled = false;
+        }
+        
+        function confirmLogin() {
+            if (selectedLoginUser) {
+                setCurrentUser(selectedLoginUser);
+                document.getElementById('login-overlay').style.display = 'none';
+            }
+        }
+        
+        function hideLogin() {
+            document.getElementById('login-overlay').style.display = 'none';
         }
         
         // ============ NAVIGATION ============
         function buildNavigation() {
-            const user = getCurrentUser();
             const nav = document.getElementById('sidebar-nav');
-            
-            const sections = {
-                principal: { title: 'Principal', items: [] },
-                ventes: { title: '🛒 Ventes', items: [] },
-                outils: { title: '🔧 Outils', items: [] },
-                systeme: { title: '⚙️ Système', items: [] }
-            };
-            
-            MODULES.forEach(m => {
-                // Check access
-                if (m.adminOnly && !isAdmin()) return;
-                if (!hasAccess(m.id) && !m.adminOnly) return;
-                
-                sections[m.section].items.push(m);
-            });
-            
             let html = '';
-            Object.keys(sections).forEach(key => {
-                const section = sections[key];
-                if (section.items.length === 0) return;
+            
+            SECTIONS.forEach(section => {
+                const items = MODULES.filter(m => m.section === section.id && hasAccess(m.id));
+                if (items.length === 0) return;
                 
                 html += `<div class="nav-section">`;
                 html += `<div class="nav-section-title">${section.title}</div>`;
                 
-                section.items.forEach(m => {
-                    const isActive = m.id === 'dashboard' ? true : false;
+                items.forEach(m => {
+                    const isActive = m.id === 'dashboard';
                     html += `
                         <a href="${m.url}" class="nav-item ${isActive ? 'active' : ''}">
                             <span class="nav-icon">${m.icon}</span>
@@ -785,10 +1190,12 @@
         function buildQuickActions() {
             const container = document.getElementById('quick-actions');
             const actions = [
-                { module: 'myfish', icon: '🛒', text: 'Nouvelle vente', color: 'green' },
-                { module: 'commandes', icon: '📋', text: 'Commandes', color: 'blue' },
-                { module: 'clients', icon: '👥', text: 'Clients', color: 'purple' },
-                { module: 'tracabilite', icon: '🏷️', text: 'Étiquettes', color: 'orange' }
+                { module: 'myfish', icon: '🛒', text: 'Nouvelle vente B2C', sub: 'MyFish', color: 'green' },
+                { module: 'commandes', icon: '📋', text: 'Commande PRO', sub: 'Professionnels', color: 'blue' },
+                { module: 'caisse', icon: '💳', text: 'Ouvrir Caisse', sub: 'Point de vente', color: 'purple' },
+                { module: 'clients', icon: '👥', text: 'Clients', sub: 'Gestion', color: 'cyan' },
+                { module: 'tracabilite', icon: '🏷️', text: 'Étiquettes', sub: 'QR Codes', color: 'orange' },
+                { module: 'articles', icon: '🐟', text: 'Articles', sub: 'Catalogue', color: 'pink' }
             ];
             
             container.innerHTML = actions
@@ -798,7 +1205,10 @@
                     return `
                         <a href="${m?.url || '#'}" class="quick-action">
                             <div class="quick-action-icon ${a.color}">${a.icon}</div>
-                            <span class="quick-action-text">${a.text}</span>
+                            <div class="quick-action-content">
+                                <div class="quick-action-text">${a.text}</div>
+                                <div class="quick-action-sub">${a.sub}</div>
+                            </div>
                             <span class="quick-action-arrow">→</span>
                         </a>
                     `;
@@ -813,13 +1223,13 @@
             document.getElementById('users-list').innerHTML = users.map(u => {
                 const role = ROLES[u.role];
                 return `
-                    <div class="user-option ${u.id === current.id ? 'active' : ''}" onclick="setCurrentUser('${u.id}')">
+                    <div class="user-option ${u.id === current?.id ? 'active' : ''}" onclick="setCurrentUser('${u.id}')">
                         <div class="user-avatar" style="background:${role.color}">${u.name[0]}</div>
                         <div class="user-info">
                             <div class="user-name">${u.name}</div>
                             <div class="user-role">${role.label}</div>
                         </div>
-                        ${u.id === current.id ? '<span class="user-check">✓</span>' : ''}
+                        ${u.id === current?.id ? '<span class="user-check">✓</span>' : ''}
                     </div>
                 `;
             }).join('');
@@ -831,9 +1241,20 @@
             document.getElementById('user-modal').classList.remove('active');
         }
         
+        function manageUsers() {
+            const user = getCurrentUser();
+            if (user?.role === 'admin') {
+                window.location.href = 'parametres.html#users';
+            } else {
+                showToast('Accès réservé aux administrateurs', 'error');
+            }
+        }
+        
         // ============ UI ============
         function updateUserDisplay() {
             const user = getCurrentUser();
+            if (!user) return;
+            
             const role = ROLES[user.role];
             
             document.getElementById('current-user-avatar').textContent = user.name[0];
@@ -843,19 +1264,29 @@
             document.getElementById('welcome-name').textContent = user.name;
         }
         
-        function updateDate() {
+        function updateDateTime() {
             const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('current-date').textContent = now.toLocaleDateString('fr-CH', options);
+            const dateOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit' };
+            
+            const dateStr = now.toLocaleDateString('fr-CH', dateOptions);
+            const timeStr = now.toLocaleTimeString('fr-CH', timeOptions);
+            
+            document.getElementById('current-date').textContent = dateStr;
+            document.getElementById('welcome-date').textContent = dateStr;
+            document.getElementById('welcome-time').textContent = timeStr;
         }
         
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            toast.innerHTML = `<span>${message}</span>`;
+            
+            const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+            toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
+            
             container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            setTimeout(() => toast.remove(), 4000);
         }
         
         function toggleSidebar() {
@@ -863,13 +1294,35 @@
         }
         
         function toggleTheme() {
-            // Pour une future implémentation
-            showToast('🌙 Thème sombre actif', 'info');
+            showToast('Thème sombre actif', 'info');
+        }
+        
+        function openSettings() {
+            window.location.href = 'parametres.html';
+        }
+        
+        function refreshData() {
+            showSyncIndicator('Actualisation...');
+            loadKPIs();
+            loadRecentOrders();
+            loadActivity();
+            setTimeout(() => {
+                hideSyncIndicator();
+                showToast('Données actualisées', 'success');
+            }, 1000);
+        }
+        
+        function showSyncIndicator(text) {
+            const el = document.getElementById('sync-indicator');
+            document.getElementById('sync-text').textContent = text || 'Synchronisation...';
+            el.classList.add('active');
+        }
+        
+        function hideSyncIndicator() {
+            document.getElementById('sync-indicator').classList.remove('active');
         }
         
         // ============ FIREBASE ============
-        let db = null;
-        
         async function initFirebase() {
             try {
                 if (!firebase.apps.length) {
@@ -877,22 +1330,145 @@
                 }
                 db = firebase.firestore();
                 
+                document.getElementById('firebase-dot').classList.remove('offline', 'syncing');
                 document.getElementById('firebase-dot').classList.add('online');
                 document.getElementById('firebase-status').textContent = 'Connecté';
+                
+                // Sync users from Firebase
+                await syncUsersFromFirebase();
+                
+                // Listen for real-time updates
+                setupRealtimeListeners();
                 
                 return true;
             } catch (e) {
                 console.error('Firebase error:', e);
+                document.getElementById('firebase-dot').classList.remove('online', 'syncing');
                 document.getElementById('firebase-dot').classList.add('offline');
                 document.getElementById('firebase-status').textContent = 'Hors ligne';
                 return false;
             }
         }
         
+        async function syncUsersFromFirebase() {
+            if (!db) return;
+            
+            try {
+                const doc = await db.collection('settings').doc('users').get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.users && data.users.length > 0) {
+                        localStorage.setItem('trakio_users', JSON.stringify(data.users));
+                        console.log('Users synced from Firebase');
+                    }
+                } else {
+                    // First time - push local users to Firebase
+                    const users = getUsers();
+                    await db.collection('settings').doc('users').set({
+                        users,
+                        updatedAt: new Date().toISOString()
+                    });
+                    console.log('Users pushed to Firebase');
+                }
+            } catch (e) {
+                console.error('Sync users error:', e);
+            }
+        }
+        
+        function setupRealtimeListeners() {
+            if (!db) return;
+            
+            // Listen for orders changes
+            db.collection('commandes').orderBy('createdAt', 'desc').limit(10)
+                .onSnapshot(snapshot => {
+                    if (!snapshot.empty) {
+                        const orders = [];
+                        snapshot.forEach(doc => {
+                            orders.push({ id: doc.id, ...doc.data() });
+                        });
+                        // Update localStorage
+                        const existing = JSON.parse(localStorage.getItem('trakio_commandes_list') || '[]');
+                        const merged = mergeOrders(existing, orders);
+                        localStorage.setItem('trakio_commandes_list', JSON.stringify(merged));
+                        loadRecentOrders();
+                        loadKPIs();
+                    }
+                }, error => {
+                    console.error('Orders listener error:', error);
+                });
+        }
+        
+        function mergeOrders(local, remote) {
+            const map = new Map();
+            local.forEach(o => map.set(o.id, o));
+            remote.forEach(o => map.set(o.id, o));
+            return Array.from(map.values());
+        }
+        
+        async function publishVersion() {
+            // Publish version for other users
+            if (!db) return;
+            
+            try {
+                await db.collection('settings').doc('version').set({
+                    version: APP_VERSION,
+                    publishedAt: new Date().toISOString(),
+                    publishedBy: getCurrentUser()?.name || 'Admin'
+                });
+                console.log('Version published:', APP_VERSION);
+            } catch (e) {
+                console.error('Publish version error:', e);
+            }
+        }
+        
+        // ============ ACTIVITY LOG ============
+        function logActivity(type, message) {
+            const activities = JSON.parse(localStorage.getItem('trakio_activities') || '[]');
+            activities.unshift({
+                type,
+                message,
+                timestamp: new Date().toISOString()
+            });
+            // Keep last 50
+            localStorage.setItem('trakio_activities', JSON.stringify(activities.slice(0, 50)));
+            
+            // Sync to Firebase
+            if (db) {
+                db.collection('activities').add({
+                    type,
+                    message,
+                    timestamp: new Date().toISOString(),
+                    user: getCurrentUser()?.name || 'Unknown'
+                }).catch(e => console.error('Log activity error:', e));
+            }
+        }
+        
+        function loadActivity() {
+            const activities = JSON.parse(localStorage.getItem('trakio_activities') || '[]');
+            const container = document.getElementById('activity-list');
+            
+            if (activities.length === 0) {
+                container.innerHTML = `<div class="empty-state"><div class="empty-icon">🕐</div><p>Aucune activité</p></div>`;
+                return;
+            }
+            
+            container.innerHTML = activities.slice(0, 8).map(a => {
+                const time = new Date(a.timestamp);
+                const timeStr = time.toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
+                return `
+                    <div class="activity-item">
+                        <span class="activity-time">${timeStr}</span>
+                        <span class="activity-text">${a.message}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
         // ============ KPIs ============
         function loadKPIs() {
             const articles = JSON.parse(localStorage.getItem('trakio_articles_list') || '[]');
-            const clients = JSON.parse(localStorage.getItem('trakio_clients_list') || '[]');
+            const clients = JSON.parse(localStorage.getItem('trakio_clients_list') || 
+                           localStorage.getItem('trakio_quickorder') || '[]');
             const commandes = JSON.parse(localStorage.getItem('trakio_commandes_list') || '[]');
             const ventes = JSON.parse(localStorage.getItem('trakio_ventes_list') || '[]');
             
@@ -912,24 +1488,33 @@
             document.getElementById('kpi-articles').textContent = articles.length;
             document.getElementById('kpi-ventes').textContent = todayVentes.length;
             
-            document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('last-refresh').textContent = 
+                new Date().toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' });
         }
         
         function loadRecentOrders() {
             const commandes = JSON.parse(localStorage.getItem('trakio_commandes_list') || '[]');
-            const recent = commandes.sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)).slice(0, 5);
+            const recent = commandes
+                .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+                .slice(0, 5);
             
             const container = document.getElementById('orders-list');
             
             if (recent.length === 0) {
-                container.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>Aucune commande</p></div>`;
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <p>Aucune commande</p>
+                    </div>
+                `;
                 return;
             }
             
             container.innerHTML = recent.map(o => {
                 const initial = (o.clientName || o.client || 'C')[0].toUpperCase();
-                const statusClass = (o.status === 'pending' || o.status === 'en_attente') ? 'pending' : 'confirmed';
-                const statusLabel = (o.status === 'pending' || o.status === 'en_attente') ? 'En attente' : 'Confirmée';
+                const isPending = o.status === 'pending' || o.status === 'en_attente';
+                const statusClass = isPending ? 'pending' : 'confirmed';
+                const statusLabel = isPending ? 'En attente' : 'Confirmée';
                 
                 return `
                     <div class="order-item">
@@ -946,20 +1531,37 @@
         }
         
         function formatCHF(amount) {
-            return new Intl.NumberFormat('fr-CH', { style: 'currency', currency: 'CHF' }).format(amount || 0);
+            return new Intl.NumberFormat('fr-CH', { 
+                style: 'currency', 
+                currency: 'CHF',
+                minimumFractionDigits: 2
+            }).format(amount || 0);
         }
         
         // ============ INIT ============
         document.addEventListener('DOMContentLoaded', async () => {
-            updateUserDisplay();
-            updateDate();
-            buildNavigation();
-            buildQuickActions();
+            // Update date/time
+            updateDateTime();
+            setInterval(updateDateTime, 60000);
             
+            // Check if user is logged in
+            const user = getCurrentUser();
+            if (!user) {
+                showLogin();
+            } else {
+                hideLogin();
+                updateUserDisplay();
+                buildNavigation();
+                buildQuickActions();
+            }
+            
+            // Init Firebase
             await initFirebase();
             
+            // Load data
             loadKPIs();
             loadRecentOrders();
+            loadActivity();
             
             // Auto refresh every 30s
             setInterval(() => {
@@ -968,8 +1570,12 @@
             }, 30000);
         });
         
-        // Close modal on Escape
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeUserModal(); });
+        // Keyboard shortcuts
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                closeUserModal();
+            }
+        });
         
         // Close modal on click outside
         document.getElementById('user-modal').addEventListener('click', e => {
