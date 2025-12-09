@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAKIO v5.0.3 - Paramètres</title>
+    <title>TRAKIO v5.0.4 - Paramètres</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -527,7 +527,7 @@
             <a href="index.html" class="nav-brand">
                 <div class="nav-logo">🐟</div>
                 <span class="nav-title">TRAKIO</span>
-                <span class="nav-version">v5.0.3</span>
+                <span class="nav-version">v5.0.4</span>
             </a>
         </div>
         <a href="index.html" class="back-btn">← Retour au Dashboard</a>
@@ -642,7 +642,7 @@
                         <div class="system-info">
                             <div class="info-row">
                                 <span class="info-label">Version</span>
-                                <span class="info-value">TRAKIO v5.0.3</span>
+                                <span class="info-value">TRAKIO v5.0.4</span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label">Entreprise</span>
@@ -825,8 +825,19 @@
         function getUsers() {
             let stored = [];
             try { stored = JSON.parse(localStorage.getItem('trakio_users') || '[]'); } catch(e) {}
-            const ids = DEFAULT_USERS.map(u => u.id);
-            const custom = stored.filter(u => !ids.includes(u.id));
+            
+            // Créer une map avec les IDs par défaut
+            const defaultIds = DEFAULT_USERS.map(u => u.id);
+            
+            // Filtrer les users stockés qui ne sont PAS des users par défaut
+            // et qui n'ont pas le même nom qu'un user par défaut
+            const defaultNames = DEFAULT_USERS.map(u => u.name.toLowerCase());
+            const custom = stored.filter(u => {
+                const isDefaultId = defaultIds.includes(u.id);
+                const isDefaultName = defaultNames.includes(u.name.toLowerCase());
+                return !isDefaultId && !isDefaultName && !u.isDefault;
+            });
+            
             return [...DEFAULT_USERS, ...custom];
         }
 
@@ -1076,8 +1087,31 @@
         // Init
         document.addEventListener('DOMContentLoaded', () => {
             if (!checkAdmin()) return;
+            cleanupDuplicateUsers(); // Nettoyer les doublons
             loadUsers();
         });
+
+        // Nettoyer les doublons dans localStorage
+        function cleanupDuplicateUsers() {
+            let stored = [];
+            try { stored = JSON.parse(localStorage.getItem('trakio_users') || '[]'); } catch(e) {}
+            
+            const defaultIds = DEFAULT_USERS.map(u => u.id);
+            const defaultNames = DEFAULT_USERS.map(u => u.name.toLowerCase());
+            
+            // Garder seulement les users vraiment personnalisés
+            const cleaned = stored.filter(u => {
+                const isDefaultId = defaultIds.includes(u.id);
+                const isDefaultName = defaultNames.includes(u.name.toLowerCase());
+                return !isDefaultId && !isDefaultName && !u.isDefault;
+            });
+            
+            // Sauvegarder la version nettoyée
+            if (cleaned.length !== stored.length) {
+                localStorage.setItem('trakio_users', JSON.stringify(cleaned));
+                console.log('🧹 Doublons nettoyés:', stored.length - cleaned.length);
+            }
+        }
     </script>
 </body>
 </html>

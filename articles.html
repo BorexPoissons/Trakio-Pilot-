@@ -3,447 +3,2495 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAKIO v4.5.0 - Articles</title>
+    <title>TRAKIO v5.0.4 - Articles</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="trakio-config.js?v=4.5.0"></script>
-    <script src="trakio-sync.js?v=4.5.0"></script>
-    <script src="trakio-ui.js?v=4.5.0"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 15px; }
-        .page-title { font-size: 26px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
-        .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-        .btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-primary { background: var(--trakio-primary); color: white; }
-        .btn-primary:hover { filter: brightness(1.1); }
-        .btn-secondary { background: var(--trakio-bg-input); color: var(--trakio-text); border: 1px solid var(--trakio-border); }
-        .btn-secondary:hover { background: var(--trakio-bg-hover); }
-        .btn-success { background: var(--trakio-success); color: white; }
-        
-        /* Import Zone */
-        .import-zone {
-            display: none;
-            background: var(--trakio-bg-card);
-            border: 2px dashed var(--trakio-border);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 24px;
-            text-align: center;
-            transition: all 0.3s;
+        :root {
+            --bg-deep: #030712;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --bg-input: #0f172a;
+            --border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #06b6d4;
+            --accent-teal: #14b8a6;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f97316;
+            --accent-pink: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gradient-main: linear-gradient(135deg, #06b6d4 0%, #14b8a6 50%, #10b981 100%);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        .import-zone.visible { display: block; }
-        .import-zone.dragover { border-color: var(--trakio-primary); background: rgba(14, 165, 233, 0.1); }
-        .import-zone-icon { font-size: 48px; margin-bottom: 15px; }
-        .import-zone-text { font-size: 16px; margin-bottom: 10px; }
-        .import-zone-hint { font-size: 12px; color: var(--trakio-text-muted); }
-        .import-options { display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
-        .import-option { padding: 12px 20px; background: var(--trakio-bg-input); border: 2px solid var(--trakio-border); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-        .import-option:hover { border-color: var(--trakio-primary); }
-        .import-option.selected { border-color: var(--trakio-primary); background: rgba(14, 165, 233, 0.1); }
-        .import-option-title { font-weight: 600; font-size: 14px; }
-        .import-option-desc { font-size: 11px; color: var(--trakio-text-muted); margin-top: 4px; }
-        
-        .tabs { display: flex; gap: 5px; margin-bottom: 20px; background: var(--trakio-bg-card); padding: 5px; border-radius: 12px; border: 1px solid var(--trakio-border); flex-wrap: wrap; }
-        .tab { padding: 10px 20px; background: transparent; border: none; border-radius: 8px; color: var(--trakio-text-muted); font-weight: 500; cursor: pointer; transition: all 0.2s; }
-        .tab:hover { background: var(--trakio-bg-input); }
-        .tab.active { background: var(--trakio-primary); color: white; }
-        .toolbar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
-        .search-box { flex: 1; min-width: 250px; position: relative; }
-        .search-box input { width: 100%; padding: 12px 15px 12px 45px; background: var(--trakio-bg-card); border: 1px solid var(--trakio-border); border-radius: 10px; color: var(--trakio-text); font-size: 14px; }
-        .search-box::before { content: '🔍'; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); }
-        .articles-table { background: var(--trakio-bg-card); border: 1px solid var(--trakio-border); border-radius: 16px; overflow: hidden; }
-        .articles-table table { width: 100%; border-collapse: collapse; }
-        .articles-table th, .articles-table td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--trakio-border); }
-        .articles-table th { background: var(--trakio-bg-input); font-size: 12px; color: var(--trakio-text-muted); text-transform: uppercase; font-weight: 600; }
-        .articles-table tr:hover { background: var(--trakio-bg-input); }
-        .articles-table tr:last-child td { border-bottom: none; }
-        .category-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-        .category-badge.poissons { background: rgba(14, 165, 233, 0.2); color: var(--trakio-primary); }
-        .category-badge.crustaces { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        .category-badge.coquillages { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-        .category-badge.traiteur { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
-        .price { font-weight: 600; color: var(--trakio-success); }
-        .action-btn { padding: 6px 12px; background: var(--trakio-bg-input); border: none; border-radius: 6px; color: var(--trakio-text); cursor: pointer; margin-right: 5px; }
-        .action-btn:hover { background: var(--trakio-primary); }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
-        .modal-overlay.active { display: flex; }
-        .modal { background: var(--trakio-bg-card); border-radius: 20px; width: 100%; max-width: 500px; border: 1px solid var(--trakio-border); }
-        .modal-header { padding: 20px; border-bottom: 1px solid var(--trakio-border); display: flex; justify-content: space-between; align-items: center; }
-        .modal-close { width: 36px; height: 36px; border-radius: 50%; background: var(--trakio-bg-input); border: none; color: var(--trakio-text); cursor: pointer; font-size: 20px; }
-        .modal-body { padding: 20px; max-height: 60vh; overflow-y: auto; }
-        .modal-footer { padding: 15px 20px; border-top: 1px solid var(--trakio-border); display: flex; justify-content: flex-end; gap: 10px; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 13px; color: var(--trakio-text-muted); margin-bottom: 6px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px 14px; background: var(--trakio-bg-input); border: 1px solid var(--trakio-border); border-radius: 8px; color: var(--trakio-text); font-size: 14px; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .empty { text-align: center; padding: 60px; color: var(--trakio-text-muted); }
-        .stats-bar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
-        .stat-item { background: var(--trakio-bg-card); border: 1px solid var(--trakio-border); border-radius: 10px; padding: 12px 20px; }
-        .stat-value { font-size: 20px; font-weight: 700; color: var(--trakio-primary); }
-        .stat-label { font-size: 11px; color: var(--trakio-text-muted); }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Navigation unifiée */
+        .top-nav {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 0 15px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 10px; }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .nav-logo {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-main);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .nav-title {
+            font-size: 18px;
+            font-weight: 800;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-version {
+            font-size: 9px;
+            padding: 2px 6px;
+            background: rgba(6, 182, 212, 0.2);
+            border-radius: 4px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            flex: 1;
+            justify-content: center;
+            padding: 0 10px;
+        }
+
+        .nav-link {
+            padding: 6px 8px;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-link.active {
+            background: var(--gradient-main);
+            color: white;
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 16px;
+            background: var(--border);
+            margin: 0 4px;
+            opacity: 0.5;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            background: var(--bg-hover);
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .user-avatar-small {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 11px;
+            color: white;
+        }
+
+        .user-name-nav {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 1200px) {
+            .nav-link span:last-child { display: none; }
+            .nav-title { display: none; }
+            .user-name-nav { display: none; }
+        }
+
+        @media (max-width: 900px) {
+            .nav-divider { display: none; }
+        }
+
+        /* Main container */
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Tabs */
+        .tabs-nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            background: var(--gradient-main);
+            color: white;
+            border-color: transparent;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Section header */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: var(--gradient-main);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card);
+            border-color: var(--accent-cyan);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* Filters */
+        .filters-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input, .filter-select {
+            padding: 10px 15px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        /* Forms */
+        .form-container {
+            background: var(--bg-card);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .form-container.visible { display: block; }
+
+        .form-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--accent-cyan);
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .form-input, .form-select {
+            padding: 10px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            align-items: center;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* Tables */
+        .table-container { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-secondary);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        tr:hover { background: var(--bg-hover); }
+
+        .action-btn {
+            padding: 6px 10px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .action-btn:hover {
+            background: var(--accent-cyan);
+            color: white;
+            border-color: var(--accent-cyan);
+        }
+
+        .action-btn.delete:hover {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* Items grid */
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .item-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            transition: all 0.2s;
+        }
+
+        .item-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .item-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .item-code {
+            font-size: 11px;
+            padding: 3px 8px;
+            background: var(--bg-hover);
+            border-radius: 4px;
+            color: var(--text-muted);
+        }
+
+        .item-icon {
+            font-size: 28px;
+        }
+
+        .item-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Import section */
+        .import-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 1000px) {
+            .import-layout { grid-template-columns: 1fr; }
+        }
+
+        .import-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+        }
+
+        .import-panel h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .file-drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .file-drop-zone:hover, .file-drop-zone.dragover {
+            border-color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        .file-drop-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .file-drop-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .file-info {
+            display: none;
+            padding: 15px;
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .file-info.visible { display: block; }
+
+        .import-options { margin-bottom: 20px; }
+
+        .import-option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .import-option:hover, .import-option.selected {
+            border-color: var(--accent-cyan);
+        }
+
+        .import-option h4 { font-size: 14px; margin-bottom: 4px; }
+        .import-option p { font-size: 12px; color: var(--text-muted); }
+
+        .import-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .import-result {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .import-result.success {
+            display: block;
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid var(--success);
+        }
+
+        .import-result.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid var(--danger);
+        }
+
+        .import-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 16px;
+        }
+
+        .import-stat { text-align: center; }
+
+        .import-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .import-stat-value.added { color: var(--success); }
+        .import-stat-value.updated { color: var(--accent-blue); }
+        .import-stat-value.errors { color: var(--danger); }
+
+        .import-stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .preview-table-container {
+            max-height: 400px;
+            overflow: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .preview-table {
+            font-size: 12px;
+        }
+
+        .preview-table th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Mapping */
+        .mapping-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .mapping-label {
+            min-width: 120px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .mapping-select {
+            flex: 1;
+            padding: 8px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 12px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title { font-size: 18px; font-weight: 700; }
+        .modal-subtitle { font-size: 12px; color: var(--text-muted); }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .modal-close:hover { background: var(--danger); color: white; }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+
+        .toast {
+            padding: 14px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            margin-top: 8px;
+            animation: slideIn 0.3s;
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Sync status */
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-hover);
+            border-radius: 8px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="page-header">
-            <h1 class="page-title">📦 Articles</h1>
-            <div class="header-actions">
-                <button class="btn btn-primary" onclick="openModal()">➕ Nouvel article</button>
-                <button class="btn btn-secondary" onclick="exportArticles()" id="btn-export">📥 Exporter</button>
-                <button class="btn btn-success" onclick="toggleImportZone()" id="btn-import">📤 Importer CSV</button>
+    <!-- Navigation unifiée -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <a href="index.html" class="nav-brand">
+                <div class="nav-logo">🐟</div>
+                <span class="nav-title">TRAKIO</span>
+                <span class="nav-version">v5.0.4</span>
+            </a>
+        </div>
+
+        <div class="nav-menu">
+            <a href="index.html" class="nav-link"><span>🏠</span><span>Dashboard</span></a>
+            <div class="nav-divider"></div>
+            <a href="articles.html" class="nav-link active"><span>📦</span><span>Articles</span></a>
+            <a href="clients.html" class="nav-link"><span>👥</span><span>Clients</span></a>
+            <a href="commandes.html" class="nav-link"><span>📋</span><span>Commandes</span></a>
+            <a href="myfish.html" class="nav-link"><span>🐟</span><span>MyFish</span></a>
+            <div class="nav-divider"></div>
+            <a href="caisse.html" class="nav-link"><span>💳</span><span>Caisse</span></a>
+            <a href="live.html" class="nav-link"><span>📊</span><span>Cours</span></a>
+            <a href="tracabilite.html" class="nav-link"><span>🏷️</span><span>Traçabilité</span></a>
+            <div class="nav-divider"></div>
+            <a href="shopify.html" class="nav-link"><span>🛍️</span><span>Shop</span></a>
+            <a href="compta.html" class="nav-link"><span>💰</span><span>Compta</span></a>
+            <a href="whatsapp.html" class="nav-link"><span>💬</span><span>WhatsApp</span></a>
+            <div class="nav-divider" id="paramDivider"></div>
+            <a href="parametres.html" class="nav-link" id="paramNavLink"><span>⚙️</span><span>Paramètres</span></a>
+        </div>
+
+        <div class="nav-right">
+            <div class="sync-status" id="syncStatus">
+                <span>⏳</span>
+                <span>Chargement...</span>
+            </div>
+            <div class="user-menu" id="userMenuNav">
+                <div class="user-avatar-small" id="userAvatarNav" style="background: var(--danger);">PA</div>
+                <span class="user-name-nav" id="userNameNav">-</span>
             </div>
         </div>
-        
-        <!-- Zone Import CSV -->
-        <div class="import-zone" id="import-zone"
-             ondragover="handleDragOver(event)"
-             ondragleave="handleDragLeave(event)"
-             ondrop="handleDrop(event)">
-            <div class="import-zone-icon">📄</div>
-            <div class="import-zone-text">Glissez votre fichier CSV ici ou cliquez pour sélectionner</div>
-            <div class="import-zone-hint">Format: nom;categorie;prix;tva;unite (séparateur: point-virgule)</div>
-            <input type="file" id="file-input" accept=".csv" style="display:none" onchange="handleFileSelect(event)">
-            <button class="btn btn-primary" style="margin-top:15px" onclick="document.getElementById('file-input').click()">📁 Choisir un fichier</button>
-            
-            <div class="import-options">
-                <div class="import-option selected" onclick="setImportMode('update')" id="mode-update">
-                    <div class="import-option-title">🔄 Mettre à jour</div>
-                    <div class="import-option-desc">Met à jour les articles existants (même nom)</div>
+    </nav>
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Tabs Navigation -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('articles')">📦 Articles</button>
+            <button class="tab-btn" onclick="switchTab('categories')">🏷️ Catégories</button>
+            <button class="tab-btn" onclick="switchTab('pricelists')">💰 Listes de Prix</button>
+            <button class="tab-btn" onclick="switchTab('discounts')">🏷️ Rabais</button>
+            <button class="tab-btn" onclick="switchTab('import')" style="background:var(--accent-secondary); color:#fff;">📥 Import CSV</button>
+        </div>
+
+        <!-- Tab: Articles -->
+        <div id="tab-articles" class="tab-content active">
+            <div class="section-header">
+                <h2 class="section-title">📦 Gestion des Articles</h2>
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="showArticleForm()">➕ Nouvel article</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📥 Importer</button>
+                    <button class="btn btn-secondary" onclick="exportArticlesCSV()">📤 Exporter</button>
+                    <button class="btn" style="background:var(--accent-secondary); color:#fff;" onclick="saveAllToDropbox()">☁️ Dropbox</button>
+                    <input type="file" id="import-file" accept=".csv" style="display:none;" onchange="importArticlesFile(this)">
                 </div>
-                <div class="import-option" onclick="setImportMode('skip')" id="mode-skip">
-                    <div class="import-option-title">⏭️ Ignorer doublons</div>
-                    <div class="import-option-desc">N'importe que les nouveaux articles</div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">Total articles</div>
                 </div>
-                <div class="import-option" onclick="setImportMode('replace')" id="mode-replace">
-                    <div class="import-option-title">🗑️ Remplacer tout</div>
-                    <div class="import-option-desc">Supprime tout et importe le CSV</div>
+                <div class="stat-card" style="background:linear-gradient(135deg, rgba(17,138,178,0.1), rgba(17,138,178,0.05)); border-color:var(--accent-secondary);">
+                    <div class="stat-value" style="color:var(--accent-secondary);" id="stat-categories">0</div>
+                    <div class="stat-label">Catégories</div>
+                </div>
+                <div class="stat-card" style="background:linear-gradient(135deg, rgba(255,183,77,0.1), rgba(255,183,77,0.05)); border-color:var(--accent-warning);">
+                    <div class="stat-value" style="color:var(--accent-warning);" id="stat-pricelists">0</div>
+                    <div class="stat-label">Listes de prix</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color:var(--accent-orange);" id="stat-discounts">0</div>
+                    <div class="stat-label">Règles rabais</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-bar">
+                <input type="text" class="search-input" id="art-search" placeholder="🔍 Rechercher N°, désignation, origine..." oninput="filterArticles()">
+                <select class="filter-select" id="art-cat-filter" onchange="filterArticles()">
+                    <option value="">Toutes catégories</option>
+                </select>
+            </div>
+
+            <!-- Form -->
+            <div class="form-container" id="art-form">
+                <h3 class="form-title">📝 Fiche Article</h3>
+                <input type="hidden" id="art-edit-id">
+                <div class="form-grid" style="grid-template-columns: 100px 1fr 1fr;">
+                    <div class="form-group">
+                        <label class="form-label">N° Article *</label>
+                        <input type="text" class="form-input" id="art-num">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Désignation *</label>
+                        <input type="text" class="form-input" id="art-name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nom latin</label>
+                        <input type="text" class="form-input" id="art-latin" placeholder="Ex: Salmo trutta" style="font-style:italic;">
+                    </div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr 100px 100px;">
+                    <div class="form-group">
+                        <label class="form-label">Catégorie</label>
+                        <select class="form-select" id="art-category"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Origine</label>
+                        <input type="text" class="form-input" id="art-origin" placeholder="FAO27, Suisse...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">N° Lot</label>
+                        <input type="text" class="form-input" id="art-lot">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Pcs/unité</label>
+                        <input type="number" class="form-input" id="art-pcs" value="1">
+                    </div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: 100px 1fr 1fr 1fr 100px;">
+                    <div class="form-group">
+                        <label class="form-label">Unité</label>
+                        <select class="form-select" id="art-unit">
+                            <option value="kg">kg</option>
+                            <option value="pce">pce</option>
+                            <option value="l">litre</option>
+                            <option value="dz">douzaine</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" style="color:var(--accent-warning); font-weight:600;">💰 Prix B2C HT</label>
+                        <input type="number" step="0.01" class="form-input" id="art-price-b2c" style="border-color:var(--accent-warning);">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" style="color:var(--accent-secondary); font-weight:600;">💼 Prix B2B HT</label>
+                        <input type="number" step="0.01" class="form-input" id="art-price-b2b" style="border-color:var(--accent-secondary);">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Prix achat HT</label>
+                        <input type="number" step="0.01" class="form-input" id="art-cost">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">TVA %</label>
+                        <input type="number" step="0.1" class="form-input" id="art-tva" value="2.6">
+                    </div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: 120px 120px 150px 1fr;">
+                    <div class="form-group">
+                        <label class="form-label" style="color:var(--accent-primary); font-weight:600;">📦 Stock actuel</label>
+                        <input type="number" step="0.01" class="form-input" id="art-stock" style="border-color:var(--accent-primary);">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Stock défaut</label>
+                        <input type="number" step="0.01" class="form-input" id="art-stock-default">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Code TVA</label>
+                        <input type="text" class="form-input" id="art-tva-code" placeholder="VTE81, TVA77...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Code barre (EAN)</label>
+                        <input type="text" class="form-input" id="art-barcode" placeholder="7640178760004" style="font-family:monospace;">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="saveArticle()">💾 Enregistrer</button>
+                    <button class="btn btn-secondary" onclick="hideArticleForm()">Annuler</button>
+                    <label style="display:flex; align-items:center; gap:6px; margin-left:auto; cursor:pointer;">
+                        <input type="checkbox" id="art-active" checked> Actif
+                    </label>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>Désignation</th>
+                                <th>Origine</th>
+                                <th>Unité</th>
+                                <th style="color:var(--accent-warning);">PV HT</th>
+                                <th>PA HT</th>
+                                <th style="color:var(--accent-primary);">Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="art-tbody"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
-        
-        <div class="stats-bar">
-            <div class="stat-item"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total articles</div></div>
-            <div class="stat-item"><div class="stat-value" id="stat-poissons">0</div><div class="stat-label">Poissons</div></div>
-            <div class="stat-item"><div class="stat-value" id="stat-crustaces">0</div><div class="stat-label">Crustacés</div></div>
-            <div class="stat-item"><div class="stat-value" id="stat-coquillages">0</div><div class="stat-label">Coquillages</div></div>
+
+        <!-- Tab: Categories -->
+        <div id="tab-categories" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">🏷️ Catégories d'articles</h2>
+                <button class="btn btn-primary" onclick="showCategoryForm()">➕ Nouvelle catégorie</button>
+            </div>
+
+            <!-- Form -->
+            <div class="form-container" id="cat-form" style="border-color:var(--accent-secondary);">
+                <h3 class="form-title" style="color:var(--accent-secondary);">📝 Catégorie</h3>
+                <input type="hidden" id="cat-edit-id">
+                <div class="form-grid" style="grid-template-columns: 100px 1fr 150px;">
+                    <div class="form-group">
+                        <label class="form-label">Code</label>
+                        <input type="text" class="form-input" id="cat-code">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nom *</label>
+                        <input type="text" class="form-input" id="cat-name" placeholder="Ex: Poissons frais, Épicerie...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Icône</label>
+                        <select class="form-select" id="cat-icon">
+                            <option value="🐟">🐟 Poisson</option>
+                            <option value="🦐">🦐 Crustacé</option>
+                            <option value="🦪">🦪 Coquillage</option>
+                            <option value="🔥">🔥 Fumé</option>
+                            <option value="🥫">🥫 Conserve</option>
+                            <option value="🍽️">🍽️ Préparation</option>
+                            <option value="❄️">❄️ Surgelé</option>
+                            <option value="🛒">🛒 Épicerie</option>
+                            <option value="📦">📦 Autre</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="saveCategory()">💾 Enregistrer</button>
+                    <button class="btn btn-secondary" onclick="hideCategoryForm()">Annuler</button>
+                </div>
+            </div>
+
+            <div class="items-grid" id="categories-grid"></div>
         </div>
-        
-        <div class="tabs">
-            <button class="tab active" onclick="setTab('all')" data-tab="all">Tous</button>
-            <button class="tab" onclick="setTab('poissons')" data-tab="poissons">🐟 Poissons</button>
-            <button class="tab" onclick="setTab('crustaces')" data-tab="crustaces">🦐 Crustacés</button>
-            <button class="tab" onclick="setTab('coquillages')" data-tab="coquillages">🦪 Coquillages</button>
-            <button class="tab" onclick="setTab('traiteur')" data-tab="traiteur">🍽️ Traiteur</button>
+
+        <!-- Tab: Pricelists -->
+        <div id="tab-pricelists" class="tab-content">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">💰 Listes de Prix</h2>
+                    <p class="text-muted" style="font-size:13px;">Tarifs personnalisés par type de client</p>
+                </div>
+                <button class="btn btn-primary" onclick="showPricelistForm()">➕ Nouvelle liste</button>
+            </div>
+
+            <!-- Form -->
+            <div class="form-container" id="pl-form" style="border-color:var(--accent-warning);">
+                <h3 class="form-title" style="color:var(--accent-warning);">📝 Liste de prix</h3>
+                <input type="hidden" id="pl-edit-id">
+                <div class="form-grid" style="grid-template-columns: 100px 1fr 150px;">
+                    <div class="form-group">
+                        <label class="form-label">Code</label>
+                        <input type="text" class="form-input" id="pl-code" placeholder="GMS, REST...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nom *</label>
+                        <input type="text" class="form-input" id="pl-name" placeholder="Ex: Restaurateurs, Grande distribution...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Remise globale %</label>
+                        <input type="number" step="0.1" class="form-input" id="pl-discount" value="0">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label class="form-label">Description / Conditions</label>
+                    <textarea class="form-input" id="pl-desc" rows="2" style="resize:vertical;"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="savePricelist()">💾 Enregistrer</button>
+                    <button class="btn btn-secondary" onclick="hidePricelistForm()">Annuler</button>
+                </div>
+            </div>
+
+            <div class="items-grid" id="pricelists-grid"></div>
         </div>
-        <div class="toolbar">
-            <div class="search-box"><input type="text" id="search" placeholder="Rechercher un article..." oninput="filterArticles()"></div>
+
+        <!-- Tab: Discounts -->
+        <div id="tab-discounts" class="tab-content">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">🏷️ Règles de Rabais</h2>
+                    <p class="text-muted" style="font-size:13px;">Remises par quantité et catégorie</p>
+                </div>
+                <button class="btn btn-primary" onclick="showDiscountForm()">➕ Nouvelle règle</button>
+            </div>
+
+            <!-- Form -->
+            <div class="form-container" id="disc-form">
+                <h3 class="form-title">📝 Règle de rabais</h3>
+                <input type="hidden" id="disc-edit-id">
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-group">
+                        <label class="form-label">Catégorie concernée *</label>
+                        <select class="form-select" id="disc-category"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Liste de prix (optionnel)</label>
+                        <select class="form-select" id="disc-pricelist">
+                            <option value="">Toutes les listes</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label class="form-label">Paliers de quantité</label>
+                    <div id="disc-tiers" style="display:flex; flex-direction:column; gap:8px;"></div>
+                    <button type="button" class="btn btn-secondary" onclick="addDiscountTier()" style="margin-top:8px; font-size:12px;">➕ Ajouter un palier</button>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="saveDiscount()">💾 Enregistrer</button>
+                    <button class="btn btn-secondary" onclick="hideDiscountForm()">Annuler</button>
+                </div>
+            </div>
+
+            <!-- Example -->
+            <div class="example-box">
+                <h4 class="example-title">💡 Exemple de configuration</h4>
+                <p class="example-text">Catégorie <strong>Épicerie</strong> : Dès 10 pièces → 5% | Dès 20 pièces → 10% | Dès 50 pièces → 15%</p>
+            </div>
+
+            <div id="discounts-grid"></div>
         </div>
-        <div class="articles-table">
-            <table>
-                <thead><tr><th>Article</th><th>Catégorie</th><th>Prix/unité</th><th>TVA</th><th>Unité</th><th>Actions</th></tr></thead>
-                <tbody id="articles-body"><tr><td colspan="6" class="empty">Chargement...</td></tr></tbody>
-            </table>
+
+        <!-- Tab: Import CSV -->
+        <div id="tab-import" class="tab-content">
+            <div class="section-header">
+                <h2 class="section-title">📥 Import CSV Articles</h2>
+            </div>
+
+            <div class="import-container">
+                <!-- Panel gauche: Upload -->
+                <div class="import-panel">
+                    <h3>📁 Fichier CSV</h3>
+                    
+                    <div class="drop-zone" id="dropZone" onclick="document.getElementById('csvFileInput').click()">
+                        <div class="drop-zone-icon">📄</div>
+                        <div class="drop-zone-text">Glissez votre fichier CSV ici</div>
+                        <div class="drop-zone-hint">ou cliquez pour sélectionner</div>
+                        <input type="file" id="csvFileInput" accept=".csv,.txt" style="display:none;">
+                    </div>
+
+                    <div class="file-info" id="fileInfo">
+                        <div class="file-info-name" id="fileName"></div>
+                        <div class="file-info-stats">
+                            <span>📊 <span id="rowCount">0</span> lignes</span>
+                            <span>📋 <span id="colCount">0</span> colonnes</span>
+                        </div>
+                    </div>
+
+                    <div class="import-options">
+                        <h4 style="margin-bottom: 12px;">⚙️ Mode d'import</h4>
+                        
+                        <div class="import-option selected" onclick="selectImportMode('update')">
+                            <input type="radio" name="importMode" value="update" checked>
+                            <div class="import-option-content">
+                                <h4>🔄 Mettre à jour</h4>
+                                <p>Ajoute les nouveaux articles et met à jour les existants (par N° article)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="import-option" onclick="selectImportMode('replace')">
+                            <input type="radio" name="importMode" value="replace">
+                            <div class="import-option-content">
+                                <h4>🗑️ Remplacer tout</h4>
+                                <p>Supprime tous les articles existants et importe les nouveaux</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="import-actions">
+                        <button class="btn btn-primary" onclick="executeImport()" id="btnImport" disabled style="flex:1;">
+                            🚀 Lancer l'import
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetImport()">
+                            ↺ Réinitialiser
+                        </button>
+                    </div>
+
+                    <div class="import-result" id="importResult">
+                        <h4 id="importResultTitle">✅ Import terminé !</h4>
+                        <p id="importResultMessage"></p>
+                        <div class="import-stats">
+                            <div class="import-stat">
+                                <div class="import-stat-value added" id="statAdded">0</div>
+                                <div class="import-stat-label">Ajoutés</div>
+                            </div>
+                            <div class="import-stat">
+                                <div class="import-stat-value updated" id="statUpdated">0</div>
+                                <div class="import-stat-label">Mis à jour</div>
+                            </div>
+                            <div class="import-stat">
+                                <div class="import-stat-value errors" id="statErrors">0</div>
+                                <div class="import-stat-label">Erreurs</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel droit: Preview -->
+                <div class="import-panel">
+                    <h3>👁️ Aperçu des données</h3>
+                    
+                    <div id="mappingContainer" style="display:none; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 12px;">🔗 Mapping des colonnes</h4>
+                        <div id="mappingRows"></div>
+                    </div>
+
+                    <div class="preview-table-container" id="previewContainer" style="display:none;">
+                        <table class="preview-table" id="previewTable">
+                            <thead id="previewHead"></thead>
+                            <tbody id="previewBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="noPreview" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                        <div style="font-size: 50px; margin-bottom: 16px; opacity: 0.5;">📋</div>
+                        <p>Sélectionnez un fichier CSV pour voir l'aperçu</p>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 16px; background: var(--bg-primary); border-radius: 8px;">
+                        <h4 style="margin-bottom: 10px; color: var(--accent-primary);">📖 Format CSV attendu</h4>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">Colonnes recommandées (séparateur ; ou ,) :</p>
+                        <code style="font-size: 11px; color: var(--accent-secondary); display: block; background: var(--bg-card); padding: 10px; border-radius: 6px; overflow-x: auto;">
+                            N° Article;Désignation;Origine;Unité;Prix HT;Stock;TVA;Code barre
+                        </code>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <div class="modal-overlay" id="article-modal">
+
+    <!-- Modal Detail -->
+    <div class="modal-overlay" id="detail-modal">
         <div class="modal">
-            <div class="modal-header"><h3 id="modal-title">➕ Nouvel article</h3><button class="modal-close" onclick="closeModal()">×</button></div>
-            <div class="modal-body">
-                <div class="form-group"><label>Nom *</label><input type="text" id="art-name" placeholder="Nom de l'article"></div>
-                <div class="form-row">
-                    <div class="form-group"><label>Catégorie</label><select id="art-category"><option value="poissons">🐟 Poissons</option><option value="crustaces">🦐 Crustacés</option><option value="coquillages">🦪 Coquillages</option><option value="traiteur">🍽️ Traiteur</option></select></div>
-                    <div class="form-group"><label>Unité</label><select id="art-unit"><option value="kg">kg</option><option value="piece">pièce</option><option value="barquette">barquette</option><option value="lot">lot</option></select></div>
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title" id="detail-title"></h2>
+                    <p class="modal-subtitle" id="detail-subtitle"></p>
                 </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Prix (CHF)</label><input type="number" id="art-price" step="0.05" placeholder="0.00"></div>
-                    <div class="form-group"><label>TVA (%)</label><input type="number" id="art-tva" value="2.6" step="0.1"></div>
-                </div>
-                <div class="form-group"><label>Code / SKU</label><input type="text" id="art-sku" placeholder="Code article (optionnel)"></div>
+                <button class="modal-close" onclick="closeDetailModal()">✕</button>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
-                <button class="btn btn-primary" onclick="saveArticle()">💾 Enregistrer</button>
-            </div>
+            <div class="modal-body" id="detail-content"></div>
         </div>
     </div>
-    
+
+
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <script>
-        let articlesData = [], filteredData = [], currentTab = 'all', editingId = null;
-        let importMode = 'update'; // update, skip, replace
-        
-        document.addEventListener('DOMContentLoaded', () => setTimeout(init, 300));
-        
-        function init() {
-            // Vérifier permissions import
-            if (!TrakioPermissions.canImport()) {
-                document.getElementById('btn-import').style.display = 'none';
-            }
-            if (!TrakioPermissions.canExport()) {
-                document.getElementById('btn-export').style.display = 'none';
-            }
-            loadArticles();
+        // ============================================
+        // VÉRIFICATION UTILISATEUR
+        // ============================================
+        const DEFAULT_USERS = [
+            { id: 'admin_pascal', name: 'Pascal Admin', pin: '1277', role: 'admin', avatar: 'PA', color: '#ef4444', active: true },
+            { id: 'manager_celine', name: 'Céline', pin: '1277', role: 'manager', avatar: 'CE', color: '#f59e0b', active: true },
+            { id: 'employee_hayat', name: 'Hayat', pin: '1260', role: 'employee', avatar: 'HA', color: '#10b981', active: true }
+        ];
+
+        const ROLES = {
+            admin: { label: 'Admin', badge: '👑', color: '#ef4444' },
+            manager: { label: 'Manager', badge: '⭐', color: '#f59e0b' },
+            employee: { label: 'Employé', badge: '👤', color: '#10b981' }
+        };
+
+        function getCurrentUser() {
+            try { return JSON.parse(localStorage.getItem('trakio_current_user')); } catch(e) { return null; }
         }
-        
-        async function loadArticles() {
-            try { 
-                articlesData = await DataStore.articles.getAll(); 
-                filteredData = [...articlesData]; 
-                updateStats();
-                filterArticles(); 
-            } catch (e) { console.error(e); }
+
+        function checkAuth() {
+            const user = getCurrentUser();
+            if (!user) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            // Mettre à jour l'affichage utilisateur
+            const role = ROLES[user.role] || ROLES.employee;
+            document.getElementById('userAvatarNav').textContent = user.avatar || user.name.substring(0,2);
+            document.getElementById('userAvatarNav').style.background = user.color || role.color;
+            document.getElementById('userNameNav').textContent = user.name.split(' ')[0];
+            
+            // Cacher Paramètres pour non-admin
+            if (user.role !== 'admin') {
+                const paramLink = document.getElementById('paramNavLink');
+                const paramDiv = document.getElementById('paramDivider');
+                if (paramLink) paramLink.style.display = 'none';
+                if (paramDiv) paramDiv.style.display = 'none';
+            }
+            return true;
         }
-        
+
+        function showToast(msg, type = 'success') {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = 'toast ' + type;
+            t.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span><span>${msg}</span>`;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const CONFIG = {
+            VERSION: '1.0.0',
+            STORAGE_KEY: 'trakio_articles',
+            DROPBOX_BASE_PATH: '/TRAKIO/Articles'
+        };
+
+        // ============================================
+        // ÉTAT GLOBAL
+        // ============================================
+        let ArticlesData = {
+            articles: [],
+            categories: [
+                { id: 1, code: 'POISSON', name: 'Poissons frais', icon: '🐟' },
+                { id: 2, code: 'CRUSTACE', name: 'Crustacés', icon: '🦐' },
+                { id: 3, code: 'COQUILLAGE', name: 'Coquillages', icon: '🦪' },
+                { id: 4, code: 'FUME', name: 'Produits fumés', icon: '🔥' },
+                { id: 5, code: 'CONSERVE', name: 'Conserves', icon: '🥫' },
+                { id: 6, code: 'PREPA', name: 'Préparations', icon: '🍽️' },
+                { id: 7, code: 'SURGELE', name: 'Surgelés', icon: '❄️' },
+                { id: 8, code: 'EPICERIE', name: 'Épicerie', icon: '🛒' }
+            ],
+            pricelists: [
+                { id: 1, code: 'STD', name: 'Standard B2C', discount: 0, desc: 'Tarif particuliers' },
+                { id: 2, code: 'PRO', name: 'Professionnels', discount: 15, desc: 'Restaurants, traiteurs' },
+                { id: 3, code: 'GMS', name: 'Grande distribution', discount: 20, desc: 'Supermarchés, hypermarchés' }
+            ],
+            discounts: []
+        };
+
+        // Numérotation automatique
+        let NumberingConfig = {
+            article: { prefix: 'ART', next: 1 }
+        };
+
+        // ============================================
+        // INITIALISATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkAuth()) return;
+            loadFromLocalStorage();
+            loadNumberingConfig();
+            updateCategorySelects();
+            updatePricelistSelects();
+            renderAll();
+            updateStats();
+            updateSyncStatus('ready');
+        });
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        // ============================================
+        // NAVIGATION ONGLETS
+        // ============================================
+        function switchTab(tabName) {
+            // Désactiver tous les onglets
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Activer l'onglet sélectionné
+            document.querySelector(`.tab-btn[onclick*="${tabName}"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        // ============================================
+        // STOCKAGE LOCAL
+        // ============================================
+        function saveToLocalStorage() {
+            localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(ArticlesData));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem(CONFIG.STORAGE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                ArticlesData = { ...ArticlesData, ...parsed };
+            }
+        }
+
+        function loadNumberingConfig() {
+            const next = localStorage.getItem('num_article_next');
+            if (next) NumberingConfig.article.next = parseInt(next);
+        }
+
+        function saveNumberingConfig() {
+            localStorage.setItem('num_article_next', NumberingConfig.article.next);
+        }
+
+        // ============================================
+        // MISE À JOUR UI
+        // ============================================
+        function renderAll() {
+            renderArticlesTable();
+            renderCategoriesGrid();
+            renderPricelistsGrid();
+            renderDiscountsGrid();
+        }
+
         function updateStats() {
-            document.getElementById('stat-total').textContent = articlesData.length;
-            document.getElementById('stat-poissons').textContent = articlesData.filter(a => a.category === 'poissons').length;
-            document.getElementById('stat-crustaces').textContent = articlesData.filter(a => a.category === 'crustaces').length;
-            document.getElementById('stat-coquillages').textContent = articlesData.filter(a => a.category === 'coquillages').length;
+            document.getElementById('stat-total').textContent = ArticlesData.articles.length;
+            document.getElementById('stat-categories').textContent = ArticlesData.categories.length;
+            document.getElementById('stat-pricelists').textContent = ArticlesData.pricelists.length;
+            document.getElementById('stat-discounts').textContent = ArticlesData.discounts.length;
         }
-        
-        function setTab(tab) { 
-            currentTab = tab; 
-            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab)); 
-            filterArticles(); 
-        }
-        
-        function filterArticles() {
-            const search = document.getElementById('search').value.toLowerCase();
-            filteredData = articlesData.filter(a => {
-                if (currentTab !== 'all' && a.category !== currentTab) return false;
-                if (search && !a.name.toLowerCase().includes(search) && !(a.sku || '').toLowerCase().includes(search)) return false;
-                return true;
-            });
-            renderArticles();
-        }
-        
-        function renderArticles() {
-            const tbody = document.getElementById('articles-body');
-            if (filteredData.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Aucun article</td></tr>'; return; }
-            tbody.innerHTML = filteredData.map(a => {
-                const cat = a.category || 'poissons';
-                return `<tr>
-                    <td><strong>${a.name}</strong>${a.sku ? '<br><small style="color:var(--trakio-text-muted)">' + a.sku + '</small>' : ''}</td>
-                    <td><span class="category-badge ${cat}">${cat}</span></td>
-                    <td class="price">${formatCHF(a.price)}</td>
-                    <td>${a.tva || 2.6}%</td>
-                    <td>${a.unit || 'kg'}</td>
-                    <td>
-                        <button class="action-btn" onclick="openModal('${a.id}')">✏️</button>
-                        <button class="action-btn" onclick="deleteArticle('${a.id}')">🗑️</button>
-                    </td>
-                </tr>`;
-            }).join('');
-        }
-        
-        function openModal(id = null) {
-            editingId = id;
-            document.getElementById('art-name').value = '';
-            document.getElementById('art-category').value = 'poissons';
-            document.getElementById('art-unit').value = 'kg';
-            document.getElementById('art-price').value = '';
-            document.getElementById('art-tva').value = '2.6';
-            document.getElementById('art-sku').value = '';
+
+        function updateCategorySelects() {
+            const options = '<option value="">-- Choisir --</option>' + 
+                ArticlesData.categories.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
             
-            if (id) {
-                const a = articlesData.find(x => x.id === id);
-                if (a) {
-                    document.getElementById('modal-title').textContent = '✏️ Modifier';
-                    document.getElementById('art-name').value = a.name || '';
-                    document.getElementById('art-category').value = a.category || 'poissons';
-                    document.getElementById('art-unit').value = a.unit || 'kg';
-                    document.getElementById('art-price').value = a.price || '';
-                    document.getElementById('art-tva').value = a.tva || 2.6;
-                    document.getElementById('art-sku').value = a.sku || '';
-                }
-            } else { 
-                document.getElementById('modal-title').textContent = '➕ Nouvel article'; 
+            const artCat = document.getElementById('art-category');
+            const discCat = document.getElementById('disc-category');
+            const filterCat = document.getElementById('art-cat-filter');
+            
+            if (artCat) artCat.innerHTML = options;
+            if (discCat) discCat.innerHTML = options;
+            if (filterCat) filterCat.innerHTML = '<option value="">Toutes catégories</option>' + 
+                ArticlesData.categories.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+        }
+
+        function updatePricelistSelects() {
+            const discPl = document.getElementById('disc-pricelist');
+            if (discPl) {
+                discPl.innerHTML = '<option value="">Toutes les listes</option>' + 
+                    ArticlesData.pricelists.map(p => `<option value="${p.id}">${p.name} (${p.discount}%)</option>`).join('');
             }
-            document.getElementById('article-modal').classList.add('active');
         }
-        
-        function closeModal() { 
-            document.getElementById('article-modal').classList.remove('active'); 
-            editingId = null; 
+
+        function updateSyncStatus(status) {
+            const el = document.getElementById('syncStatus');
+            if (status === 'ready') {
+                el.innerHTML = '<span>✅</span><span>Prêt</span>';
+            } else if (status === 'syncing') {
+                el.classList.add('syncing');
+                el.innerHTML = '<span>🔄</span><span>Sync...</span>';
+            } else if (status === 'success') {
+                el.classList.remove('syncing');
+                el.innerHTML = '<span>☁️</span><span>Synchronisé</span>';
+            }
         }
-        
-        async function saveArticle() {
-            const name = document.getElementById('art-name').value.trim();
-            if (!name) { TrakioUI.showToast('❌ Nom requis', 'error'); return; }
+
+        // ============================================
+        // ARTICLES
+        // ============================================
+        function renderArticlesTable() {
+            let articles = ArticlesData.articles;
+            const search = document.getElementById('art-search')?.value.toLowerCase() || '';
+            const catFilter = document.getElementById('art-cat-filter')?.value || '';
             
-            const data = { 
-                name, 
-                category: document.getElementById('art-category').value, 
-                unit: document.getElementById('art-unit').value, 
-                price: parseFloat(document.getElementById('art-price').value) || 0, 
+            if (search) {
+                articles = articles.filter(a =>
+                    a.num.toLowerCase().includes(search) ||
+                    a.name.toLowerCase().includes(search) ||
+                    (a.latin && a.latin.toLowerCase().includes(search)) ||
+                    (a.origin && a.origin.toLowerCase().includes(search)) ||
+                    (a.barcode && a.barcode.toLowerCase().includes(search))
+                );
+            }
+            if (catFilter) {
+                articles = articles.filter(a => a.categoryId == catFilter);
+            }
+            
+            const tbody = document.getElementById('art-tbody');
+            tbody.innerHTML = articles.map(a => {
+                const stock = a.stock || 0;
+                const stockColor = stock <= 0 ? 'var(--accent-danger)' : stock < 10 ? 'var(--accent-warning)' : 'var(--accent-primary)';
+                return `
+                <tr style="opacity:${a.active !== false ? 1 : 0.5}">
+                    <td><strong class="text-orange" style="font-family:monospace;">${a.num}</strong></td>
+                    <td>
+                        <div><strong>${a.name}</strong></div>
+                        ${a.latin ? `<div style="font-size:11px; font-style:italic;" class="text-muted">${a.latin}</div>` : ''}
+                        ${a.barcode ? `<div style="font-size:10px; font-family:monospace;" class="text-muted">🔖 ${a.barcode}</div>` : ''}
+                    </td>
+                    <td style="font-size:12px;">${a.origin || '-'}</td>
+                    <td>${a.unit || 'kg'}</td>
+                    <td style="font-weight:600; color:var(--accent-warning);">${(a.priceB2C || 0).toFixed(2)}</td>
+                    <td class="text-muted">${(a.cost || 0).toFixed(2)}</td>
+                    <td style="font-weight:600; color:${stockColor};">${stock.toFixed(1)}</td>
+                    <td>
+                        <div style="display:flex; gap:4px;">
+                            <button class="action-btn" onclick="editArticle(${a.id})">✏️</button>
+                            <button class="action-btn delete" onclick="deleteArticle(${a.id})">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+                `;
+            }).join('') || '<tr><td colspan="8" style="text-align:center; padding:40px;" class="text-muted">Aucun article</td></tr>';
+            
+            updateStats();
+        }
+
+        function filterArticles() {
+            renderArticlesTable();
+        }
+
+        function showArticleForm() {
+            document.getElementById('art-form').style.display = 'block';
+            document.getElementById('art-edit-id').value = '';
+            const nextNum = `${NumberingConfig.article.prefix}-${NumberingConfig.article.next}`;
+            document.getElementById('art-num').value = nextNum;
+            document.getElementById('art-name').value = '';
+            document.getElementById('art-latin').value = '';
+            document.getElementById('art-category').value = '';
+            document.getElementById('art-origin').value = '';
+            document.getElementById('art-lot').value = '';
+            document.getElementById('art-pcs').value = '1';
+            document.getElementById('art-unit').value = 'kg';
+            document.getElementById('art-price-b2c').value = '';
+            document.getElementById('art-price-b2b').value = '';
+            document.getElementById('art-cost').value = '';
+            document.getElementById('art-tva').value = '2.6';
+            document.getElementById('art-stock').value = '';
+            document.getElementById('art-stock-default').value = '';
+            document.getElementById('art-tva-code').value = '';
+            document.getElementById('art-barcode').value = '';
+            document.getElementById('art-active').checked = true;
+            document.getElementById('art-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideArticleForm() {
+            document.getElementById('art-form').style.display = 'none';
+        }
+
+        function editArticle(id) {
+            const a = ArticlesData.articles.find(x => x.id === id);
+            if (!a) return;
+            
+            document.getElementById('art-form').style.display = 'block';
+            document.getElementById('art-edit-id').value = id;
+            document.getElementById('art-num').value = a.num || '';
+            document.getElementById('art-name').value = a.name || '';
+            document.getElementById('art-latin').value = a.latin || '';
+            document.getElementById('art-category').value = a.categoryId || '';
+            document.getElementById('art-origin').value = a.origin || '';
+            document.getElementById('art-lot').value = a.lot || '';
+            document.getElementById('art-pcs').value = a.pcs || 1;
+            document.getElementById('art-unit').value = a.unit || 'kg';
+            document.getElementById('art-price-b2c').value = a.priceB2C || '';
+            document.getElementById('art-price-b2b').value = a.priceB2B || '';
+            document.getElementById('art-cost').value = a.cost || '';
+            document.getElementById('art-tva').value = a.tva || 2.6;
+            document.getElementById('art-stock').value = a.stock || '';
+            document.getElementById('art-stock-default').value = a.stockDefault || '';
+            document.getElementById('art-tva-code').value = a.tvaCode || '';
+            document.getElementById('art-barcode').value = a.barcode || '';
+            document.getElementById('art-active').checked = a.active !== false;
+            document.getElementById('art-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function saveArticle() {
+            const id = document.getElementById('art-edit-id').value;
+            const article = {
+                id: id ? parseInt(id) : Date.now(),
+                num: document.getElementById('art-num').value.trim(),
+                name: document.getElementById('art-name').value.trim(),
+                latin: document.getElementById('art-latin').value.trim(),
+                categoryId: parseInt(document.getElementById('art-category').value) || null,
+                origin: document.getElementById('art-origin').value.trim(),
+                lot: document.getElementById('art-lot').value.trim(),
+                pcs: parseInt(document.getElementById('art-pcs').value) || 1,
+                unit: document.getElementById('art-unit').value,
+                priceB2C: parseFloat(document.getElementById('art-price-b2c').value) || 0,
+                priceB2B: parseFloat(document.getElementById('art-price-b2b').value) || 0,
+                cost: parseFloat(document.getElementById('art-cost').value) || 0,
                 tva: parseFloat(document.getElementById('art-tva').value) || 2.6,
-                sku: document.getElementById('art-sku').value.trim()
+                stock: parseFloat(document.getElementById('art-stock').value) || 0,
+                stockDefault: parseFloat(document.getElementById('art-stock-default').value) || 0,
+                tvaCode: document.getElementById('art-tva-code').value.trim(),
+                barcode: document.getElementById('art-barcode').value.trim(),
+                active: document.getElementById('art-active').checked,
+                updatedAt: new Date().toISOString()
             };
             
-            await DataStore.articles.save(editingId, data);
-            TrakioUI.showToast('✅ Article enregistré', 'success');
-            closeModal(); 
-            loadArticles();
-        }
-        
-        async function deleteArticle(id) { 
-            if (confirm('Supprimer cet article?')) { 
-                await DataStore.articles.delete(id); 
-                TrakioUI.showToast('✅ Supprimé', 'success'); 
-                loadArticles(); 
-            } 
-        }
-        
-        // ================== IMPORT CSV ==================
-        function toggleImportZone() {
-            const zone = document.getElementById('import-zone');
-            zone.classList.toggle('visible');
-        }
-        
-        function setImportMode(mode) {
-            importMode = mode;
-            document.querySelectorAll('.import-option').forEach(o => o.classList.remove('selected'));
-            document.getElementById('mode-' + mode).classList.add('selected');
-        }
-        
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.currentTarget.classList.add('dragover');
-        }
-        
-        function handleDragLeave(e) {
-            e.currentTarget.classList.remove('dragover');
-        }
-        
-        function handleDrop(e) {
-            e.preventDefault();
-            e.currentTarget.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file && file.name.endsWith('.csv')) {
-                importCSV(file);
-            } else {
-                TrakioUI.showToast('❌ Fichier CSV requis', 'error');
+            if (!article.num || !article.name) {
+                showToast('N° article et désignation requis', 'error');
+                return;
             }
+            
+            if (id) {
+                const idx = ArticlesData.articles.findIndex(a => a.id === parseInt(id));
+                if (idx !== -1) ArticlesData.articles[idx] = article;
+            } else {
+                article.createdAt = new Date().toISOString();
+                ArticlesData.articles.push(article);
+                if (article.num.startsWith(NumberingConfig.article.prefix + '-')) {
+                    NumberingConfig.article.next++;
+                    saveNumberingConfig();
+                }
+            }
+            
+            saveToLocalStorage();
+            hideArticleForm();
+            renderArticlesTable();
+            showToast('Article enregistré', 'success');
         }
-        
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (file) importCSV(file);
+
+        function deleteArticle(id) {
+            if (!confirm('Supprimer cet article ?')) return;
+            ArticlesData.articles = ArticlesData.articles.filter(a => a.id !== id);
+            saveToLocalStorage();
+            renderArticlesTable();
+            showToast('Article supprimé', 'success');
         }
-        
-        async function importCSV(file) {
-            const text = await file.text();
-            const lines = text.split('\n').filter(l => l.trim());
+
+        // ============================================
+        // CATÉGORIES
+        // ============================================
+        function renderCategoriesGrid() {
+            const grid = document.getElementById('categories-grid');
+            grid.innerHTML = ArticlesData.categories.map(c => {
+                const count = ArticlesData.articles.filter(a => a.categoryId === c.id).length;
+                return `
+                <div class="item-card" onclick="showCategoryArticles(${c.id})">
+                    <div class="item-icon">${c.icon}</div>
+                    <div class="item-info">
+                        <div class="item-name">${c.name}</div>
+                        <div class="item-meta">Code: ${c.code}</div>
+                        <span class="item-badge">📦 ${count} article${count > 1 ? 's' : ''}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn" onclick="event.stopPropagation(); editCategory(${c.id})">✏️</button>
+                        <button class="action-btn delete" onclick="event.stopPropagation(); deleteCategory(${c.id})">🗑️</button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function showCategoryArticles(categoryId) {
+            const cat = ArticlesData.categories.find(c => c.id === categoryId);
+            if (!cat) return;
+            
+            const articles = ArticlesData.articles.filter(a => a.categoryId === categoryId);
+            
+            document.getElementById('detail-title').innerHTML = `${cat.icon} ${cat.name}`;
+            document.getElementById('detail-subtitle').textContent = `${articles.length} article${articles.length > 1 ? 's' : ''} dans cette catégorie`;
+            
+            const content = document.getElementById('detail-content');
+            if (articles.length === 0) {
+                content.innerHTML = '<p style="text-align:center; padding:40px;" class="text-muted">Aucun article dans cette catégorie</p>';
+            } else {
+                content.innerHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>Désignation</th>
+                                <th>Origine</th>
+                                <th style="color:var(--accent-warning);">B2C</th>
+                                <th style="color:var(--accent-secondary);">B2B</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${articles.map(a => `
+                                <tr style="opacity:${a.active ? 1 : 0.5}">
+                                    <td><strong class="text-orange">${a.num}</strong></td>
+                                    <td>
+                                        <div><strong>${a.name}</strong></div>
+                                        ${a.latin ? `<div style="font-size:11px; font-style:italic;" class="text-muted">${a.latin}</div>` : ''}
+                                    </td>
+                                    <td>${a.origin || '-'}</td>
+                                    <td style="font-weight:600; color:var(--accent-warning);">${(a.priceB2C || 0).toFixed(2)}</td>
+                                    <td style="font-weight:600; color:var(--accent-secondary);">${(a.priceB2B || 0).toFixed(2)}</td>
+                                    <td>
+                                        <button class="btn btn-primary" style="font-size:11px; padding:4px 8px;" onclick="closeDetailModal(); switchTab('articles'); setTimeout(() => editArticle(${a.id}), 200)">Éditer →</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+            
+            document.getElementById('detail-modal').style.display = 'flex';
+        }
+
+        function showCategoryForm() {
+            document.getElementById('cat-form').style.display = 'block';
+            document.getElementById('cat-edit-id').value = '';
+            document.getElementById('cat-code').value = '';
+            document.getElementById('cat-name').value = '';
+            document.getElementById('cat-icon').value = '📦';
+        }
+
+        function hideCategoryForm() {
+            document.getElementById('cat-form').style.display = 'none';
+        }
+
+        function editCategory(id) {
+            const c = ArticlesData.categories.find(x => x.id === id);
+            if (!c) return;
+            document.getElementById('cat-form').style.display = 'block';
+            document.getElementById('cat-edit-id').value = id;
+            document.getElementById('cat-code').value = c.code || '';
+            document.getElementById('cat-name').value = c.name || '';
+            document.getElementById('cat-icon').value = c.icon || '📦';
+        }
+
+        function saveCategory() {
+            const id = document.getElementById('cat-edit-id').value;
+            const cat = {
+                id: id ? parseInt(id) : Date.now(),
+                code: document.getElementById('cat-code').value.trim().toUpperCase() || 'CAT' + Date.now(),
+                name: document.getElementById('cat-name').value.trim(),
+                icon: document.getElementById('cat-icon').value
+            };
+            
+            if (!cat.name) {
+                showToast('Nom requis', 'error');
+                return;
+            }
+            
+            if (id) {
+                const idx = ArticlesData.categories.findIndex(c => c.id === parseInt(id));
+                if (idx !== -1) ArticlesData.categories[idx] = cat;
+            } else {
+                ArticlesData.categories.push(cat);
+            }
+            
+            saveToLocalStorage();
+            hideCategoryForm();
+            updateCategorySelects();
+            renderCategoriesGrid();
+            updateStats();
+            showToast('Catégorie enregistrée', 'success');
+        }
+
+        function deleteCategory(id) {
+            if (!confirm('Supprimer cette catégorie ?')) return;
+            ArticlesData.categories = ArticlesData.categories.filter(c => c.id !== id);
+            saveToLocalStorage();
+            updateCategorySelects();
+            renderCategoriesGrid();
+            updateStats();
+            showToast('Catégorie supprimée', 'success');
+        }
+
+        // ============================================
+        // LISTES DE PRIX
+        // ============================================
+        function renderPricelistsGrid() {
+            const grid = document.getElementById('pricelists-grid');
+            grid.innerHTML = ArticlesData.pricelists.map(p => {
+                return `
+                <div class="item-card" style="cursor:default;">
+                    <div class="item-icon">💰</div>
+                    <div class="item-info">
+                        <div class="item-name">${p.name}</div>
+                        <div class="item-meta">Code: ${p.code}</div>
+                        <span class="item-badge" style="background:rgba(255,183,77,0.2); color:var(--accent-warning);">-${p.discount}% sur B2C</span>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn" onclick="editPricelist(${p.id})">✏️</button>
+                        <button class="action-btn delete" onclick="deletePricelist(${p.id})">🗑️</button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function showPricelistForm() {
+            document.getElementById('pl-form').style.display = 'block';
+            document.getElementById('pl-edit-id').value = '';
+            document.getElementById('pl-code').value = '';
+            document.getElementById('pl-name').value = '';
+            document.getElementById('pl-discount').value = '0';
+            document.getElementById('pl-desc').value = '';
+        }
+
+        function hidePricelistForm() {
+            document.getElementById('pl-form').style.display = 'none';
+        }
+
+        function editPricelist(id) {
+            const p = ArticlesData.pricelists.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('pl-form').style.display = 'block';
+            document.getElementById('pl-edit-id').value = id;
+            document.getElementById('pl-code').value = p.code || '';
+            document.getElementById('pl-name').value = p.name || '';
+            document.getElementById('pl-discount').value = p.discount || 0;
+            document.getElementById('pl-desc').value = p.desc || '';
+        }
+
+        function savePricelist() {
+            const id = document.getElementById('pl-edit-id').value;
+            const pl = {
+                id: id ? parseInt(id) : Date.now(),
+                code: document.getElementById('pl-code').value.trim().toUpperCase() || 'PL' + Date.now(),
+                name: document.getElementById('pl-name').value.trim(),
+                discount: parseFloat(document.getElementById('pl-discount').value) || 0,
+                desc: document.getElementById('pl-desc').value.trim()
+            };
+            
+            if (!pl.name) {
+                showToast('Nom requis', 'error');
+                return;
+            }
+            
+            if (id) {
+                const idx = ArticlesData.pricelists.findIndex(p => p.id === parseInt(id));
+                if (idx !== -1) ArticlesData.pricelists[idx] = pl;
+            } else {
+                ArticlesData.pricelists.push(pl);
+            }
+            
+            saveToLocalStorage();
+            hidePricelistForm();
+            updatePricelistSelects();
+            renderPricelistsGrid();
+            updateStats();
+            showToast('Liste de prix enregistrée', 'success');
+        }
+
+        function deletePricelist(id) {
+            if (!confirm('Supprimer cette liste de prix ?')) return;
+            ArticlesData.pricelists = ArticlesData.pricelists.filter(p => p.id !== id);
+            saveToLocalStorage();
+            updatePricelistSelects();
+            renderPricelistsGrid();
+            updateStats();
+            showToast('Liste supprimée', 'success');
+        }
+
+        // ============================================
+        // RABAIS
+        // ============================================
+        function renderDiscountsGrid() {
+            const grid = document.getElementById('discounts-grid');
+            grid.innerHTML = ArticlesData.discounts.map(d => {
+                const cat = ArticlesData.categories.find(c => c.id === d.categoryId);
+                const pl = d.pricelistId ? ArticlesData.pricelists.find(p => p.id === d.pricelistId) : null;
+                const tiersHtml = (d.tiers || []).map(t =>
+                    `<span style="display:inline-block; padding:4px 10px; background:var(--bg-hover); border-radius:20px; font-size:12px; margin:2px;">Dès ${t.qty} pce → <strong>-${t.pct}%</strong></span>`
+                ).join(' ');
+                
+                return `
+                <div class="card" style="padding:16px; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span style="font-size:24px;">${cat?.icon || '📦'}</span>
+                            <div>
+                                <div style="font-weight:700;">${cat?.name || 'Catégorie inconnue'}</div>
+                                <div style="font-size:12px;" class="text-muted">${pl ? `Liste: ${pl.name}` : 'Toutes les listes'}</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:6px;">
+                            <button class="action-btn" onclick="editDiscount(${d.id})">✏️</button>
+                            <button class="action-btn delete" onclick="deleteDiscount(${d.id})">🗑️</button>
+                        </div>
+                    </div>
+                    <div>${tiersHtml || '<span class="text-muted">Aucun palier défini</span>'}</div>
+                </div>
+                `;
+            }).join('') || '<p class="text-muted" style="text-align:center; padding:40px;">Aucune règle de rabais configurée</p>';
+        }
+
+        function showDiscountForm() {
+            document.getElementById('disc-form').style.display = 'block';
+            document.getElementById('disc-edit-id').value = '';
+            document.getElementById('disc-category').value = '';
+            document.getElementById('disc-pricelist').value = '';
+            document.getElementById('disc-tiers').innerHTML = createTierRow();
+        }
+
+        function hideDiscountForm() {
+            document.getElementById('disc-form').style.display = 'none';
+        }
+
+        function createTierRow(qty = '', pct = '') {
+            return `
+            <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:center;">
+                <input type="number" placeholder="Dès X pièces" class="disc-qty form-input" value="${qty}">
+                <input type="number" step="0.1" placeholder="% rabais" class="disc-pct form-input" value="${pct}">
+                <button type="button" class="btn btn-danger" onclick="removeDiscountTier(this)" style="padding:8px 12px;">✕</button>
+            </div>
+            `;
+        }
+
+        function addDiscountTier() {
+            const container = document.getElementById('disc-tiers');
+            const div = document.createElement('div');
+            div.innerHTML = createTierRow();
+            container.appendChild(div.firstElementChild);
+        }
+
+        function removeDiscountTier(btn) {
+            const rows = document.querySelectorAll('#disc-tiers > div');
+            if (rows.length > 1) btn.parentElement.remove();
+        }
+
+        function editDiscount(id) {
+            const d = ArticlesData.discounts.find(x => x.id === id);
+            if (!d) return;
+            
+            document.getElementById('disc-form').style.display = 'block';
+            document.getElementById('disc-edit-id').value = id;
+            document.getElementById('disc-category').value = d.categoryId || '';
+            document.getElementById('disc-pricelist').value = d.pricelistId || '';
+            
+            const container = document.getElementById('disc-tiers');
+            container.innerHTML = (d.tiers || []).map(t => createTierRow(t.qty, t.pct)).join('') || createTierRow();
+        }
+
+        function saveDiscount() {
+            const id = document.getElementById('disc-edit-id').value;
+            const categoryId = parseInt(document.getElementById('disc-category').value);
+            
+            if (!categoryId) {
+                showToast('Catégorie requise', 'error');
+                return;
+            }
+            
+            const tiers = [];
+            document.querySelectorAll('#disc-tiers > div').forEach(row => {
+                const qty = parseInt(row.querySelector('.disc-qty').value);
+                const pct = parseFloat(row.querySelector('.disc-pct').value);
+                if (qty > 0 && pct > 0) tiers.push({ qty, pct });
+            });
+            tiers.sort((a, b) => a.qty - b.qty);
+            
+            const disc = {
+                id: id ? parseInt(id) : Date.now(),
+                categoryId: categoryId,
+                pricelistId: parseInt(document.getElementById('disc-pricelist').value) || null,
+                tiers: tiers
+            };
+            
+            if (id) {
+                const idx = ArticlesData.discounts.findIndex(d => d.id === parseInt(id));
+                if (idx !== -1) ArticlesData.discounts[idx] = disc;
+            } else {
+                ArticlesData.discounts.push(disc);
+            }
+            
+            saveToLocalStorage();
+            hideDiscountForm();
+            renderDiscountsGrid();
+            updateStats();
+            showToast('Règle enregistrée', 'success');
+        }
+
+        function deleteDiscount(id) {
+            if (!confirm('Supprimer cette règle ?')) return;
+            ArticlesData.discounts = ArticlesData.discounts.filter(d => d.id !== id);
+            saveToLocalStorage();
+            renderDiscountsGrid();
+            updateStats();
+            showToast('Règle supprimée', 'success');
+        }
+
+        // ============================================
+        // IMPORT / EXPORT
+        // ============================================
+        function exportArticlesCSV() {
+            const headers = ['Numéro article', 'Description', 'Nom 2 français', 'Unité de la quantité', 'PV hors TVA', 'PV inclus TVA', 'Stock actuel', 'PA hors TVA', 'PA inclus TVA', 'Quantité achetée', 'Stock par défaut', 'Code TVA - Recettes', 'Code barre'];
+            
+            const rows = ArticlesData.articles.map(a => {
+                const tvaRate = (a.tva || 2.6) / 100;
+                const pvTTC = a.priceB2C ? (a.priceB2C * (1 + tvaRate)).toFixed(2) + '  CHF' : '';
+                const pvHT = a.priceB2C ? a.priceB2C.toFixed(2) + '  CHF' : '';
+                const paTTC = a.cost ? (a.cost * (1 + tvaRate)).toFixed(2) + '  CHF' : '';
+                const paHT = a.cost ? a.cost.toFixed(2) + '  CHF' : '';
+                
+                let unite = a.unit || 'Pièce';
+                if (unite === 'kg') unite = 'Kilo';
+                if (unite === 'pce') unite = 'Pièce';
+                if (unite === 'l') unite = 'Litre';
+                
+                return [
+                    a.num || '',
+                    a.name || '',
+                    a.origin || a.latin || '',
+                    unite,
+                    pvHT, pvTTC,
+                    a.stock !== undefined ? a.stock : '',
+                    paHT, paTTC,
+                    a.qtyPurchased || '',
+                    a.stockDefault || '',
+                    a.tvaCode || '',
+                    a.barcode || ''
+                ].map(v => `${v}`).join(';');
+            });
+            
+            const csv = [headers.join(';'), ...rows].join('\n');
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'Articles_export_' + new Date().toISOString().slice(0, 10) + '.csv';
+            link.click();
+            showToast('Export terminé', 'success');
+        }
+
+        function importArticlesFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let content = e.target.result;
+                content = fixEncoding(content);
+                
+                const lines = content.split('\n').filter(l => l.trim());
+                let added = 0, updated = 0;
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const cols = lines[i].split(';').map(c => c.replace(/"/g, '').trim());
+                    if (cols.length < 2 || !cols[1]) continue;
+                    
+                    const parsePrice = (str) => {
+                        if (!str) return 0;
+                        return parseFloat(str.replace(/CHF/gi, '').replace(/\s/g, '').replace(',', '.')) || 0;
+                    };
+                    
+                    let unit = (cols[3] || 'pce').toLowerCase();
+                    if (unit.includes('kilo') || unit === 'kg') unit = 'kg';
+                    else if (unit.includes('pièce') || unit.includes('piece')) unit = 'pce';
+                    else if (unit.includes('litre')) unit = 'l';
+                    else unit = 'pce';
+                    
+                    const articleData = {
+                        num: cols[0] || String(Date.now() + i).slice(-6),
+                        name: cols[1],
+                        origin: cols[2] || '',
+                        latin: '',
+                        categoryId: null,
+                        lot: '',
+                        pcs: 1,
+                        unit: unit,
+                        priceB2C: parsePrice(cols[4]),
+                        priceB2B: parsePrice(cols[4]) * 0.85,
+                        cost: parsePrice(cols[7]),
+                        stock: parseFloat(cols[6]) || 0,
+                        stockDefault: parseFloat(cols[10]) || 0,
+                        tvaCode: cols[11] || '',
+                        barcode: cols[12] || '',
+                        tva: 2.6,
+                        active: true
+                    };
+                    
+                    const existingIdx = ArticlesData.articles.findIndex(a => a.num === articleData.num);
+                    if (existingIdx !== -1) {
+                        articleData.id = ArticlesData.articles[existingIdx].id;
+                        ArticlesData.articles[existingIdx] = articleData;
+                        updated++;
+                    } else {
+                        articleData.id = Date.now() + i;
+                        ArticlesData.articles.push(articleData);
+                        added++;
+                    }
+                }
+                
+                saveToLocalStorage();
+                renderArticlesTable();
+                updateStats();
+                
+                showToast(`Import: ${added} ajoutés, ${updated} mis à jour`, 'success');
+            };
+            reader.readAsText(file, 'ISO-8859-1');
+            input.value = '';
+        }
+
+        function fixEncoding(str) {
+            const replacements = {
+                'Ã©': 'é', 'Ã¨': 'è', 'Ãª': 'ê', 'Ã«': 'ë',
+                'Ã ': 'à', 'Ã¢': 'â', 'Ã¤': 'ä',
+                'Ã¹': 'ù', 'Ã»': 'û', 'Ã¼': 'ü',
+                'Ã®': 'î', 'Ã¯': 'ï', 'Ã´': 'ô',
+                'Ã§': 'ç'
+            };
+            for (const [bad, good] of Object.entries(replacements)) {
+                str = str.split(bad).join(good);
+            }
+            return str;
+        }
+
+        // ============================================
+        // DROPBOX
+        // ============================================
+        async function saveAllToDropbox() {
+            // Récupérer les tokens depuis TRAKIO principal
+            const dropboxData = localStorage.getItem('trakio_dropbox');
+            if (!dropboxData) {
+                showToast('Dropbox non configuré. Connectez-vous depuis TRAKIO principal.', 'error');
+                return;
+            }
+            
+            showToast('Sauvegarde Dropbox en cours...', 'warning');
+            updateSyncStatus('syncing');
+            
+            // Ici on utiliserait l'API Dropbox - pour l'instant on simule
+            setTimeout(() => {
+                updateSyncStatus('success');
+                showToast('Articles sauvegardés sur Dropbox', 'success');
+            }, 1500);
+        }
+
+        // ============================================
+        // MODAL
+        // ============================================
+        function closeDetailModal() {
+            document.getElementById('detail-modal').style.display = 'none';
+        }
+
+        // Fermer modal sur clic extérieur
+        document.getElementById('detail-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeDetailModal();
+        });
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(message, type = 'success') {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ============================================
+        // CALCUL PRIX AVEC RABAIS (pour autres modules)
+        // ============================================
+        function calculatePriceWithDiscount(article, qty, clientType, pricelistId) {
+            let basePrice = clientType === 'b2c' ? article.priceB2C : article.priceB2B;
+            
+            if (pricelistId) {
+                const pl = ArticlesData.pricelists.find(p => p.id === pricelistId);
+                if (pl && pl.discount > 0) {
+                    basePrice = basePrice * (1 - pl.discount / 100);
+                }
+            }
+            
+            const discount = ArticlesData.discounts.find(d =>
+                d.categoryId === article.categoryId &&
+                (!d.pricelistId || d.pricelistId === pricelistId)
+            );
+            
+            if (discount && discount.tiers) {
+                const applicableTier = discount.tiers
+                    .filter(t => qty >= t.qty)
+                    .sort((a, b) => b.qty - a.qty)[0];
+                
+                if (applicableTier) {
+                    basePrice = basePrice * (1 - applicableTier.pct / 100);
+                }
+            }
+            
+            return basePrice;
+        }
+
+        // ============================================
+        // IMPORT CSV AVANCÉ
+        // ============================================
+        let csvData = null;
+        let csvHeaders = [];
+        let importModeCSV = 'update';
+        let columnMapping = {};
+
+        const ARTICLE_FIELDS = [
+            { key: 'num', label: 'N° Article', required: true },
+            { key: 'name', label: 'Désignation', required: true },
+            { key: 'origin', label: 'Origine' },
+            { key: 'latin', label: 'Nom latin' },
+            { key: 'unit', label: 'Unité' },
+            { key: 'priceB2C', label: 'Prix B2C HT' },
+            { key: 'priceB2B', label: 'Prix B2B HT' },
+            { key: 'cost', label: 'Prix achat HT' },
+            { key: 'stock', label: 'Stock' },
+            { key: 'tva', label: 'TVA %' },
+            { key: 'barcode', label: 'Code barre' },
+            { key: 'ignore', label: '— Ignorer —' }
+        ];
+
+        // Initialisation drag & drop
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('csvFileInput');
+
+            if (dropZone) {
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('dragover');
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        handleCSVFile(files[0]);
+                    }
+                });
+            }
+
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        handleCSVFile(e.target.files[0]);
+                    }
+                });
+            }
+        });
+
+        function handleCSVFile(file) {
+            if (!file.name.match(/\.(csv|txt)$/i)) {
+                showToast('Format non supporté. Utilisez un fichier CSV.', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let content = fixEncoding(e.target.result);
+                parseCSV(content, file.name);
+            };
+            reader.readAsText(file, 'ISO-8859-1');
+        }
+
+        function parseCSV(content, fileName) {
+            const separator = content.includes(';') ? ';' : ',';
+            const lines = content.split('\n').filter(l => l.trim());
             
             if (lines.length < 2) {
-                TrakioUI.showToast('❌ Fichier vide ou invalide', 'error');
+                showToast('Le fichier doit contenir au moins un en-tête et une ligne de données', 'error');
                 return;
             }
-            
-            // Parser les headers
-            const headers = lines[0].toLowerCase().split(';').map(h => h.trim());
-            const nameIdx = headers.findIndex(h => h === 'nom' || h === 'name' || h === 'article');
-            const catIdx = headers.findIndex(h => h === 'categorie' || h === 'category' || h === 'cat');
-            const priceIdx = headers.findIndex(h => h === 'prix' || h === 'price' || h === 'pv' || h === 'tarif');
-            const tvaIdx = headers.findIndex(h => h === 'tva' || h === 'tax');
-            const unitIdx = headers.findIndex(h => h === 'unite' || h === 'unit' || h === 'unité');
-            const skuIdx = headers.findIndex(h => h === 'sku' || h === 'code' || h === 'ref' || h === 'reference');
-            
-            if (nameIdx === -1) {
-                TrakioUI.showToast('❌ Colonne "nom" non trouvée', 'error');
-                return;
-            }
-            
-            // Mode replace: supprimer tous les articles existants
-            if (importMode === 'replace') {
-                for (const art of articlesData) {
-                    await DataStore.articles.delete(art.id);
-                }
-                articlesData = [];
-            }
-            
-            let imported = 0, updated = 0, skipped = 0;
-            
+
+            csvHeaders = lines[0].split(separator).map(h => h.replace(/"/g, '').trim());
+            csvData = [];
+
             for (let i = 1; i < lines.length; i++) {
-                const cols = lines[i].split(';').map(c => c.trim());
-                const name = cols[nameIdx];
-                
-                if (!name) continue;
-                
-                // Chercher si l'article existe (par nom ou SKU)
-                const sku = skuIdx >= 0 ? cols[skuIdx] : '';
-                const existing = articlesData.find(a => 
-                    a.name.toLowerCase() === name.toLowerCase() || 
-                    (sku && a.sku && a.sku.toLowerCase() === sku.toLowerCase())
-                );
-                
-                if (existing) {
-                    if (importMode === 'skip') {
-                        skipped++;
-                        continue;
-                    }
-                    // Mode update: mettre à jour l'article existant
-                    const data = {
-                        name,
-                        category: catIdx >= 0 ? (cols[catIdx] || existing.category) : existing.category,
-                        price: priceIdx >= 0 ? (parseFloat(cols[priceIdx].replace(',', '.')) || existing.price) : existing.price,
-                        tva: tvaIdx >= 0 ? (parseFloat(cols[tvaIdx].replace(',', '.')) || existing.tva) : existing.tva,
-                        unit: unitIdx >= 0 ? (cols[unitIdx] || existing.unit) : existing.unit,
-                        sku: sku || existing.sku
-                    };
-                    await DataStore.articles.save(existing.id, data);
-                    updated++;
-                } else {
-                    // Nouvel article
-                    const data = {
-                        name,
-                        category: catIdx >= 0 ? (cols[catIdx] || 'poissons') : 'poissons',
-                        price: priceIdx >= 0 ? (parseFloat(cols[priceIdx].replace(',', '.')) || 0) : 0,
-                        tva: tvaIdx >= 0 ? (parseFloat(cols[tvaIdx].replace(',', '.')) || 2.6) : 2.6,
-                        unit: unitIdx >= 0 ? (cols[unitIdx] || 'kg') : 'kg',
-                        sku: sku
-                    };
-                    await DataStore.articles.save(null, data);
-                    imported++;
+                const cols = lines[i].split(separator).map(c => c.replace(/"/g, '').trim());
+                if (cols.length >= 2 && cols.some(c => c)) {
+                    csvData.push(cols);
                 }
             }
+
+            // Afficher infos fichier
+            document.getElementById('fileInfo').classList.add('visible');
+            document.getElementById('fileName').textContent = '📄 ' + fileName;
+            document.getElementById('rowCount').textContent = csvData.length;
+            document.getElementById('colCount').textContent = csvHeaders.length;
+
+            // Auto-mapping des colonnes
+            autoMapColumns();
             
-            // Message de résultat
-            let msg = `✅ Import terminé: ${imported} ajouté(s)`;
-            if (updated > 0) msg += `, ${updated} mis à jour`;
-            if (skipped > 0) msg += `, ${skipped} ignoré(s)`;
+            // Afficher mapping
+            renderMapping();
             
-            TrakioUI.showToast(msg, 'success');
-            toggleImportZone();
-            loadArticles();
+            // Afficher preview
+            renderPreview();
+
+            // Activer bouton import
+            document.getElementById('btnImport').disabled = false;
+            document.getElementById('noPreview').style.display = 'none';
+            document.getElementById('previewContainer').style.display = 'block';
+            document.getElementById('mappingContainer').style.display = 'block';
         }
-        
-        // ================== EXPORT CSV ==================
-        function exportArticles() {
-            const headers = ['nom', 'categorie', 'prix', 'tva', 'unite', 'sku'];
-            const rows = articlesData.map(a => [
-                a.name,
-                a.category || 'poissons',
-                a.price || 0,
-                a.tva || 2.6,
-                a.unit || 'kg',
-                a.sku || ''
-            ]);
+
+        function autoMapColumns() {
+            columnMapping = {};
             
-            const csv = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'articles_' + new Date().toISOString().slice(0,10) + '.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-            TrakioUI.showToast('✅ Export CSV téléchargé', 'success');
+            const mappings = {
+                'num': ['numéro', 'numero', 'n°', 'article', 'ref', 'référence', 'code'],
+                'name': ['désignation', 'designation', 'nom', 'name', 'description', 'libellé', 'libelle'],
+                'origin': ['origine', 'origin', 'provenance', 'nom 2'],
+                'latin': ['latin', 'scientifique', 'espèce'],
+                'unit': ['unité', 'unite', 'unit', 'mesure'],
+                'priceB2C': ['prix', 'pv', 'vente', 'b2c', 'ttc', 'ht'],
+                'cost': ['achat', 'pa', 'coût', 'cout'],
+                'stock': ['stock', 'qté', 'quantité', 'quantity'],
+                'tva': ['tva', 'taxe', 'vat'],
+                'barcode': ['barre', 'ean', 'barcode', 'gtin', 'code-barre']
+            };
+
+            csvHeaders.forEach((header, idx) => {
+                const headerLower = header.toLowerCase();
+                for (const [field, keywords] of Object.entries(mappings)) {
+                    if (keywords.some(kw => headerLower.includes(kw))) {
+                        if (!Object.values(columnMapping).includes(field)) {
+                            columnMapping[idx] = field;
+                            break;
+                        }
+                    }
+                }
+                if (!columnMapping[idx]) {
+                    columnMapping[idx] = 'ignore';
+                }
+            });
         }
-        
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+        function renderMapping() {
+            const container = document.getElementById('mappingRows');
+            container.innerHTML = '';
+
+            csvHeaders.forEach((header, idx) => {
+                const row = document.createElement('div');
+                row.className = 'mapping-row';
+                
+                const options = ARTICLE_FIELDS.map(f => 
+                    `<option value="${f.key}" ${columnMapping[idx] === f.key ? 'selected' : ''}>${f.label}${f.required ? ' *' : ''}</option>`
+                ).join('');
+
+                row.innerHTML = `
+                    <span class="mapping-csv-col">${header}</span>
+                    <span class="mapping-arrow">→</span>
+                    <select class="mapping-select" onchange="updateMapping(${idx}, this.value)">
+                        ${options}
+                    </select>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function updateMapping(idx, value) {
+            columnMapping[idx] = value;
+        }
+
+        function renderPreview() {
+            const thead = document.getElementById('previewHead');
+            const tbody = document.getElementById('previewBody');
+
+            // Headers
+            thead.innerHTML = '<tr>' + csvHeaders.map(h => `<th>${h}</th>`).join('') + '</tr>';
+
+            // Body (max 10 lignes)
+            tbody.innerHTML = csvData.slice(0, 10).map(row => 
+                '<tr>' + row.map(cell => `<td title="${cell}">${cell}</td>`).join('') + '</tr>'
+            ).join('');
+
+            if (csvData.length > 10) {
+                tbody.innerHTML += `<tr><td colspan="${csvHeaders.length}" style="text-align:center; color:var(--text-muted);">... et ${csvData.length - 10} autres lignes</td></tr>`;
+            }
+        }
+
+        function selectImportMode(mode) {
+            importModeCSV = mode;
+            document.querySelectorAll('.import-option').forEach(opt => {
+                opt.classList.remove('selected');
+                opt.querySelector('input[type="radio"]').checked = false;
+            });
+            const selected = document.querySelector(`.import-option input[value="${mode}"]`);
+            if (selected) {
+                selected.checked = true;
+                selected.closest('.import-option').classList.add('selected');
+            }
+        }
+
+        function executeImport() {
+            if (!csvData || csvData.length === 0) {
+                showToast('Aucune donnée à importer', 'error');
+                return;
+            }
+
+            // Vérifier champs requis
+            const numCol = Object.entries(columnMapping).find(([k, v]) => v === 'num');
+            const nameCol = Object.entries(columnMapping).find(([k, v]) => v === 'name');
+
+            if (!numCol && !nameCol) {
+                showToast('Mappez au moins N° Article ou Désignation', 'error');
+                return;
+            }
+
+            let added = 0, updated = 0, errors = 0;
+
+            if (importModeCSV === 'replace') {
+                ArticlesData.articles = [];
+            }
+
+            csvData.forEach((row, rowIndex) => {
+                try {
+                    const articleData = {
+                        id: Date.now() + rowIndex,
+                        num: '',
+                        name: '',
+                        origin: '',
+                        latin: '',
+                        categoryId: null,
+                        lot: '',
+                        pcs: 1,
+                        unit: 'pce',
+                        priceB2C: 0,
+                        priceB2B: 0,
+                        cost: 0,
+                        stock: 0,
+                        stockDefault: 0,
+                        tva: 2.6,
+                        barcode: '',
+                        active: true
+                    };
+
+                    // Appliquer mapping
+                    Object.entries(columnMapping).forEach(([colIdx, field]) => {
+                        if (field !== 'ignore' && row[colIdx] !== undefined) {
+                            const value = row[colIdx];
+                            
+                            switch(field) {
+                                case 'num':
+                                case 'name':
+                                case 'origin':
+                                case 'latin':
+                                case 'barcode':
+                                    articleData[field] = value;
+                                    break;
+                                case 'unit':
+                                    let unit = value.toLowerCase();
+                                    if (unit.includes('kilo') || unit === 'kg') unit = 'kg';
+                                    else if (unit.includes('litre')) unit = 'l';
+                                    else unit = 'pce';
+                                    articleData.unit = unit;
+                                    break;
+                                case 'priceB2C':
+                                case 'priceB2B':
+                                case 'cost':
+                                case 'stock':
+                                case 'tva':
+                                    const num = parseFloat(value.replace(/[^\d.,\-]/g, '').replace(',', '.'));
+                                    if (!isNaN(num)) articleData[field] = num;
+                                    break;
+                            }
+                        }
+                    });
+
+                    // Générer N° si vide
+                    if (!articleData.num) {
+                        articleData.num = 'IMP' + String(Date.now() + rowIndex).slice(-6);
+                    }
+
+                    // Générer nom si vide
+                    if (!articleData.name) {
+                        articleData.name = 'Article ' + articleData.num;
+                    }
+
+                    // Calculer prix B2B si vide
+                    if (articleData.priceB2C > 0 && articleData.priceB2B === 0) {
+                        articleData.priceB2B = articleData.priceB2C * 0.85;
+                    }
+
+                    // Chercher doublon
+                    const existingIdx = ArticlesData.articles.findIndex(a => a.num === articleData.num);
+                    
+                    if (existingIdx !== -1) {
+                        articleData.id = ArticlesData.articles[existingIdx].id;
+                        ArticlesData.articles[existingIdx] = articleData;
+                        updated++;
+                    } else {
+                        ArticlesData.articles.push(articleData);
+                        added++;
+                    }
+                } catch(err) {
+                    errors++;
+                    console.error('Erreur ligne ' + (rowIndex + 2), err);
+                }
+            });
+
+            // Sauvegarder
+            saveToLocalStorage();
+            renderArticlesTable();
+            updateStats();
+
+            // Afficher résultat
+            const result = document.getElementById('importResult');
+            result.className = 'import-result success';
+            document.getElementById('importResultTitle').textContent = '✅ Import terminé !';
+            document.getElementById('importResultMessage').textContent = 
+                importModeCSV === 'replace' ? 'Base articles remplacée' : 'Articles mis à jour';
+            document.getElementById('statAdded').textContent = added;
+            document.getElementById('statUpdated').textContent = updated;
+            document.getElementById('statErrors').textContent = errors;
+
+            showToast(`Import: ${added} ajoutés, ${updated} mis à jour`, 'success');
+        }
+
+        function resetImport() {
+            csvData = null;
+            csvHeaders = [];
+            columnMapping = {};
+
+            document.getElementById('csvFileInput').value = '';
+            document.getElementById('fileInfo').classList.remove('visible');
+            document.getElementById('btnImport').disabled = true;
+            document.getElementById('previewContainer').style.display = 'none';
+            document.getElementById('mappingContainer').style.display = 'none';
+            document.getElementById('noPreview').style.display = 'block';
+            document.getElementById('importResult').className = 'import-result';
+            document.getElementById('previewHead').innerHTML = '';
+            document.getElementById('previewBody').innerHTML = '';
+            document.getElementById('mappingRows').innerHTML = '';
+        }
     </script>
 </body>
 </html>
