@@ -526,9 +526,112 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.15s ease;
+            position: relative;
         }
 
         .user-menu:hover { background: var(--bg-card); }
+
+        .user-chevron {
+            font-size: 10px;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .user-menu.open .user-chevron { transform: rotate(180deg); }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            min-width: 220px;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .user-menu.open .user-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-header {
+            padding: 12px 15px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--bg-secondary);
+        }
+
+        .dropdown-users {
+            padding: 8px;
+        }
+
+        .dropdown-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .dropdown-user:hover { background: var(--bg-hover); }
+
+        .dropdown-user.current {
+            background: rgba(6, 182, 212, 0.15);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .dropdown-user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 11px;
+            color: white;
+        }
+
+        .dropdown-user-info { flex: 1; }
+        .dropdown-user-name { font-size: 13px; font-weight: 600; }
+        .dropdown-user-role { font-size: 10px; color: var(--text-muted); }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 0;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
 
         .user-avatar-small {
             width: 28px;
@@ -949,6 +1052,8 @@
                     <a href="shopify.html" class="nav-link"><span class="nav-icon">🛍️</span><span class="nav-text">Shop</span></a>
                     <a href="compta.html" class="nav-link"><span class="nav-icon">💰</span><span class="nav-text">Compta</span></a>
                     <a href="whatsapp.html" class="nav-link"><span class="nav-icon">💬</span><span class="nav-text">WhatsApp</span></a>
+                    <div class="nav-divider"></div>
+                    <a href="parametres.html" class="nav-link"><span class="nav-icon">⚙️</span><span class="nav-text">Paramètres</span></a>
                 </div>
             </div>
 
@@ -958,13 +1063,27 @@
                     <span id="statusText">...</span>
                 </div>
 
-                <div class="user-menu">
+                <div class="user-menu" id="userMenu" onclick="toggleUserDropdown()">
                     <div class="user-avatar-small" id="userAvatarSmall">PA</div>
                     <div class="user-details">
                         <div class="user-details-name" id="userNameDisplay">-</div>
                         <div class="user-details-role">
                             <span class="role-badge admin" id="roleBadge"></span>
                             <span id="userRoleDisplay">-</span>
+                        </div>
+                    </div>
+                    <span class="user-chevron">▼</span>
+                    
+                    <!-- User Dropdown -->
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header">Changer d'utilisateur</div>
+                        <div class="dropdown-users" id="dropdownUsers"></div>
+                        <div class="dropdown-divider"></div>
+                        <a href="parametres.html" class="dropdown-item">
+                            <span>⚙️</span> Paramètres
+                        </a>
+                        <div class="dropdown-item" onclick="logout()">
+                            <span>🚪</span> Déconnexion
                         </div>
                     </div>
                 </div>
@@ -1237,9 +1356,79 @@
             updateStatus();
         }
 
-        document.getElementById('logoutBtn').addEventListener('click', () => {
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        function logout() {
             clearCurrentUser();
             window.location.reload();
+        }
+
+        // User dropdown
+        function toggleUserDropdown() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('open');
+            if (menu.classList.contains('open')) {
+                populateUserDropdown();
+            }
+        }
+
+        function populateUserDropdown() {
+            const container = document.getElementById('dropdownUsers');
+            const currentUser = getCurrentUser();
+            const users = getUsers();
+            
+            container.innerHTML = users.filter(u => u.active).map(user => {
+                const role = ROLES[user.role] || ROLES.employee;
+                const isCurrent = currentUser && currentUser.id === user.id;
+                return `
+                    <div class="dropdown-user ${isCurrent ? 'current' : ''}" onclick="switchUser('${user.id}')">
+                        <div class="dropdown-user-avatar" style="background:${user.color || role.color}">${user.avatar || user.name.substring(0,2)}</div>
+                        <div class="dropdown-user-info">
+                            <div class="dropdown-user-name">${user.name}</div>
+                            <div class="dropdown-user-role">${role.badge} ${role.label}</div>
+                        </div>
+                        ${isCurrent ? '<span style="color:var(--accent-cyan)">✓</span>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function switchUser(userId) {
+            const users = getUsers();
+            const user = users.find(u => u.id === userId);
+            const currentUser = getCurrentUser();
+            
+            if (user && currentUser && user.id === currentUser.id) {
+                document.getElementById('userMenu').classList.remove('open');
+                return;
+            }
+            
+            if (user) {
+                // Demander le PIN
+                const pin = prompt(`🔐 Code PIN pour ${user.name}:`);
+                if (pin === user.pin) {
+                    setCurrentUser(user);
+                    showToast(`Connecté en tant que ${user.name}`, 'success');
+                    setTimeout(() => window.location.reload(), 500);
+                } else if (pin !== null) {
+                    showToast('Code PIN incorrect', 'error');
+                }
+            }
+            document.getElementById('userMenu').classList.remove('open');
+        }
+
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            const userMenu = document.getElementById('userMenu');
+            if (!userMenu.contains(e.target)) {
+                userMenu.classList.remove('open');
+            }
+            
+            const navMenu = document.getElementById('navMenu');
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            if (!navMenu.contains(e.target) && !menuBtn.contains(e.target)) {
+                navMenu.classList.remove('open');
+            }
         });
 
         document.getElementById('mobileMenuBtn').addEventListener('click', () => {
