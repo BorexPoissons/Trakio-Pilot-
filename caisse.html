@@ -289,7 +289,10 @@
             cursor: pointer;
             transition: all 0.2s;
             text-align: center;
+<<<<<<< HEAD
             position: relative;
+=======
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
         }
         
         .article-btn:hover {
@@ -372,7 +375,10 @@
         .category-btn span:first-child { font-size: 20px; }
         
         .cat-all { background: linear-gradient(135deg, #64748b, #475569); }
+<<<<<<< HEAD
         .cat-favoris { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+=======
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
         .cat-poissons { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
         .cat-crustaces { background: linear-gradient(135deg, #ef4444, #dc2626); }
         .cat-coquillages { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
@@ -887,6 +893,7 @@
         .notification.error { background: var(--error); }
         .notification.warning { background: var(--warning); }
         
+<<<<<<< HEAD
         /* MODAL ARTICLES */
         .modal-articles {
             max-width: 700px;
@@ -1079,6 +1086,8 @@
             opacity: 0.5;
         }
         
+=======
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
         /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -1111,7 +1120,10 @@
                 <span class="status-dot" id="statusDot"></span>
                 <span id="statusText">Hors ligne</span>
             </div>
+<<<<<<< HEAD
             <button class="header-btn" onclick="openArticlesModal()">⚙️ Articles</button>
+=======
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
             <button class="header-btn" onclick="openReportModal()">📊 Rapport</button>
             <button class="header-btn" onclick="syncData()">🔄 Sync</button>
         </div>
@@ -1137,10 +1149,13 @@
         
         <!-- COLONNE CATÉGORIES -->
         <div class="categories-col">
+<<<<<<< HEAD
             <button class="category-btn cat-favoris" onclick="selectCategory('favoris')" data-cat="favoris">
                 <span>⭐</span>
                 <span>Favoris</span>
             </button>
+=======
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
             <button class="category-btn cat-all active" onclick="selectCategory('')" data-cat="">
                 <span>📦</span>
                 <span>Tous</span>
@@ -1396,6 +1411,7 @@
     
     <!-- NOTIFICATION -->
     <div class="notification" id="notification"></div>
+<<<<<<< HEAD
     
     <!-- MODAL GESTION ARTICLES -->
     <div class="modal-overlay" id="articlesModal">
@@ -1464,6 +1480,8 @@
             </div>
         </div>
     </div>
+=======
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
 
     <script>
         // ============================================
@@ -1475,13 +1493,19 @@
         let articlesData = [];
         let filteredArticles = [];
         let currentCategory = '';
+<<<<<<< HEAD
         let currentArticlesTab = 'list';
+=======
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
         let cart = [];
         let transactions = [];
         let currentWeightArticle = null;
         let weightInput = '';
         let transactionCounter = 0;
+<<<<<<< HEAD
         let editingArticleId = null;
+=======
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
         
         // Configuration manifestation
         let eventConfig = {
@@ -1552,6 +1576,7 @@
         }
         
         // ============================================
+<<<<<<< HEAD
         // ARTICLES CAISSE (localStorage séparé)
         // ============================================
         
@@ -1568,10 +1593,28 @@
             } else {
                 articlesData = getDefaultArticles();
                 saveArticlesToStorage();
+=======
+        // ARTICLES (localStorage first)
+        // ============================================
+        
+        function loadArticles() {
+            // Charger depuis localStorage
+            const stored = localStorage.getItem('trakio_articles');
+            if (stored) {
+                try {
+                    const data = JSON.parse(stored);
+                    articlesData = (data.articles || data || []).filter(a => a.active !== false);
+                } catch (e) {
+                    articlesData = getDefaultArticles();
+                }
+            } else {
+                articlesData = getDefaultArticles();
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
             }
             filterArticles();
         }
         
+<<<<<<< HEAD
         function saveArticlesToStorage() {
             localStorage.setItem('trakio_caisse_articles', JSON.stringify(articlesData));
         }
@@ -1589,6 +1632,21 @@
                 { id: '8', name: 'Tarama maison', category: 'traiteur', price: 4.50, unit: 'pce', tva: 2.6, active: true, favorite: false },
                 { id: '9', name: 'Salade de la mer', category: 'traiteur', price: 28.00, unit: 'kg', tva: 2.6, active: true, favorite: false },
                 { id: '10', name: 'Citrons (filet)', category: 'epicerie', price: 3.50, unit: 'pce', tva: 2.6, active: true, favorite: false }
+=======
+        function getDefaultArticles() {
+            // Articles de démo pour fonctionner immédiatement
+            return [
+                { id: '1', name: 'Saumon frais', category: 'poissons', price: 45.00, unit: 'kg', tva: 2.6, origin: 'Norvège', active: true },
+                { id: '2', name: 'Filet de perche', category: 'poissons', price: 58.00, unit: 'kg', tva: 2.6, origin: 'Lac Léman', active: true },
+                { id: '3', name: 'Truite entière', category: 'poissons', price: 28.00, unit: 'kg', tva: 2.6, origin: 'Suisse', active: true },
+                { id: '4', name: 'Crevettes roses', category: 'crustaces', price: 32.00, unit: 'kg', tva: 2.6, origin: 'Madagascar', active: true },
+                { id: '5', name: 'Huîtres (dz)', category: 'coquillages', price: 24.00, unit: 'pce', tva: 2.6, origin: 'France', active: true },
+                { id: '6', name: 'Moules', category: 'coquillages', price: 8.50, unit: 'kg', tva: 2.6, origin: 'Hollande', active: true },
+                { id: '7', name: 'Saumon fumé', category: 'fumes', price: 65.00, unit: 'kg', tva: 2.6, origin: 'Écosse', active: true },
+                { id: '8', name: 'Tarama maison', category: 'traiteur', price: 4.50, unit: 'pce', tva: 2.6, active: true },
+                { id: '9', name: 'Salade de la mer', category: 'traiteur', price: 28.00, unit: 'kg', tva: 2.6, active: true },
+                { id: '10', name: 'Citrons (filet)', category: 'epicerie', price: 3.50, unit: 'pce', tva: 2.6, active: true }
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
             ];
         }
         
@@ -1596,6 +1654,7 @@
             const search = document.getElementById('searchArticle').value.toLowerCase();
             
             filteredArticles = articlesData.filter(article => {
+<<<<<<< HEAD
                 // Filtre favoris
                 if (currentCategory === 'favoris') {
                     if (!article.favorite) return false;
@@ -1610,6 +1669,13 @@
                     article.origin?.toLowerCase().includes(search);
                 
                 return matchSearch;
+=======
+                const matchCategory = !currentCategory || article.category === currentCategory;
+                const matchSearch = !search || 
+                    article.name?.toLowerCase().includes(search) ||
+                    article.origin?.toLowerCase().includes(search);
+                return matchCategory && matchSearch;
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
             });
             
             renderArticles();
@@ -1632,6 +1698,7 @@
                 fumes: '🔥', traiteur: '🍽️', epicerie: '🛒'
             };
             
+<<<<<<< HEAD
             if (filteredArticles.length === 0) {
                 grid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
@@ -1650,6 +1717,10 @@
             grid.innerHTML = filteredArticles.map(article => `
                 <button class="article-btn" onclick="addToCart('${article.id}')">
                     ${article.favorite ? '<span style="position:absolute;top:8px;right:8px;font-size:14px;">⭐</span>' : ''}
+=======
+            grid.innerHTML = filteredArticles.map(article => `
+                <button class="article-btn" onclick="addToCart('${article.id}')">
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
                     <div class="article-icon">${icons[article.category] || '📦'}</div>
                     <div class="article-name">${article.name}</div>
                     ${article.origin ? `<div class="article-origin">📍 ${article.origin}</div>` : ''}
@@ -2154,6 +2225,7 @@ Généré le ${new Date().toLocaleString('fr-CH')}
         }
         
         // ============================================
+<<<<<<< HEAD
         // MODAL GESTION ARTICLES
         // ============================================
         
@@ -2408,6 +2480,8 @@ Généré le ${new Date().toLocaleString('fr-CH')}
         }
         
         // ============================================
+=======
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
         // SYNC
         // ============================================
         
@@ -2482,7 +2556,10 @@ Généré le ${new Date().toLocaleString('fr-CH')}
                 closeWeightModal();
                 closeEventModal();
                 closeReportModal();
+<<<<<<< HEAD
                 closeArticlesModal();
+=======
+>>>>>>> c753f24bbf4e6b27873b0f78b92bfa140e59bdfd
             }
             
             // Enter dans modal pesée = confirmer
