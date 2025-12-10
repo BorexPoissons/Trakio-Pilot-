@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clients - TRAKIO v5.0.4</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --border: #475569;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary: #06b6d4;
+            --primary-hover: #22d3ee;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --purple: #8b5cf6;
+            --gradient: linear-gradient(135deg, #06b6d4, #14b8a6);
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        /* ============================================
+           HEADER UNIFIÉ v5.0.4
+        ============================================ */
+        .main-header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text);
+        }
+        
+        .logo-icon { font-size: 24px; }
+        .logo-text { 
+            font-size: 18px; 
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .nav-link {
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .nav-link:hover { 
+            background: var(--bg-input); 
+            color: var(--text); 
+        }
+        
+        .nav-link.active { 
+            background: var(--primary); 
+            color: white; 
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-input);
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+        
+        .sync-dot.syncing { 
+            background: var(--warning);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--bg-input);
+            border: none;
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .user-btn:hover { background: var(--border); }
+        
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .user-name { font-size: 13px; font-weight: 500; }
+        
+        /* ============================================
+           CONTAINER
+        ============================================ */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        /* PAGE HEADER */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .version-badge {
+            font-size: 11px;
+            padding: 4px 10px;
+            background: var(--gradient);
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        /* BUTTONS */
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+        
+        .btn:hover { transform: translateY(-1px); }
+        
+        .btn-primary { 
+            background: var(--gradient); 
+            color: white; 
+        }
+        .btn-primary:hover { filter: brightness(1.1); }
+        
+        .btn-secondary { 
+            background: var(--bg-input); 
+            color: var(--text); 
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { 
+            background: var(--border); 
+            border-color: var(--primary);
+        }
+        
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--error); color: white; }
+        
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+            background: var(--bg-card);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            font-size: 13px;
+        }
+        
+        .tab:hover { background: var(--bg-input); color: var(--text); }
+        .tab.active { background: var(--primary); color: white; }
+        
+        .tab-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+        
+        /* STATS */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-item {
+            background: var(--bg-card);
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        
+        .stat-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* TOOLBAR */
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 280px;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+        
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+        }
+        
+        select {
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        /* CLIENTS GRID */
+        .clients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 16px;
+        }
+        
+        .client-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .client-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            border-color: var(--primary);
+        }
+        
+        .client-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+        
+        .client-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .client-avatar.b2b { background: linear-gradient(135deg, var(--primary), #0891b2); }
+        .client-avatar.b2c { background: linear-gradient(135deg, var(--purple), #ec4899); }
+        
+        .client-info-header { flex: 1; }
+        
+        .client-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .client-type-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .client-type-badge.b2b { 
+            background: rgba(6, 182, 212, 0.15); 
+            color: var(--primary); 
+        }
+        .client-type-badge.b2c { 
+            background: rgba(139, 92, 246, 0.15); 
+            color: var(--purple); 
+        }
+        
+        .client-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+        }
+        
+        .client-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .client-stats {
+            display: flex;
+            gap: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .client-stat {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .client-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--success);
+        }
+        
+        .client-stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .client-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+        }
+        
+        .client-action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: var(--bg-input);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        
+        .client-action-btn:hover { background: var(--primary); color: white; }
+        .client-action-btn.whatsapp:hover { background: #25d366; }
+        
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+        
+        .modal-overlay.active { display: flex; }
+        
+        .modal {
+            background: var(--bg-card);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+        
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(20, 184, 166, 0.1));
+        }
+        
+        .modal-header h2 {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg-input);
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover { background: var(--error); }
+        
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            max-height: calc(90vh - 160px);
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: var(--bg-dark);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .form-group.full { grid-column: 1 / -1; }
+        
+        .form-group label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+        
+        /* IMPORT MODAL */
+        .modal-import {
+            max-width: 900px;
+        }
+        
+        .import-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        
+        @media (max-width: 800px) {
+            .import-body { grid-template-columns: 1fr; }
+        }
+        
+        .import-panel {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .import-panel h4 {
+            margin-bottom: 16px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(6, 182, 212, 0.1);
+        }
+        
+        .drop-zone-icon { font-size: 40px; margin-bottom: 10px; }
+        .drop-zone-text { font-weight: 600; margin-bottom: 6px; }
+        .drop-zone-hint { font-size: 12px; color: var(--text-muted); }
+        
+        .file-info {
+            display: none;
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(6, 182, 212, 0.1);
+            border-radius: 8px;
+            border: 1px solid var(--primary);
+        }
+        
+        .file-info.visible { display: block; }
+        
+        .import-options { margin-top: 16px; }
+        
+        .import-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .import-option:hover,
+        .import-option.selected {
+            border-color: var(--primary);
+            background: rgba(6, 182, 212, 0.1);
+        }
+        
+        .import-option h5 { font-size: 14px; margin-bottom: 4px; }
+        .import-option p { font-size: 12px; color: var(--text-muted); }
+        
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        
+        .preview-table th,
+        .preview-table td {
+            padding: 8px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+        
+        .preview-table th {
+            background: var(--bg-card);
+            font-weight: 600;
+        }
+        
+        /* STATES */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-muted);
+        }
+        
+        .loading-spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid var(--bg-input);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-muted);
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        /* NOTIFICATION */
+        .notification {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 20000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .notification.show { transform: translateX(0); }
+        .notification.success { background: var(--success); }
+        .notification.error { background: var(--error); }
+        .notification.warning { background: var(--warning); }
+        
+        /* RESPONSIVE */
+        @media (max-width: 1200px) {
+            .nav-link span:last-child { display: none; }
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .clients-grid { grid-template-columns: 1fr; }
+            .tabs { flex-wrap: wrap; }
+            .nav-links { display: none; }
+            .page-title { font-size: 22px; }
+            .header-actions { width: 100%; }
+            .header-actions .btn { flex: 1; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER UNIFIÉ -->
+    <header class="main-header">
+        <div class="header-left">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🐟</span>
+                <span class="logo-text">TRAKIO</span>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link">📊 <span>Dashboard</span></a>
+                <a href="articles.html" class="nav-link">📦 <span>Articles</span></a>
+                <a href="clients.html" class="nav-link active">👥 <span>Clients</span></a>
+                <a href="commandes.html" class="nav-link">📋 <span>Commandes</span></a>
+                <a href="myfish.html" class="nav-link">🐠 <span>MyFish</span></a>
+                <a href="caisse.html" class="nav-link">💰 <span>Caisse</span></a>
+                <a href="live.html" class="nav-link">📈 <span>Cours</span></a>
+                <a href="tracabilite.html" class="nav-link">🏷️ <span>Traçabilité</span></a>
+                <a href="compta.html" class="nav-link">📒 <span>Compta</span></a>
+                <a href="shopify.html" class="nav-link">🛒 <span>Shop</span></a>
+                <a href="whatsapp.html" class="nav-link">💬 <span>WhatsApp</span></a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <div class="sync-indicator">
+                <span class="sync-dot" id="syncDot"></span>
+                <span id="syncStatus">Connecté</span>
+            </div>
+            <div class="user-dropdown">
+                <button class="user-btn" id="userBtn">
+                    <div class="user-avatar" id="userAvatar">P</div>
+                    <span class="user-name" id="userName">Pascal</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <span>👥</span>
+                <span>Gestion Clients</span>
+                <span class="version-badge">v5.0.4</span>
+            </h1>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="openModal('add')">
+                    ➕ Nouveau client
+                </button>
+                <button class="btn btn-secondary" onclick="openImportModal()">
+                    📥 Importer CSV
+                </button>
+                <button class="btn btn-secondary" onclick="exportClients()">
+                    📤 Exporter
+                </button>
+            </div>
+        </div>
+        
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab active" onclick="setTab('all')" data-tab="all">
+                👥 Tous
+                <span class="tab-badge" id="count-all">0</span>
+            </button>
+            <button class="tab" onclick="setTab('b2b')" data-tab="b2b">
+                🏢 Professionnels
+                <span class="tab-badge" id="count-b2b">0</span>
+            </button>
+            <button class="tab" onclick="setTab('b2c')" data-tab="b2c">
+                👤 Particuliers
+                <span class="tab-badge" id="count-b2c">0</span>
+            </button>
+        </div>
+        
+        <!-- STATS -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="stat-total">-</div>
+                <div class="stat-label">Total clients</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-active">-</div>
+                <div class="stat-label">Actifs ce mois</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-revenue">-</div>
+                <div class="stat-label">CA total (CHF)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-orders">-</div>
+                <div class="stat-label">Commandes</div>
+            </div>
+        </div>
+        
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Rechercher un client..." oninput="filterClients()">
+            </div>
+            <select id="sortBy" onchange="filterClients()">
+                <option value="name">Trier par nom</option>
+                <option value="recent">Plus récent</option>
+                <option value="orders">Plus de commandes</option>
+                <option value="revenue">Plus gros CA</option>
+            </select>
+        </div>
+        
+        <!-- CLIENTS GRID -->
+        <div class="clients-grid" id="clients-grid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Chargement des clients...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL CLIENT -->
+    <div class="modal-overlay" id="clientModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">
+                    <span>👤</span>
+                    <span>Nouveau client</span>
+                </h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="clientForm">
+                    <input type="hidden" id="clientId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Type de client *</label>
+                            <select id="clientType" required onchange="toggleCompanyField()">
+                                <option value="b2b">🏢 Professionnel (B2B)</option>
+                                <option value="b2c">👤 Particulier (B2C)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="companyField">
+                            <label>Entreprise</label>
+                            <input type="text" id="clientCompany" placeholder="Nom de l'entreprise">
+                        </div>
+                        <div class="form-group">
+                            <label>Nom *</label>
+                            <input type="text" id="clientLastName" required placeholder="Nom">
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom *</label>
+                            <input type="text" id="clientFirstName" required placeholder="Prénom">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="clientEmail" placeholder="email@exemple.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Téléphone *</label>
+                            <input type="tel" id="clientPhone" required placeholder="+41 79 123 45 67">
+                        </div>
+                        <div class="form-group full">
+                            <label>Adresse</label>
+                            <input type="text" id="clientAddress" placeholder="Rue et numéro">
+                        </div>
+                        <div class="form-group">
+                            <label>NPA</label>
+                            <input type="text" id="clientZip" placeholder="1260">
+                        </div>
+                        <div class="form-group">
+                            <label>Ville</label>
+                            <input type="text" id="clientCity" placeholder="Nyon">
+                        </div>
+                        <div class="form-group full">
+                            <label>Notes</label>
+                            <textarea id="clientNotes" rows="3" placeholder="Notes internes..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Remise client (%)</label>
+                            <input type="number" id="clientDiscount" min="0" max="100" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Source</label>
+                            <select id="clientSource">
+                                <option value="">Sélectionner...</option>
+                                <option value="direct">Direct</option>
+                                <option value="myfish">MyFish</option>
+                                <option value="shopify">Shopify</option>
+                                <option value="referral">Recommandation</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="deleteBtn" onclick="deleteClient()" style="display:none;">
+                    🗑️ Supprimer
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="saveClient()">💾 Enregistrer</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL IMPORT -->
+    <div class="modal-overlay" id="importModal">
+        <div class="modal modal-import">
+            <div class="modal-header">
+                <h2>📥 Import CSV Clients</h2>
+                <button class="modal-close" onclick="closeImportModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="import-body">
+                    <!-- Panel Gauche -->
+                    <div class="import-panel">
+                        <h4>📁 Fichier CSV</h4>
+                        <div class="drop-zone" id="dropZone" onclick="document.getElementById('csvInput').click()">
+                            <div class="drop-zone-icon">📄</div>
+                            <div class="drop-zone-text">Glissez votre fichier ici</div>
+                            <div class="drop-zone-hint">ou cliquez pour sélectionner</div>
+                        </div>
+                        <input type="file" id="csvInput" accept=".csv,.txt" style="display:none;">
+                        
+                        <div class="file-info" id="fileInfo">
+                            <strong id="fileName"></strong>
+                            <div style="margin-top:8px; font-size:12px; color:var(--text-muted);">
+                                📊 <span id="rowCount">0</span> lignes • 
+                                📋 <span id="colCount">0</span> colonnes
+                            </div>
+                        </div>
+                        
+                        <div class="import-options">
+                            <h4 style="margin-bottom:12px;">⚙️ Mode d'import</h4>
+                            <div class="import-option selected" onclick="selectImportMode('update')">
+                                <input type="radio" name="importMode" value="update" checked>
+                                <div>
+                                    <h5>🔄 Mettre à jour</h5>
+                                    <p>Ajoute les nouveaux, met à jour les existants</p>
+                                </div>
+                            </div>
+                            <div class="import-option" onclick="selectImportMode('replace')">
+                                <input type="radio" name="importMode" value="replace">
+                                <div>
+                                    <h5>🗑️ Remplacer tout</h5>
+                                    <p>Supprime tout et importe le fichier</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Panel Droit -->
+                    <div class="import-panel">
+                        <h4>👁️ Aperçu</h4>
+                        <div id="previewContainer">
+                            <p style="text-align:center; color:var(--text-muted); padding:40px;">
+                                Sélectionnez un fichier pour voir l'aperçu
+                            </p>
+                        </div>
+                        <div style="margin-top:16px; padding:12px; background:var(--bg-card); border-radius:8px; font-size:11px;">
+                            <strong>📖 Format CSV attendu :</strong>
+                            <code style="display:block; margin-top:8px; padding:8px; background:var(--bg-dark); border-radius:4px; color:var(--primary);">
+                                Type;Nom;Prénom;Email;Téléphone;Adresse;NPA;Ville
+                            </code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeImportModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="executeImport()" id="importBtn" disabled>
+                    🚀 Lancer l'import
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- NOTIFICATION -->
+    <div class="notification" id="notification"></div>
+
+    <!-- FIREBASE CONFIG -->
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            authDomain: "trakio-pilot-6e97a.firebaseapp.com",
+            projectId: "trakio-pilot-6e97a",
+            storageBucket: "trakio-pilot-6e97a.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+        
+        // Initialize Firebase (avec fallback si non disponible)
+        let db = null;
+        let firebaseAvailable = false;
+        
+        try {
+            if (typeof firebase !== 'undefined' && firebase.apps) {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                db = firebase.firestore();
+                firebaseAvailable = true;
+                console.log('✅ Firebase initialisé');
+            }
+        } catch (e) {
+            console.warn('⚠️ Firebase non disponible, mode localStorage activé');
+        }
+    </script>
+    
+    <script>
+        // ============================================
+        // VARIABLES GLOBALES
+        // ============================================
+        
+        let clientsData = [];
+        let filteredData = [];
+        let currentTab = 'all';
+        let editingId = null;
+        let unsubscribe = null;
+        let importData = [];
+        let importMode = 'update';
+        
+        // ============================================
+        // CHARGEMENT
+        // ============================================
+        
+        async function loadClients() {
+            // Si Firebase disponible, charger depuis Firestore
+            if (firebaseAvailable && db) {
+                try {
+                    const snapshot = await db.collection('clients')
+                        .orderBy('lastName', 'asc')
+                        .get();
+                    
+                    clientsData = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    
+                    // Backup localStorage
+                    localStorage.setItem('trakio_clients', JSON.stringify(clientsData));
+                    updateSyncStatus('online');
+                    
+                } catch (error) {
+                    console.error('Erreur chargement Firebase:', error);
+                    loadFromLocalStorage();
+                }
+            } else {
+                // Mode localStorage
+                loadFromLocalStorage();
+            }
+            
+            filterClients();
+            updateStats();
+            updateTabCounts();
+        }
+        
+        function loadFromLocalStorage() {
+            const stored = localStorage.getItem('trakio_clients');
+            if (stored) {
+                clientsData = JSON.parse(stored);
+                filterClients();
+                updateStats();
+                updateTabCounts();
+            }
+            updateSyncStatus('offline');
+        }
+        
+        function setupRealtimeListener() {
+            if (!firebaseAvailable || !db) {
+                console.log('Mode localStorage - pas de listener temps réel');
+                return;
+            }
+            
+            try {
+                unsubscribe = db.collection('clients')
+                    .orderBy('lastName', 'asc')
+                    .onSnapshot(snapshot => {
+                        clientsData = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        
+                        // Backup localStorage
+                        localStorage.setItem('trakio_clients', JSON.stringify(clientsData));
+                        
+                        filterClients();
+                        updateStats();
+                        updateTabCounts();
+                        updateSyncStatus('online');
+                    }, error => {
+                        console.error('Erreur listener:', error);
+                        updateSyncStatus('offline');
+                    });
+            } catch (error) {
+                console.error('Erreur setup listener:', error);
+            }
+        }
+        
+        // ============================================
+        // SYNC STATUS
+        // ============================================
+        
+        function updateSyncStatus(status) {
+            const dot = document.getElementById('syncDot');
+            const text = document.getElementById('syncStatus');
+            
+            dot.className = 'sync-dot';
+            
+            if (status === 'online') {
+                dot.style.background = 'var(--success)';
+                text.textContent = 'Connecté';
+            } else if (status === 'syncing') {
+                dot.classList.add('syncing');
+                text.textContent = 'Sync...';
+            } else {
+                dot.style.background = 'var(--error)';
+                text.textContent = 'Hors ligne';
+            }
+        }
+        
+        // ============================================
+        // TABS & FILTRAGE
+        // ============================================
+        
+        function setTab(tab) {
+            currentTab = tab;
+            
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.tab === tab);
+            });
+            
+            filterClients();
+        }
+        
+        function filterClients() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const sortBy = document.getElementById('sortBy').value;
+            
+            // Filtrer par tab
+            filteredData = clientsData.filter(c => {
+                if (currentTab !== 'all' && c.type !== currentTab) return false;
+                
+                // Recherche
+                if (search) {
+                    const searchFields = [
+                        c.firstName,
+                        c.lastName,
+                        c.company,
+                        c.email,
+                        c.phone,
+                        c.city
+                    ].filter(Boolean).join(' ').toLowerCase();
+                    
+                    if (!searchFields.includes(search)) return false;
+                }
+                
+                return true;
+            });
+            
+            // Trier
+            filteredData.sort((a, b) => {
+                switch (sortBy) {
+                    case 'recent':
+                        return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
+                    case 'orders':
+                        return (b.ordersCount || 0) - (a.ordersCount || 0);
+                    case 'revenue':
+                        return (b.totalRevenue || 0) - (a.totalRevenue || 0);
+                    default: // name
+                        return (a.lastName || '').localeCompare(b.lastName || '');
+                }
+            });
+            
+            renderClients();
+        }
+        
+        function updateTabCounts() {
+            const all = clientsData.length;
+            const b2b = clientsData.filter(c => c.type === 'b2b').length;
+            const b2c = clientsData.filter(c => c.type === 'b2c').length;
+            
+            document.getElementById('count-all').textContent = all;
+            document.getElementById('count-b2b').textContent = b2b;
+            document.getElementById('count-b2c').textContent = b2c;
+        }
+        
+        // ============================================
+        // RENDU
+        // ============================================
+        
+        function renderClients() {
+            const grid = document.getElementById('clients-grid');
+            
+            if (filteredData.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon">👥</div>
+                        <p>Aucun client trouvé</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = filteredData.map(c => {
+                const initials = getInitials(c);
+                const fullName = `${c.firstName || ''} ${c.lastName || ''}`.trim();
+                const displayName = c.company || fullName || 'Sans nom';
+                
+                return `
+                    <div class="client-card" onclick="openModal('edit', '${c.id}')">
+                        <div class="client-header">
+                            <div class="client-avatar ${c.type || 'b2c'}">${initials}</div>
+                            <div class="client-info-header">
+                                <div class="client-name">${displayName}</div>
+                                <span class="client-type-badge ${c.type || 'b2c'}">
+                                    ${c.type === 'b2b' ? '🏢 Pro' : '👤 Particulier'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="client-details">
+                            ${c.company && fullName ? `<div class="client-detail-item">👤 ${fullName}</div>` : ''}
+                            ${c.phone ? `<div class="client-detail-item">📞 ${c.phone}</div>` : ''}
+                            ${c.email ? `<div class="client-detail-item">✉️ ${c.email}</div>` : ''}
+                            ${c.city ? `<div class="client-detail-item">📍 ${c.zip || ''} ${c.city}</div>` : ''}
+                        </div>
+                        <div class="client-stats">
+                            <div class="client-stat">
+                                <div class="client-stat-value">${c.ordersCount || 0}</div>
+                                <div class="client-stat-label">Commandes</div>
+                            </div>
+                            <div class="client-stat">
+                                <div class="client-stat-value">${formatCHF(c.totalRevenue || 0)}</div>
+                                <div class="client-stat-label">CA Total</div>
+                            </div>
+                        </div>
+                        <div class="client-actions" onclick="event.stopPropagation()">
+                            <button class="client-action-btn" onclick="newOrder('${c.id}')">
+                                📋 Commande
+                            </button>
+                            ${c.phone ? `
+                                <button class="client-action-btn whatsapp" onclick="openWhatsApp('${c.phone}')">
+                                    💬 WhatsApp
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function getInitials(client) {
+            if (client.company) {
+                return client.company.substring(0, 2).toUpperCase();
+            }
+            const first = (client.firstName || '').charAt(0);
+            const last = (client.lastName || '').charAt(0);
+            return (first + last).toUpperCase() || '??';
+        }
+        
+        function formatCHF(amount) {
+            return new Intl.NumberFormat('fr-CH', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        // ============================================
+        // STATS
+        // ============================================
+        
+        function updateStats() {
+            const total = clientsData.length;
+            
+            // Clients actifs ce mois
+            const monthStart = new Date();
+            monthStart.setDate(1);
+            monthStart.setHours(0, 0, 0, 0);
+            
+            const activeCount = clientsData.filter(c => {
+                const lastOrder = c.lastOrderDate?.toDate?.() || new Date(c.lastOrderDate || 0);
+                return lastOrder >= monthStart;
+            }).length;
+            
+            // CA et commandes totaux
+            const totalRevenue = clientsData.reduce((sum, c) => sum + (c.totalRevenue || 0), 0);
+            const totalOrders = clientsData.reduce((sum, c) => sum + (c.ordersCount || 0), 0);
+            
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-active').textContent = activeCount;
+            document.getElementById('stat-revenue').textContent = formatCHF(totalRevenue);
+            document.getElementById('stat-orders').textContent = totalOrders;
+        }
+        
+        // ============================================
+        // MODAL CLIENT
+        // ============================================
+        
+        function openModal(mode, id = null) {
+            editingId = id;
+            const modal = document.getElementById('clientModal');
+            const form = document.getElementById('clientForm');
+            const title = document.getElementById('modal-title');
+            const deleteBtn = document.getElementById('deleteBtn');
+            
+            form.reset();
+            toggleCompanyField();
+            
+            if (mode === 'edit' && id) {
+                const client = clientsData.find(c => c.id === id);
+                if (!client) return;
+                
+                title.innerHTML = '<span>✏️</span><span>Modifier le client</span>';
+                deleteBtn.style.display = 'block';
+                
+                document.getElementById('clientId').value = id;
+                document.getElementById('clientType').value = client.type || 'b2c';
+                document.getElementById('clientCompany').value = client.company || '';
+                document.getElementById('clientLastName').value = client.lastName || '';
+                document.getElementById('clientFirstName').value = client.firstName || '';
+                document.getElementById('clientEmail').value = client.email || '';
+                document.getElementById('clientPhone').value = client.phone || '';
+                document.getElementById('clientAddress').value = client.address || '';
+                document.getElementById('clientZip').value = client.zip || '';
+                document.getElementById('clientCity').value = client.city || '';
+                document.getElementById('clientNotes').value = client.notes || '';
+                document.getElementById('clientDiscount').value = client.discount || '';
+                document.getElementById('clientSource').value = client.source || '';
+                
+                toggleCompanyField();
+                
+            } else {
+                title.innerHTML = '<span>➕</span><span>Nouveau client</span>';
+                deleteBtn.style.display = 'none';
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('clientModal').classList.remove('active');
+            editingId = null;
+        }
+        
+        function toggleCompanyField() {
+            const type = document.getElementById('clientType').value;
+            document.getElementById('companyField').style.display = type === 'b2b' ? 'flex' : 'none';
+        }
+        
+        // ============================================
+        // CRUD
+        // ============================================
+        
+        async function saveClient() {
+            const form = document.getElementById('clientForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const data = {
+                type: document.getElementById('clientType').value,
+                company: document.getElementById('clientCompany').value.trim(),
+                lastName: document.getElementById('clientLastName').value.trim(),
+                firstName: document.getElementById('clientFirstName').value.trim(),
+                email: document.getElementById('clientEmail').value.trim(),
+                phone: document.getElementById('clientPhone').value.trim(),
+                address: document.getElementById('clientAddress').value.trim(),
+                zip: document.getElementById('clientZip').value.trim(),
+                city: document.getElementById('clientCity').value.trim(),
+                notes: document.getElementById('clientNotes').value.trim(),
+                discount: parseFloat(document.getElementById('clientDiscount').value) || 0,
+                source: document.getElementById('clientSource').value,
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Nom complet pour recherche facile
+            data.fullName = `${data.firstName} ${data.lastName}`.trim();
+            
+            try {
+                updateSyncStatus('syncing');
+                
+                if (firebaseAvailable && db) {
+                    // Mode Firebase
+                    if (editingId) {
+                        await db.collection('clients').doc(editingId).update({
+                            ...data,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    } else {
+                        await db.collection('clients').add({
+                            ...data,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            ordersCount: 0,
+                            totalRevenue: 0
+                        });
+                    }
+                } else {
+                    // Mode localStorage
+                    if (editingId) {
+                        const index = clientsData.findIndex(c => c.id === editingId);
+                        if (index !== -1) {
+                            clientsData[index] = { ...clientsData[index], ...data };
+                        }
+                    } else {
+                        data.id = 'local_' + Date.now();
+                        data.createdAt = new Date().toISOString();
+                        data.ordersCount = 0;
+                        data.totalRevenue = 0;
+                        clientsData.push(data);
+                    }
+                    localStorage.setItem('trakio_clients', JSON.stringify(clientsData));
+                    filterClients();
+                    updateStats();
+                    updateTabCounts();
+                }
+                
+                showNotification(editingId ? 'Client modifié' : 'Client créé', 'success');
+                closeModal();
+                updateSyncStatus(firebaseAvailable ? 'online' : 'offline');
+                
+            } catch (error) {
+                console.error('Erreur sauvegarde:', error);
+                showNotification('Erreur de sauvegarde', 'error');
+                updateSyncStatus('offline');
+            }
+        }
+        
+        async function deleteClient() {
+            if (!editingId) return;
+            
+            const client = clientsData.find(c => c.id === editingId);
+            if (!client) return;
+            
+            const name = `${client.firstName} ${client.lastName}`.trim() || client.company;
+            
+            if (confirm(`Supprimer le client "${name}" ?\n\nCette action est irréversible.`)) {
+                try {
+                    updateSyncStatus('syncing');
+                    
+                    if (firebaseAvailable && db) {
+                        await db.collection('clients').doc(editingId).delete();
+                    } else {
+                        // Mode localStorage
+                        clientsData = clientsData.filter(c => c.id !== editingId);
+                        localStorage.setItem('trakio_clients', JSON.stringify(clientsData));
+                        filterClients();
+                        updateStats();
+                        updateTabCounts();
+                    }
+                    
+                    showNotification('Client supprimé', 'success');
+                    closeModal();
+                    updateSyncStatus(firebaseAvailable ? 'online' : 'offline');
+                    
+                } catch (error) {
+                    console.error('Erreur suppression:', error);
+                    showNotification('Erreur de suppression', 'error');
+                }
+            }
+        }
+        
+        // ============================================
+        // IMPORT CSV
+        // ============================================
+        
+        function openImportModal() {
+            document.getElementById('importModal').classList.add('active');
+            resetImport();
+        }
+        
+        function closeImportModal() {
+            document.getElementById('importModal').classList.remove('active');
+            resetImport();
+        }
+        
+        function resetImport() {
+            importData = [];
+            document.getElementById('fileInfo').classList.remove('visible');
+            document.getElementById('previewContainer').innerHTML = `
+                <p style="text-align:center; color:var(--text-muted); padding:40px;">
+                    Sélectionnez un fichier pour voir l'aperçu
+                </p>
+            `;
+            document.getElementById('importBtn').disabled = true;
+            document.getElementById('csvInput').value = '';
+        }
+        
+        function selectImportMode(mode) {
+            importMode = mode;
+            document.querySelectorAll('.import-option').forEach(opt => {
+                opt.classList.toggle('selected', opt.querySelector('input').value === mode);
+                opt.querySelector('input').checked = opt.querySelector('input').value === mode;
+            });
+        }
+        
+        // Drop zone
+        const dropZone = document.getElementById('dropZone');
+        const csvInput = document.getElementById('csvInput');
+        
+        dropZone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) processCSVFile(file);
+        });
+        
+        csvInput.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (file) processCSVFile(file);
+        });
+        
+        function processCSVFile(file) {
+            const reader = new FileReader();
+            
+            reader.onload = e => {
+                const text = e.target.result;
+                const lines = text.split(/\r?\n/).filter(l => l.trim());
+                
+                if (lines.length < 2) {
+                    showNotification('Fichier vide ou invalide', 'error');
+                    return;
+                }
+                
+                // Détecter séparateur
+                const sep = lines[0].includes(';') ? ';' : ',';
+                const headers = lines[0].split(sep).map(h => h.trim().toLowerCase());
+                
+                importData = lines.slice(1).map(line => {
+                    const values = line.split(sep);
+                    const row = {};
+                    headers.forEach((h, i) => {
+                        row[h] = (values[i] || '').trim();
+                    });
+                    return row;
+                });
+                
+                // Afficher info fichier
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('rowCount').textContent = importData.length;
+                document.getElementById('colCount').textContent = headers.length;
+                document.getElementById('fileInfo').classList.add('visible');
+                
+                // Aperçu
+                renderPreview(headers, importData.slice(0, 5));
+                
+                document.getElementById('importBtn').disabled = false;
+            };
+            
+            reader.readAsText(file, 'UTF-8');
+        }
+        
+        function renderPreview(headers, rows) {
+            const container = document.getElementById('previewContainer');
+            
+            container.innerHTML = `
+                <table class="preview-table">
+                    <thead>
+                        <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+                    </thead>
+                    <tbody>
+                        ${rows.map(row => `
+                            <tr>${headers.map(h => `<td>${row[h] || ''}</td>`).join('')}</tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                ${rows.length < importData.length ? `<p style="text-align:center; margin-top:10px; font-size:12px; color:var(--text-muted);">... et ${importData.length - rows.length} lignes de plus</p>` : ''}
+            `;
+        }
+        
+        async function executeImport() {
+            if (importData.length === 0) return;
+            
+            const btn = document.getElementById('importBtn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Import en cours...';
+            
+            try {
+                updateSyncStatus('syncing');
+                
+                let added = 0;
+                let errors = 0;
+                
+                if (firebaseAvailable && db) {
+                    // Mode Firebase
+                    if (importMode === 'replace') {
+                        const snapshot = await db.collection('clients').get();
+                        const batch = db.batch();
+                        snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                        await batch.commit();
+                    }
+                    
+                    for (const row of importData) {
+                        try {
+                            const data = mapRowToClient(row);
+                            if (data.lastName || data.company) {
+                                await db.collection('clients').add(data);
+                                added++;
+                            }
+                        } catch (e) {
+                            errors++;
+                        }
+                    }
+                } else {
+                    // Mode localStorage
+                    if (importMode === 'replace') {
+                        clientsData = [];
+                    }
+                    
+                    for (const row of importData) {
+                        try {
+                            const data = mapRowToClient(row);
+                            if (data.lastName || data.company) {
+                                data.id = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                                clientsData.push(data);
+                                added++;
+                            }
+                        } catch (e) {
+                            errors++;
+                        }
+                    }
+                    
+                    localStorage.setItem('trakio_clients', JSON.stringify(clientsData));
+                    filterClients();
+                    updateStats();
+                    updateTabCounts();
+                }
+                
+                showNotification(`Import terminé: ${added} ajoutés, ${errors} erreurs`, added > 0 ? 'success' : 'warning');
+                closeImportModal();
+                updateSyncStatus(firebaseAvailable ? 'online' : 'offline');
+                
+            } catch (error) {
+                console.error('Erreur import:', error);
+                showNotification('Erreur lors de l\'import', 'error');
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = '🚀 Lancer l\'import';
+        }
+        
+        function mapRowToClient(row) {
+            return {
+                type: (row.type || '').toLowerCase().includes('b2b') ? 'b2b' : 'b2c',
+                company: row.entreprise || row.company || row.société || '',
+                lastName: row.nom || row.lastname || '',
+                firstName: row.prénom || row.prenom || row.firstname || '',
+                email: row.email || row.mail || '',
+                phone: row.téléphone || row.telephone || row.phone || row.tél || row.tel || '',
+                address: row.adresse || row.address || '',
+                zip: row.npa || row.cp || row.zip || row.codepostal || '',
+                city: row.ville || row.city || row.localité || '',
+                notes: row.notes || row.remarques || '',
+                fullName: `${row.prénom || row.prenom || ''} ${row.nom || ''}`.trim(),
+                createdAt: new Date().toISOString(),
+                ordersCount: 0,
+                totalRevenue: 0
+            };
+        }
+        
+        // ============================================
+        // EXPORT
+        // ============================================
+        
+        function exportClients() {
+            const headers = ['Type', 'Entreprise', 'Nom', 'Prénom', 'Email', 'Téléphone', 'Adresse', 'NPA', 'Ville', 'Remise', 'Commandes', 'CA'];
+            const rows = filteredData.map(c => [
+                c.type,
+                c.company || '',
+                c.lastName,
+                c.firstName,
+                c.email || '',
+                c.phone || '',
+                c.address || '',
+                c.zip || '',
+                c.city || '',
+                c.discount || 0,
+                c.ordersCount || 0,
+                c.totalRevenue || 0
+            ]);
+            
+            const csv = [headers, ...rows]
+                .map(row => row.map(cell => `"${cell}"`).join(';'))
+                .join('\n');
+            
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `clients_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            
+            showNotification('Export terminé', 'success');
+        }
+        
+        // ============================================
+        // ACTIONS
+        // ============================================
+        
+        function newOrder(clientId) {
+            window.location.href = `commandes.html?client=${clientId}`;
+        }
+        
+        function openWhatsApp(phone) {
+            let cleanPhone = phone.replace(/\s+/g, '').replace(/[^0-9+]/g, '');
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = '+41' + cleanPhone.substring(1);
+            }
+            window.open(`https://wa.me/${cleanPhone.replace('+', '')}`, '_blank');
+        }
+        
+        // ============================================
+        // NOTIFICATION
+        // ============================================
+        
+        function showNotification(message, type = 'success') {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notif.classList.remove('show');
+            }, 3000);
+        }
+        
+        // ============================================
+        // USER INFO
+        // ============================================
+        
+        function loadUserInfo() {
+            try {
+                const stored = localStorage.getItem('trakio_current_user');
+                if (stored) {
+                    const user = JSON.parse(stored);
+                    if (user && user.name) {
+                        document.getElementById('userName').textContent = user.name;
+                        document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+                    }
+                }
+            } catch (e) {
+                console.log('User info non disponible');
+            }
+        }
+        
+        // ============================================
+        // ÉVÉNEMENTS
+        // ============================================
+        
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeImportModal();
+            }
+        });
+        
+        document.getElementById('clientModal').addEventListener('click', e => {
+            if (e.target.classList.contains('modal-overlay')) closeModal();
+        });
+        
+        document.getElementById('importModal').addEventListener('click', e => {
+            if (e.target.classList.contains('modal-overlay')) closeImportModal();
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            if (unsubscribe) unsubscribe();
+        });
+        
+        // ============================================
+        // DÉMARRAGE
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserInfo();
+            setTimeout(() => {
+                loadClients();
+                setupRealtimeListener();
+            }, 300);
+        });
+    </script>
+</body>
+</html>
