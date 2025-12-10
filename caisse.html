@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Caisse - TRAKIO v5.0.4</title>
+    <title>Caisse - TRAKIO v5.1.0</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
@@ -49,7 +49,7 @@
         }
         
         /* ============================================
-           HEADER COMPACT v5.0.4 - Style unifié
+           HEADER COMPACT v5.1.0 - Style unifié
         ============================================ */
         .main-header {
             background: var(--bg-secondary);
@@ -186,16 +186,22 @@
         ============================================ */
         .pos-container {
             display: grid;
-            grid-template-columns: 1fr 90px 400px;
+            grid-template-columns: 1fr 90px 550px;
             gap: 12px;
             height: calc(100vh - 50px);
             padding: 12px;
             overflow: hidden;
         }
         
+        @media (max-width: 1400px) {
+            .pos-container {
+                grid-template-columns: 1fr 80px 480px;
+            }
+        }
+        
         @media (max-width: 1200px) {
             .pos-container {
-                grid-template-columns: 1fr 80px 340px;
+                grid-template-columns: 1fr 80px 420px;
             }
         }
         
@@ -294,64 +300,627 @@
         
         .articles-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 10px;
-            padding: 12px;
-            overflow-y: auto;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            padding: 10px;
+            overflow-y: hidden;
             flex: 1;
         }
         
+        .articles-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+        
+        .pagination-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            color: white;
+        }
+        
+        .pagination-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .pagination-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+            min-width: 80px;
+            text-align: center;
+        }
+        
         .article-btn {
-            background: var(--bg-input);
-            border: 2px solid transparent;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 14px 10px;
+            padding: 0;
             cursor: pointer;
             transition: all 0.2s;
             text-align: center;
             position: relative;
+            overflow: hidden;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
         }
         
         .article-btn:hover {
-            border-color: var(--primary);
+            border-color: var(--accent-cyan);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
+            box-shadow: 0 6px 16px rgba(6, 182, 212, 0.25);
         }
         
         .article-btn:active { transform: scale(0.98); }
         
-        .article-icon { font-size: 26px; margin-bottom: 6px; }
+        .article-color-bar {
+            height: 5px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+        
+        .article-content {
+            padding: 10px 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex: 1;
+            min-height: 0;
+        }
         
         .article-name {
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 700;
             color: var(--text);
-            margin-bottom: 4px;
-            line-height: 1.3;
+            line-height: 1.25;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            flex-shrink: 0;
         }
         
         .article-origin {
             font-size: 10px;
             color: var(--text-muted);
-            margin-bottom: 4px;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .article-price-section {
+            margin-top: auto;
+            padding-top: 6px;
         }
         
         .article-price {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 700;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--accent-cyan);
         }
         
         .article-unit {
             font-size: 10px;
             color: var(--text-muted);
+        }
+        
+        .article-favorite {
+            position: absolute;
+            top: 8px;
+            right: 6px;
+            font-size: 12px;
+        }
+        
+        .article-image {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 0;
+        }
+        
+        .article-btn.has-image {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .article-btn.has-image .article-header {
+            padding: 6px 8px 4px;
+            text-align: center;
+        }
+        
+        .article-btn.has-image .article-header .article-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            -webkit-line-clamp: 1;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .article-btn.has-image .article-content {
+            padding: 4px 8px 8px;
+            flex: 0 0 auto;
+            text-align: center;
+        }
+        
+        .article-btn.has-image .article-price-section {
+            padding-top: 0;
+        }
+        
+        .article-btn.has-image .article-price {
+            font-size: 13px;
+        }
+        
+        .article-btn.has-image .article-unit {
+            font-size: 9px;
+        }
+        
+        /* Upload image dans le formulaire */
+        .image-upload-container {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: var(--bg-hover);
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        
+        .image-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            background: var(--bg-card);
+            border: 2px dashed var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--text-muted);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-preview.has-image {
+            border-style: solid;
+            border-color: var(--accent-cyan);
+        }
+        
+        .image-upload-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+        }
+        
+        .image-upload-btn {
+            padding: 8px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        
+        .image-upload-btn:hover {
+            background: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+        }
+        
+        .image-upload-btn.remove {
+            background: transparent;
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+        
+        .image-upload-btn.remove:hover {
+            background: var(--danger);
+            color: white;
+        }
+        
+        /* Recherche dans modal */
+        .modal-search-wrapper {
+            margin-bottom: 12px;
+        }
+        
+        .modal-search-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: inherit;
+        }
+        
+        .modal-search-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+        
+        .modal-search-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        /* Modal Paiement Espèces */
+        .modal-cash {
+            width: 400px;
+            max-width: 95vw;
+        }
+        
+        .cash-total-display {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .cash-total-label {
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .cash-total-amount {
+            font-size: 42px;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .cash-given-section {
+            margin-bottom: 20px;
+        }
+        
+        .cash-given-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .cash-bills {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .cash-bill-btn {
+            aspect-ratio: 1;
+            border: 2px solid var(--border);
+            background: var(--bg-primary);
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cash-bill-btn:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.1);
+            transform: scale(1.05);
+        }
+        
+        .cash-bill-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .cash-custom {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .cash-custom input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 16px;
+            font-family: inherit;
+        }
+        
+        .cash-custom input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+        
+        .cash-custom-btn {
+            padding: 12px 24px;
+            background: var(--accent-cyan);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .cash-custom-btn:hover {
+            background: var(--accent-teal);
+        }
+        
+        .cash-exact-btn-wrapper {
+            margin-top: 16px;
+        }
+        
+        .cash-exact-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .cash-exact-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+        
+        /* Modal Rendu Monnaie */
+        .modal-change {
+            width: 380px;
+            max-width: 95vw;
+            text-align: center;
+            padding: 40px 30px;
+            background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+        }
+        
+        .change-success-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            animation: bounceIn 0.5s ease;
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .change-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 24px;
+        }
+        
+        .change-details {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .change-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 16px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .change-row:last-child {
+            border-bottom: none;
+        }
+        
+        .change-row span:last-child {
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .change-row.change-amount {
+            padding-top: 16px;
+            margin-top: 6px;
+            border-top: 2px solid var(--accent-cyan);
+            border-bottom: none;
+        }
+        
+        .change-row.change-amount span:first-child {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        
+        .change-row.change-amount span:last-child {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+        }
+        
+        .change-countdown {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+        
+        /* Modal Terminal (Carte & Twint) */
+        .modal-terminal {
+            width: 380px;
+            max-width: 95vw;
+            text-align: center;
+            padding: 40px 30px;
+            background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+        }
+        
+        .terminal-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        
+        .terminal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 20px;
+        }
+        
+        .terminal-amount {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+        }
+        
+        .modal-terminal.twint .terminal-amount {
+            background: linear-gradient(135deg, var(--accent-cyan), #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .terminal-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px 24px;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        .terminal-loader {
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .terminal-loader.twint {
+            border-top-color: #000000;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .terminal-hint {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+        
+        .terminal-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .terminal-btn {
+            flex: 1;
+            padding: 16px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .terminal-btn.cancel {
+            background: var(--bg-primary);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        
+        .terminal-btn.cancel:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        
+        .terminal-btn.confirm {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .terminal-btn.confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .terminal-btn.confirm.twint {
+            background: linear-gradient(135deg, #000000, #333333);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .terminal-btn.confirm.twint:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Modal Success Animation */
+        .modal-terminal.success .terminal-icon {
+            animation: bounceIn 0.5s ease;
+        }
+        
+        .modal-terminal.success .terminal-status {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+        
+        .modal-terminal.success .terminal-loader {
+            display: none;
         }
         
         /* ============================================
@@ -360,45 +929,94 @@
         .categories-col {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
+            padding: 4px;
         }
         
         .category-btn {
-            height: 65px;
+            height: 70px;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 4px;
-            transition: all 0.2s;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             color: white;
             font-weight: 600;
             font-size: 10px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        
+        .category-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
+            border-radius: 14px 14px 0 0;
         }
         
         .category-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.25);
+        }
+        
+        .category-btn:active {
+            transform: translateY(0) scale(0.98);
         }
         
         .category-btn.active {
-            box-shadow: 0 0 0 3px white, 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.9), 0 8px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+            transform: scale(1.02);
         }
         
-        .category-btn span:first-child { font-size: 20px; }
+        .category-btn .cat-icon {
+            font-size: 24px;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+            z-index: 1;
+        }
         
-        .cat-all { background: linear-gradient(135deg, #64748b, #475569); }
-        .cat-favoris { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
-        .cat-poissons { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
-        .cat-crustaces { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .cat-coquillages { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-        .cat-fumes { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .cat-traiteur { background: linear-gradient(135deg, #10b981, #059669); }
-        .cat-epicerie { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+        .category-btn .cat-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            z-index: 1;
+            text-transform: uppercase;
+        }
+        
+        /* Couleurs des catégories - Plus riches et profondes */
+        .cat-all { 
+            background: linear-gradient(145deg, #64748b 0%, #475569 50%, #334155 100%);
+        }
+        .cat-favoris { 
+            background: linear-gradient(145deg, #fcd34d 0%, #fbbf24 50%, #f59e0b 100%);
+        }
+        .cat-poissons { 
+            background: linear-gradient(145deg, #38bdf8 0%, #0ea5e9 50%, #0284c7 100%);
+        }
+        .cat-crustaces { 
+            background: linear-gradient(145deg, #f87171 0%, #ef4444 50%, #dc2626 100%);
+        }
+        .cat-coquillages { 
+            background: linear-gradient(145deg, #14b8a6 0%, #0d9488 50%, #0f766e 100%);
+        }
+        .cat-fumes { 
+            background: linear-gradient(145deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+        }
+        .cat-traiteur { 
+            background: linear-gradient(145deg, #34d399 0%, #10b981 50%, #059669 100%);
+        }
+        .cat-epicerie { 
+            background: linear-gradient(145deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%);
+        }
         
         /* ============================================
            COLONNE TICKET
@@ -884,6 +1502,429 @@
             border-bottom: none;
         }
         
+        /* Modal Rapport amélioré */
+        .modal-report {
+            max-width: 700px;
+            max-height: 85vh;
+        }
+        
+        .modal-report .modal-body {
+            max-height: 65vh;
+            overflow-y: auto;
+        }
+        
+        .report-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: var(--bg-dark);
+            padding: 6px;
+            border-radius: 12px;
+        }
+        
+        .report-tab {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .report-tab:hover {
+            color: var(--text);
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .report-tab.active {
+            background: var(--gradient);
+            color: white;
+        }
+        
+        .report-tab-content {
+            display: none;
+        }
+        
+        .report-tab-content.active {
+            display: block;
+        }
+        
+        /* Liste des tickets */
+        .tickets-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .ticket-card {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .ticket-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
+        }
+        
+        .ticket-card.cancelled {
+            opacity: 0.5;
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--danger);
+        }
+        
+        .ticket-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .ticket-number {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        
+        .ticket-number span {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-left: 8px;
+        }
+        
+        .ticket-datetime {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .ticket-items {
+            margin-bottom: 12px;
+        }
+        
+        .ticket-item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+            color: var(--text);
+        }
+        
+        .ticket-item-name {
+            flex: 1;
+        }
+        
+        .ticket-item-qty {
+            color: var(--text-muted);
+            margin: 0 12px;
+        }
+        
+        .ticket-item-total {
+            font-weight: 600;
+            min-width: 80px;
+            text-align: right;
+        }
+        
+        .ticket-footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .ticket-payment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .ticket-payment-badge.cash {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+        
+        .ticket-payment-badge.card {
+            background: rgba(14, 165, 233, 0.15);
+            color: #0ea5e9;
+        }
+        
+        .ticket-payment-badge.twint {
+            background: rgba(0, 0, 0, 0.15);
+            color: var(--text);
+        }
+        
+        .ticket-total {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+        
+        .ticket-discount {
+            font-size: 12px;
+            color: var(--warning);
+            margin-right: 10px;
+        }
+        
+        .ticket-cancelled-badge {
+            background: var(--danger);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .tickets-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+        
+        .tickets-empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        
+        /* Recherche tickets */
+        .tickets-search-wrapper {
+            margin-bottom: 16px;
+        }
+        
+        .tickets-search-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .tickets-search-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+        
+        /* Modal Ticket Détail - Style Supermarché */
+        .modal-receipt {
+            max-width: 400px;
+            padding: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+        
+        .receipt-paper {
+            background: #fafafa;
+            color: #1a1a1a;
+            padding: 30px 25px;
+            font-family: 'Courier New', monospace;
+            border-radius: 4px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        
+        .receipt-paper::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: linear-gradient(135deg, transparent 33.33%, #fafafa 33.33%, #fafafa 66.66%, transparent 66.66%),
+                        linear-gradient(-135deg, transparent 33.33%, #fafafa 33.33%, #fafafa 66.66%, transparent 66.66%);
+            background-size: 14px 20px;
+        }
+        
+        .receipt-paper::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: linear-gradient(45deg, transparent 33.33%, #fafafa 33.33%, #fafafa 66.66%, transparent 66.66%),
+                        linear-gradient(-45deg, transparent 33.33%, #fafafa 33.33%, #fafafa 66.66%, transparent 66.66%);
+            background-size: 14px 20px;
+        }
+        
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .receipt-logo {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+        
+        .receipt-company {
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        
+        .receipt-subtitle {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        .receipt-event {
+            font-size: 12px;
+            margin-top: 10px;
+            padding: 5px 10px;
+            background: #eee;
+            display: inline-block;
+            border-radius: 3px;
+        }
+        
+        .receipt-divider {
+            text-align: center;
+            color: #ccc;
+            font-size: 10px;
+            letter-spacing: -1px;
+            margin: 12px 0;
+        }
+        
+        .receipt-info {
+            margin: 10px 0;
+        }
+        
+        .receipt-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 3px 0;
+        }
+        
+        .receipt-items {
+            margin: 10px 0;
+        }
+        
+        .receipt-item {
+            margin-bottom: 8px;
+        }
+        
+        .receipt-item-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .receipt-item-detail {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #555;
+            padding-left: 10px;
+        }
+        
+        .receipt-totals {
+            margin: 15px 0;
+        }
+        
+        .receipt-total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 4px 0;
+        }
+        
+        .receipt-total-row.small {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .receipt-total-row.discount {
+            color: #e53e3e;
+        }
+        
+        .receipt-total-row.grand-total {
+            font-size: 18px;
+            font-weight: bold;
+            padding-top: 10px;
+            margin-top: 5px;
+            border-top: 2px dashed #333;
+        }
+        
+        .receipt-payment {
+            text-align: center;
+            font-size: 13px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .receipt-payment span:first-child {
+            font-size: 20px;
+            margin-right: 5px;
+        }
+        
+        .receipt-footer {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .receipt-footer p {
+            font-size: 12px;
+            margin: 5px 0;
+        }
+        
+        .receipt-footer .receipt-small {
+            font-size: 10px;
+            color: #888;
+        }
+        
+        .receipt-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 0 10px;
+        }
+        
+        .receipt-btn {
+            flex: 1;
+            padding: 14px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg-card);
+            color: var(--text);
+        }
+        
+        .receipt-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .receipt-btn.print {
+            background: var(--accent-cyan);
+            color: white;
+        }
+        
+        .receipt-btn.email {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
         /* NOTIFICATION */
         .notification {
             position: fixed;
@@ -966,6 +2007,17 @@
         
         .article-list-fav:hover {
             transform: scale(1.2);
+        }
+        
+        .article-list-thumb {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            flex-shrink: 0;
+            border: 2px solid var(--border);
         }
         
         .article-list-info {
@@ -1112,7 +2164,7 @@
             <a href="index.html" class="logo">
                 <span class="logo-icon">🐟</span>
                 <span class="logo-text">TRAKIO</span>
-                <span class="nav-version">v5.0.4</span>
+                <span class="nav-version">v5.1.0</span>
             </a>
         </div>
         
@@ -1154,41 +2206,46 @@
             <div class="articles-grid" id="articles-grid">
                 <!-- Articles dynamiques -->
             </div>
+            <div class="articles-pagination" id="articlesPagination">
+                <button class="pagination-btn" onclick="prevPage()" id="prevPageBtn" disabled>◀</button>
+                <span class="pagination-info" id="paginationInfo">1 / 1</span>
+                <button class="pagination-btn" onclick="nextPage()" id="nextPageBtn" disabled>▶</button>
+            </div>
         </div>
         
         <!-- COLONNE CATÉGORIES -->
         <div class="categories-col">
             <button class="category-btn cat-favoris" onclick="selectCategory('favoris')" data-cat="favoris">
-                <span>⭐</span>
-                <span>Favoris</span>
+                <span class="cat-icon">⭐</span>
+                <span class="cat-label">Favoris</span>
             </button>
             <button class="category-btn cat-all active" onclick="selectCategory('')" data-cat="">
-                <span>📦</span>
-                <span>Tous</span>
+                <span class="cat-icon">🗂️</span>
+                <span class="cat-label">Tous</span>
             </button>
             <button class="category-btn cat-poissons" onclick="selectCategory('poissons')" data-cat="poissons">
-                <span>🐟</span>
-                <span>Poissons</span>
+                <span class="cat-icon">🐟</span>
+                <span class="cat-label">Poissons</span>
             </button>
             <button class="category-btn cat-crustaces" onclick="selectCategory('crustaces')" data-cat="crustaces">
-                <span>🦐</span>
-                <span>Crustacés</span>
+                <span class="cat-icon">🦞</span>
+                <span class="cat-label">Crustacés</span>
             </button>
             <button class="category-btn cat-coquillages" onclick="selectCategory('coquillages')" data-cat="coquillages">
-                <span>🦪</span>
-                <span>Coquillages</span>
+                <span class="cat-icon">🦪</span>
+                <span class="cat-label">Coquillages</span>
             </button>
             <button class="category-btn cat-fumes" onclick="selectCategory('fumes')" data-cat="fumes">
-                <span>🔥</span>
-                <span>Fumés</span>
+                <span class="cat-icon">🍣</span>
+                <span class="cat-label">Fumés</span>
             </button>
             <button class="category-btn cat-traiteur" onclick="selectCategory('traiteur')" data-cat="traiteur">
-                <span>🍽️</span>
-                <span>Traiteur</span>
+                <span class="cat-icon">🍴</span>
+                <span class="cat-label">Traiteur</span>
             </button>
             <button class="category-btn cat-epicerie" onclick="selectCategory('epicerie')" data-cat="epicerie">
-                <span>🛒</span>
-                <span>Épicerie</span>
+                <span class="cat-icon">🧺</span>
+                <span class="cat-label">Épicerie</span>
             </button>
         </div>
         
@@ -1234,15 +2291,15 @@
             </div>
             
             <div class="payment-buttons">
-                <button class="pay-btn cash" onclick="processPayment('cash')">
+                <button class="pay-btn cash" onclick="openCashModal()">
                     <span>💵</span>
                     <span>Espèces</span>
                 </button>
-                <button class="pay-btn card" onclick="processPayment('card')">
+                <button class="pay-btn card" onclick="openCardModal()">
                     <span>💳</span>
                     <span>Carte</span>
                 </button>
-                <button class="pay-btn twint" onclick="processPayment('twint')">
+                <button class="pay-btn twint" onclick="openTwintModal()">
                     <span>📱</span>
                     <span>Twint</span>
                 </button>
@@ -1286,6 +2343,102 @@
             <div class="modal-footer">
                 <button class="cancel" onclick="closeWeightModal()">Annuler</button>
                 <button class="confirm" onclick="confirmWeight()">✓ Ajouter</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL PAIEMENT ESPÈCES -->
+    <div class="modal-overlay" id="cashModal">
+        <div class="modal modal-cash">
+            <div class="modal-header">
+                <div class="modal-title">💵 Paiement Espèces</div>
+            </div>
+            <div class="modal-body">
+                <div class="cash-total-display">
+                    <div class="cash-total-label">Total à payer</div>
+                    <div class="cash-total-amount" id="cashTotalAmount">0.00 CHF</div>
+                </div>
+                
+                <div class="cash-given-section">
+                    <div class="cash-given-label">Montant reçu</div>
+                    <div class="cash-bills">
+                        <button class="cash-bill-btn" onclick="selectCashAmount(10)">10</button>
+                        <button class="cash-bill-btn" onclick="selectCashAmount(20)">20</button>
+                        <button class="cash-bill-btn" onclick="selectCashAmount(50)">50</button>
+                        <button class="cash-bill-btn" onclick="selectCashAmount(100)">100</button>
+                        <button class="cash-bill-btn" onclick="selectCashAmount(200)">200</button>
+                    </div>
+                    <div class="cash-custom">
+                        <input type="number" id="cashCustomAmount" placeholder="Autre montant..." step="0.05" min="0">
+                        <button class="cash-custom-btn" onclick="selectCustomCashAmount()">OK</button>
+                    </div>
+                </div>
+                
+                <div class="cash-exact-btn-wrapper">
+                    <button class="cash-exact-btn" onclick="selectExactAmount()">💰 Montant exact</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel" onclick="closeCashModal()">Annuler</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL RENDU MONNAIE -->
+    <div class="modal-overlay" id="changeModal" onclick="closeChangeModalNow()">
+        <div class="modal modal-change" onclick="event.stopPropagation()">
+            <div class="change-success-icon">✅</div>
+            <div class="change-title">Paiement accepté</div>
+            <div class="change-details">
+                <div class="change-row">
+                    <span>Total</span>
+                    <span id="changeTotal">0.00 CHF</span>
+                </div>
+                <div class="change-row">
+                    <span>Reçu</span>
+                    <span id="changeReceived">0.00 CHF</span>
+                </div>
+                <div class="change-row change-amount">
+                    <span>À rendre</span>
+                    <span id="changeAmount">0.00 CHF</span>
+                </div>
+            </div>
+            <div class="change-countdown" id="changeCountdown">Fermeture dans 5s... <span style="opacity: 0.6;">(cliquer pour fermer)</span></div>
+        </div>
+    </div>
+    
+    <!-- MODAL PAIEMENT CARTE -->
+    <div class="modal-overlay" id="cardModal">
+        <div class="modal modal-terminal">
+            <div class="terminal-icon">💳</div>
+            <div class="terminal-title">Paiement par Carte</div>
+            <div class="terminal-amount" id="cardTotalAmount">0.00 CHF</div>
+            <div class="terminal-status">
+                <div class="terminal-loader"></div>
+                <span>En attente du terminal...</span>
+            </div>
+            <div class="terminal-hint">Présentez la carte au terminal de paiement</div>
+            <div class="terminal-actions">
+                <button class="terminal-btn cancel" onclick="closeCardModal()">✕ Annuler</button>
+                <button class="terminal-btn confirm" onclick="confirmCardPayment()">✓ Paiement accepté</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL PAIEMENT TWINT -->
+    <div class="modal-overlay" id="twintModal">
+        <div class="modal modal-terminal twint">
+            <div class="terminal-icon">📱</div>
+            <div class="terminal-title">Paiement Twint</div>
+            <div class="terminal-amount" id="twintTotalAmount">0.00 CHF</div>
+            <div class="terminal-status">
+                <div class="terminal-loader twint"></div>
+                <span>En attente de confirmation...</span>
+            </div>
+            <div class="terminal-hint">Le client scanne le QR code ou valide sur son app</div>
+            <div class="terminal-actions">
+                <button class="terminal-btn cancel" onclick="closeTwintModal()">✕ Annuler</button>
+                <button class="terminal-btn confirm twint" onclick="confirmTwintPayment()">✓ Paiement accepté</button>
             </div>
         </div>
     </div>
@@ -1352,65 +2505,151 @@
     
     <!-- MODAL RAPPORT -->
     <div class="modal-overlay" id="reportModal">
-        <div class="modal modal-large">
+        <div class="modal modal-report">
             <div class="modal-header">
                 <div class="modal-title">📊 Rapport - <span id="reportEventName">Manifestation</span></div>
             </div>
             <div class="modal-body">
-                <div class="report-stats">
-                    <div class="report-stat">
-                        <div class="report-stat-value" id="reportTxCount">0</div>
-                        <div class="report-stat-label">Transactions</div>
+                <!-- Onglets -->
+                <div class="report-tabs">
+                    <button class="report-tab active" onclick="setReportTab('summary')" data-tab="summary">📈 Résumé</button>
+                    <button class="report-tab" onclick="setReportTab('tickets')" data-tab="tickets">🧾 Tickets (<span id="reportTicketCount">0</span>)</button>
+                </div>
+                
+                <!-- TAB RÉSUMÉ -->
+                <div class="report-tab-content active" id="reportTabSummary">
+                    <div class="report-stats">
+                        <div class="report-stat">
+                            <div class="report-stat-value" id="reportTxCount">0</div>
+                            <div class="report-stat-label">Transactions</div>
+                        </div>
+                        <div class="report-stat">
+                            <div class="report-stat-value" id="reportCaTTC">0 CHF</div>
+                            <div class="report-stat-label">CA TTC</div>
+                        </div>
+                        <div class="report-stat">
+                            <div class="report-stat-value" id="reportCaHT">0 CHF</div>
+                            <div class="report-stat-label">CA HT</div>
+                        </div>
+                        <div class="report-stat">
+                            <div class="report-stat-value" id="reportArticles">0</div>
+                            <div class="report-stat-label">Articles vendus</div>
+                        </div>
                     </div>
-                    <div class="report-stat">
-                        <div class="report-stat-value" id="reportCaTTC">0 CHF</div>
-                        <div class="report-stat-label">CA TTC</div>
+                    
+                    <div class="report-breakdown">
+                        <h4>💳 Répartition paiements</h4>
+                        <div class="breakdown-row">
+                            <span>💵 Espèces</span>
+                            <span id="reportCash">0.00 CHF</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span>💳 Carte</span>
+                            <span id="reportCard">0.00 CHF</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span>📱 Twint</span>
+                            <span id="reportTwint">0.00 CHF</span>
+                        </div>
                     </div>
-                    <div class="report-stat">
-                        <div class="report-stat-value" id="reportCaHT">0 CHF</div>
-                        <div class="report-stat-label">CA HT</div>
-                    </div>
-                    <div class="report-stat">
-                        <div class="report-stat-value" id="reportArticles">0</div>
-                        <div class="report-stat-label">Articles vendus</div>
+                    
+                    <div class="report-breakdown" style="margin-top: 16px;" id="redevanceSection">
+                        <h4>💰 Calcul Redevance</h4>
+                        <div class="breakdown-row">
+                            <span>CA HT</span>
+                            <span id="reportHT">0.00 CHF</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span>Redevance (<span id="reportRedevancePercent">0</span>%)</span>
+                            <span id="reportRedevanceAmount" style="color: var(--error);">-0.00 CHF</span>
+                        </div>
+                        <div class="breakdown-row total">
+                            <span>💵 À REMETTRE</span>
+                            <span id="reportToRemit">0.00 CHF</span>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="report-breakdown">
-                    <h4>💳 Répartition paiements</h4>
-                    <div class="breakdown-row">
-                        <span>💵 Espèces</span>
-                        <span id="reportCash">0.00 CHF</span>
+                <!-- TAB TICKETS -->
+                <div class="report-tab-content" id="reportTabTickets">
+                    <div class="tickets-search-wrapper">
+                        <input type="text" class="tickets-search-input" id="searchTickets" placeholder="🔍 Rechercher par n°, article, montant..." oninput="filterTicketsList()">
                     </div>
-                    <div class="breakdown-row">
-                        <span>💳 Carte</span>
-                        <span id="reportCard">0.00 CHF</span>
-                    </div>
-                    <div class="breakdown-row">
-                        <span>📱 Twint</span>
-                        <span id="reportTwint">0.00 CHF</span>
-                    </div>
-                </div>
-                
-                <div class="report-breakdown" style="margin-top: 16px;" id="redevanceSection">
-                    <h4>💰 Calcul Redevance</h4>
-                    <div class="breakdown-row">
-                        <span>CA HT</span>
-                        <span id="reportHT">0.00 CHF</span>
-                    </div>
-                    <div class="breakdown-row">
-                        <span>Redevance (<span id="reportRedevancePercent">0</span>%)</span>
-                        <span id="reportRedevanceAmount" style="color: var(--error);">-0.00 CHF</span>
-                    </div>
-                    <div class="breakdown-row total">
-                        <span>💵 À REMETTRE</span>
-                        <span id="reportToRemit">0.00 CHF</span>
+                    <div class="tickets-list" id="ticketsList">
+                        <!-- Liste des tickets générée dynamiquement -->
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="cancel" onclick="closeReportModal()">Fermer</button>
                 <button class="confirm" onclick="exportReport()">📄 Exporter</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL TICKET DÉTAIL (style supermarché) -->
+    <div class="modal-overlay" id="ticketDetailModal" onclick="closeTicketDetail()">
+        <div class="modal modal-receipt" onclick="event.stopPropagation()">
+            <div class="receipt-paper" id="receiptContent">
+                <div class="receipt-header">
+                    <div class="receipt-logo">🐟</div>
+                    <div class="receipt-company">BOREX POISSONS</div>
+                    <div class="receipt-subtitle">Produits de la mer</div>
+                    <div class="receipt-event" id="receiptEventName">Manifestation</div>
+                </div>
+                <div class="receipt-divider">━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                <div class="receipt-info">
+                    <div class="receipt-info-row">
+                        <span>Ticket N°</span>
+                        <span id="receiptNumber">#0001</span>
+                    </div>
+                    <div class="receipt-info-row">
+                        <span>Date</span>
+                        <span id="receiptDate">10.12.2024</span>
+                    </div>
+                    <div class="receipt-info-row">
+                        <span>Heure</span>
+                        <span id="receiptTime">14:32</span>
+                    </div>
+                </div>
+                <div class="receipt-divider">━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                <div class="receipt-items" id="receiptItems">
+                    <!-- Articles dynamiques -->
+                </div>
+                <div class="receipt-divider">━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                <div class="receipt-totals">
+                    <div class="receipt-total-row" id="receiptSubtotal">
+                        <span>Sous-total</span>
+                        <span>0.00</span>
+                    </div>
+                    <div class="receipt-total-row discount" id="receiptDiscountRow" style="display: none;">
+                        <span>Remise</span>
+                        <span id="receiptDiscount">-0.00</span>
+                    </div>
+                    <div class="receipt-total-row small">
+                        <span>TVA 2.6%</span>
+                        <span id="receiptTVA">0.00</span>
+                    </div>
+                    <div class="receipt-total-row grand-total">
+                        <span>TOTAL CHF</span>
+                        <span id="receiptTotal">0.00</span>
+                    </div>
+                </div>
+                <div class="receipt-divider">━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                <div class="receipt-payment">
+                    <span id="receiptPaymentIcon">💵</span>
+                    <span>Payé par </span>
+                    <strong id="receiptPaymentMethod">Espèces</strong>
+                </div>
+                <div class="receipt-footer">
+                    <p>Merci de votre visite !</p>
+                    <p class="receipt-small">www.borex-poissons.ch</p>
+                </div>
+            </div>
+            <div class="receipt-actions">
+                <button class="receipt-btn" onclick="closeTicketDetail()">✕ Fermer</button>
+                <button class="receipt-btn print" onclick="printReceipt()">🖨️ Imprimer</button>
+                <button class="receipt-btn email" onclick="emailReceipt()">📧 Email</button>
             </div>
         </div>
     </div>
@@ -1433,6 +2672,11 @@
                     <button class="articles-tab" onclick="setArticlesTab('favorites')" data-tab="favorites">
                         ⭐ Favoris (<span id="favoritesCount">0</span>)
                     </button>
+                </div>
+                
+                <!-- Barre de recherche -->
+                <div class="modal-search-wrapper">
+                    <input type="text" class="modal-search-input" id="searchArticleModal" placeholder="🔍 Rechercher un article..." oninput="filterArticlesList()">
                 </div>
                 
                 <!-- Formulaire ajout/modif -->
@@ -1460,6 +2704,16 @@
                         </select>
                         <input type="text" id="articleOrigin" placeholder="Origine (optionnel)">
                     </div>
+                    <!-- Upload Image -->
+                    <div class="image-upload-container">
+                        <div class="image-preview" id="imagePreview">📷</div>
+                        <div class="image-upload-actions">
+                            <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+                            <button type="button" class="image-upload-btn" onclick="document.getElementById('imageInput').click()">📷 Ajouter photo</button>
+                            <button type="button" class="image-upload-btn remove" id="removeImageBtn" onclick="removeImage()" style="display:none;">🗑️ Supprimer</button>
+                        </div>
+                    </div>
+                    <input type="hidden" id="articleImage">
                     <div class="article-form-actions">
                         <button class="article-form-btn cancel" onclick="cancelArticleForm()">Annuler</button>
                         <button class="article-form-btn save" onclick="saveArticle()">💾 Enregistrer</button>
@@ -1491,11 +2745,14 @@
         // CONFIGURATION & VARIABLES
         // ============================================
         
+        const APP_VERSION = '5.1.0';
         const TVA_RATE = 2.6; // TVA alimentaire Suisse
         
         let articlesData = [];
         let filteredArticles = [];
         let currentCategory = '';
+        let currentPage = 1;
+        const ARTICLES_PER_PAGE = 18; // 6 colonnes x 3 lignes
         let currentArticlesTab = 'list';
         let cart = [];
         let transactions = [];
@@ -1597,6 +2854,158 @@
             localStorage.setItem('trakio_caisse_articles', JSON.stringify(articlesData));
         }
         
+        // ============================================
+        // FIREBASE SYNC - Articles & Transactions
+        // ============================================
+        
+        function getDateFolder() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+        
+        async function saveArticlesToFirebase() {
+            if (!firebaseAvailable || !db) return;
+            
+            try {
+                const batch = db.batch();
+                const collectionRef = db.collection('caisse').doc('articles').collection('items');
+                
+                // Sauvegarder chaque article
+                for (const article of articlesData) {
+                    const docRef = collectionRef.doc(article.id);
+                    batch.set(docRef, {
+                        ...article,
+                        syncedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                
+                await batch.commit();
+                console.log('✅ Articles synchronisés avec Firebase');
+            } catch (e) {
+                console.error('❌ Erreur sync articles Firebase:', e);
+            }
+        }
+        
+        async function saveTransactionToFirebase(transaction) {
+            if (!firebaseAvailable || !db) return;
+            
+            try {
+                const dateFolder = getDateFolder();
+                const eventName = eventConfig.name || 'default';
+                
+                // Structure: caisse/{eventName}/{date}/transactions/{transactionId}
+                await db.collection('caisse')
+                    .doc(eventName.replace(/[^a-zA-Z0-9]/g, '_'))
+                    .collection(dateFolder)
+                    .doc(transaction.id)
+                    .set({
+                        ...transaction,
+                        syncedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                
+                console.log('✅ Transaction sauvegardée:', transaction.id);
+            } catch (e) {
+                console.error('❌ Erreur save transaction:', e);
+            }
+        }
+        
+        async function saveDailyReport(report) {
+            if (!firebaseAvailable || !db) return;
+            
+            try {
+                const dateFolder = getDateFolder();
+                const eventName = eventConfig.name || 'default';
+                
+                // Structure: caisse/{eventName}/{date}/report
+                await db.collection('caisse')
+                    .doc(eventName.replace(/[^a-zA-Z0-9]/g, '_'))
+                    .collection(dateFolder)
+                    .doc('_report')
+                    .set({
+                        ...report,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                
+                console.log('✅ Rapport journalier sauvegardé');
+            } catch (e) {
+                console.error('❌ Erreur save rapport:', e);
+            }
+        }
+        
+        async function loadArticlesFromFirebase() {
+            if (!firebaseAvailable || !db) return false;
+            
+            try {
+                const snapshot = await db.collection('caisse').doc('articles').collection('items').get();
+                
+                if (!snapshot.empty) {
+                    const firebaseArticles = [];
+                    snapshot.forEach(doc => {
+                        firebaseArticles.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    // Merge avec localStorage (Firebase prioritaire)
+                    if (firebaseArticles.length > 0) {
+                        articlesData = firebaseArticles.filter(a => a.active !== false);
+                        saveArticlesToStorage();
+                        console.log('✅ Articles chargés depuis Firebase:', articlesData.length);
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.error('❌ Erreur chargement Firebase:', e);
+            }
+            return false;
+        }
+        
+        async function syncAllData() {
+            showNotification('Synchronisation...', 'info');
+            
+            try {
+                // 1. Charger articles depuis Firebase
+                await loadArticlesFromFirebase();
+                
+                // 2. Sauvegarder articles locaux vers Firebase
+                await saveArticlesToFirebase();
+                
+                // 3. Sauvegarder transactions du jour
+                for (const tx of transactions) {
+                    await saveTransactionToFirebase(tx);
+                }
+                
+                // 4. Sauvegarder rapport journalier
+                const report = generateDailyReportData();
+                await saveDailyReport(report);
+                
+                filterArticles();
+                showNotification('Synchronisation terminée', 'success');
+            } catch (e) {
+                showNotification('Erreur de synchronisation', 'error');
+                console.error(e);
+            }
+        }
+        
+        function generateDailyReportData() {
+            const today = new Date().toISOString().slice(0, 10);
+            const todayTx = transactions.filter(t => t.date?.startsWith(today));
+            
+            return {
+                date: today,
+                event: eventConfig.name || 'default',
+                redevance: eventConfig.redevance || 0,
+                totalTransactions: todayTx.length,
+                totalHT: todayTx.reduce((sum, t) => sum + (t.totalHT || 0), 0),
+                totalTVA: todayTx.reduce((sum, t) => sum + (t.totalTVA || 0), 0),
+                totalTTC: todayTx.reduce((sum, t) => sum + (t.totalTTC || 0), 0),
+                totalRedevance: todayTx.reduce((sum, t) => sum + (t.redevance || 0), 0),
+                payments: {
+                    cash: todayTx.filter(t => t.paymentMethod === 'cash').reduce((sum, t) => sum + (t.totalTTC || 0), 0),
+                    card: todayTx.filter(t => t.paymentMethod === 'card').reduce((sum, t) => sum + (t.totalTTC || 0), 0),
+                    twint: todayTx.filter(t => t.paymentMethod === 'twint').reduce((sum, t) => sum + (t.totalTTC || 0), 0)
+                }
+            };
+        }
+        
         function getDefaultArticles() {
             // Articles de démo pour fonctionner immédiatement
             return [
@@ -1633,6 +3042,7 @@
                 return matchSearch;
             });
             
+            currentPage = 1; // Reset page on filter
             renderArticles();
         }
         
@@ -1648,10 +3058,27 @@
             const grid = document.getElementById('articles-grid');
             document.getElementById('articles-count').textContent = `(${filteredArticles.length})`;
             
-            const icons = {
-                poissons: '🐟', crustaces: '🦐', coquillages: '🦪',
-                fumes: '🔥', traiteur: '🍽️', epicerie: '🛒'
+            const categoryColors = {
+                poissons: '#06b6d4',
+                crustaces: '#ef4444',
+                coquillages: '#14b8a6',
+                fumes: '#f59e0b',
+                traiteur: '#10b981',
+                epicerie: '#8b5cf6'
             };
+            
+            // Calcul pagination
+            const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            
+            const startIndex = (currentPage - 1) * ARTICLES_PER_PAGE;
+            const endIndex = startIndex + ARTICLES_PER_PAGE;
+            const pageArticles = filteredArticles.slice(startIndex, endIndex);
+            
+            // Mise à jour pagination UI
+            document.getElementById('paginationInfo').textContent = `${currentPage} / ${totalPages}`;
+            document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+            document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
             
             if (filteredArticles.length === 0) {
                 grid.innerHTML = `
@@ -1668,16 +3095,59 @@
                 return;
             }
             
-            grid.innerHTML = filteredArticles.map(article => `
-                <button class="article-btn" onclick="addToCart('${article.id}')">
-                    ${article.favorite ? '<span style="position:absolute;top:8px;right:8px;font-size:14px;">⭐</span>' : ''}
-                    <div class="article-icon">${icons[article.category] || '📦'}</div>
-                    <div class="article-name">${article.name}</div>
-                    ${article.origin ? `<div class="article-origin">📍 ${article.origin}</div>` : ''}
-                    <div class="article-price">${formatCHF(article.price)}</div>
-                    <div class="article-unit">/${article.unit || 'kg'}</div>
-                </button>
-            `).join('');
+            grid.innerHTML = pageArticles.map(article => {
+                const color = categoryColors[article.category] || '#64748b';
+                const hasImage = article.image && article.image.length > 0;
+                
+                if (hasImage) {
+                    return `
+                    <button class="article-btn has-image" onclick="addToCart('${article.id}')">
+                        <div class="article-color-bar" style="background: ${color};"></div>
+                        ${article.favorite ? '<span class="article-favorite">⭐</span>' : ''}
+                        <div class="article-header">
+                            <div class="article-name">${article.name}</div>
+                        </div>
+                        <div class="article-image" style="background-image: url('${article.image}');"></div>
+                        <div class="article-content">
+                            <div class="article-price-section">
+                                <span class="article-price">${formatCHF(article.price)}</span>
+                                <span class="article-unit">/${article.unit || 'kg'}</span>
+                            </div>
+                        </div>
+                    </button>
+                `} else {
+                    return `
+                    <button class="article-btn" onclick="addToCart('${article.id}')">
+                        <div class="article-color-bar" style="background: ${color};"></div>
+                        ${article.favorite ? '<span class="article-favorite">⭐</span>' : ''}
+                        <div class="article-content">
+                            <div>
+                                <div class="article-name">${article.name}</div>
+                                ${article.origin ? `<div class="article-origin">${article.origin}</div>` : ''}
+                            </div>
+                            <div class="article-price-section">
+                                <div class="article-price">${formatCHF(article.price)}</div>
+                                <div class="article-unit">/${article.unit || 'kg'}</div>
+                            </div>
+                        </div>
+                    </button>
+                `}
+            }).join('');
+        }
+        
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderArticles();
+            }
+        }
+        
+        function nextPage() {
+            const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderArticles();
+            }
         }
         
         // ============================================
@@ -1989,6 +3459,7 @@
         }
         
         function getEventTransactions() {
+            if (!eventConfig || !eventConfig.name) return [];
             return transactions.filter(tx => 
                 tx.event === eventConfig.name && 
                 tx.date === eventConfig.date &&
@@ -1996,7 +3467,248 @@
             );
         }
         
-        async function processPayment(method) {
+        // ============================================
+        // PAIEMENT ESPÈCES - MODAL RENDU MONNAIE
+        // ============================================
+        
+        let cashModalTotal = 0;
+        let changeCountdownTimer = null;
+        
+        function openCashModal() {
+            if (cart.length === 0) {
+                showNotification('Le ticket est vide', 'warning');
+                return;
+            }
+            
+            // Calculer le total
+            const globalDiscount = parseFloat(document.getElementById('globalDiscount').value) || 0;
+            let subtotalTTC = 0;
+            cart.forEach(item => {
+                subtotalTTC += item.price * item.qty - (item.discount || 0);
+            });
+            cashModalTotal = swiss(subtotalTTC - globalDiscount);
+            
+            // Afficher le total
+            document.getElementById('cashTotalAmount').textContent = formatCHF(cashModalTotal);
+            document.getElementById('cashCustomAmount').value = '';
+            
+            // Ouvrir le modal
+            document.getElementById('cashModal').classList.add('active');
+        }
+        
+        function closeCashModal() {
+            document.getElementById('cashModal').classList.remove('active');
+        }
+        
+        function selectCashAmount(amount) {
+            if (amount < cashModalTotal) {
+                showNotification(`Montant insuffisant (minimum ${formatCHF(cashModalTotal)})`, 'warning');
+                return;
+            }
+            processCashPayment(amount);
+        }
+        
+        function selectCustomCashAmount() {
+            const amount = parseFloat(document.getElementById('cashCustomAmount').value) || 0;
+            if (amount < cashModalTotal) {
+                showNotification(`Montant insuffisant (minimum ${formatCHF(cashModalTotal)})`, 'warning');
+                return;
+            }
+            processCashPayment(amount);
+        }
+        
+        function selectExactAmount() {
+            processCashPayment(cashModalTotal);
+        }
+        
+        function processCashPayment(amountReceived) {
+            const changeAmount = swiss(amountReceived - cashModalTotal);
+            
+            // Fermer le modal espèces
+            closeCashModal();
+            
+            // Définir le mode de paiement courant
+            currentPaymentMethod = 'cash';
+            
+            // Afficher le rendu
+            document.getElementById('changeTotal').textContent = formatCHF(cashModalTotal);
+            document.getElementById('changeReceived').textContent = formatCHF(amountReceived);
+            document.getElementById('changeAmount').textContent = formatCHF(changeAmount);
+            
+            // Ouvrir le modal de rendu
+            document.getElementById('changeModal').classList.add('active');
+            
+            // Countdown et fermeture automatique
+            let countdown = 5;
+            document.getElementById('changeCountdown').innerHTML = `Fermeture dans ${countdown}s... <span style="opacity: 0.6;">(cliquer pour fermer)</span>`;
+            
+            if (changeCountdownTimer) clearInterval(changeCountdownTimer);
+            
+            changeCountdownTimer = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    document.getElementById('changeCountdown').innerHTML = `Fermeture dans ${countdown}s... <span style="opacity: 0.6;">(cliquer pour fermer)</span>`;
+                } else {
+                    clearInterval(changeCountdownTimer);
+                    document.getElementById('changeModal').classList.remove('active');
+                    // Enregistrer la transaction (sans notification car déjà affichée)
+                    processPayment('cash', true);
+                }
+            }, 1000);
+        }
+        
+        let currentPaymentMethod = 'cash'; // Pour savoir quel type de paiement traiter
+        
+        function closeChangeModalNow() {
+            if (changeCountdownTimer) clearInterval(changeCountdownTimer);
+            document.getElementById('changeModal').classList.remove('active');
+            
+            // Ne rien faire si ce n'est pas un paiement espèces (carte/twint déjà traités)
+            if (currentPaymentMethod === 'cash' && cart.length > 0) {
+                processPayment('cash', true);
+            }
+            
+            resetChangeModal();
+        }
+        
+        // ============================================
+        // PAIEMENT CARTE - MODAL TERMINAL
+        // ============================================
+        
+        let cardModalTotal = 0;
+        
+        function openCardModal() {
+            if (cart.length === 0) {
+                showNotification('Le ticket est vide', 'warning');
+                return;
+            }
+            
+            // Calculer le total
+            const globalDiscount = parseFloat(document.getElementById('globalDiscount').value) || 0;
+            let subtotalTTC = 0;
+            cart.forEach(item => {
+                subtotalTTC += item.price * item.qty - (item.discount || 0);
+            });
+            cardModalTotal = swiss(subtotalTTC - globalDiscount);
+            
+            // Afficher le total
+            document.getElementById('cardTotalAmount').textContent = formatCHF(cardModalTotal);
+            
+            // Ouvrir le modal
+            document.getElementById('cardModal').classList.add('active');
+        }
+        
+        function closeCardModal() {
+            document.getElementById('cardModal').classList.remove('active');
+        }
+        
+        function confirmCardPayment() {
+            closeCardModal();
+            
+            // Afficher confirmation succès
+            showSuccessModal('card', cardModalTotal);
+            
+            // Enregistrer la transaction
+            processPayment('card', true);
+        }
+        
+        // ============================================
+        // PAIEMENT TWINT - MODAL TERMINAL
+        // ============================================
+        
+        let twintModalTotal = 0;
+        
+        function openTwintModal() {
+            if (cart.length === 0) {
+                showNotification('Le ticket est vide', 'warning');
+                return;
+            }
+            
+            // Calculer le total
+            const globalDiscount = parseFloat(document.getElementById('globalDiscount').value) || 0;
+            let subtotalTTC = 0;
+            cart.forEach(item => {
+                subtotalTTC += item.price * item.qty - (item.discount || 0);
+            });
+            twintModalTotal = swiss(subtotalTTC - globalDiscount);
+            
+            // Afficher le total
+            document.getElementById('twintTotalAmount').textContent = formatCHF(twintModalTotal);
+            
+            // Ouvrir le modal
+            document.getElementById('twintModal').classList.add('active');
+        }
+        
+        function closeTwintModal() {
+            document.getElementById('twintModal').classList.remove('active');
+        }
+        
+        function confirmTwintPayment() {
+            closeTwintModal();
+            
+            // Afficher confirmation succès
+            showSuccessModal('twint', twintModalTotal);
+            
+            // Enregistrer la transaction
+            processPayment('twint', true);
+        }
+        
+        // ============================================
+        // MODAL SUCCÈS GÉNÉRIQUE
+        // ============================================
+        
+        function showSuccessModal(method, amount) {
+            const methodLabels = { card: '💳 Carte', twint: '📱 Twint', cash: '💵 Espèces' };
+            const methodColors = { card: '#0ea5e9', twint: '#000000', cash: '#10b981' };
+            
+            // Définir le mode de paiement (pas cash = transaction déjà traitée)
+            currentPaymentMethod = method;
+            
+            // Réutiliser le modal de rendu pour afficher le succès
+            document.getElementById('changeTotal').textContent = formatCHF(amount);
+            document.getElementById('changeReceived').textContent = methodLabels[method];
+            document.getElementById('changeAmount').textContent = '✓ Payé';
+            document.getElementById('changeAmount').style.color = methodColors[method];
+            
+            // Modifier les labels
+            const rows = document.querySelectorAll('#changeModal .change-row');
+            rows[1].querySelector('span:first-child').textContent = 'Mode';
+            rows[2].querySelector('span:first-child').textContent = 'Statut';
+            
+            // Ouvrir le modal
+            document.getElementById('changeModal').classList.add('active');
+            
+            // Fermeture automatique après 3 secondes
+            let countdown = 3;
+            document.getElementById('changeCountdown').innerHTML = `Fermeture dans ${countdown}s... <span style="opacity: 0.6;">(cliquer pour fermer)</span>`;
+            
+            if (changeCountdownTimer) clearInterval(changeCountdownTimer);
+            
+            changeCountdownTimer = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    document.getElementById('changeCountdown').innerHTML = `Fermeture dans ${countdown}s... <span style="opacity: 0.6;">(cliquer pour fermer)</span>`;
+                } else {
+                    clearInterval(changeCountdownTimer);
+                    document.getElementById('changeModal').classList.remove('active');
+                    resetChangeModal();
+                }
+            }, 1000);
+        }
+        
+        function resetChangeModal() {
+            // Remettre les labels par défaut
+            const rows = document.querySelectorAll('#changeModal .change-row');
+            rows[1].querySelector('span:first-child').textContent = 'Reçu';
+            rows[2].querySelector('span:first-child').textContent = 'À rendre';
+            document.getElementById('changeAmount').style.color = '';
+        }
+        
+        // ============================================
+        // PAIEMENT GÉNÉRAL
+        // ============================================
+        
+        async function processPayment(method, skipNotification = false) {
             if (cart.length === 0) {
                 showNotification('Le ticket est vide', 'warning');
                 return;
@@ -2010,6 +3722,9 @@
             });
             
             const total = swiss(subtotalTTC - globalDiscount);
+            const totalHT = total / (1 + TVA_RATE / 100);
+            const totalTVA = total - totalHT;
+            const redevanceAmount = total * ((eventConfig.redevance || 0) / 100);
             
             // Incrémenter compteur
             transactionCounter++;
@@ -2021,8 +3736,9 @@
                 num: transactionCounter,
                 date: eventConfig.date || new Date().toISOString().slice(0, 10),
                 time: new Date().toTimeString().slice(0, 5),
+                timestamp: Date.now(),
                 event: eventConfig.name,
-                redevance: eventConfig.redevance,
+                eventRedevance: eventConfig.redevance,
                 items: cart.map(item => ({
                     articleId: item.articleId,
                     name: item.name,
@@ -2035,7 +3751,12 @@
                 })),
                 subtotal: subtotalTTC,
                 discount: globalDiscount,
+                totalHT: swiss(totalHT),
+                totalTVA: swiss(totalTVA),
+                totalTTC: total,
                 total: total,
+                redevance: swiss(redevanceAmount),
+                paymentMethod: method,
                 method: method,
                 cancelled: false,
                 synced: false
@@ -2045,19 +3766,17 @@
             transactions.push(transaction);
             saveTransactions();
             
-            // Essayer sync Firebase si disponible
+            // Sync Firebase avec structure dossier/date
             if (firebaseAvailable && db) {
-                try {
-                    await db.collection('caisse_transactions').add(transaction);
-                    transaction.synced = true;
-                    saveTransactions();
-                } catch (e) {
-                    console.log('Sync Firebase échoué, gardé local');
-                }
+                await saveTransactionToFirebase(transaction);
+                transaction.synced = true;
+                saveTransactions();
             }
             
-            const methodLabels = { cash: 'espèces', card: 'carte', twint: 'Twint' };
-            showNotification(`✓ Paiement ${methodLabels[method]}: ${formatCHF(total)}`, 'success');
+            if (!skipNotification) {
+                const methodLabels = { cash: 'espèces', card: 'carte', twint: 'Twint' };
+                showNotification(`✓ Paiement ${methodLabels[method]}: ${formatCHF(total)}`, 'success');
+            }
             
             // Reset
             cart = [];
@@ -2068,6 +3787,242 @@
         // ============================================
         // RAPPORT
         // ============================================
+        
+        let currentReportTab = 'summary';
+        
+        function setReportTab(tab) {
+            currentReportTab = tab;
+            
+            // Update tabs UI
+            document.querySelectorAll('.report-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.tab === tab);
+            });
+            
+            // Update content
+            document.getElementById('reportTabSummary').classList.toggle('active', tab === 'summary');
+            document.getElementById('reportTabTickets').classList.toggle('active', tab === 'tickets');
+            
+            if (tab === 'tickets') {
+                renderTicketsList();
+            }
+        }
+        
+        function filterTicketsList() {
+            renderTicketsList();
+        }
+        
+        function renderTicketsList() {
+            const eventTx = getEventTransactions();
+            const container = document.getElementById('ticketsList');
+            const searchInput = document.getElementById('searchTickets');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            
+            let filteredTx = eventTx;
+            
+            // Filtrer par recherche
+            if (searchTerm) {
+                filteredTx = eventTx.filter(tx => {
+                    // Recherche par numéro
+                    if (tx.num.toString().includes(searchTerm)) return true;
+                    // Recherche par montant
+                    if (tx.total.toString().includes(searchTerm)) return true;
+                    // Recherche par article
+                    if (tx.items.some(item => item.name.toLowerCase().includes(searchTerm))) return true;
+                    // Recherche par mode de paiement
+                    const methods = { cash: 'espèces', card: 'carte', twint: 'twint' };
+                    if (methods[tx.method]?.includes(searchTerm)) return true;
+                    return false;
+                });
+            }
+            
+            if (filteredTx.length === 0) {
+                container.innerHTML = `
+                    <div class="tickets-empty">
+                        <div class="tickets-empty-icon">${searchTerm ? '🔍' : '🧾'}</div>
+                        <p>${searchTerm ? 'Aucun ticket trouvé pour "' + searchTerm + '"' : 'Aucun ticket pour cette manifestation'}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Trier par timestamp décroissant (plus récent en premier)
+            const sortedTx = [...filteredTx].sort((a, b) => b.timestamp - a.timestamp);
+            
+            const paymentIcons = { cash: '💵', card: '💳', twint: '📱' };
+            const paymentLabels = { cash: 'Espèces', card: 'Carte', twint: 'Twint' };
+            
+            container.innerHTML = sortedTx.map(tx => `
+                <div class="ticket-card ${tx.cancelled ? 'cancelled' : ''}" onclick="showTicketDetail('${tx.id}')" style="cursor: pointer;">
+                    <div class="ticket-header-row">
+                        <div class="ticket-number">
+                            #${tx.num.toString().padStart(4, '0')}
+                            ${tx.cancelled ? '<span class="ticket-cancelled-badge">ANNULÉ</span>' : ''}
+                        </div>
+                        <div class="ticket-datetime">
+                            📅 ${formatDate(tx.date)} à ${tx.time}
+                        </div>
+                    </div>
+                    <div class="ticket-items">
+                        ${tx.items.map(item => `
+                            <div class="ticket-item-row">
+                                <span class="ticket-item-name">${item.name}</span>
+                                <span class="ticket-item-qty">${item.qty} × ${formatCHF(item.price)}/${item.unit || 'kg'}</span>
+                                <span class="ticket-item-total">${formatCHF(item.total)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="ticket-footer-row">
+                        <span class="ticket-payment-badge ${tx.method}">
+                            ${paymentIcons[tx.method] || '💰'} ${paymentLabels[tx.method] || tx.method}
+                        </span>
+                        <div>
+                            ${tx.discount > 0 ? `<span class="ticket-discount">-${formatCHF(tx.discount)}</span>` : ''}
+                            <span class="ticket-total">${formatCHF(tx.total)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // ============================================
+        // TICKET DÉTAIL - STYLE SUPERMARCHÉ
+        // ============================================
+        
+        let currentTicketId = null;
+        
+        function showTicketDetail(ticketId) {
+            const tx = transactions.find(t => t.id === ticketId);
+            if (!tx) return;
+            
+            currentTicketId = ticketId;
+            
+            // Remplir le ticket
+            document.getElementById('receiptEventName').textContent = tx.event || 'Vente directe';
+            document.getElementById('receiptNumber').textContent = '#' + tx.num.toString().padStart(4, '0');
+            document.getElementById('receiptDate').textContent = formatDate(tx.date);
+            document.getElementById('receiptTime').textContent = tx.time;
+            
+            // Articles
+            const itemsHtml = tx.items.map(item => `
+                <div class="receipt-item">
+                    <div class="receipt-item-name">${item.name}</div>
+                    <div class="receipt-item-detail">
+                        <span>${item.qty} × ${formatCHF(item.price)}/${item.unit || 'kg'}</span>
+                        <span>${formatCHF(item.total)}</span>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('receiptItems').innerHTML = itemsHtml;
+            
+            // Totaux
+            const subtotal = tx.items.reduce((sum, item) => sum + item.total, 0);
+            document.getElementById('receiptSubtotal').querySelector('span:last-child').textContent = formatCHF(subtotal);
+            
+            // Remise
+            if (tx.discount > 0) {
+                document.getElementById('receiptDiscountRow').style.display = 'flex';
+                document.getElementById('receiptDiscount').textContent = '-' + formatCHF(tx.discount);
+            } else {
+                document.getElementById('receiptDiscountRow').style.display = 'none';
+            }
+            
+            // TVA et Total
+            const tva = tx.totalTVA || (tx.total * TVA_RATE / (100 + TVA_RATE));
+            document.getElementById('receiptTVA').textContent = formatCHF(tva);
+            document.getElementById('receiptTotal').textContent = formatCHF(tx.total);
+            
+            // Mode de paiement
+            const paymentIcons = { cash: '💵', card: '💳', twint: '📱' };
+            const paymentLabels = { cash: 'Espèces', card: 'Carte', twint: 'Twint' };
+            document.getElementById('receiptPaymentIcon').textContent = paymentIcons[tx.method] || '💰';
+            document.getElementById('receiptPaymentMethod').textContent = paymentLabels[tx.method] || tx.method;
+            
+            // Ouvrir le modal
+            document.getElementById('ticketDetailModal').classList.add('active');
+        }
+        
+        function closeTicketDetail() {
+            document.getElementById('ticketDetailModal').classList.remove('active');
+            currentTicketId = null;
+        }
+        
+        function printReceipt() {
+            const content = document.getElementById('receiptContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Ticket</title>
+                    <style>
+                        body {
+                            font-family: 'Courier New', monospace;
+                            padding: 20px;
+                            max-width: 300px;
+                            margin: 0 auto;
+                        }
+                        .receipt-logo { font-size: 36px; text-align: center; }
+                        .receipt-company { font-size: 18px; font-weight: bold; text-align: center; letter-spacing: 2px; }
+                        .receipt-subtitle { font-size: 11px; color: #666; text-align: center; }
+                        .receipt-event { font-size: 12px; text-align: center; padding: 5px; background: #eee; display: inline-block; border-radius: 3px; }
+                        .receipt-header { text-align: center; margin-bottom: 15px; }
+                        .receipt-divider { text-align: center; color: #ccc; font-size: 10px; margin: 12px 0; }
+                        .receipt-info-row, .receipt-item-detail, .receipt-total-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; }
+                        .receipt-item-name { font-size: 13px; font-weight: 600; }
+                        .receipt-item-detail { padding-left: 10px; color: #555; }
+                        .receipt-total-row.grand-total { font-size: 18px; font-weight: bold; border-top: 2px dashed #333; padding-top: 10px; margin-top: 5px; }
+                        .receipt-total-row.small { font-size: 11px; color: #666; }
+                        .receipt-total-row.discount { color: #e53e3e; }
+                        .receipt-payment { text-align: center; padding: 10px; background: #f0f0f0; border-radius: 4px; margin: 10px 0; }
+                        .receipt-footer { text-align: center; margin-top: 15px; }
+                        .receipt-footer p { font-size: 12px; margin: 5px 0; }
+                        .receipt-small { font-size: 10px; color: #888; }
+                    </style>
+                </head>
+                <body>
+                    ${content}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        function emailReceipt() {
+            const tx = transactions.find(t => t.id === currentTicketId);
+            if (!tx) return;
+            
+            // Construire le corps de l'email
+            const itemsList = tx.items.map(item => 
+                `  - ${item.name}: ${item.qty} x ${formatCHF(item.price)} = ${formatCHF(item.total)}`
+            ).join('%0A');
+            
+            const paymentLabels = { cash: 'Espèces', card: 'Carte', twint: 'Twint' };
+            
+            const subject = encodeURIComponent(`Ticket #${tx.num.toString().padStart(4, '0')} - Borex Poissons`);
+            const body = encodeURIComponent(`BOREX POISSONS - Ticket de caisse
+================================
+Ticket N° #${tx.num.toString().padStart(4, '0')}
+Date: ${formatDate(tx.date)} à ${tx.time}
+Événement: ${tx.event || 'Vente directe'}
+================================
+
+ARTICLES:
+${tx.items.map(item => `  - ${item.name}: ${item.qty} x ${formatCHF(item.price)} = ${formatCHF(item.total)}`).join('\n')}
+
+--------------------------------
+${tx.discount > 0 ? `Remise: -${formatCHF(tx.discount)}\n` : ''}TVA 2.6%: ${formatCHF(tx.totalTVA || (tx.total * TVA_RATE / (100 + TVA_RATE)))}
+TOTAL: ${formatCHF(tx.total)}
+--------------------------------
+
+Payé par: ${paymentLabels[tx.method] || tx.method}
+
+Merci de votre visite !
+www.borex-poissons.ch`);
+            
+            // Ouvrir le client email
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
         
         function openReportModal() {
             const eventTx = getEventTransactions();
@@ -2093,6 +4048,7 @@
             // Afficher
             document.getElementById('reportEventName').textContent = `${eventConfig.name} (${formatDate(eventConfig.date)})`;
             document.getElementById('reportTxCount').textContent = txCount;
+            document.getElementById('reportTicketCount').textContent = txCount;
             document.getElementById('reportCaTTC').textContent = formatCHF(caTTC);
             document.getElementById('reportCaHT').textContent = formatCHF(caHT);
             document.getElementById('reportArticles').textContent = Math.round(articlesCount);
@@ -2108,6 +4064,10 @@
             
             // Masquer section redevance si 0%
             document.getElementById('redevanceSection').style.display = redevancePercent > 0 ? 'block' : 'none';
+            
+            // Reset tab to summary
+            currentReportTab = 'summary';
+            setReportTab('summary');
             
             document.getElementById('reportModal').classList.add('active');
         }
@@ -2183,6 +4143,7 @@ Généré le ${new Date().toLocaleString('fr-CH')}
             editingArticleId = null;
             document.getElementById('articleForm').style.display = 'none';
             document.getElementById('addArticleBtn').style.display = 'flex';
+            document.getElementById('searchArticleModal').value = ''; // Reset recherche
             updateArticlesTabs();
             renderArticlesList();
             document.getElementById('articlesModal').classList.add('active');
@@ -2213,19 +4174,32 @@ Généré le ${new Date().toLocaleString('fr-CH')}
         
         function renderArticlesList() {
             const container = document.getElementById('articlesList');
+            const searchInput = document.getElementById('searchArticleModal');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
             
             let listData = articlesData;
+            
+            // Filtre par tab (favoris ou tous)
             if (currentArticlesTab === 'favorites') {
                 listData = articlesData.filter(a => a.favorite);
+            }
+            
+            // Filtre par recherche
+            if (searchTerm) {
+                listData = listData.filter(a => 
+                    a.name?.toLowerCase().includes(searchTerm) ||
+                    a.origin?.toLowerCase().includes(searchTerm) ||
+                    a.category?.toLowerCase().includes(searchTerm)
+                );
             }
             
             if (listData.length === 0) {
                 container.innerHTML = `
                     <div class="empty-articles">
-                        <div class="empty-articles-icon">${currentArticlesTab === 'favorites' ? '⭐' : '📦'}</div>
-                        <p>${currentArticlesTab === 'favorites' ? 'Aucun favori' : 'Aucun article'}</p>
+                        <div class="empty-articles-icon">${searchTerm ? '🔍' : (currentArticlesTab === 'favorites' ? '⭐' : '📦')}</div>
+                        <p>${searchTerm ? 'Aucun résultat pour "' + searchTerm + '"' : (currentArticlesTab === 'favorites' ? 'Aucun favori' : 'Aucun article')}</p>
                         <p style="font-size: 12px; margin-top: 5px;">
-                            ${currentArticlesTab === 'favorites' ? 'Cliquez sur ☆ pour ajouter des favoris' : 'Ajoutez des articles pour commencer'}
+                            ${searchTerm ? 'Essayez un autre terme de recherche' : (currentArticlesTab === 'favorites' ? 'Cliquez sur ☆ pour ajouter des favoris' : 'Ajoutez des articles pour commencer')}
                         </p>
                     </div>
                 `;
@@ -2242,7 +4216,10 @@ Généré le ${new Date().toLocaleString('fr-CH')}
                     <span class="article-list-fav" onclick="toggleFavorite('${article.id}')" title="${article.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}">
                         ${article.favorite ? '⭐' : '☆'}
                     </span>
-                    <span style="font-size: 20px;">${icons[article.category] || '📦'}</span>
+                    ${article.image ? 
+                        `<div class="article-list-thumb" style="background-image: url('${article.image}');"></div>` :
+                        `<span style="font-size: 20px;">${icons[article.category] || '📦'}</span>`
+                    }
                     <div class="article-list-info">
                         <div class="article-list-name">${article.name}</div>
                         <div class="article-list-details">
@@ -2256,6 +4233,10 @@ Généré le ${new Date().toLocaleString('fr-CH')}
                     </div>
                 </div>
             `).join('');
+        }
+        
+        function filterArticlesList() {
+            renderArticlesList();
         }
         
         function toggleFavorite(articleId) {
@@ -2278,6 +4259,9 @@ Généré le ${new Date().toLocaleString('fr-CH')}
             form.style.display = 'block';
             addBtn.style.display = 'none';
             
+            // Reset image preview
+            resetImagePreview();
+            
             if (articleId) {
                 const article = articlesData.find(a => a.id === articleId);
                 if (article) {
@@ -2288,6 +4272,14 @@ Généré le ${new Date().toLocaleString('fr-CH')}
                     document.getElementById('articleUnit').value = article.unit || 'kg';
                     document.getElementById('articleCategory').value = article.category || 'poissons';
                     document.getElementById('articleOrigin').value = article.origin || '';
+                    
+                    // Charger l'image si elle existe
+                    if (article.image) {
+                        document.getElementById('articleImage').value = article.image;
+                        document.getElementById('imagePreview').innerHTML = `<img src="${article.image}" alt="Preview">`;
+                        document.getElementById('imagePreview').classList.add('has-image');
+                        document.getElementById('removeImageBtn').style.display = 'block';
+                    }
                 }
             } else {
                 document.getElementById('articleFormTitle').textContent = '➕ Nouvel article';
@@ -2302,10 +4294,95 @@ Généré le ${new Date().toLocaleString('fr-CH')}
             document.getElementById('articleName').focus();
         }
         
+        function resetImagePreview() {
+            document.getElementById('articleImage').value = '';
+            document.getElementById('imagePreview').innerHTML = '📷';
+            document.getElementById('imagePreview').classList.remove('has-image');
+            document.getElementById('removeImageBtn').style.display = 'none';
+        }
+        
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Compression et redimensionnement automatique
+            const maxSize = 200; // 200x200 pixels max
+            const quality = 0.9; // 90% qualité PNG
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // Créer un canvas pour redimensionner
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    // Redimensionner si trop grand
+                    if (width > height) {
+                        if (width > maxSize) {
+                            height = Math.round(height * maxSize / width);
+                            width = maxSize;
+                        }
+                    } else {
+                        if (height > maxSize) {
+                            width = Math.round(width * maxSize / height);
+                            height = maxSize;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Supprimer le fond blanc/clair
+                    const imageData = ctx.getImageData(0, 0, width, height);
+                    const data = imageData.data;
+                    
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i];
+                        const g = data[i + 1];
+                        const b = data[i + 2];
+                        
+                        // Détecter les pixels clairs (fond blanc/gris clair)
+                        // Seuil : si R, G, B sont tous > 200 et proches les uns des autres
+                        const isLight = r > 200 && g > 200 && b > 200;
+                        const isGrayish = Math.abs(r - g) < 30 && Math.abs(g - b) < 30 && Math.abs(r - b) < 30;
+                        
+                        if (isLight && isGrayish) {
+                            data[i + 3] = 0; // Rendre transparent
+                        }
+                    }
+                    
+                    ctx.putImageData(imageData, 0, 0);
+                    
+                    // Convertir en PNG avec transparence
+                    const compressedBase64 = canvas.toDataURL('image/png');
+                    
+                    document.getElementById('articleImage').value = compressedBase64;
+                    document.getElementById('imagePreview').innerHTML = `<img src="${compressedBase64}" alt="Preview">`;
+                    document.getElementById('imagePreview').classList.add('has-image');
+                    document.getElementById('removeImageBtn').style.display = 'block';
+                    
+                    console.log('Image traitée:', Math.round(compressedBase64.length / 1024) + 'KB');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function removeImage() {
+            resetImagePreview();
+            document.getElementById('imageInput').value = '';
+        }
+        
         function cancelArticleForm() {
             editingArticleId = null;
             document.getElementById('articleForm').style.display = 'none';
             document.getElementById('addArticleBtn').style.display = 'flex';
+            resetImagePreview();
         }
         
         function saveArticle() {
@@ -2322,14 +4399,18 @@ Généré le ${new Date().toLocaleString('fr-CH')}
                 return;
             }
             
+            const imageData = document.getElementById('articleImage').value;
+            
             const articleData = {
                 name: name,
                 price: price,
                 unit: document.getElementById('articleUnit').value,
                 category: document.getElementById('articleCategory').value,
                 origin: document.getElementById('articleOrigin').value.trim(),
+                image: imageData || null,
                 tva: TVA_RATE,
-                active: true
+                active: true,
+                updatedAt: Date.now()
             };
             
             if (editingArticleId) {
@@ -2338,6 +4419,7 @@ Généré le ${new Date().toLocaleString('fr-CH')}
                 if (index !== -1) {
                     articleData.id = editingArticleId;
                     articleData.favorite = articlesData[index].favorite || false;
+                    articleData.createdAt = articlesData[index].createdAt || Date.now();
                     articlesData[index] = articleData;
                     showNotification('Article modifié', 'success');
                 }
@@ -2345,11 +4427,13 @@ Généré le ${new Date().toLocaleString('fr-CH')}
                 // Création
                 articleData.id = generateId();
                 articleData.favorite = false;
+                articleData.createdAt = Date.now();
                 articlesData.push(articleData);
                 showNotification('Article ajouté', 'success');
             }
             
             saveArticlesToStorage();
+            saveArticlesToFirebase(); // Sync Firebase
             cancelArticleForm();
             renderArticlesList();
             updateArticlesTabs();
@@ -2438,22 +4522,7 @@ Généré le ${new Date().toLocaleString('fr-CH')}
                 return;
             }
             
-            showNotification('Synchronisation...', 'success');
-            
-            // Sync transactions non sync
-            const unsyncedTx = transactions.filter(tx => !tx.synced);
-            
-            for (const tx of unsyncedTx) {
-                try {
-                    await db.collection('caisse_transactions').add(tx);
-                    tx.synced = true;
-                } catch (e) {
-                    console.error('Erreur sync tx:', e);
-                }
-            }
-            
-            saveTransactions();
-            showNotification(`${unsyncedTx.length} transactions synchronisées`, 'success');
+            await syncAllData();
         }
         
         // ============================================
