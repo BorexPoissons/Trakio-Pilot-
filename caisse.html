@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="Caisse">
     <meta name="theme-color" content="#0f172a">
     
-    <title>TRAKIO Caisse v5.5.7</title>
+    <title>TRAKIO Caisse v5.5.8</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -475,7 +475,7 @@
             <div class="logo">
                 <div class="logo-icon">🐟</div>
                 <span>TRAKIO</span>
-                <span class="version">v5.5.7</span>
+                <span class="version">v5.5.8</span>
             </div>
         </div>
         <div class="header-center">
@@ -692,6 +692,7 @@
             <div class="report-tabs">
                 <button class="report-tab active" onclick="setReportTab('today')">📅 Aujourd'hui</button>
                 <button class="report-tab" onclick="setReportTab('history')">📜 Historique</button>
+                <button class="report-tab" onclick="setReportTab('logs')">🚫 Annulations</button>
             </div>
             
             <div id="reportToday">
@@ -738,6 +739,16 @@
                 </div>
                 <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">Historique :</div>
                 <div class="report-list" id="reportListHistory"></div>
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                    <button onclick="resetByLocation()" style="width:100%;padding:10px;background:var(--danger);color:#fff;border:none;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit;">
+                        ⚠️ Réinitialiser les données du lieu sélectionné
+                    </button>
+                </div>
+            </div>
+            
+            <div id="reportLogs" style="display:none;">
+                <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">Annulations enregistrées :</div>
+                <div class="report-list" id="reportLogsList"></div>
             </div>
             
             <div class="modal-actions" style="margin-top:12px;">
@@ -1018,6 +1029,13 @@
                     console.log('✅ Transactions Firebase:', fbTx.length);
                 }
                 
+                // Logs (annulations)
+                const fbLogs = await loadFromFirebase('logs', null);
+                if (fbLogs && fbLogs.length > 0) {
+                    localStorage.setItem('trakio_logs', JSON.stringify(fbLogs));
+                    console.log('✅ Logs Firebase:', fbLogs.length);
+                }
+                
                 // Compteur TX
                 if (fbTxCounter) {
                     txCnt = fbTxCounter;
@@ -1090,7 +1108,16 @@
         
         function updQty(id, d) { const i = cart.find(x => x.id === id); if (!i) return; i.qty = Math.max(0.1, i.qty + d); if (i.qty < 0.05) cart = cart.filter(x => x.id !== id); renderCart(); }
         function del(id) { cart = cart.filter(x => x.id !== id); renderCart(); }
-        function clearCart() { if (cart.length && !confirm('Vider ?')) return; cart = []; document.getElementById('disc').value = 0; renderCart(); }
+        function clearCart() { 
+            if (!cart.length) return;
+            if (!confirm('Vider le panier ?')) return; 
+            // Enregistrer l'annulation
+            logCancellation('Panier vidé manuellement');
+            cart = []; 
+            document.getElementById('disc').value = 0; 
+            renderCart(); 
+            notify('🗑️ Panier vidé (annulation enregistrée)', 'warning');
+        }
         
         function renderCart() {
             const c = document.getElementById('ticketItems');
@@ -1179,7 +1206,7 @@
             closePayment(); cart = []; document.getElementById('disc').value = 0; renderCart();
         }
         
-        function saveTx(method, total) {
+        function saveTx(method, total, clientName = null, status = 'completed') {
             txCnt++; 
             localStorage.setItem('trakio_tx_counter', txCnt);
             
@@ -1193,6 +1220,9 @@
                 date: new Date().toISOString().slice(0,10), 
                 time: new Date().toTimeString().slice(0,5), 
                 timestamp: Date.now(),
+                status: status, // 'completed', 'cancelled', 'refunded'
+                // Client
+                clientName: clientName || null,
                 // Événement complet
                 event: eventData.id,
                 eventName: eventData.name,
@@ -1213,11 +1243,42 @@
             txs.push(tx); 
             localStorage.setItem('trakio_tx', JSON.stringify(txs));
             
-            // Sync Firebase (transactions + compteur)
+            // Sync Firebase immédiat
             syncToFirebase('transactions', txs);
             syncToFirebase('txCounter', txCnt);
             
-            console.log('💾 Transaction #' + txCnt + ' enregistrée:', eventData.name, total + ' CHF');
+            console.log('💾 Transaction #' + txCnt + ' [' + status + ']:', eventData.name, total + ' CHF');
+            return tx;
+        }
+        
+        // Enregistrer une annulation
+        function logCancellation(reason = 'Annulation manuelle') {
+            if (!cart.length) return;
+            
+            const eventId = document.getElementById('eventSelect').value;
+            const eventData = events.find(e => e.id === eventId) || { id: eventId, name: eventId, type: 'magasin' };
+            const total = swiss(cart.reduce((s, i) => s + i.price * i.qty, 0) - (+document.getElementById('disc').value || 0));
+            
+            const log = {
+                id: Date.now().toString(36),
+                type: 'cancellation',
+                date: new Date().toISOString().slice(0,10),
+                time: new Date().toTimeString().slice(0,5),
+                timestamp: Date.now(),
+                event: eventData.id,
+                eventName: eventData.name,
+                items: cart.map(i => ({name: i.name, price: i.price, qty: i.qty})),
+                total: total,
+                reason: reason
+            };
+            
+            const logs = JSON.parse(localStorage.getItem('trakio_logs') || '[]');
+            logs.push(log);
+            localStorage.setItem('trakio_logs', JSON.stringify(logs));
+            syncToFirebase('logs', logs);
+            
+            console.log('🚫 Annulation enregistrée:', total + ' CHF');
+        }
         }
         
         function holdTicket() {
@@ -1428,8 +1489,66 @@
             document.querySelector(`.report-tab[onclick*="${tab}"]`).classList.add('active');
             document.getElementById('reportToday').style.display = tab === 'today' ? 'block' : 'none';
             document.getElementById('reportHistory').style.display = tab === 'history' ? 'block' : 'none';
+            document.getElementById('reportLogs').style.display = tab === 'logs' ? 'block' : 'none';
             if (tab === 'today') renderReportToday();
-            else renderReportHistory();
+            else if (tab === 'history') renderReportHistory();
+            else if (tab === 'logs') renderReportLogs();
+        }
+        
+        function renderReportLogs() {
+            const logs = JSON.parse(localStorage.getItem('trakio_logs') || '[]');
+            const list = document.getElementById('reportLogsList');
+            
+            if (!logs.length) {
+                list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;font-size:11px;">Aucune annulation</div>';
+                return;
+            }
+            
+            const sorted = logs.slice().sort((a, b) => b.timestamp - a.timestamp);
+            list.innerHTML = sorted.map(l => {
+                const items = (l.items || []).slice(0, 2).map(i => i.name).join(', ');
+                return `<div class="report-item" style="border-left:3px solid var(--danger);">
+                    <div class="report-item-left">
+                        <span class="report-item-date">${l.date}</span>
+                        <span class="report-item-time">${l.time}</span>
+                        <span style="font-size:9px;">🚫 ${items}${l.items?.length > 2 ? '...' : ''}</span>
+                        <span class="report-item-event">📍 ${l.eventName || '-'}</span>
+                    </div>
+                    <div class="report-item-total" style="color:var(--danger);">-${(l.total || 0).toFixed(2)}</div>
+                </div>`;
+            }).join('');
+        }
+        
+        function resetByLocation() {
+            const eventFilter = document.getElementById('rptEventHistory').value;
+            if (!eventFilter) {
+                notify('⚠️ Sélectionnez d\'abord un lieu', 'warning');
+                return;
+            }
+            
+            const eventName = events.find(e => e.id === eventFilter)?.name || eventFilter;
+            
+            // Double confirmation
+            if (!confirm('⚠️ ATTENTION !\n\nVous allez supprimer TOUTES les données de:\n📍 ' + eventName + '\n\nCette action est IRRÉVERSIBLE !')) return;
+            if (!confirm('🔴 DERNIÈRE CONFIRMATION\n\nÊtes-vous VRAIMENT sûr de vouloir supprimer l\'historique de "' + eventName + '" ?\n\nTapez OK pour confirmer.')) return;
+            
+            // Supprimer les transactions de ce lieu
+            let txs = JSON.parse(localStorage.getItem('trakio_tx') || '[]');
+            const countBefore = txs.length;
+            txs = txs.filter(t => t.event !== eventFilter);
+            const deleted = countBefore - txs.length;
+            
+            localStorage.setItem('trakio_tx', JSON.stringify(txs));
+            syncToFirebase('transactions', txs);
+            
+            // Supprimer les logs de ce lieu
+            let logs = JSON.parse(localStorage.getItem('trakio_logs') || '[]');
+            logs = logs.filter(l => l.event !== eventFilter);
+            localStorage.setItem('trakio_logs', JSON.stringify(logs));
+            syncToFirebase('logs', logs);
+            
+            notify('🗑️ ' + deleted + ' transactions supprimées pour ' + eventName, 'warning');
+            renderReportHistory();
         }
         
         function renderReportToday() {
@@ -1600,7 +1719,7 @@
         // BACKUP / RESTORE
         function exportData() {
             const data = {
-                version: 'v5.5.7',
+                version: 'v5.5.8',
                 date: new Date().toISOString(),
                 articles: JSON.parse(localStorage.getItem('trakio_articles2') || '[]'),
                 events: JSON.parse(localStorage.getItem('trakio_events') || '[]'),
