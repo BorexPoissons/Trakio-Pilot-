@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="Caisse">
     <meta name="theme-color" content="#0f172a">
     
-    <title>TRAKIO Caisse v5.4.1</title>
+    <title>TRAKIO Caisse v5.4.2</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -400,7 +400,7 @@
             <div class="logo">
                 <div class="logo-icon">🐟</div>
                 <span>TRAKIO</span>
-                <span class="version">v5.4.1</span>
+                <span class="version">v5.4.2</span>
             </div>
         </div>
         <div class="header-center">
@@ -414,7 +414,7 @@
             <button class="header-btn" onclick="openReport()" title="Rapport">📊</button>
             <button class="header-btn" onclick="openConfig()" title="Config">⚙️</button>
             <button class="header-btn" onclick="openArticles()" title="Articles">📝</button>
-            <button class="header-btn" onclick="location.href='index.html'">🏠</button>
+            <button class="header-btn" onclick="exitApp()" title="Sortir">🏠</button>
         </div>
     </header>
     
@@ -964,6 +964,15 @@
         // UTILS
         function swiss(n) { return Math.round(n * 20) / 20; }
         function notify(msg, type = 'success', dur = 1500) { const n = document.getElementById('notif'); document.getElementById('nIcon').textContent = type === 'success' ? '✓' : '⚠'; document.getElementById('nText').textContent = msg; n.className = `notif ${type} show`; setTimeout(() => n.classList.remove('show'), dur); }
+        
+        function exitApp() {
+            if (cart.length > 0) {
+                if (!confirm('⚠️ Panier non vide !\n\nVoulez-vous vraiment quitter ?')) return;
+            } else {
+                if (!confirm('Quitter la caisse ?')) return;
+            }
+            location.href = 'index.html';
+        }
         
         document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeW(); closePayment(); closeQueue(); closeReport(); closeConfig(); closeArticles(); closeEditArticle(); } });
         document.addEventListener('DOMContentLoaded', init);
