@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="Caisse">
     <meta name="theme-color" content="#0f172a">
     
-    <title>TRAKIO Caisse v5.5.0</title>
+    <title>TRAKIO Caisse v5.5.1</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -253,20 +253,32 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 6px 8px;
+            padding: 8px 10px;
             background: var(--bg-input);
             border: 1px solid var(--border);
-            border-radius: 6px;
-            margin-bottom: 4px;
+            border-radius: 8px;
+            margin-bottom: 6px;
             cursor: pointer;
         }
         .queue-item:hover { border-color: var(--accent); }
-        .queue-num { font-size: 16px; font-weight: 700; color: var(--warning); min-width: 30px; }
+        .queue-num { font-size: 18px; font-weight: 700; color: var(--warning); min-width: 35px; }
         .queue-info { flex: 1; }
-        .queue-info-top { font-size: 11px; font-weight: 600; }
-        .queue-info-bottom { font-size: 9px; color: var(--text-muted); }
-        .queue-total { font-weight: 700; color: var(--accent); font-size: 12px; }
-        .queue-del { background: none; border: none; color: var(--danger); font-size: 14px; cursor: pointer; padding: 4px; }
+        .queue-info-top { font-size: 12px; font-weight: 600; }
+        .queue-info-bottom { font-size: 10px; color: var(--text-muted); }
+        .queue-total { font-weight: 700; color: var(--accent); font-size: 14px; }
+        .queue-del { background: none; border: none; color: var(--danger); font-size: 16px; cursor: pointer; padding: 4px; }
+        
+        /* Queue Detail Modal */
+        .queue-detail-items { max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
+        .queue-detail-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: var(--bg-input); border-radius: 6px; margin-bottom: 4px; }
+        .queue-detail-name { font-size: 12px; font-weight: 600; }
+        .queue-detail-qty { font-size: 10px; color: var(--text-muted); }
+        .queue-detail-price { font-size: 12px; font-weight: 700; color: var(--accent); }
+        .queue-detail-total { display: flex; justify-content: space-between; padding: 12px; background: var(--bg-primary); border-radius: 8px; margin-bottom: 12px; font-size: 16px; font-weight: 700; }
+        .queue-detail-total span:last-child { color: var(--accent); }
+        .queue-detail-status { text-align: center; padding: 8px; border-radius: 6px; margin-bottom: 12px; font-size: 11px; font-weight: 600; }
+        .queue-detail-status.paid { background: rgba(16,185,129,0.2); color: var(--success); }
+        .queue-detail-status.unpaid { background: rgba(245,158,11,0.2); color: var(--warning); }
         
         /* MODALS */
         .modal-overlay {
@@ -320,22 +332,23 @@
         .modal-actions .cancel { background: var(--bg-input); color: var(--text-primary); }
         .modal-actions .confirm { background: var(--success); color: white; }
         
-        .cash-display { background: var(--bg-primary); border-radius: 8px; padding: 10px; text-align: center; margin-bottom: 8px; }
-        .cash-label { font-size: 8px; color: var(--text-muted); }
-        .cash-amount { font-size: 24px; font-weight: 700; color: var(--accent); }
+        .cash-display { background: var(--bg-primary); border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 10px; }
+        .cash-label { font-size: 10px; color: var(--text-muted); }
+        .cash-amount { font-size: 28px; font-weight: 700; color: var(--accent); }
         
-        .cash-bills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 8px; }
-        .cash-bill { padding: 8px 4px; background: var(--bg-input); border: 2px solid var(--border); border-radius: 6px; cursor: pointer; text-align: center; font-family: inherit; }
-        .cash-bill.selected { border-color: var(--success); background: rgba(16,185,129,0.1); }
-        .cash-bill-val { font-size: 14px; font-weight: 700; }
-        .cash-bill-label { font-size: 7px; color: var(--text-muted); }
+        .cash-bills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+        .cash-bill { padding: 14px 8px; background: var(--bg-input); border: 2px solid var(--border); border-radius: 10px; cursor: pointer; text-align: center; font-family: inherit; }
+        .cash-bill:active { transform: scale(0.95); }
+        .cash-bill.selected { border-color: var(--success); background: rgba(16,185,129,0.2); }
+        .cash-bill-val { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+        .cash-bill-label { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
         
-        .cash-input { width: 100%; padding: 8px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-size: 14px; text-align: center; margin-bottom: 8px; font-family: inherit; }
+        .cash-input { width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 18px; text-align: center; margin-bottom: 10px; font-family: inherit; }
         
-        .cash-change { padding: 10px; background: var(--success); border-radius: 6px; text-align: center; margin-bottom: 8px; display: none; }
+        .cash-change { padding: 12px; background: var(--success); border-radius: 8px; text-align: center; margin-bottom: 10px; display: none; }
         .cash-change.visible { display: block; }
-        .cash-change-label { font-size: 8px; opacity: 0.9; }
-        .cash-change-val { font-size: 20px; font-weight: 700; }
+        .cash-change-label { font-size: 10px; opacity: 0.9; }
+        .cash-change-val { font-size: 24px; font-weight: 700; }
         
         /* Paiement options */
         .pay-options { display: flex; gap: 6px; margin-bottom: 10px; }
@@ -404,7 +417,7 @@
             <div class="logo">
                 <div class="logo-icon">🐟</div>
                 <span>TRAKIO</span>
-                <span class="version">v5.5.0</span>
+                <span class="version">v5.5.1</span>
             </div>
         </div>
         <div class="header-center">
@@ -550,6 +563,26 @@
             </div>
             <div class="queue-list" id="queueList">
                 <div style="text-align:center;color:var(--text-muted);padding:20px;font-size:11px;">Aucun client en attente</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL DÉTAIL FILE D'ATTENTE -->
+    <div class="modal-overlay" id="queueDetailModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">👤 Client <span id="queueDetailNum">#1</span></div>
+                <button class="modal-close" onclick="closeQueueDetail()">×</button>
+            </div>
+            <div class="queue-detail-status" id="queueDetailStatus">⏳ Non payé</div>
+            <div class="queue-detail-items" id="queueDetailItems"></div>
+            <div class="queue-detail-total">
+                <span>TOTAL</span>
+                <span id="queueDetailTotal">0.00 CHF</span>
+            </div>
+            <div class="modal-actions" id="queueDetailActions">
+                <button class="cancel" onclick="closeQueueDetail()">Fermer</button>
+                <button class="confirm" id="queueDetailBtn" onclick="handleQueueAction()">✓ Servi</button>
             </div>
         </div>
     </div>
@@ -952,6 +985,8 @@
         }
         
         // QUEUE
+        let currentQueueId = null;
+        
         function updateQueueBtn() { const btn = document.getElementById('queueBtn'); if (queue.length > 0) { btn.classList.add('has-queue'); btn.dataset.count = queue.length; } else { btn.classList.remove('has-queue'); } }
         
         function openQueue() { renderQueue(); document.getElementById('queueModal').classList.add('active'); }
@@ -960,30 +995,85 @@
         function renderQueue() {
             const list = document.getElementById('queueList');
             if (!queue.length) { list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;font-size:11px;">Aucun client en attente</div>'; return; }
-            list.innerHTML = queue.map((q, i) => `<div class="queue-item" onclick="recallQueue('${q.id}')"><div class="queue-num">#${i+1}</div><div class="queue-info"><div class="queue-info-top">${q.items.length} article(s) • ${q.time}</div><div class="queue-info-bottom">${q.paid ? '✅ Payé ('+q.method+')' : '⏳ Non payé'}</div></div><div class="queue-total">${q.total.toFixed(2)}</div><button class="queue-del" onclick="event.stopPropagation();delQueue('${q.id}')">×</button></div>`).join('');
+            list.innerHTML = queue.map((q, i) => `<div class="queue-item" onclick="openQueueDetail('${q.id}')"><div class="queue-num">#${i+1}</div><div class="queue-info"><div class="queue-info-top">${q.items.length} article(s) • ${q.time}</div><div class="queue-info-bottom">${q.paid ? '✅ Payé ('+q.method+')' : '⏳ Non payé'}</div></div><div class="queue-total">${q.total.toFixed(2)}</div><button class="queue-del" onclick="event.stopPropagation();delQueue('${q.id}')">×</button></div>`).join('');
         }
         
-        function recallQueue(id) {
+        function openQueueDetail(id) {
             const q = queue.find(x => x.id === id);
             if (!q) return;
+            currentQueueId = id;
+            
+            // Numéro
+            const idx = queue.findIndex(x => x.id === id);
+            document.getElementById('queueDetailNum').textContent = '#' + (idx + 1);
+            
+            // Status
+            const statusEl = document.getElementById('queueDetailStatus');
             if (q.paid) {
-                queue = queue.filter(x => x.id !== id);
+                statusEl.textContent = '✅ Payé (' + (q.method === 'cash' ? 'Espèces' : q.method === 'card' ? 'Carte' : 'Twint') + ')';
+                statusEl.className = 'queue-detail-status paid';
+            } else {
+                statusEl.textContent = '⏳ Non payé';
+                statusEl.className = 'queue-detail-status unpaid';
+            }
+            
+            // Articles
+            document.getElementById('queueDetailItems').innerHTML = q.items.map(i => `
+                <div class="queue-detail-item">
+                    <div>
+                        <div class="queue-detail-name">${i.name}</div>
+                        <div class="queue-detail-qty">${i.isW ? i.qty.toFixed(3) + 'kg' : i.qty + 'x'} × ${i.price.toFixed(2)}</div>
+                    </div>
+                    <div class="queue-detail-price">${(i.price * i.qty).toFixed(2)}</div>
+                </div>
+            `).join('');
+            
+            // Total
+            document.getElementById('queueDetailTotal').textContent = q.total.toFixed(2) + ' CHF';
+            
+            // Bouton action
+            const btn = document.getElementById('queueDetailBtn');
+            if (q.paid) {
+                btn.textContent = '✓ Client servi';
+                btn.style.background = 'var(--success)';
+            } else {
+                btn.textContent = '🛒 Reprendre le panier';
+                btn.style.background = 'var(--accent)';
+            }
+            
+            closeQueue();
+            document.getElementById('queueDetailModal').classList.add('active');
+        }
+        
+        function closeQueueDetail() { document.getElementById('queueDetailModal').classList.remove('active'); currentQueueId = null; }
+        
+        function handleQueueAction() {
+            const q = queue.find(x => x.id === currentQueueId);
+            if (!q) return;
+            
+            if (q.paid) {
+                // Déjà payé → retirer de la file (servi)
+                queue = queue.filter(x => x.id !== currentQueueId);
                 localStorage.setItem('trakio_queue', JSON.stringify(queue));
                 syncToFirebase('queue', queue);
-                updateQueueBtn(); closeQueue();
+                updateQueueBtn();
+                closeQueueDetail();
                 notify('✅ Client servi', 'success');
             } else {
+                // Non payé → reprendre le panier
                 cart = [...q.items];
                 document.getElementById('disc').value = q.discount;
-                queue = queue.filter(x => x.id !== id);
+                queue = queue.filter(x => x.id !== currentQueueId);
                 localStorage.setItem('trakio_queue', JSON.stringify(queue));
                 syncToFirebase('queue', queue);
-                updateQueueBtn(); closeQueue(); renderCart();
+                updateQueueBtn();
+                closeQueueDetail();
+                renderCart();
                 notify('🛒 Panier repris', 'success');
             }
         }
         
-        function delQueue(id) { if (!confirm('Supprimer ?')) return; queue = queue.filter(x => x.id !== id); localStorage.setItem('trakio_queue', JSON.stringify(queue)); syncToFirebase('queue', queue); updateQueueBtn(); renderQueue(); }
+        function delQueue(id) { if (!confirm('Supprimer de la file ?')) return; queue = queue.filter(x => x.id !== id); localStorage.setItem('trakio_queue', JSON.stringify(queue)); syncToFirebase('queue', queue); updateQueueBtn(); renderQueue(); }
         
         // REPORT
         function openReport() { renderReport(); document.getElementById('reportModal').classList.add('active'); }
@@ -1031,7 +1121,7 @@
         // BACKUP / RESTORE
         function exportData() {
             const data = {
-                version: 'v5.5.0',
+                version: 'v5.5.1',
                 date: new Date().toISOString(),
                 articles: JSON.parse(localStorage.getItem('trakio_articles2') || '[]'),
                 events: JSON.parse(localStorage.getItem('trakio_events') || '[]'),
@@ -1146,7 +1236,7 @@
             }
         }
         
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeW(); closePayment(); closeQueue(); closeReport(); closeConfig(); closeArticles(); closeEditArticle(); } });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeW(); closePayment(); closeQueue(); closeQueueDetail(); closeReport(); closeConfig(); closeArticles(); closeEditArticle(); } });
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
