@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="Caisse">
     <meta name="theme-color" content="#0f172a">
     
-    <title>TRAKIO Caisse v5.5.5</title>
+    <title>TRAKIO Caisse v5.5.6</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -230,6 +230,48 @@
         .pay-btn.card { background: linear-gradient(135deg, #06b6d4, #0891b2); }
         .pay-btn.twint { background: linear-gradient(135deg, #000, #333); }
         
+        /* Bouton rappel file d'attente */
+        .queue-recall-btn {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 6px;
+            border: 2px solid var(--warning);
+            border-radius: 10px;
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .queue-recall-btn.show { display: flex; }
+        .queue-recall-btn.blink { animation: blink 1s infinite; }
+        @keyframes blink {
+            0%, 50% { background: rgba(245, 158, 11, 0.2); }
+            51%, 100% { background: rgba(245, 158, 11, 0.5); border-color: #fff; }
+        }
+        .queue-recall-btn:active { transform: scale(0.98); }
+        
+        /* Ticket style supermarché */
+        .receipt-modal { background: #fff; color: #000; border-radius: 0; max-width: 320px; font-family: 'Courier New', monospace; }
+        .receipt-header { text-align: center; padding: 15px 10px; border-bottom: 2px dashed #000; }
+        .receipt-logo { font-size: 24px; font-weight: bold; }
+        .receipt-info { font-size: 11px; margin-top: 5px; }
+        .receipt-items { padding: 10px; border-bottom: 2px dashed #000; }
+        .receipt-item { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+        .receipt-item-name { flex: 1; }
+        .receipt-item-qty { width: 60px; text-align: center; }
+        .receipt-item-price { width: 60px; text-align: right; }
+        .receipt-totals { padding: 10px; }
+        .receipt-line { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+        .receipt-line.total { font-size: 16px; font-weight: bold; border-top: 1px solid #000; padding-top: 8px; margin-top: 8px; }
+        .receipt-footer { text-align: center; padding: 10px; border-top: 2px dashed #000; font-size: 10px; }
+        .receipt-close { width: 100%; padding: 10px; margin-top: 10px; background: #000; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-family: inherit; }
+        
         .action-btns { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px; }
         .action-btn {
             padding: 5px;
@@ -433,7 +475,7 @@
             <div class="logo">
                 <div class="logo-icon">🐟</div>
                 <span>TRAKIO</span>
-                <span class="version">v5.5.5</span>
+                <span class="version">v5.5.6</span>
             </div>
         </div>
         <div class="header-center">
@@ -487,6 +529,10 @@
                 <div class="total-row grand"><span>TOTAL</span><span id="total">0.00 CHF</span></div>
             </div>
             <div class="payment-section">
+                <button class="queue-recall-btn" id="queueRecallBtn" onclick="openQueue()">
+                    <span>⏳</span>
+                    <span id="queueRecallText">0 client(s) en attente</span>
+                </button>
                 <div class="payment-grid">
                     <button class="pay-btn cash" onclick="openPayment('cash')"><span>💵</span>Espèces</button>
                     <button class="pay-btn card" onclick="openPayment('card')"><span>💳</span>Carte</button>
@@ -615,6 +661,23 @@
                 <button class="cancel" onclick="closeClientNameModal()">Annuler</button>
                 <button class="confirm" onclick="confirmHoldTicket()">⏳ Mettre en attente</button>
             </div>
+        </div>
+    </div>
+    
+    <!-- MODAL TICKET SUPERMARCHÉ -->
+    <div class="modal-overlay" id="receiptModal">
+        <div class="modal receipt-modal">
+            <div class="receipt-header">
+                <div class="receipt-logo">🐟 BOREX POISSONS</div>
+                <div class="receipt-info" id="receiptInfo">-</div>
+            </div>
+            <div class="receipt-items" id="receiptItems"></div>
+            <div class="receipt-totals" id="receiptTotals"></div>
+            <div class="receipt-footer">
+                Merci de votre visite !<br>
+                À bientôt 🐟
+            </div>
+            <button class="receipt-close" onclick="closeReceipt()">Fermer</button>
         </div>
     </div>
     
@@ -1171,7 +1234,23 @@
         // QUEUE
         let currentQueueId = null;
         
-        function updateQueueBtn() { const btn = document.getElementById('queueBtn'); if (queue.length > 0) { btn.classList.add('has-queue'); btn.dataset.count = queue.length; } else { btn.classList.remove('has-queue'); } }
+        function updateQueueBtn() { 
+            const btn = document.getElementById('queueBtn'); 
+            const recallBtn = document.getElementById('queueRecallBtn');
+            const recallText = document.getElementById('queueRecallText');
+            
+            if (queue.length > 0) { 
+                btn.classList.add('has-queue'); 
+                btn.dataset.count = queue.length;
+                // Bouton rappel visible et clignotant
+                recallBtn.classList.add('show', 'blink');
+                const names = queue.slice(0, 3).map(q => q.clientName || 'Client').join(', ');
+                recallText.textContent = queue.length + ' en attente: ' + names + (queue.length > 3 ? '...' : '');
+            } else { 
+                btn.classList.remove('has-queue');
+                recallBtn.classList.remove('show', 'blink');
+            } 
+        }
         
         function openQueue() { renderQueue(); document.getElementById('queueModal').classList.add('active'); }
         function closeQueue() { document.getElementById('queueModal').classList.remove('active'); }
@@ -1406,31 +1485,75 @@
                 // Utiliser eventName stocké dans la transaction, sinon chercher dans events
                 const eventName = t.eventName || events.find(e => e.id === t.event)?.name || t.event || '-';
                 const commission = t.commission ? ` <span style="color:var(--warning);font-size:8px;">(-${t.commission.toFixed(2)})</span>` : '';
+                const clientName = t.clientName ? `<span style="color:var(--success);font-size:9px;">👤 ${t.clientName}</span>` : '';
                 
-                return `<div class="report-item">
+                return `<div class="report-item" onclick="showReceipt('${t.id}')" style="cursor:pointer;">
                     <div class="report-item-left">
                         <span class="report-item-num">#${t.num}</span>
                         ${showDate ? `<span class="report-item-date">${t.date}</span>` : ''}
                         <span class="report-item-time">${t.time}</span>
                         <span class="report-item-method">${methodIcons[t.method] || '💰'}</span>
                         <span class="report-item-event">📍 ${eventName}</span>
+                        ${clientName}
                     </div>
                     <div class="report-item-total">${(t.total || 0).toFixed(2)}${commission}</div>
                 </div>`;
             }).join('');
         }
         
+        // Afficher le ticket comme un supermarché
+        function showReceipt(txId) {
+            const allTxs = JSON.parse(localStorage.getItem('trakio_tx') || '[]');
+            const tx = allTxs.find(t => t.id === txId);
+            if (!tx) return;
+            
+            // Header
+            const eventName = tx.eventName || events.find(e => e.id === tx.event)?.name || 'Magasin';
+            document.getElementById('receiptInfo').innerHTML = `
+                ${tx.date} à ${tx.time}<br>
+                📍 ${eventName}<br>
+                Ticket #${tx.num}
+                ${tx.clientName ? '<br>👤 ' + tx.clientName : ''}
+            `;
+            
+            // Articles
+            const items = tx.items || [];
+            document.getElementById('receiptItems').innerHTML = items.map(i => `
+                <div class="receipt-item">
+                    <span class="receipt-item-name">${i.name}</span>
+                    <span class="receipt-item-qty">${i.isW ? i.qty.toFixed(3) + 'kg' : i.qty + 'x'}</span>
+                    <span class="receipt-item-price">${(i.price * i.qty).toFixed(2)}</span>
+                </div>
+            `).join('') || '<div style="text-align:center;font-size:11px;">Aucun article</div>';
+            
+            // Totaux
+            const methodNames = {cash: 'Espèces', card: 'Carte', twint: 'Twint'};
+            let totalsHtml = '';
+            if (tx.subtotal) totalsHtml += `<div class="receipt-line"><span>Sous-total</span><span>${tx.subtotal.toFixed(2)} CHF</span></div>`;
+            if (tx.discount) totalsHtml += `<div class="receipt-line"><span>Remise</span><span>-${tx.discount.toFixed(2)} CHF</span></div>`;
+            totalsHtml += `<div class="receipt-line total"><span>TOTAL</span><span>${tx.total.toFixed(2)} CHF</span></div>`;
+            totalsHtml += `<div class="receipt-line"><span>Payé par</span><span>${methodNames[tx.method] || tx.method}</span></div>`;
+            if (tx.commission) totalsHtml += `<div class="receipt-line"><span>Commission (${tx.eventCommission}%)</span><span>${tx.commission.toFixed(2)} CHF</span></div>`;
+            
+            document.getElementById('receiptTotals').innerHTML = totalsHtml;
+            
+            document.getElementById('receiptModal').classList.add('active');
+        }
+        
+        function closeReceipt() { document.getElementById('receiptModal').classList.remove('active'); }
+        
         function exportReportCSV() {
             const allTxs = JSON.parse(localStorage.getItem('trakio_tx') || '[]');
             if (!allTxs.length) { notify('Aucune donnée', 'warning'); return; }
             
-            // Header CSV
-            let csv = 'Numéro;Date;Heure;Lieu;Type;Méthode;Articles;Nb Articles;Sous-total;Remise;Total;Commission\n';
+            // Header CSV avec nom client
+            let csv = 'Numéro;Date;Heure;Client;Lieu;Type;Méthode;Articles;Nb Articles;Sous-total;Remise;Total;Commission\n';
             
             allTxs.forEach(t => {
                 const eventName = t.eventName || events.find(e => e.id === t.event)?.name || t.event || '-';
+                const clientName = t.clientName || '-';
                 const articles = (t.items || []).map(i => `${i.name}(${i.qty})`).join(' / ');
-                csv += `${t.num};${t.date};${t.time};"${eventName}";${t.eventType || ''};${t.method};"${articles}";${t.itemsCount || t.items?.length || 0};${t.subtotal || ''};${t.discount || 0};${t.total};${t.commission || 0}\n`;
+                csv += `${t.num};${t.date};${t.time};"${clientName}";"${eventName}";${t.eventType || ''};${t.method};"${articles}";${t.itemsCount || t.items?.length || 0};${t.subtotal || ''};${t.discount || 0};${t.total};${t.commission || 0}\n`;
             });
             
             // Télécharger
@@ -1467,7 +1590,7 @@
         // BACKUP / RESTORE
         function exportData() {
             const data = {
-                version: 'v5.5.5',
+                version: 'v5.5.6',
                 date: new Date().toISOString(),
                 articles: JSON.parse(localStorage.getItem('trakio_articles2') || '[]'),
                 events: JSON.parse(localStorage.getItem('trakio_events') || '[]'),
@@ -1612,7 +1735,7 @@
             }
         }
         
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeW(); closePayment(); closeQueue(); closeQueueDetail(); closeClientNameModal(); closeReport(); closeConfig(); closeArticles(); closeEditArticle(); } });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeW(); closePayment(); closeQueue(); closeQueueDetail(); closeClientNameModal(); closeReceipt(); closeReport(); closeConfig(); closeArticles(); closeEditArticle(); } });
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
