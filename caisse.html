@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="Caisse">
     <meta name="theme-color" content="#0f172a">
     
-    <title>TRAKIO Caisse v5.5.4</title>
+    <title>TRAKIO Caisse v5.5.5</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -208,24 +208,24 @@
         
         /* PAIEMENT */
         .payment-section { padding: 4px 6px; border-top: 1px solid var(--border); }
-        .payment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin-bottom: 3px; }
+        .payment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 6px; }
         
         .pay-btn {
-            padding: 6px 4px;
+            padding: 14px 8px;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 7px;
+            font-size: 11px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1px;
+            gap: 4px;
             color: white;
             font-family: inherit;
         }
         .pay-btn:active { opacity: 0.8; transform: scale(0.95); }
-        .pay-btn span:first-child { font-size: 14px; }
+        .pay-btn span:first-child { font-size: 24px; }
         .pay-btn.cash { background: linear-gradient(135deg, #10b981, #059669); }
         .pay-btn.card { background: linear-gradient(135deg, #06b6d4, #0891b2); }
         .pay-btn.twint { background: linear-gradient(135deg, #000, #333); }
@@ -399,6 +399,10 @@
         /* Articles edit */
         .article-edit-list { max-height: 300px; overflow-y: auto; }
         .article-edit-item { display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--bg-input); border-radius: 6px; margin-bottom: 4px; }
+        .article-edit-order { display: flex; flex-direction: column; gap: 2px; }
+        .order-btn { width: 24px; height: 20px; padding: 0; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px; font-size: 10px; cursor: pointer; color: var(--text-primary); font-family: inherit; }
+        .order-btn:active { background: var(--accent); }
+        .order-btn:disabled { opacity: 0.3; cursor: not-allowed; }
         .article-edit-icon { font-size: 16px; }
         .article-edit-info { flex: 1; }
         .article-edit-name { font-size: 11px; font-weight: 600; }
@@ -429,7 +433,7 @@
             <div class="logo">
                 <div class="logo-icon">🐟</div>
                 <span>TRAKIO</span>
-                <span class="version">v5.5.4</span>
+                <span class="version">v5.5.5</span>
             </div>
         </div>
         <div class="header-center">
@@ -489,7 +493,7 @@
                     <button class="pay-btn twint" onclick="openPayment('twint')"><span>📱</span>Twint</button>
                 </div>
                 <div class="action-btns">
-                    <button class="action-btn" onclick="holdTicket()">⏳ Attente</button>
+                    <button class="action-btn" onclick="promptClientName()">⏳ Attente</button>
                     <button class="action-btn danger" onclick="clearCart()">🗑️ Vider</button>
                 </div>
             </div>
@@ -583,7 +587,7 @@
     <div class="modal-overlay" id="queueDetailModal">
         <div class="modal">
             <div class="modal-header">
-                <div class="modal-title">👤 Client <span id="queueDetailNum">#1</span></div>
+                <div class="modal-title">👤 <span id="queueDetailClientName">Client</span> <span id="queueDetailNum">#1</span></div>
                 <button class="modal-close" onclick="closeQueueDetail()">×</button>
             </div>
             <div class="queue-detail-status" id="queueDetailStatus">⏳ Non payé</div>
@@ -595,6 +599,21 @@
             <div class="modal-actions" id="queueDetailActions">
                 <button class="cancel" onclick="closeQueueDetail()">Fermer</button>
                 <button class="confirm" id="queueDetailBtn" onclick="handleQueueAction()">✓ Servi</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL NOM CLIENT -->
+    <div class="modal-overlay" id="clientNameModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">👤 Nom du client</div>
+                <button class="modal-close" onclick="closeClientNameModal()">×</button>
+            </div>
+            <input type="text" id="clientNameInput" placeholder="Nom ou numéro..." onkeypress="if(event.key==='Enter')confirmHoldTicket()" style="width:100%;padding:12px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:16px;margin-bottom:12px;font-family:inherit;">
+            <div class="modal-actions">
+                <button class="cancel" onclick="closeClientNameModal()">Annuler</button>
+                <button class="confirm" onclick="confirmHoldTicket()">⏳ Mettre en attente</button>
             </div>
         </div>
     </div>
@@ -1070,12 +1089,24 @@
             }
             
             if (payOption === 'hold') {
+                // Demander le nom du client
+                const clientName = prompt('Nom du client:', 'Client ' + (queue.length + 1)) || 'Client ' + (queue.length + 1);
                 // Mettre en attente (payé mais attend)
-                queue.push({ id: Date.now().toString(36), num: queue.length + 1, items: [...cart], discount: +document.getElementById('disc').value || 0, total: payToPay, method: payMethod, paid: true, time: new Date().toTimeString().slice(0,5) });
+                queue.push({ 
+                    id: Date.now().toString(36), 
+                    num: queue.length + 1, 
+                    clientName: clientName,
+                    items: [...cart], 
+                    discount: +document.getElementById('disc').value || 0, 
+                    total: payToPay, 
+                    method: payMethod, 
+                    paid: true, 
+                    time: new Date().toTimeString().slice(0,5) 
+                });
                 localStorage.setItem('trakio_queue', JSON.stringify(queue));
                 syncToFirebase('queue', queue);
                 updateQueueBtn();
-                notify('⏳ Client en attente', 'success');
+                notify('⏳ ' + clientName + ' en attente', 'success');
             } else {
                 // Enregistrer la vente
                 saveTx(payMethod, payToPay);
@@ -1145,10 +1176,55 @@
         function openQueue() { renderQueue(); document.getElementById('queueModal').classList.add('active'); }
         function closeQueue() { document.getElementById('queueModal').classList.remove('active'); }
         
+        // Demander le nom du client avant mise en attente
+        function promptClientName() {
+            if (!cart.length) { notify('Panier vide', 'warning'); return; }
+            document.getElementById('clientNameInput').value = '';
+            document.getElementById('clientNameModal').classList.add('active');
+            document.getElementById('clientNameInput').focus();
+        }
+        
+        function closeClientNameModal() { document.getElementById('clientNameModal').classList.remove('active'); }
+        
+        function confirmHoldTicket() {
+            const clientName = document.getElementById('clientNameInput').value.trim() || 'Client ' + (queue.length + 1);
+            holdTicket(clientName);
+            closeClientNameModal();
+        }
+        
+        function holdTicket(clientName) {
+            if (!cart.length) { notify('Panier vide', 'warning'); return; }
+            const d = +document.getElementById('disc').value || 0;
+            const tot = swiss(cart.reduce((s, i) => s + i.price * i.qty, 0) - d);
+            queue.push({ 
+                id: Date.now().toString(36), 
+                num: queue.length + 1, 
+                clientName: clientName || 'Client ' + (queue.length + 1),
+                items: [...cart], 
+                discount: d, 
+                total: tot, 
+                method: null, 
+                paid: false, 
+                time: new Date().toTimeString().slice(0,5) 
+            });
+            localStorage.setItem('trakio_queue', JSON.stringify(queue));
+            syncToFirebase('queue', queue);
+            updateQueueBtn(); cart = []; document.getElementById('disc').value = 0; renderCart();
+            notify('⏳ ' + clientName + ' en attente', 'success');
+        }
+        
         function renderQueue() {
             const list = document.getElementById('queueList');
             if (!queue.length) { list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;font-size:11px;">Aucun client en attente</div>'; return; }
-            list.innerHTML = queue.map((q, i) => `<div class="queue-item" onclick="openQueueDetail('${q.id}')"><div class="queue-num">#${i+1}</div><div class="queue-info"><div class="queue-info-top">${q.items.length} article(s) • ${q.time}</div><div class="queue-info-bottom">${q.paid ? '✅ Payé ('+q.method+')' : '⏳ Non payé'}</div></div><div class="queue-total">${q.total.toFixed(2)}</div><button class="queue-del" onclick="event.stopPropagation();delQueue('${q.id}')">×</button></div>`).join('');
+            list.innerHTML = queue.map((q, i) => `<div class="queue-item" onclick="openQueueDetail('${q.id}')">
+                <div class="queue-num">#${i+1}</div>
+                <div class="queue-info">
+                    <div class="queue-info-top">👤 ${q.clientName || 'Client'}</div>
+                    <div class="queue-info-bottom">${q.items.length} art. • ${q.time} ${q.paid ? '✅ Payé' : ''}</div>
+                </div>
+                <div class="queue-total">${q.total.toFixed(2)}</div>
+                <button class="queue-del" onclick="event.stopPropagation();delQueue('${q.id}')">×</button>
+            </div>`).join('');
         }
         
         function openQueueDetail(id) {
@@ -1156,9 +1232,10 @@
             if (!q) return;
             currentQueueId = id;
             
-            // Numéro
+            // Numéro et nom
             const idx = queue.findIndex(x => x.id === id);
             document.getElementById('queueDetailNum').textContent = '#' + (idx + 1);
+            document.getElementById('queueDetailClientName').textContent = q.clientName || 'Client';
             
             // Status
             const statusEl = document.getElementById('queueDetailStatus');
@@ -1211,7 +1288,7 @@
                 syncToFirebase('queue', queue);
                 updateQueueBtn();
                 closeQueueDetail();
-                notify('✅ Client servi', 'success');
+                notify('✅ ' + (q.clientName || 'Client') + ' servi', 'success');
             } else {
                 // Non payé → reprendre le panier
                 cart = [...q.items];
@@ -1222,11 +1299,19 @@
                 updateQueueBtn();
                 closeQueueDetail();
                 renderCart();
-                notify('🛒 Panier repris', 'success');
+                notify('🛒 Panier ' + (q.clientName || '') + ' repris', 'success');
             }
         }
         
-        function delQueue(id) { if (!confirm('Supprimer de la file ?')) return; queue = queue.filter(x => x.id !== id); localStorage.setItem('trakio_queue', JSON.stringify(queue)); syncToFirebase('queue', queue); updateQueueBtn(); renderQueue(); }
+        function delQueue(id) { 
+            const q = queue.find(x => x.id === id);
+            if (!confirm('Supprimer ' + (q?.clientName || 'ce client') + ' de la file ?')) return; 
+            queue = queue.filter(x => x.id !== id); 
+            localStorage.setItem('trakio_queue', JSON.stringify(queue)); 
+            syncToFirebase('queue', queue); 
+            updateQueueBtn(); 
+            renderQueue(); 
+        }
         
         // REPORT
         function openReport() { 
@@ -1382,7 +1467,7 @@
         // BACKUP / RESTORE
         function exportData() {
             const data = {
-                version: 'v5.5.4',
+                version: 'v5.5.5',
                 date: new Date().toISOString(),
                 articles: JSON.parse(localStorage.getItem('trakio_articles2') || '[]'),
                 events: JSON.parse(localStorage.getItem('trakio_events') || '[]'),
@@ -1437,7 +1522,37 @@
             const q = document.getElementById('articleSearchInput').value.toLowerCase();
             const list = articles.filter(a => !q || a.name.toLowerCase().includes(q));
             const icons = {poissons:'🐟',crustaces:'🦐',coquillages:'🦪',fumes:'🔥',traiteur:'🍽️',epicerie:'🛒'};
-            document.getElementById('articleEditList').innerHTML = list.map(a => `<div class="article-edit-item"><div class="article-edit-icon">${icons[a.category] || '📦'}</div><div class="article-edit-info"><div class="article-edit-name">${a.fav ? '⭐ ' : ''}${a.name}</div><div class="article-edit-cat">${a.category} • ${a.unit}</div></div><div class="article-edit-price">${a.price.toFixed(2)}</div><button class="article-edit-btn" onclick="editArticle('${a.id}')">✏️</button></div>`).join('');
+            document.getElementById('articleEditList').innerHTML = list.map((a, idx) => {
+                const realIdx = articles.findIndex(x => x.id === a.id);
+                return `<div class="article-edit-item">
+                    <div class="article-edit-order">
+                        <button class="order-btn" onclick="moveArticle('${a.id}', -1)" ${realIdx === 0 ? 'disabled' : ''}>▲</button>
+                        <button class="order-btn" onclick="moveArticle('${a.id}', 1)" ${realIdx === articles.length - 1 ? 'disabled' : ''}>▼</button>
+                    </div>
+                    <div class="article-edit-icon">${icons[a.category] || '📦'}</div>
+                    <div class="article-edit-info">
+                        <div class="article-edit-name">${a.fav ? '⭐ ' : ''}${a.name}</div>
+                        <div class="article-edit-cat">${a.category} • ${a.unit}</div>
+                    </div>
+                    <div class="article-edit-price">${a.price.toFixed(2)}</div>
+                    <button class="article-edit-btn" onclick="editArticle('${a.id}')">✏️</button>
+                </div>`;
+            }).join('');
+        }
+        
+        function moveArticle(id, direction) {
+            const idx = articles.findIndex(a => a.id === id);
+            if (idx === -1) return;
+            const newIdx = idx + direction;
+            if (newIdx < 0 || newIdx >= articles.length) return;
+            
+            // Échanger les positions
+            [articles[idx], articles[newIdx]] = [articles[newIdx], articles[idx]];
+            
+            localStorage.setItem('trakio_articles2', JSON.stringify(articles));
+            syncToFirebase('articles', articles);
+            filterArticles();
+            filter();
         }
         
         function editArticle(id) {
@@ -1497,7 +1612,7 @@
             }
         }
         
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeW(); closePayment(); closeQueue(); closeQueueDetail(); closeReport(); closeConfig(); closeArticles(); closeEditArticle(); } });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeW(); closePayment(); closeQueue(); closeQueueDetail(); closeClientNameModal(); closeReport(); closeConfig(); closeArticles(); closeEditArticle(); } });
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
