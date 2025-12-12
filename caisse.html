@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="Caisse">
     <meta name="theme-color" content="#0f172a">
     
-    <title>TRAKIO Caisse v5.5.6</title>
+    <title>TRAKIO Caisse v5.5.7</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -291,25 +291,25 @@
         .action-btn.danger:active { background: var(--danger); color: white; }
         
         /* FILE D'ATTENTE */
-        .queue-list { max-height: 200px; overflow-y: auto; }
+        .queue-list { max-height: 350px; overflow-y: auto; }
         .queue-item {
             display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 10px;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 10px 12px;
             background: var(--bg-input);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 6px;
+            border-radius: 10px;
+            margin-bottom: 8px;
             cursor: pointer;
         }
         .queue-item:hover { border-color: var(--accent); }
-        .queue-num { font-size: 18px; font-weight: 700; color: var(--warning); min-width: 35px; }
+        .queue-num { font-size: 20px; font-weight: 700; color: var(--warning); min-width: 40px; padding-top: 4px; }
         .queue-info { flex: 1; }
-        .queue-info-top { font-size: 12px; font-weight: 600; }
+        .queue-info-top { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
         .queue-info-bottom { font-size: 10px; color: var(--text-muted); }
-        .queue-total { font-weight: 700; color: var(--accent); font-size: 14px; }
-        .queue-del { background: none; border: none; color: var(--danger); font-size: 16px; cursor: pointer; padding: 4px; }
+        .queue-total { font-weight: 700; color: var(--accent); font-size: 16px; padding-top: 4px; }
+        .queue-del { background: none; border: none; color: var(--danger); font-size: 18px; cursor: pointer; padding: 4px; }
         
         /* Queue Detail Modal */
         .queue-detail-items { max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
@@ -475,7 +475,7 @@
             <div class="logo">
                 <div class="logo-icon">🐟</div>
                 <span>TRAKIO</span>
-                <span class="version">v5.5.6</span>
+                <span class="version">v5.5.7</span>
             </div>
         </div>
         <div class="header-center">
@@ -1295,15 +1295,25 @@
         function renderQueue() {
             const list = document.getElementById('queueList');
             if (!queue.length) { list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;font-size:11px;">Aucun client en attente</div>'; return; }
-            list.innerHTML = queue.map((q, i) => `<div class="queue-item" onclick="openQueueDetail('${q.id}')">
-                <div class="queue-num">#${i+1}</div>
-                <div class="queue-info">
-                    <div class="queue-info-top">👤 ${q.clientName || 'Client'}</div>
-                    <div class="queue-info-bottom">${q.items.length} art. • ${q.time} ${q.paid ? '✅ Payé' : ''}</div>
-                </div>
-                <div class="queue-total">${q.total.toFixed(2)}</div>
-                <button class="queue-del" onclick="event.stopPropagation();delQueue('${q.id}')">×</button>
-            </div>`).join('');
+            list.innerHTML = queue.map((q, i) => {
+                // Résumé des articles (max 3 affichés)
+                const itemsSummary = q.items.slice(0, 3).map(item => {
+                    const qty = item.isW ? item.qty.toFixed(2) + 'kg' : item.qty + 'x';
+                    return `<span style="background:var(--bg-secondary);padding:2px 6px;border-radius:4px;font-size:9px;">${qty} ${item.name}</span>`;
+                }).join(' ');
+                const moreItems = q.items.length > 3 ? `<span style="font-size:9px;color:var(--text-muted);">+${q.items.length - 3} autres</span>` : '';
+                
+                return `<div class="queue-item" onclick="openQueueDetail('${q.id}')">
+                    <div class="queue-num">#${i+1}</div>
+                    <div class="queue-info">
+                        <div class="queue-info-top">👤 <strong>${q.clientName || 'Client'}</strong></div>
+                        <div style="margin:4px 0;display:flex;flex-wrap:wrap;gap:4px;">${itemsSummary} ${moreItems}</div>
+                        <div class="queue-info-bottom">${q.time} ${q.paid ? '✅ Payé (' + q.method + ')' : '⏳ Non payé'}</div>
+                    </div>
+                    <div class="queue-total">${q.total.toFixed(2)}</div>
+                    <button class="queue-del" onclick="event.stopPropagation();delQueue('${q.id}')">×</button>
+                </div>`;
+            }).join('');
         }
         
         function openQueueDetail(id) {
@@ -1590,7 +1600,7 @@
         // BACKUP / RESTORE
         function exportData() {
             const data = {
-                version: 'v5.5.6',
+                version: 'v5.5.7',
                 date: new Date().toISOString(),
                 articles: JSON.parse(localStorage.getItem('trakio_articles2') || '[]'),
                 events: JSON.parse(localStorage.getItem('trakio_events') || '[]'),

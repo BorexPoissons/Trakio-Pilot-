@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trakio-caisse-v5.5.6';
+const CACHE_NAME = 'trakio-caisse-v5.5.7';
 const urlsToCache = [
     './caisse.html',
     './manifest.json'
