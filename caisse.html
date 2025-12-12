@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="Caisse">
     <meta name="theme-color" content="#0f172a">
     
-    <title>TRAKIO Caisse v5.5.3</title>
+    <title>TRAKIO Caisse v5.5.4</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -136,9 +136,9 @@
         /* TUILES UNIFORMES 50px (+20%) */
         .articles-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-            gap: 5px;
-            padding: 5px;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 3px;
+            padding: 4px;
             overflow-y: auto;
             flex: 1;
             -webkit-overflow-scrolling: touch;
@@ -147,23 +147,24 @@
         .tile {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 4px;
+            border-radius: 8px;
+            padding: 6px;
             cursor: pointer;
             text-align: center;
             position: relative;
-            height: 50px;
+            height: 70px;
+            min-width: 90px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
-        .tile::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--cat-color, var(--accent)); border-radius: 6px 6px 0 0; }
+        .tile::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--cat-color, var(--accent)); border-radius: 8px 8px 0 0; }
         .tile:active { background: var(--bg-hover); transform: scale(0.95); }
-        .tile-icon { font-size: 14px; line-height: 1; }
-        .tile-name { font-size: 8px; font-weight: 600; line-height: 1; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
-        .tile-price { font-size: 9px; font-weight: 700; color: var(--accent); }
-        .tile-fav { position: absolute; top: 2px; right: 2px; font-size: 7px; }
+        .tile-icon { font-size: 20px; line-height: 1; }
+        .tile-name { font-size: 10px; font-weight: 600; line-height: 1.1; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
+        .tile-price { font-size: 12px; font-weight: 700; color: var(--accent); margin-top: 2px; }
+        .tile-fav { position: absolute; top: 3px; right: 3px; font-size: 10px; }
         
         /* TICKET */
         .ticket-zone { display: flex; flex-direction: column; background: var(--bg-secondary); overflow: hidden; }
@@ -428,7 +429,7 @@
             <div class="logo">
                 <div class="logo-icon">🐟</div>
                 <span>TRAKIO</span>
-                <span class="version">v5.5.3</span>
+                <span class="version">v5.5.4</span>
             </div>
         </div>
         <div class="header-center">
@@ -1381,7 +1382,7 @@
         // BACKUP / RESTORE
         function exportData() {
             const data = {
-                version: 'v5.5.3',
+                version: 'v5.5.4',
                 date: new Date().toISOString(),
                 articles: JSON.parse(localStorage.getItem('trakio_articles2') || '[]'),
                 events: JSON.parse(localStorage.getItem('trakio_events') || '[]'),
