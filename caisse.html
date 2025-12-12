@@ -9,10 +9,14 @@
     <meta name="apple-mobile-web-app-title" content="Caisse">
     <meta name="theme-color" content="#0f172a">
     
-    <title>TRAKIO Caisse v5.4.4</title>
+    <title>TRAKIO Caisse v5.5.0</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     
     <style>
         :root {
@@ -400,7 +404,7 @@
             <div class="logo">
                 <div class="logo-icon">🐟</div>
                 <span>TRAKIO</span>
-                <span class="version">v5.4.4</span>
+                <span class="version">v5.5.0</span>
             </div>
         </div>
         <div class="header-center">
@@ -581,6 +585,7 @@
             <div class="modal-tabs">
                 <button class="modal-tab active" onclick="setConfigTab('events')">📍 Lieux</button>
                 <button class="modal-tab" onclick="setConfigTab('new')">➕ Nouveau</button>
+                <button class="modal-tab" onclick="setConfigTab('backup')">💾 Backup</button>
             </div>
             <div class="modal-content active" id="configEvents">
                 <div id="eventsList"></div>
@@ -594,6 +599,20 @@
                 <div class="config-group"><label>Type</label><select id="newEventType"><option value="magasin">Magasin</option><option value="marche">Marché</option><option value="manifestation">Manifestation</option></select></div>
                 <div class="modal-actions">
                     <button class="confirm" onclick="addEvent()">➕ Ajouter</button>
+                </div>
+            </div>
+            <div class="modal-content" id="configBackup">
+                <div style="text-align:center;padding:10px;">
+                    <p style="font-size:11px;color:var(--text-muted);margin-bottom:15px;">Sauvegarde toutes tes données : articles, ventes, lieux, file d'attente</p>
+                    <div class="modal-actions" style="margin-bottom:15px;">
+                        <button class="confirm" onclick="exportData()">📤 Exporter</button>
+                    </div>
+                    <hr style="border-color:var(--border);margin:15px 0;">
+                    <p style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">Restaurer depuis un fichier backup :</p>
+                    <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)">
+                    <div class="modal-actions">
+                        <button class="cancel" onclick="document.getElementById('importFile').click()">📥 Importer</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -647,6 +666,64 @@
     <div class="notif" id="notif"><span id="nIcon">✓</span><span id="nText">OK</span></div>
     
     <script>
+        // FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBLU26IZVQQ0I7DHVY14GuZIZe-eZAm2bQ",
+            authDomain: "trakio-pilot-6e97a.firebaseapp.com",
+            projectId: "trakio-pilot-6e97a",
+            storageBucket: "trakio-pilot-6e97a.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc123"
+        };
+        
+        let db = null;
+        let firebaseReady = false;
+        
+        // Init Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            firebaseReady = true;
+            console.log('🔥 Firebase connecté');
+        } catch(e) {
+            console.warn('Firebase non disponible, mode offline');
+        }
+        
+        // FIREBASE SYNC FUNCTIONS
+        async function syncToFirebase(collection, data) {
+            if (!firebaseReady || !db) return;
+            try {
+                await db.collection(collection).doc('caisse').set({
+                    data: data,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                updateSyncStatus(true);
+            } catch(e) {
+                console.warn('Sync error:', e);
+                updateSyncStatus(false);
+            }
+        }
+        
+        async function loadFromFirebase(collection, defaultData) {
+            if (!firebaseReady || !db) return null;
+            try {
+                const doc = await db.collection(collection).doc('caisse').get();
+                if (doc.exists && doc.data().data) {
+                    return doc.data().data;
+                }
+            } catch(e) {
+                console.warn('Load error:', e);
+            }
+            return null;
+        }
+        
+        function updateSyncStatus(connected) {
+            const dot = document.querySelector('.status-dot');
+            if (dot) {
+                dot.style.background = connected ? 'var(--success)' : 'var(--warning)';
+            }
+        }
+        
         // PWA
         let deferredPrompt;
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
@@ -708,19 +785,40 @@
             {id:'morges',name:'Marché Morges',type:'marche',discount:0,commission:0}
         ];
         
-        function init() {
-            articles = JSON.parse(localStorage.getItem('trakio_articles2') || 'null') || [...DEFAULTS];
-            events = JSON.parse(localStorage.getItem('trakio_events') || 'null') || [...DEFAULT_EVENTS];
-            queue = JSON.parse(localStorage.getItem('trakio_queue') || '[]');
+        async function init() {
+            // Migration anciennes clés si nécessaire
+            if (!localStorage.getItem('trakio_articles2') && localStorage.getItem('trakio_articles')) {
+                localStorage.setItem('trakio_articles2', localStorage.getItem('trakio_articles'));
+            }
+            
+            // Charger depuis Firebase d'abord, sinon localStorage
+            const fbArticles = await loadFromFirebase('articles', null);
+            const fbEvents = await loadFromFirebase('events', null);
+            const fbQueue = await loadFromFirebase('queue', null);
+            const fbTx = await loadFromFirebase('transactions', null);
+            
+            articles = fbArticles || JSON.parse(localStorage.getItem('trakio_articles2') || 'null') || [...DEFAULTS];
+            events = fbEvents || JSON.parse(localStorage.getItem('trakio_events') || 'null') || [...DEFAULT_EVENTS];
+            queue = fbQueue || JSON.parse(localStorage.getItem('trakio_queue') || '[]');
             txCnt = +localStorage.getItem('trakio_tx_counter') || 0;
             
+            // Sauvegarder en local
             localStorage.setItem('trakio_articles2', JSON.stringify(articles));
             localStorage.setItem('trakio_events', JSON.stringify(events));
+            localStorage.setItem('trakio_queue', JSON.stringify(queue));
+            
+            // Charger transactions depuis Firebase
+            if (fbTx) {
+                localStorage.setItem('trakio_tx', JSON.stringify(fbTx));
+            }
             
             document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('fr-CH');
             updateEventSelect();
             updateQueueBtn();
             filter();
+            
+            // Status Firebase
+            updateSyncStatus(firebaseReady);
         }
         
         function updateEventSelect() {
@@ -824,6 +922,7 @@
             if (payOption === 'hold') {
                 queue.push({ id: Date.now().toString(36), num: queue.length + 1, items: [...cart], discount: +document.getElementById('disc').value || 0, total: payToPay, method: payMethod, paid: true, time: new Date().toTimeString().slice(0,5) });
                 localStorage.setItem('trakio_queue', JSON.stringify(queue));
+                syncToFirebase('queue', queue);
                 updateQueueBtn();
                 notify('⏳ Client en attente', 'success');
             } else {
@@ -838,6 +937,7 @@
             txCnt++; localStorage.setItem('trakio_tx_counter', txCnt);
             const tx = { id: Date.now().toString(36), num: txCnt, date: new Date().toISOString().slice(0,10), time: new Date().toTimeString().slice(0,5), event: document.getElementById('eventSelect').value, items: cart.map(i => ({name: i.name, price: i.price, qty: i.qty})), discount: +document.getElementById('disc').value || 0, total: total, method: method };
             const txs = JSON.parse(localStorage.getItem('trakio_tx') || '[]'); txs.push(tx); localStorage.setItem('trakio_tx', JSON.stringify(txs));
+            syncToFirebase('transactions', txs);
         }
         
         function holdTicket() {
@@ -846,6 +946,7 @@
             const tot = swiss(cart.reduce((s, i) => s + i.price * i.qty, 0) - d);
             queue.push({ id: Date.now().toString(36), num: queue.length + 1, items: [...cart], discount: d, total: tot, method: null, paid: false, time: new Date().toTimeString().slice(0,5) });
             localStorage.setItem('trakio_queue', JSON.stringify(queue));
+            syncToFirebase('queue', queue);
             updateQueueBtn(); cart = []; document.getElementById('disc').value = 0; renderCart();
             notify('⏳ Mis en attente', 'success');
         }
@@ -868,6 +969,7 @@
             if (q.paid) {
                 queue = queue.filter(x => x.id !== id);
                 localStorage.setItem('trakio_queue', JSON.stringify(queue));
+                syncToFirebase('queue', queue);
                 updateQueueBtn(); closeQueue();
                 notify('✅ Client servi', 'success');
             } else {
@@ -875,12 +977,13 @@
                 document.getElementById('disc').value = q.discount;
                 queue = queue.filter(x => x.id !== id);
                 localStorage.setItem('trakio_queue', JSON.stringify(queue));
+                syncToFirebase('queue', queue);
                 updateQueueBtn(); closeQueue(); renderCart();
                 notify('🛒 Panier repris', 'success');
             }
         }
         
-        function delQueue(id) { if (!confirm('Supprimer ?')) return; queue = queue.filter(x => x.id !== id); localStorage.setItem('trakio_queue', JSON.stringify(queue)); updateQueueBtn(); renderQueue(); }
+        function delQueue(id) { if (!confirm('Supprimer ?')) return; queue = queue.filter(x => x.id !== id); localStorage.setItem('trakio_queue', JSON.stringify(queue)); syncToFirebase('queue', queue); updateQueueBtn(); renderQueue(); }
         
         // REPORT
         function openReport() { renderReport(); document.getElementById('reportModal').classList.add('active'); }
@@ -903,13 +1006,13 @@
             document.getElementById('reportList').innerHTML = txs.length ? txs.slice().reverse().map(t => `<div class="report-item"><div class="report-item-left"><span class="report-item-num">#${t.num}</span><span class="report-item-time">${t.time}</span><span class="report-item-method">${methodIcons[t.method] || '💰'}</span></div><div class="report-item-total">${t.total.toFixed(2)} CHF</div></div>`).join('') : '<div style="text-align:center;color:var(--text-muted);padding:20px;font-size:11px;">Aucune vente aujourd\'hui</div>';
         }
         
-        function clearTodayTx() { if (!confirm('Effacer les ventes du jour ?')) return; const today = new Date().toISOString().slice(0,10); let txs = JSON.parse(localStorage.getItem('trakio_tx') || '[]'); txs = txs.filter(t => t.date !== today); localStorage.setItem('trakio_tx', JSON.stringify(txs)); renderReport(); notify('🗑️ Effacé', 'success'); }
+        function clearTodayTx() { if (!confirm('Effacer les ventes du jour ?')) return; const today = new Date().toISOString().slice(0,10); let txs = JSON.parse(localStorage.getItem('trakio_tx') || '[]'); txs = txs.filter(t => t.date !== today); localStorage.setItem('trakio_tx', JSON.stringify(txs)); syncToFirebase('transactions', txs); renderReport(); notify('🗑️ Effacé', 'success'); }
         
         // CONFIG
         function openConfig() { renderEvents(); document.getElementById('configModal').classList.add('active'); }
         function closeConfig() { document.getElementById('configModal').classList.remove('active'); }
         
-        function setConfigTab(tab) { document.querySelectorAll('#configModal .modal-tab').forEach(t => t.classList.remove('active')); document.querySelectorAll('#configModal .modal-content').forEach(c => c.classList.remove('active')); document.querySelector(`#configModal .modal-tab[onclick*="${tab}"]`).classList.add('active'); document.getElementById(tab === 'events' ? 'configEvents' : 'configNew').classList.add('active'); }
+        function setConfigTab(tab) { document.querySelectorAll('#configModal .modal-tab').forEach(t => t.classList.remove('active')); document.querySelectorAll('#configModal .modal-content').forEach(c => c.classList.remove('active')); document.querySelector(`#configModal .modal-tab[onclick*="${tab}"]`).classList.add('active'); document.getElementById(tab === 'events' ? 'configEvents' : tab === 'new' ? 'configNew' : 'configBackup').classList.add('active'); }
         
         function renderEvents() { document.getElementById('eventsList').innerHTML = events.map(e => `<div class="event-card"><div class="event-card-header"><div class="event-card-name">📍 ${e.name}</div><div class="event-card-actions">${e.id !== 'magasin' ? `<button class="event-card-btn" onclick="delEvent('${e.id}')">🗑️</button>` : ''}</div></div><div style="font-size:10px;color:var(--text-muted);">Type: ${e.type} • Remise: ${e.discount}% • Commission: ${e.commission}%</div></div>`).join(''); }
         
@@ -918,11 +1021,62 @@
             if (!name) { notify('Nom requis', 'warning'); return; }
             events.push({ id: Date.now().toString(36), name: name, type: document.getElementById('newEventType').value, discount: +document.getElementById('newEventDiscount').value || 0, commission: +document.getElementById('newEventCommission').value || 0 });
             localStorage.setItem('trakio_events', JSON.stringify(events));
+            syncToFirebase('events', events);
             updateEventSelect(); document.getElementById('newEventName').value = ''; setConfigTab('events'); renderEvents();
             notify('✅ Lieu ajouté', 'success');
         }
         
-        function delEvent(id) { if (!confirm('Supprimer ?')) return; events = events.filter(e => e.id !== id); localStorage.setItem('trakio_events', JSON.stringify(events)); updateEventSelect(); renderEvents(); }
+        function delEvent(id) { if (!confirm('Supprimer ?')) return; events = events.filter(e => e.id !== id); localStorage.setItem('trakio_events', JSON.stringify(events)); syncToFirebase('events', events); updateEventSelect(); renderEvents(); }
+        
+        // BACKUP / RESTORE
+        function exportData() {
+            const data = {
+                version: 'v5.5.0',
+                date: new Date().toISOString(),
+                articles: JSON.parse(localStorage.getItem('trakio_articles2') || '[]'),
+                events: JSON.parse(localStorage.getItem('trakio_events') || '[]'),
+                transactions: JSON.parse(localStorage.getItem('trakio_tx') || '[]'),
+                queue: JSON.parse(localStorage.getItem('trakio_queue') || '[]'),
+                txCounter: localStorage.getItem('trakio_tx_counter') || '0'
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trakio-backup-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            notify('📤 Backup exporté !', 'success');
+        }
+        
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.articles || !data.events) {
+                        notify('Fichier invalide', 'warning');
+                        return;
+                    }
+                    if (!confirm('⚠️ Restaurer ce backup ?\n\nCela remplacera toutes les données actuelles.')) return;
+                    
+                    localStorage.setItem('trakio_articles2', JSON.stringify(data.articles));
+                    localStorage.setItem('trakio_events', JSON.stringify(data.events));
+                    localStorage.setItem('trakio_tx', JSON.stringify(data.transactions || []));
+                    localStorage.setItem('trakio_queue', JSON.stringify(data.queue || []));
+                    localStorage.setItem('trakio_tx_counter', data.txCounter || '0');
+                    
+                    notify('📥 Backup restauré !', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } catch (err) {
+                    notify('Erreur lecture fichier', 'warning');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
         
         // ARTICLES EDIT
         function openArticles() { filterArticles(); document.getElementById('articlesModal').classList.add('active'); }
@@ -958,6 +1112,7 @@
             a.category = document.getElementById('editArtCat').value;
             a.fav = document.getElementById('editArtFav').checked ? 1 : 0;
             localStorage.setItem('trakio_articles2', JSON.stringify(articles));
+            syncToFirebase('articles', articles);
             closeEditArticle(); filterArticles(); filter();
             notify('💾 Sauvegardé', 'success');
         }
