@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="Caisse">
     <meta name="theme-color" content="#0f172a">
     
-    <title>TRAKIO Caisse v5.5.2</title>
+    <title>TRAKIO Caisse v5.5.3</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -363,13 +363,24 @@
         .report-stat-value { font-size: 20px; font-weight: 700; color: var(--accent); }
         .report-stat-label { font-size: 9px; color: var(--text-muted); }
         
-        .report-list { max-height: 200px; overflow-y: auto; }
-        .report-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: var(--bg-input); border-radius: 6px; margin-bottom: 4px; font-size: 10px; }
-        .report-item-left { display: flex; align-items: center; gap: 8px; }
+        .report-filters { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .report-filter { flex: 1; min-width: 100px; }
+        .report-filter label { display: block; font-size: 9px; color: var(--text-muted); margin-bottom: 4px; }
+        .report-filter input, .report-filter select { width: 100%; padding: 8px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-size: 11px; font-family: inherit; }
+        
+        .report-list { max-height: 250px; overflow-y: auto; }
+        .report-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-input); border-radius: 8px; margin-bottom: 6px; font-size: 11px; }
+        .report-item-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .report-item-num { font-weight: 700; color: var(--text-muted); }
         .report-item-time { color: var(--text-muted); }
+        .report-item-date { color: var(--accent); font-size: 9px; }
+        .report-item-event { font-size: 9px; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px; }
         .report-item-method { font-size: 14px; }
-        .report-item-total { font-weight: 700; color: var(--success); }
+        .report-item-total { font-weight: 700; color: var(--success); font-size: 12px; }
+        
+        .report-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+        .report-tab { flex: 1; padding: 8px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted); font-size: 10px; cursor: pointer; text-align: center; font-family: inherit; }
+        .report-tab.active { background: var(--accent); color: #000; border-color: var(--accent); }
         
         /* Config manifestation */
         .config-group { margin-bottom: 12px; }
@@ -417,7 +428,7 @@
             <div class="logo">
                 <div class="logo-icon">🐟</div>
                 <span>TRAKIO</span>
-                <span class="version">v5.5.2</span>
+                <span class="version">v5.5.3</span>
             </div>
         </div>
         <div class="header-center">
@@ -591,19 +602,63 @@
     <div class="modal-overlay" id="reportModal">
         <div class="modal large">
             <div class="modal-header">
-                <div class="modal-title">📊 Rapport du jour</div>
+                <div class="modal-title">📊 Rapport des ventes</div>
                 <button class="modal-close" onclick="closeReport()">×</button>
             </div>
-            <div class="report-summary" id="reportSummary">
-                <div class="report-stat"><div class="report-stat-value" id="rptTotal">0.00</div><div class="report-stat-label">Total CHF</div></div>
-                <div class="report-stat"><div class="report-stat-value" id="rptCount">0</div><div class="report-stat-label">Tickets</div></div>
-                <div class="report-stat"><div class="report-stat-value" id="rptCash">0.00</div><div class="report-stat-label">💵 Espèces</div></div>
-                <div class="report-stat"><div class="report-stat-value" id="rptCard">0.00</div><div class="report-stat-label">💳 Carte/Twint</div></div>
+            
+            <div class="report-tabs">
+                <button class="report-tab active" onclick="setReportTab('today')">📅 Aujourd'hui</button>
+                <button class="report-tab" onclick="setReportTab('history')">📜 Historique</button>
             </div>
-            <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Dernières ventes :</div>
-            <div class="report-list" id="reportList"></div>
+            
+            <div id="reportToday">
+                <div class="report-filters">
+                    <div class="report-filter">
+                        <label>📍 Lieu actuel</label>
+                        <select id="rptEventToday" onchange="renderReportToday()">
+                            <option value="">Tous les lieux</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="report-summary">
+                    <div class="report-stat"><div class="report-stat-value" id="rptTotal">0.00</div><div class="report-stat-label">Total CHF</div></div>
+                    <div class="report-stat"><div class="report-stat-value" id="rptCount">0</div><div class="report-stat-label">Tickets</div></div>
+                    <div class="report-stat"><div class="report-stat-value" id="rptCash">0.00</div><div class="report-stat-label">💵 Espèces</div></div>
+                    <div class="report-stat"><div class="report-stat-value" id="rptCard">0.00</div><div class="report-stat-label">💳 Carte/Twint</div></div>
+                </div>
+                <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">Ventes du jour :</div>
+                <div class="report-list" id="reportList"></div>
+            </div>
+            
+            <div id="reportHistory" style="display:none;">
+                <div class="report-filters">
+                    <div class="report-filter">
+                        <label>📅 Date début</label>
+                        <input type="date" id="rptDateFrom" onchange="renderReportHistory()">
+                    </div>
+                    <div class="report-filter">
+                        <label>📅 Date fin</label>
+                        <input type="date" id="rptDateTo" onchange="renderReportHistory()">
+                    </div>
+                    <div class="report-filter">
+                        <label>📍 Lieu</label>
+                        <select id="rptEventHistory" onchange="renderReportHistory()">
+                            <option value="">Tous les lieux</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="report-summary">
+                    <div class="report-stat"><div class="report-stat-value" id="rptTotalH">0.00</div><div class="report-stat-label">Total CHF</div></div>
+                    <div class="report-stat"><div class="report-stat-value" id="rptCountH">0</div><div class="report-stat-label">Tickets</div></div>
+                    <div class="report-stat"><div class="report-stat-value" id="rptCashH">0.00</div><div class="report-stat-label">💵 Espèces</div></div>
+                    <div class="report-stat"><div class="report-stat-value" id="rptCardH">0.00</div><div class="report-stat-label">💳 Carte/Twint</div></div>
+                </div>
+                <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">Historique :</div>
+                <div class="report-list" id="reportListHistory"></div>
+            </div>
+            
             <div class="modal-actions" style="margin-top:12px;">
-                <button class="cancel" onclick="clearTodayTx()">🗑️ Effacer jour</button>
+                <button class="cancel" onclick="exportReportCSV()">📤 Export CSV</button>
                 <button class="confirm" onclick="closeReport()">Fermer</button>
             </div>
         </div>
@@ -727,18 +782,21 @@
         async function syncToFirebase(collection, data) {
             if (!firebaseReady || !db) {
                 console.log('⚠️ Firebase non disponible, données en local seulement');
-                return;
+                return false;
             }
             try {
                 await db.collection(collection).doc('caisse').set({
                     data: data,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    device: 'caisse-pwa'
                 }, { merge: true });
                 updateSyncStatus(true);
-                console.log('🔥 Firebase sync OK:', collection, '(' + (Array.isArray(data) ? data.length : 1) + ' items)');
+                console.log('🔥 Sync OK:', collection);
+                return true;
             } catch(e) {
-                console.warn('❌ Firebase sync error:', e);
+                console.warn('❌ Sync error:', collection, e);
                 updateSyncStatus(false);
+                return false;
             }
         }
         
@@ -746,12 +804,11 @@
             if (!firebaseReady || !db) return null;
             try {
                 const doc = await db.collection(collection).doc('caisse').get();
-                if (doc.exists && doc.data().data) {
-                    console.log('🔥 Firebase load OK:', collection);
+                if (doc.exists && doc.data().data !== undefined) {
                     return doc.data().data;
                 }
             } catch(e) {
-                console.warn('❌ Firebase load error:', e);
+                console.warn('❌ Load error:', collection, e);
             }
             return null;
         }
@@ -830,34 +887,83 @@
                 localStorage.setItem('trakio_articles2', localStorage.getItem('trakio_articles'));
             }
             
-            // Charger depuis Firebase d'abord, sinon localStorage
-            const fbArticles = await loadFromFirebase('articles', null);
-            const fbEvents = await loadFromFirebase('events', null);
-            const fbQueue = await loadFromFirebase('queue', null);
-            const fbTx = await loadFromFirebase('transactions', null);
+            console.log('🚀 Initialisation TRAKIO Caisse...');
             
-            articles = fbArticles || JSON.parse(localStorage.getItem('trakio_articles2') || 'null') || [...DEFAULTS];
-            events = fbEvents || JSON.parse(localStorage.getItem('trakio_events') || 'null') || [...DEFAULT_EVENTS];
-            queue = fbQueue || JSON.parse(localStorage.getItem('trakio_queue') || '[]');
-            txCnt = +localStorage.getItem('trakio_tx_counter') || 0;
+            // Charger depuis Firebase d'abord (source de vérité)
+            if (firebaseReady) {
+                console.log('🔥 Chargement depuis Firebase...');
+                
+                const fbArticles = await loadFromFirebase('articles', null);
+                const fbEvents = await loadFromFirebase('events', null);
+                const fbQueue = await loadFromFirebase('queue', null);
+                const fbTx = await loadFromFirebase('transactions', null);
+                const fbTxCounter = await loadFromFirebase('txCounter', null);
+                
+                // Articles
+                if (fbArticles && fbArticles.length > 0) {
+                    articles = fbArticles;
+                    localStorage.setItem('trakio_articles2', JSON.stringify(articles));
+                    console.log('✅ Articles Firebase:', articles.length);
+                } else {
+                    articles = JSON.parse(localStorage.getItem('trakio_articles2') || 'null') || [...DEFAULTS];
+                    await syncToFirebase('articles', articles);
+                }
+                
+                // Événements
+                if (fbEvents && fbEvents.length > 0) {
+                    events = fbEvents;
+                    localStorage.setItem('trakio_events', JSON.stringify(events));
+                    console.log('✅ Événements Firebase:', events.length);
+                } else {
+                    events = JSON.parse(localStorage.getItem('trakio_events') || 'null') || [...DEFAULT_EVENTS];
+                    await syncToFirebase('events', events);
+                }
+                
+                // File d'attente
+                if (fbQueue) {
+                    queue = fbQueue;
+                    localStorage.setItem('trakio_queue', JSON.stringify(queue));
+                    console.log('✅ Queue Firebase:', queue.length);
+                } else {
+                    queue = JSON.parse(localStorage.getItem('trakio_queue') || '[]');
+                    if (queue.length > 0) await syncToFirebase('queue', queue);
+                }
+                
+                // Transactions
+                if (fbTx && fbTx.length > 0) {
+                    localStorage.setItem('trakio_tx', JSON.stringify(fbTx));
+                    console.log('✅ Transactions Firebase:', fbTx.length);
+                }
+                
+                // Compteur TX
+                if (fbTxCounter) {
+                    txCnt = fbTxCounter;
+                    localStorage.setItem('trakio_tx_counter', txCnt);
+                } else {
+                    txCnt = +localStorage.getItem('trakio_tx_counter') || 0;
+                    if (txCnt > 0) await syncToFirebase('txCounter', txCnt);
+                }
+                
+            } else {
+                console.log('⚠️ Mode hors-ligne, chargement localStorage...');
+                articles = JSON.parse(localStorage.getItem('trakio_articles2') || 'null') || [...DEFAULTS];
+                events = JSON.parse(localStorage.getItem('trakio_events') || 'null') || [...DEFAULT_EVENTS];
+                queue = JSON.parse(localStorage.getItem('trakio_queue') || '[]');
+                txCnt = +localStorage.getItem('trakio_tx_counter') || 0;
+            }
             
-            // Sauvegarder en local
+            // Sauvegarder en local (backup)
             localStorage.setItem('trakio_articles2', JSON.stringify(articles));
             localStorage.setItem('trakio_events', JSON.stringify(events));
             localStorage.setItem('trakio_queue', JSON.stringify(queue));
-            
-            // Charger transactions depuis Firebase
-            if (fbTx) {
-                localStorage.setItem('trakio_tx', JSON.stringify(fbTx));
-            }
             
             document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('fr-CH');
             updateEventSelect();
             updateQueueBtn();
             filter();
             
-            // Status Firebase
             updateSyncStatus(firebaseReady);
+            console.log('✅ TRAKIO Caisse prêt!');
         }
         
         function updateEventSelect() {
@@ -982,25 +1088,41 @@
             txCnt++; 
             localStorage.setItem('trakio_tx_counter', txCnt);
             
+            // Récupérer l'événement complet
+            const eventId = document.getElementById('eventSelect').value;
+            const eventData = events.find(e => e.id === eventId) || { id: eventId, name: eventId, type: 'magasin', discount: 0, commission: 0 };
+            
             const tx = { 
                 id: Date.now().toString(36), 
                 num: txCnt, 
                 date: new Date().toISOString().slice(0,10), 
                 time: new Date().toTimeString().slice(0,5), 
-                event: document.getElementById('eventSelect').value, 
-                items: cart.map(i => ({name: i.name, price: i.price, qty: i.qty, isW: i.isW})), 
+                timestamp: Date.now(),
+                // Événement complet
+                event: eventData.id,
+                eventName: eventData.name,
+                eventType: eventData.type,
+                eventCommission: eventData.commission || 0,
+                // Vente
+                items: cart.map(i => ({name: i.name, price: i.price, qty: i.qty, isW: i.isW, unit: i.unit})), 
+                itemsCount: cart.length,
                 discount: +document.getElementById('disc').value || 0, 
+                subtotal: cart.reduce((s, i) => s + i.price * i.qty, 0),
                 total: total, 
-                method: method 
+                method: method,
+                // Commission calculée
+                commission: eventData.commission ? swiss(total * eventData.commission / 100) : 0
             };
             
             const txs = JSON.parse(localStorage.getItem('trakio_tx') || '[]'); 
             txs.push(tx); 
             localStorage.setItem('trakio_tx', JSON.stringify(txs));
-            syncToFirebase('transactions', txs);
             
-            console.log('💾 Transaction enregistrée:', tx);
-            console.log('📊 Total transactions:', txs.length);
+            // Sync Firebase (transactions + compteur)
+            syncToFirebase('transactions', txs);
+            syncToFirebase('txCounter', txCnt);
+            
+            console.log('💾 Transaction #' + txCnt + ' enregistrée:', eventData.name, total + ' CHF');
         }
         
         function holdTicket() {
@@ -1106,46 +1228,135 @@
         function delQueue(id) { if (!confirm('Supprimer de la file ?')) return; queue = queue.filter(x => x.id !== id); localStorage.setItem('trakio_queue', JSON.stringify(queue)); syncToFirebase('queue', queue); updateQueueBtn(); renderQueue(); }
         
         // REPORT
-        function openReport() { renderReport(); document.getElementById('reportModal').classList.add('active'); }
+        function openReport() { 
+            // Remplir les sélecteurs d'événements
+            const eventOptions = '<option value="">Tous les lieux</option>' + events.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+            document.getElementById('rptEventToday').innerHTML = eventOptions;
+            document.getElementById('rptEventHistory').innerHTML = eventOptions;
+            
+            // Sélectionner l'événement actuel
+            document.getElementById('rptEventToday').value = document.getElementById('eventSelect').value;
+            
+            // Dates par défaut pour historique (30 derniers jours)
+            const today = new Date().toISOString().slice(0,10);
+            const monthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString().slice(0,10);
+            document.getElementById('rptDateFrom').value = monthAgo;
+            document.getElementById('rptDateTo').value = today;
+            
+            setReportTab('today');
+            document.getElementById('reportModal').classList.add('active'); 
+        }
         function closeReport() { document.getElementById('reportModal').classList.remove('active'); }
         
-        function renderReport() {
+        function setReportTab(tab) {
+            document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.report-tab[onclick*="${tab}"]`).classList.add('active');
+            document.getElementById('reportToday').style.display = tab === 'today' ? 'block' : 'none';
+            document.getElementById('reportHistory').style.display = tab === 'history' ? 'block' : 'none';
+            if (tab === 'today') renderReportToday();
+            else renderReportHistory();
+        }
+        
+        function renderReportToday() {
             const today = new Date().toISOString().slice(0,10);
+            const eventFilter = document.getElementById('rptEventToday').value;
             const allTxs = JSON.parse(localStorage.getItem('trakio_tx') || '[]');
-            const txs = allTxs.filter(t => t.date === today);
             
-            console.log('📊 Rapport - Date:', today);
-            console.log('📊 Toutes transactions:', allTxs.length);
-            console.log('📊 Transactions aujourd\'hui:', txs.length);
+            let txs = allTxs.filter(t => t.date === today);
+            if (eventFilter) {
+                // Filtrer par event ID ou eventName
+                txs = txs.filter(t => t.event === eventFilter || t.eventName === eventFilter);
+            }
             
+            renderReportStats(txs, 'rptTotal', 'rptCount', 'rptCash', 'rptCard');
+            renderReportList(txs, 'reportList', false);
+        }
+        
+        function renderReportHistory() {
+            const dateFrom = document.getElementById('rptDateFrom').value;
+            const dateTo = document.getElementById('rptDateTo').value;
+            const eventFilter = document.getElementById('rptEventHistory').value;
+            const allTxs = JSON.parse(localStorage.getItem('trakio_tx') || '[]');
+            
+            let txs = allTxs.filter(t => {
+                if (dateFrom && t.date < dateFrom) return false;
+                if (dateTo && t.date > dateTo) return false;
+                if (eventFilter) {
+                    // Filtrer par event ID ou eventName
+                    if (t.event !== eventFilter && t.eventName !== events.find(e => e.id === eventFilter)?.name) return false;
+                }
+                return true;
+            });
+            
+            renderReportStats(txs, 'rptTotalH', 'rptCountH', 'rptCashH', 'rptCardH');
+            renderReportList(txs, 'reportListHistory', true);
+        }
+        
+        function renderReportStats(txs, totalId, countId, cashId, cardId) {
             const total = txs.reduce((s, t) => s + (t.total || 0), 0);
             const cash = txs.filter(t => t.method === 'cash').reduce((s, t) => s + (t.total || 0), 0);
             const card = txs.filter(t => t.method !== 'cash').reduce((s, t) => s + (t.total || 0), 0);
+            const commission = txs.reduce((s, t) => s + (t.commission || 0), 0);
             
-            document.getElementById('rptTotal').textContent = total.toFixed(2);
-            document.getElementById('rptCount').textContent = txs.length;
-            document.getElementById('rptCash').textContent = cash.toFixed(2);
-            document.getElementById('rptCard').textContent = card.toFixed(2);
-            
-            const methodIcons = {cash: '💵', card: '💳', twint: '📱'};
-            if (txs.length) {
-                document.getElementById('reportList').innerHTML = txs.slice().reverse().map(t => `
-                    <div class="report-item">
-                        <div class="report-item-left">
-                            <span class="report-item-num">#${t.num}</span>
-                            <span class="report-item-time">${t.time}</span>
-                            <span class="report-item-method">${methodIcons[t.method] || '💰'}</span>
-                            <span style="font-size:9px;color:var(--text-muted);">${t.items?.length || 0} art.</span>
-                        </div>
-                        <div class="report-item-total">${(t.total || 0).toFixed(2)} CHF</div>
-                    </div>
-                `).join('');
-            } else {
-                document.getElementById('reportList').innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;font-size:11px;">Aucune vente aujourd\'hui<br><small>(' + today + ')</small></div>';
-            }
+            document.getElementById(totalId).textContent = total.toFixed(2);
+            document.getElementById(countId).textContent = txs.length;
+            document.getElementById(cashId).textContent = cash.toFixed(2);
+            document.getElementById(cardId).textContent = card.toFixed(2);
         }
         
-        function clearTodayTx() { if (!confirm('Effacer les ventes du jour ?')) return; const today = new Date().toISOString().slice(0,10); let txs = JSON.parse(localStorage.getItem('trakio_tx') || '[]'); txs = txs.filter(t => t.date !== today); localStorage.setItem('trakio_tx', JSON.stringify(txs)); syncToFirebase('transactions', txs); renderReport(); notify('🗑️ Effacé', 'success'); }
+        function renderReportList(txs, listId, showDate) {
+            const methodIcons = {cash: '💵', card: '💳', twint: '📱'};
+            const list = document.getElementById(listId);
+            
+            if (!txs.length) {
+                list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;font-size:11px;">Aucune vente</div>';
+                return;
+            }
+            
+            // Trier par date/heure décroissant
+            const sorted = txs.slice().sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
+            
+            list.innerHTML = sorted.map(t => {
+                // Utiliser eventName stocké dans la transaction, sinon chercher dans events
+                const eventName = t.eventName || events.find(e => e.id === t.event)?.name || t.event || '-';
+                const commission = t.commission ? ` <span style="color:var(--warning);font-size:8px;">(-${t.commission.toFixed(2)})</span>` : '';
+                
+                return `<div class="report-item">
+                    <div class="report-item-left">
+                        <span class="report-item-num">#${t.num}</span>
+                        ${showDate ? `<span class="report-item-date">${t.date}</span>` : ''}
+                        <span class="report-item-time">${t.time}</span>
+                        <span class="report-item-method">${methodIcons[t.method] || '💰'}</span>
+                        <span class="report-item-event">📍 ${eventName}</span>
+                    </div>
+                    <div class="report-item-total">${(t.total || 0).toFixed(2)}${commission}</div>
+                </div>`;
+            }).join('');
+        }
+        
+        function exportReportCSV() {
+            const allTxs = JSON.parse(localStorage.getItem('trakio_tx') || '[]');
+            if (!allTxs.length) { notify('Aucune donnée', 'warning'); return; }
+            
+            // Header CSV
+            let csv = 'Numéro;Date;Heure;Lieu;Type;Méthode;Articles;Nb Articles;Sous-total;Remise;Total;Commission\n';
+            
+            allTxs.forEach(t => {
+                const eventName = t.eventName || events.find(e => e.id === t.event)?.name || t.event || '-';
+                const articles = (t.items || []).map(i => `${i.name}(${i.qty})`).join(' / ');
+                csv += `${t.num};${t.date};${t.time};"${eventName}";${t.eventType || ''};${t.method};"${articles}";${t.itemsCount || t.items?.length || 0};${t.subtotal || ''};${t.discount || 0};${t.total};${t.commission || 0}\n`;
+            });
+            
+            // Télécharger
+            const blob = new Blob(['\ufeff' + csv], {type: 'text/csv;charset=utf-8;'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trakio-ventes-${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            notify('📤 CSV exporté', 'success');
+        }
         
         // CONFIG
         function openConfig() { renderEvents(); document.getElementById('configModal').classList.add('active'); }
@@ -1170,7 +1381,7 @@
         // BACKUP / RESTORE
         function exportData() {
             const data = {
-                version: 'v5.5.2',
+                version: 'v5.5.3',
                 date: new Date().toISOString(),
                 articles: JSON.parse(localStorage.getItem('trakio_articles2') || '[]'),
                 events: JSON.parse(localStorage.getItem('trakio_events') || '[]'),
