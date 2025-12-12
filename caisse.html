@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="Caisse">
     <meta name="theme-color" content="#0f172a">
     
-    <title>TRAKIO Caisse v5.4.3</title>
+    <title>TRAKIO Caisse v5.4.4</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -400,7 +400,7 @@
             <div class="logo">
                 <div class="logo-icon">🐟</div>
                 <span>TRAKIO</span>
-                <span class="version">v5.4.3</span>
+                <span class="version">v5.4.4</span>
             </div>
         </div>
         <div class="header-center">
@@ -410,6 +410,7 @@
             <div class="status"><span class="status-dot"></span><span id="dateDisplay">-</span></div>
         </div>
         <div class="header-right">
+            <button class="header-btn" onclick="refreshApp()" title="Mise à jour">🔄</button>
             <button class="header-btn" id="queueBtn" onclick="openQueue()" title="File d'attente">⏳</button>
             <button class="header-btn" onclick="openReport()" title="Rapport">📊</button>
             <button class="header-btn" onclick="openConfig()" title="Config">⚙️</button>
@@ -972,6 +973,22 @@
                 if (!confirm('Quitter la caisse ?')) return;
             }
             location.href = 'index.html';
+        }
+        
+        function refreshApp() {
+            if (cart.length > 0) {
+                if (!confirm('⚠️ Panier non vide !\n\nVoulez-vous vraiment actualiser ?')) return;
+            }
+            // Vider le cache du Service Worker et recharger
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                }).then(() => {
+                    location.reload(true);
+                });
+            } else {
+                location.reload(true);
+            }
         }
         
         document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeW(); closePayment(); closeQueue(); closeReport(); closeConfig(); closeArticles(); closeEditArticle(); } });
