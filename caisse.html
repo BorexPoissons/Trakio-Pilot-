@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="Caisse">
     <meta name="theme-color" content="#0f172a">
     
-    <title>TRAKIO Caisse v5.5.1</title>
+    <title>TRAKIO Caisse v5.5.2</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -417,7 +417,7 @@
             <div class="logo">
                 <div class="logo-icon">🐟</div>
                 <span>TRAKIO</span>
-                <span class="version">v5.5.1</span>
+                <span class="version">v5.5.2</span>
             </div>
         </div>
         <div class="header-center">
@@ -597,12 +597,13 @@
             <div class="report-summary" id="reportSummary">
                 <div class="report-stat"><div class="report-stat-value" id="rptTotal">0.00</div><div class="report-stat-label">Total CHF</div></div>
                 <div class="report-stat"><div class="report-stat-value" id="rptCount">0</div><div class="report-stat-label">Tickets</div></div>
-                <div class="report-stat"><div class="report-stat-value" id="rptCash">0.00</div><div class="report-stat-label">Espèces</div></div>
-                <div class="report-stat"><div class="report-stat-value" id="rptCard">0.00</div><div class="report-stat-label">Carte/Twint</div></div>
+                <div class="report-stat"><div class="report-stat-value" id="rptCash">0.00</div><div class="report-stat-label">💵 Espèces</div></div>
+                <div class="report-stat"><div class="report-stat-value" id="rptCard">0.00</div><div class="report-stat-label">💳 Carte/Twint</div></div>
             </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Dernières ventes :</div>
             <div class="report-list" id="reportList"></div>
-            <div class="modal-actions" style="margin-top:10px;">
-                <button class="cancel" onclick="clearTodayTx()">🗑️ Effacer</button>
+            <div class="modal-actions" style="margin-top:12px;">
+                <button class="cancel" onclick="clearTodayTx()">🗑️ Effacer jour</button>
                 <button class="confirm" onclick="closeReport()">Fermer</button>
             </div>
         </div>
@@ -724,15 +725,19 @@
         
         // FIREBASE SYNC FUNCTIONS
         async function syncToFirebase(collection, data) {
-            if (!firebaseReady || !db) return;
+            if (!firebaseReady || !db) {
+                console.log('⚠️ Firebase non disponible, données en local seulement');
+                return;
+            }
             try {
                 await db.collection(collection).doc('caisse').set({
                     data: data,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
                 updateSyncStatus(true);
+                console.log('🔥 Firebase sync OK:', collection, '(' + (Array.isArray(data) ? data.length : 1) + ' items)');
             } catch(e) {
-                console.warn('Sync error:', e);
+                console.warn('❌ Firebase sync error:', e);
                 updateSyncStatus(false);
             }
         }
@@ -742,10 +747,11 @@
             try {
                 const doc = await db.collection(collection).doc('caisse').get();
                 if (doc.exists && doc.data().data) {
+                    console.log('🔥 Firebase load OK:', collection);
                     return doc.data().data;
                 }
             } catch(e) {
-                console.warn('Load error:', e);
+                console.warn('❌ Firebase load error:', e);
             }
             return null;
         }
@@ -950,15 +956,21 @@
         function selectPayOpt(opt) { payOption = opt; document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected')); event.target.closest('.pay-option').classList.add('selected'); }
         
         function confirmPayment() {
-            if (payMethod === 'cash' && (+document.getElementById('cashIn').value || 0) < payToPay) { notify('Montant insuffisant', 'warning'); return; }
+            // Pour espèces, vérifier montant suffisant
+            if (payMethod === 'cash') {
+                const received = +document.getElementById('cashIn').value || 0;
+                if (received < payToPay) { notify('Montant insuffisant', 'warning'); return; }
+            }
             
             if (payOption === 'hold') {
+                // Mettre en attente (payé mais attend)
                 queue.push({ id: Date.now().toString(36), num: queue.length + 1, items: [...cart], discount: +document.getElementById('disc').value || 0, total: payToPay, method: payMethod, paid: true, time: new Date().toTimeString().slice(0,5) });
                 localStorage.setItem('trakio_queue', JSON.stringify(queue));
                 syncToFirebase('queue', queue);
                 updateQueueBtn();
                 notify('⏳ Client en attente', 'success');
             } else {
+                // Enregistrer la vente
                 saveTx(payMethod, payToPay);
                 notify('✅ ' + payToPay.toFixed(2) + ' CHF', 'success');
             }
@@ -967,10 +979,28 @@
         }
         
         function saveTx(method, total) {
-            txCnt++; localStorage.setItem('trakio_tx_counter', txCnt);
-            const tx = { id: Date.now().toString(36), num: txCnt, date: new Date().toISOString().slice(0,10), time: new Date().toTimeString().slice(0,5), event: document.getElementById('eventSelect').value, items: cart.map(i => ({name: i.name, price: i.price, qty: i.qty})), discount: +document.getElementById('disc').value || 0, total: total, method: method };
-            const txs = JSON.parse(localStorage.getItem('trakio_tx') || '[]'); txs.push(tx); localStorage.setItem('trakio_tx', JSON.stringify(txs));
+            txCnt++; 
+            localStorage.setItem('trakio_tx_counter', txCnt);
+            
+            const tx = { 
+                id: Date.now().toString(36), 
+                num: txCnt, 
+                date: new Date().toISOString().slice(0,10), 
+                time: new Date().toTimeString().slice(0,5), 
+                event: document.getElementById('eventSelect').value, 
+                items: cart.map(i => ({name: i.name, price: i.price, qty: i.qty, isW: i.isW})), 
+                discount: +document.getElementById('disc').value || 0, 
+                total: total, 
+                method: method 
+            };
+            
+            const txs = JSON.parse(localStorage.getItem('trakio_tx') || '[]'); 
+            txs.push(tx); 
+            localStorage.setItem('trakio_tx', JSON.stringify(txs));
             syncToFirebase('transactions', txs);
+            
+            console.log('💾 Transaction enregistrée:', tx);
+            console.log('📊 Total transactions:', txs.length);
         }
         
         function holdTicket() {
@@ -1081,11 +1111,16 @@
         
         function renderReport() {
             const today = new Date().toISOString().slice(0,10);
-            const txs = JSON.parse(localStorage.getItem('trakio_tx') || '[]').filter(t => t.date === today);
+            const allTxs = JSON.parse(localStorage.getItem('trakio_tx') || '[]');
+            const txs = allTxs.filter(t => t.date === today);
             
-            const total = txs.reduce((s, t) => s + t.total, 0);
-            const cash = txs.filter(t => t.method === 'cash').reduce((s, t) => s + t.total, 0);
-            const card = txs.filter(t => t.method !== 'cash').reduce((s, t) => s + t.total, 0);
+            console.log('📊 Rapport - Date:', today);
+            console.log('📊 Toutes transactions:', allTxs.length);
+            console.log('📊 Transactions aujourd\'hui:', txs.length);
+            
+            const total = txs.reduce((s, t) => s + (t.total || 0), 0);
+            const cash = txs.filter(t => t.method === 'cash').reduce((s, t) => s + (t.total || 0), 0);
+            const card = txs.filter(t => t.method !== 'cash').reduce((s, t) => s + (t.total || 0), 0);
             
             document.getElementById('rptTotal').textContent = total.toFixed(2);
             document.getElementById('rptCount').textContent = txs.length;
@@ -1093,7 +1128,21 @@
             document.getElementById('rptCard').textContent = card.toFixed(2);
             
             const methodIcons = {cash: '💵', card: '💳', twint: '📱'};
-            document.getElementById('reportList').innerHTML = txs.length ? txs.slice().reverse().map(t => `<div class="report-item"><div class="report-item-left"><span class="report-item-num">#${t.num}</span><span class="report-item-time">${t.time}</span><span class="report-item-method">${methodIcons[t.method] || '💰'}</span></div><div class="report-item-total">${t.total.toFixed(2)} CHF</div></div>`).join('') : '<div style="text-align:center;color:var(--text-muted);padding:20px;font-size:11px;">Aucune vente aujourd\'hui</div>';
+            if (txs.length) {
+                document.getElementById('reportList').innerHTML = txs.slice().reverse().map(t => `
+                    <div class="report-item">
+                        <div class="report-item-left">
+                            <span class="report-item-num">#${t.num}</span>
+                            <span class="report-item-time">${t.time}</span>
+                            <span class="report-item-method">${methodIcons[t.method] || '💰'}</span>
+                            <span style="font-size:9px;color:var(--text-muted);">${t.items?.length || 0} art.</span>
+                        </div>
+                        <div class="report-item-total">${(t.total || 0).toFixed(2)} CHF</div>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('reportList').innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;font-size:11px;">Aucune vente aujourd\'hui<br><small>(' + today + ')</small></div>';
+            }
         }
         
         function clearTodayTx() { if (!confirm('Effacer les ventes du jour ?')) return; const today = new Date().toISOString().slice(0,10); let txs = JSON.parse(localStorage.getItem('trakio_tx') || '[]'); txs = txs.filter(t => t.date !== today); localStorage.setItem('trakio_tx', JSON.stringify(txs)); syncToFirebase('transactions', txs); renderReport(); notify('🗑️ Effacé', 'success'); }
@@ -1121,7 +1170,7 @@
         // BACKUP / RESTORE
         function exportData() {
             const data = {
-                version: 'v5.5.1',
+                version: 'v5.5.2',
                 date: new Date().toISOString(),
                 articles: JSON.parse(localStorage.getItem('trakio_articles2') || '[]'),
                 events: JSON.parse(localStorage.getItem('trakio_events') || '[]'),
