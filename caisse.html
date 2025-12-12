@@ -3,18 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TRAKIO v5.3.0 - Caisse</title>
-    <!-- TRAKIO v5.3.0 - Caisse POS complète autonome - 12.12.2025 -->
+    <title>TRAKIO v5.3.1 - Caisse Tablette</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-deep: #030712;
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
             --bg-card: #1e293b;
@@ -25,505 +19,389 @@
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
             --accent-cyan: #06b6d4;
-            --accent-teal: #14b8a6;
-            --accent-purple: #8b5cf6;
-            --accent-orange: #f97316;
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --gradient-main: linear-gradient(135deg, #06b6d4 0%, #14b8a6 50%, #10b981 100%);
-            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        body {
+        html, body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            min-height: 100vh;
+            height: 100vh;
+            width: 100vw;
             overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
         }
         
-        /* HEADER */
-        .pos-header {
-            height: 60px;
+        /* ===== HEADER COMPACT 45px ===== */
+        .header {
+            height: 45px;
             background: var(--bg-secondary);
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
+            padding: 0 10px;
         }
         
-        .header-left { display: flex; align-items: center; gap: 15px; }
-        
-        .header-logo {
+        .header-left {
             display: flex;
             align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            color: inherit;
+            gap: 8px;
+        }
+        
+        .logo {
+            font-weight: 700;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         
         .logo-icon {
-            width: 36px; height: 36px;
-            background: var(--gradient-main);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #06b6d4, #10b981);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
         }
         
-        .logo-text { font-weight: 700; font-size: 20px; }
-        
-        .version-badge {
-            font-size: 10px;
+        .version {
+            font-size: 9px;
             background: var(--accent-cyan);
-            color: var(--bg-deep);
-            padding: 2px 8px;
-            border-radius: 4px;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
             font-weight: 600;
         }
         
-        .header-center { display: flex; align-items: center; gap: 10px; }
-        
-        .event-badge {
-            display: flex; align-items: center; gap: 8px;
-            padding: 8px 15px;
-            background: rgba(249, 115, 22, 0.15);
-            border: 1px solid rgba(249, 115, 22, 0.3);
-            border-radius: 10px;
-            cursor: pointer;
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .event-name { font-weight: 600; font-size: 13px; color: var(--accent-orange); }
-        .event-date { font-size: 11px; color: var(--text-muted); }
-        
-        .status-badge {
-            display: flex; align-items: center; gap: 6px;
-            padding: 6px 12px;
+        .event-select {
+            padding: 6px 10px;
             background: var(--bg-input);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 12px;
-        }
-        
-        .status-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: var(--danger);
-        }
-        
-        .status-dot.online {
-            background: var(--success);
-            box-shadow: 0 0 8px var(--success);
-        }
-        
-        .header-right { display: flex; align-items: center; gap: 10px; }
-        
-        .header-btn {
-            padding: 8px 14px;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 6px;
             color: var(--text-primary);
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            display: flex; align-items: center; gap: 6px;
-            transition: all 0.2s;
+            font-size: 12px;
             font-family: inherit;
         }
         
-        .header-btn:hover {
-            border-color: var(--accent-cyan);
-            background: var(--bg-hover);
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--text-muted);
         }
         
-        /* LAYOUT 3 COLONNES */
-        .pos-container {
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .header-btn {
+            padding: 6px 10px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        /* ===== CATÉGORIES HORIZONTALES 50px ===== */
+        .categories-bar {
+            height: 50px;
+            background: var(--bg-secondary);
+            display: flex;
+            gap: 6px;
+            padding: 6px 10px;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .categories-bar::-webkit-scrollbar { display: none; }
+        
+        .cat-btn {
+            flex-shrink: 0;
+            height: 38px;
+            padding: 0 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: white;
+            font-weight: 600;
+            font-size: 11px;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+        
+        .cat-btn:hover { transform: scale(1.03); }
+        .cat-btn.active { box-shadow: 0 0 0 2px white; }
+        
+        .cat-btn span:first-child { font-size: 16px; }
+        
+        .cat-favoris { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .cat-tous { background: linear-gradient(135deg, #64748b, #475569); }
+        .cat-poissons { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+        .cat-crustaces { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .cat-coquillages { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .cat-fumes { background: linear-gradient(135deg, #f97316, #ea580c); }
+        .cat-traiteur { background: linear-gradient(135deg, #10b981, #059669); }
+        .cat-epicerie { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+        
+        /* ===== LAYOUT PRINCIPAL ===== */
+        .main-container {
             display: grid;
-            grid-template-columns: 1fr 120px 400px;
-            height: calc(100vh - 60px);
+            grid-template-columns: 1fr 320px;
+            height: calc(100vh - 95px);
             overflow: hidden;
         }
         
-        @media (max-width: 1400px) { .pos-container { grid-template-columns: 1fr 100px 360px; } }
-        @media (max-width: 1200px) { .pos-container { grid-template-columns: 1fr 90px 320px; } .category-label { font-size: 9px; } }
-        @media (max-width: 900px) { .pos-container { grid-template-columns: 1fr 70px 280px; } .category-label { display: none; } .category-btn { height: 55px !important; } }
-        
-        @media (max-width: 768px) {
-            .pos-container {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto 1fr auto;
-                height: auto;
-                min-height: calc(100vh - 60px);
-            }
-            .categories-col {
-                display: flex !important;
-                flex-direction: row !important;
-                overflow-x: auto;
-                gap: 8px;
-                padding: 10px !important;
-                order: -1;
-            }
-            .category-btn { min-width: 65px; height: 60px !important; padding: 8px !important; flex-shrink: 0; }
-            .category-label { display: block; font-size: 8px; }
-            .articles-col { max-height: 45vh; }
-            .ticket-col { border-left: none; border-top: 1px solid var(--border); }
-        }
-        
-        /* COLONNE ARTICLES */
-        .articles-col {
-            background: var(--bg-primary);
+        /* ===== ZONE ARTICLES ===== */
+        .articles-zone {
             display: flex;
             flex-direction: column;
             overflow: hidden;
             border-right: 1px solid var(--border);
         }
         
-        .col-header {
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--bg-secondary);
-        }
-        
-        .col-title {
-            font-weight: 600; font-size: 15px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        
-        .articles-count { color: var(--text-muted); font-weight: 400; font-size: 13px; }
-        
-        .search-container {
-            padding: 12px 15px;
+        .search-bar {
+            padding: 8px 10px;
             background: var(--bg-secondary);
             border-bottom: 1px solid var(--border);
-        }
-        
-        .search-wrapper { position: relative; }
-        
-        .search-icon {
-            position: absolute;
-            left: 12px; top: 50%;
-            transform: translateY(-50%);
-            font-size: 16px; opacity: 0.5;
         }
         
         .search-input {
             width: 100%;
-            padding: 12px 15px 12px 40px;
+            padding: 8px 12px 8px 32px;
             background: var(--bg-input);
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: 8px;
             color: var(--text-primary);
-            font-size: 14px;
+            font-size: 13px;
             font-family: inherit;
         }
         
         .search-input:focus { outline: none; border-color: var(--accent-cyan); }
         
+        .search-wrapper {
+            position: relative;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.5;
+        }
+        
+        /* ===== GRILLE ARTICLES - TUILES COMPACTES ===== */
         .articles-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
-            gap: 10px;
-            padding: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 6px;
+            padding: 8px;
             overflow-y: auto;
             flex: 1;
+            -webkit-overflow-scrolling: touch;
         }
         
-        .article-btn {
+        .article-tile {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 12px 10px;
+            border-radius: 10px;
+            padding: 8px 6px;
             cursor: pointer;
-            transition: all 0.2s;
             text-align: center;
             position: relative;
-            overflow: hidden;
+            transition: all 0.15s;
+            min-height: 85px;
         }
         
-        .article-btn::before {
+        .article-tile::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
             height: 3px;
             background: var(--cat-color, var(--accent-cyan));
+            border-radius: 10px 10px 0 0;
         }
         
-        .article-btn:hover {
-            border-color: var(--accent-cyan);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        .article-tile:active {
+            transform: scale(0.95);
+            background: var(--bg-hover);
         }
         
-        .article-btn:active { transform: scale(0.97); }
-        
-        .article-icon { font-size: 28px; margin-bottom: 6px; }
+        .article-icon { font-size: 22px; margin-bottom: 3px; }
         
         .article-name {
-            font-size: 12px; font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 3px;
+            font-size: 10px;
+            font-weight: 600;
             line-height: 1.2;
+            margin-bottom: 2px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            min-height: 28px;
+            min-height: 24px;
         }
         
-        .article-origin { font-size: 9px; color: var(--text-muted); margin-bottom: 4px; }
-        .article-price { font-size: 15px; font-weight: 700; color: var(--accent-cyan); }
-        .article-unit { font-size: 10px; color: var(--text-muted); }
-        .article-favorite { position: absolute; top: 8px; right: 8px; font-size: 12px; }
-        
-        /* COLONNE CATÉGORIES */
-        .categories-col {
-            background: var(--bg-secondary);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 12px 8px;
-            overflow-y: auto;
+        .article-price {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-cyan);
         }
         
-        .category-btn {
-            height: 70px;
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            transition: all 0.2s;
-            color: white;
-            font-weight: 600;
-            font-size: 11px;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-            position: relative;
-            overflow: hidden;
+        .article-unit {
+            font-size: 8px;
+            color: var(--text-muted);
         }
         
-        .category-btn::after {
-            content: '';
+        .article-fav {
             position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-            pointer-events: none;
+            top: 5px;
+            right: 5px;
+            font-size: 10px;
         }
         
-        .category-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-        }
-        
-        .category-btn.active {
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 6px 20px rgba(0, 0, 0, 0.4);
-            transform: scale(1.02);
-        }
-        
-        .category-icon { font-size: 24px; }
-        .category-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; }
-        
-        .cat-favoris { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-        .cat-tous { background: linear-gradient(135deg, #64748b 0%, #475569 100%); }
-        .cat-poissons { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); }
-        .cat-crustaces { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
-        .cat-coquillages { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
-        .cat-fumes { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
-        .cat-traiteur { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-        .cat-epicerie { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
-        
-        /* COLONNE TICKET */
-        .ticket-col {
-            background: var(--bg-secondary);
+        /* ===== ZONE TICKET ===== */
+        .ticket-zone {
             display: flex;
             flex-direction: column;
+            background: var(--bg-secondary);
             overflow: hidden;
-            border-left: 1px solid var(--border);
         }
         
         .ticket-header {
-            padding: 12px 15px;
+            padding: 8px 10px;
             border-bottom: 1px solid var(--border);
-            background: var(--bg-card);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        .ticket-event {
-            display: flex; align-items: center; gap: 10px;
-            margin-bottom: 10px;
+        .ticket-title {
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        
-        .ticket-event select {
-            flex: 1;
-            padding: 10px 14px;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-size: 13px;
-            font-family: inherit;
-            cursor: pointer;
-        }
-        
-        .ticket-event select:focus { outline: none; border-color: var(--accent-cyan); }
-        
-        .ticket-title-row { display: flex; justify-content: space-between; align-items: center; }
         
         .ticket-count {
             background: var(--accent-cyan);
-            color: var(--bg-deep);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            color: #000;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
             font-weight: 600;
         }
         
-        .ticket-items { flex: 1; overflow-y: auto; padding: 10px; }
+        .ticket-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px;
+            -webkit-overflow-scrolling: touch;
+        }
         
         .ticket-item {
-            display: flex; align-items: center; gap: 8px;
-            padding: 10px;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            margin-bottom: 8px;
-        }
-        
-        .ticket-item-info { flex: 1; min-width: 0; }
-        
-        .ticket-item-name {
-            font-weight: 600; font-size: 13px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        
-        .ticket-item-details { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-        
-        .ticket-item-price {
-            font-weight: 700; color: var(--accent-cyan);
-            white-space: nowrap; font-size: 13px;
-            min-width: 70px; text-align: right;
-        }
-        
-        .qty-controls { display: flex; align-items: center; gap: 3px; }
-        
-        .qty-btn {
-            width: 26px; height: 26px;
-            border-radius: 6px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            cursor: pointer;
-            font-size: 16px; font-weight: 600;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
-        }
-        
-        .qty-btn:hover { border-color: var(--accent-cyan); background: var(--bg-hover); }
-        
-        .qty-value { min-width: 30px; text-align: center; font-weight: 600; font-size: 13px; }
-        
-        .remove-btn {
-            width: 26px; height: 26px;
-            border-radius: 6px;
-            background: transparent;
-            border: none;
-            color: var(--danger);
-            cursor: pointer;
-            font-size: 18px;
-        }
-        
-        .remove-btn:hover { background: rgba(239, 68, 68, 0.15); }
-        
-        /* TOTAUX */
-        .ticket-totals {
-            padding: 12px 15px;
-            border-top: 1px solid var(--border);
-            background: var(--bg-card);
-        }
-        
-        .total-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
-        .total-row.subtotal { color: var(--text-muted); }
-        .total-row.discount { color: var(--danger); }
-        
-        .total-row.grand-total {
-            font-size: 20px; font-weight: 700; color: var(--accent-cyan);
-            padding: 10px 0 5px;
-            border-top: 2px solid var(--border);
-            margin-top: 8px;
-        }
-        
-        .discount-input { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
-        .discount-input label { font-size: 12px; color: var(--text-muted); }
-        
-        .discount-input input {
-            width: 65px; padding: 5px 8px;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: var(--text-primary);
-            text-align: center;
-            font-family: inherit;
-            font-size: 13px;
-        }
-        
-        .discount-input input:focus { outline: none; border-color: var(--accent-cyan); }
-        
-        /* BOUTONS PAIEMENT */
-        .payment-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            padding: 12px;
-            border-top: 1px solid var(--border);
-        }
-        
-        .pay-btn {
-            padding: 16px 10px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 11px;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 5px;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-        
-        .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); }
-        .pay-btn:active { transform: scale(0.97); }
-        
-        .pay-btn.cash { background: linear-gradient(135deg, var(--success) 0%, #059669 100%); color: white; }
-        .pay-btn.card { background: linear-gradient(135deg, var(--accent-cyan) 0%, #0891b2 100%); color: white; }
-        .pay-btn.twint { background: linear-gradient(135deg, #000 0%, #1a1a1a 100%); color: white; }
-        .pay-btn span:first-child { font-size: 24px; }
-        
-        .clear-btn {
-            grid-column: 1 / -1;
-            padding: 10px;
+            gap: 6px;
+            padding: 8px;
             background: var(--bg-input);
             border: 1px solid var(--border);
             border-radius: 8px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 12px;
-            font-family: inherit;
+            margin-bottom: 6px;
         }
         
-        .clear-btn:hover { background: var(--danger); border-color: var(--danger); color: white; }
+        .item-info { flex: 1; min-width: 0; }
         
-        /* EMPTY STATE */
+        .item-name {
+            font-weight: 600;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .item-details {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+        
+        .item-price {
+            font-weight: 700;
+            color: var(--accent-cyan);
+            font-size: 12px;
+            min-width: 60px;
+            text-align: right;
+        }
+        
+        .qty-btns {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .qty-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 5px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .qty-val {
+            min-width: 24px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .del-btn {
+            width: 24px;
+            height: 24px;
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
         .empty-ticket {
             flex: 1;
             display: flex;
@@ -531,89 +409,180 @@
             align-items: center;
             justify-content: center;
             color: var(--text-muted);
-            padding: 30px;
-            text-align: center;
+            font-size: 12px;
         }
         
-        .empty-ticket-icon { font-size: 50px; margin-bottom: 12px; opacity: 0.3; }
-        .empty-ticket p { font-size: 13px; }
-        .empty-ticket p:last-child { font-size: 11px; margin-top: 5px; opacity: 0.7; }
+        .empty-ticket span:first-child {
+            font-size: 36px;
+            opacity: 0.3;
+            margin-bottom: 8px;
+        }
         
-        /* MODALS */
+        /* ===== TOTAUX COMPACT ===== */
+        .ticket-totals {
+            padding: 8px 10px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-card);
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            padding: 3px 0;
+            color: var(--text-muted);
+        }
+        
+        .total-row.grand {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            padding: 8px 0 4px;
+            border-top: 1px solid var(--border);
+            margin-top: 4px;
+        }
+        
+        .discount-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 0;
+        }
+        
+        .discount-row label {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+        
+        .discount-row input {
+            width: 55px;
+            padding: 4px 6px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 12px;
+            text-align: center;
+            font-family: inherit;
+        }
+        
+        /* ===== BOUTONS PAIEMENT ===== */
+        .payment-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 8px 10px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .pay-btn {
+            padding: 12px 8px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: white;
+            font-family: inherit;
+            transition: transform 0.1s;
+        }
+        
+        .pay-btn:active { transform: scale(0.95); }
+        
+        .pay-btn span:first-child { font-size: 20px; }
+        
+        .pay-btn.cash { background: linear-gradient(135deg, #10b981, #059669); }
+        .pay-btn.card { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .pay-btn.twint { background: linear-gradient(135deg, #000, #333); }
+        
+        .clear-btn {
+            grid-column: 1 / -1;
+            padding: 8px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 11px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .clear-btn:active { background: var(--danger); color: white; }
+        
+        /* ===== MODALS ===== */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
+            background: rgba(0,0,0,0.85);
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 10000;
-            padding: 20px;
+            z-index: 1000;
+            padding: 15px;
         }
         
         .modal-overlay.active { display: flex; }
         
         .modal {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 25px;
+            border-radius: 16px;
+            padding: 20px;
             width: 100%;
-            max-width: 400px;
+            max-width: 340px;
             border: 1px solid var(--border);
-            box-shadow: var(--shadow-lg);
-            max-height: 90vh;
-            overflow-y: auto;
         }
         
         .modal-header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            align-items: center;
+            margin-bottom: 15px;
         }
         
         .modal-title {
-            font-size: 20px; font-weight: 700;
-            display: flex; align-items: center; gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .modal-close {
-            width: 36px; height: 36px;
-            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
             background: var(--bg-input);
             border: 1px solid var(--border);
             color: var(--text-primary);
-            cursor: pointer;
             font-size: 18px;
-            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
         }
         
-        .modal-close:hover { background: var(--danger); border-color: var(--danger); }
-        
-        /* Modal Pesée */
         .weight-display {
             background: var(--bg-primary);
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 15px;
             text-align: center;
-            margin-bottom: 15px;
-            border: 1px solid var(--border);
+            margin-bottom: 12px;
         }
         
         .weight-value {
-            font-size: 48px; font-weight: 700;
-            font-variant-numeric: tabular-nums;
+            font-size: 40px;
+            font-weight: 700;
             color: var(--accent-cyan);
         }
         
-        .weight-unit { font-size: 20px; color: var(--text-muted); margin-left: 5px; }
+        .weight-unit { font-size: 18px; color: var(--text-muted); }
         
         .weight-info {
             text-align: center;
-            margin-bottom: 15px;
+            font-size: 13px;
             color: var(--text-muted);
-            font-size: 14px;
+            margin-bottom: 12px;
         }
         
         .weight-info strong { color: var(--success); }
@@ -621,274 +590,223 @@
         .numpad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 20px;
+            gap: 6px;
+            margin-bottom: 15px;
         }
         
         .numpad-btn {
-            padding: 18px;
-            font-size: 24px; font-weight: 600;
+            padding: 14px;
+            font-size: 20px;
+            font-weight: 600;
             background: var(--bg-input);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 10px;
             color: var(--text-primary);
             cursor: pointer;
-            transition: all 0.15s;
             font-family: inherit;
         }
         
-        .numpad-btn:hover { background: var(--bg-hover); border-color: var(--accent-cyan); }
-        .numpad-btn:active { transform: scale(0.95); }
-        .numpad-btn.clear { background: var(--danger); color: white; border-color: var(--danger); }
+        .numpad-btn:active { background: var(--bg-hover); }
+        .numpad-btn.clear { background: var(--danger); color: white; }
         
-        .modal-actions { display: flex; gap: 10px; }
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+        }
         
         .modal-actions button {
             flex: 1;
-            padding: 14px;
+            padding: 12px;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             font-weight: 600;
-            cursor: pointer;
             font-size: 14px;
+            cursor: pointer;
             font-family: inherit;
-            transition: all 0.2s;
         }
         
         .modal-actions .cancel {
             background: var(--bg-input);
             color: var(--text-primary);
-            border: 1px solid var(--border);
         }
         
-        .modal-actions .cancel:hover { background: var(--bg-hover); }
-        .modal-actions .confirm { background: var(--success); color: white; }
-        .modal-actions .confirm:hover { background: #059669; }
+        .modal-actions .confirm {
+            background: var(--success);
+            color: white;
+        }
         
-        /* Modal Espèces */
-        .cash-display {
-            text-align: center;
-            padding: 20px;
+        /* Cash modal */
+        .cash-total-display {
             background: var(--bg-primary);
-            border-radius: 16px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 12px;
         }
         
-        .cash-label { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
-        .cash-total { font-size: 36px; font-weight: 700; color: var(--accent-cyan); }
+        .cash-label { font-size: 11px; color: var(--text-muted); }
+        .cash-amount { font-size: 32px; font-weight: 700; color: var(--accent-cyan); }
         
         .cash-bills {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
         
         .cash-bill {
-            padding: 15px 10px;
+            padding: 12px 8px;
             background: var(--bg-input);
             border: 2px solid var(--border);
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             text-align: center;
-            transition: all 0.2s;
             font-family: inherit;
         }
         
-        .cash-bill:hover { border-color: var(--accent-cyan); }
-        .cash-bill.selected { border-color: var(--success); background: rgba(16, 185, 129, 0.1); }
+        .cash-bill.selected {
+            border-color: var(--success);
+            background: rgba(16,185,129,0.1);
+        }
         
-        .cash-bill-value { font-size: 20px; font-weight: 700; color: var(--text-primary); }
-        .cash-bill-label { font-size: 10px; color: var(--text-muted); }
+        .cash-bill-val { font-size: 18px; font-weight: 700; }
+        .cash-bill-label { font-size: 9px; color: var(--text-muted); }
         
-        .cash-custom { margin-bottom: 20px; }
-        
-        .cash-custom input {
+        .cash-input {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             background: var(--bg-input);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 10px;
             color: var(--text-primary);
-            font-size: 20px;
+            font-size: 18px;
             text-align: center;
+            margin-bottom: 12px;
             font-family: inherit;
         }
         
-        .cash-custom input:focus { outline: none; border-color: var(--accent-cyan); }
-        
         .cash-change {
-            padding: 20px;
+            padding: 15px;
             background: var(--success);
-            border-radius: 12px;
+            border-radius: 10px;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             display: none;
         }
         
         .cash-change.visible { display: block; }
-        .cash-change-label { font-size: 12px; opacity: 0.9; }
-        .cash-change-amount { font-size: 32px; font-weight: 700; }
+        .cash-change-label { font-size: 11px; opacity: 0.9; }
+        .cash-change-val { font-size: 28px; font-weight: 700; }
         
         /* Notification */
-        .notification {
+        .notif {
             position: fixed;
-            bottom: 20px; right: 20px;
-            padding: 15px 25px;
+            bottom: 15px;
+            right: 15px;
+            padding: 12px 20px;
             background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--success);
+            border-radius: 10px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            z-index: 20000;
-            transform: translateY(100px);
+            gap: 8px;
+            z-index: 2000;
+            transform: translateY(80px);
             opacity: 0;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            font-size: 13px;
         }
         
-        .notification.show { transform: translateY(0); opacity: 1; }
-        .notification.success { border-color: var(--success); }
-        .notification.warning { border-color: var(--warning); }
-        .notification.error { border-color: var(--danger); }
+        .notif.show { transform: translateY(0); opacity: 1; }
+        .notif.warning { border-color: var(--warning); }
+        .notif.error { border-color: var(--danger); }
         
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        /* Scrollbar fin */
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
     </style>
 </head>
 <body>
     <!-- HEADER -->
-    <header class="pos-header">
+    <header class="header">
         <div class="header-left">
-            <a href="index.html" class="header-logo">
+            <div class="logo">
                 <div class="logo-icon">🐟</div>
-                <span class="logo-text">TRAKIO</span>
-                <span class="version-badge">v5.3.0</span>
-            </a>
+                <span>TRAKIO</span>
+                <span class="version">v5.3.1</span>
+            </div>
         </div>
-        
         <div class="header-center">
-            <div class="event-badge" onclick="openEventModal()">
-                <span>📍</span>
-                <div>
-                    <div class="event-name" id="displayEventName">Magasin</div>
-                    <div class="event-date" id="displayEventDate">-</div>
-                </div>
-            </div>
-            <div class="status-badge">
-                <span class="status-dot" id="statusDot"></span>
-                <span id="statusText">Hors ligne</span>
+            <select class="event-select" id="eventSelect" onchange="updateEvent()">
+                <option value="magasin">📍 Magasin</option>
+                <option value="marche_nyon">📍 Marché Nyon</option>
+                <option value="marche_morges">📍 Marché Morges</option>
+                <option value="livraison">📍 Livraison</option>
+            </select>
+            <div class="status">
+                <span class="status-dot"></span>
+                <span id="dateDisplay">-</span>
             </div>
         </div>
-        
         <div class="header-right">
-            <button class="header-btn" onclick="openReportModal()">📊 Rapport</button>
+            <button class="header-btn" onclick="location.href='index.html'">🏠</button>
             <button class="header-btn" onclick="syncData()">🔄</button>
         </div>
     </header>
     
-    <!-- LAYOUT 3 COLONNES -->
-    <div class="pos-container">
-        <!-- COLONNE ARTICLES -->
-        <div class="articles-col">
-            <div class="col-header">
-                <span class="col-title">
-                    <span>🐟</span>
-                    <span>Articles</span>
-                    <span class="articles-count" id="articles-count">(0)</span>
-                </span>
-                <button class="header-btn" onclick="openArticlesManager()">⚙️</button>
-            </div>
-            <div class="search-container">
+    <!-- CATÉGORIES HORIZONTALES -->
+    <div class="categories-bar">
+        <button class="cat-btn cat-favoris" onclick="selectCat('favoris')" data-cat="favoris"><span>⭐</span>Favoris</button>
+        <button class="cat-btn cat-tous active" onclick="selectCat('')" data-cat=""><span>📦</span>Tous</button>
+        <button class="cat-btn cat-poissons" onclick="selectCat('poissons')" data-cat="poissons"><span>🐟</span>Poissons</button>
+        <button class="cat-btn cat-crustaces" onclick="selectCat('crustaces')" data-cat="crustaces"><span>🦐</span>Crustacés</button>
+        <button class="cat-btn cat-coquillages" onclick="selectCat('coquillages')" data-cat="coquillages"><span>🦪</span>Coquillages</button>
+        <button class="cat-btn cat-fumes" onclick="selectCat('fumes')" data-cat="fumes"><span>🔥</span>Fumés</button>
+        <button class="cat-btn cat-traiteur" onclick="selectCat('traiteur')" data-cat="traiteur"><span>🍽️</span>Traiteur</button>
+        <button class="cat-btn cat-epicerie" onclick="selectCat('epicerie')" data-cat="epicerie"><span>🛒</span>Épicerie</button>
+    </div>
+    
+    <!-- LAYOUT PRINCIPAL -->
+    <div class="main-container">
+        <!-- ARTICLES -->
+        <div class="articles-zone">
+            <div class="search-bar">
                 <div class="search-wrapper">
                     <span class="search-icon">🔍</span>
-                    <input type="text" class="search-input" placeholder="Rechercher..." id="searchArticle" oninput="filterArticles()">
+                    <input type="text" class="search-input" placeholder="Rechercher..." id="searchInput" oninput="filterArticles()">
                 </div>
             </div>
-            <div class="articles-grid" id="articles-grid"></div>
+            <div class="articles-grid" id="articlesGrid"></div>
         </div>
         
-        <!-- COLONNE CATÉGORIES -->
-        <div class="categories-col">
-            <button class="category-btn cat-favoris" onclick="selectCategory('favoris')" data-cat="favoris">
-                <span class="category-icon">⭐</span>
-                <span class="category-label">Favoris</span>
-            </button>
-            <button class="category-btn cat-tous active" onclick="selectCategory('')" data-cat="">
-                <span class="category-icon">📦</span>
-                <span class="category-label">Tous</span>
-            </button>
-            <button class="category-btn cat-poissons" onclick="selectCategory('poissons')" data-cat="poissons">
-                <span class="category-icon">🐟</span>
-                <span class="category-label">Poissons</span>
-            </button>
-            <button class="category-btn cat-crustaces" onclick="selectCategory('crustaces')" data-cat="crustaces">
-                <span class="category-icon">🦐</span>
-                <span class="category-label">Crustacés</span>
-            </button>
-            <button class="category-btn cat-coquillages" onclick="selectCategory('coquillages')" data-cat="coquillages">
-                <span class="category-icon">🦪</span>
-                <span class="category-label">Coquillages</span>
-            </button>
-            <button class="category-btn cat-fumes" onclick="selectCategory('fumes')" data-cat="fumes">
-                <span class="category-icon">🔥</span>
-                <span class="category-label">Fumés</span>
-            </button>
-            <button class="category-btn cat-traiteur" onclick="selectCategory('traiteur')" data-cat="traiteur">
-                <span class="category-icon">🍽️</span>
-                <span class="category-label">Traiteur</span>
-            </button>
-            <button class="category-btn cat-epicerie" onclick="selectCategory('epicerie')" data-cat="epicerie">
-                <span class="category-icon">🛒</span>
-                <span class="category-label">Épicerie</span>
-            </button>
-        </div>
-        
-        <!-- COLONNE TICKET -->
-        <div class="ticket-col">
+        <!-- TICKET -->
+        <div class="ticket-zone">
             <div class="ticket-header">
-                <div class="ticket-event">
-                    <span>📍</span>
-                    <select id="eventSelect" onchange="updateEventFromSelect()">
-                        <option value="magasin">Magasin</option>
-                        <option value="marche_nyon">Marché Nyon</option>
-                        <option value="marche_morges">Marché Morges</option>
-                        <option value="livraison">Livraison</option>
-                    </select>
-                </div>
-                <div class="ticket-title-row">
-                    <span class="col-title"><span>🧾</span> Ticket</span>
-                    <span class="ticket-count" id="ticket-count">0 article</span>
-                </div>
+                <div class="ticket-title">🧾 Ticket</div>
+                <div class="ticket-count" id="ticketCount">0</div>
             </div>
-            <div class="ticket-items" id="ticket-items">
+            <div class="ticket-items" id="ticketItems">
                 <div class="empty-ticket">
-                    <div class="empty-ticket-icon">🛒</div>
-                    <p>Ticket vide</p>
-                    <p>Cliquez sur un article</p>
+                    <span>🛒</span>
+                    <span>Ticket vide</span>
                 </div>
             </div>
             <div class="ticket-totals">
-                <div class="total-row subtotal"><span>Sous-total HT</span><span id="subtotal-ht">0.00 CHF</span></div>
-                <div class="total-row subtotal"><span>TVA 2.6%</span><span id="total-tva">0.00 CHF</span></div>
-                <div class="discount-input">
+                <div class="total-row"><span>Sous-total HT</span><span id="subtotalHT">0.00 CHF</span></div>
+                <div class="total-row"><span>TVA 2.6%</span><span id="totalTVA">0.00 CHF</span></div>
+                <div class="discount-row">
                     <label>Remise</label>
-                    <input type="number" id="globalDiscount" min="0" step="0.05" value="0" onchange="updateTotals()">
-                    <span>CHF</span>
+                    <input type="number" id="discountInput" value="0" min="0" step="0.05" onchange="updateTotals()">
+                    <span style="font-size:10px;color:var(--text-muted)">CHF</span>
                 </div>
-                <div class="total-row discount" id="discount-row" style="display: none;"><span>Remise</span><span id="total-discount">-0.00 CHF</span></div>
-                <div class="total-row grand-total"><span>TOTAL</span><span id="grand-total">0.00 CHF</span></div>
+                <div class="total-row grand"><span>TOTAL</span><span id="grandTotal">0.00 CHF</span></div>
             </div>
-            <div class="payment-buttons">
-                <button class="pay-btn cash" onclick="openCashModal()"><span>💵</span><span>Espèces</span></button>
-                <button class="pay-btn card" onclick="processPayment('card')"><span>💳</span><span>Carte</span></button>
-                <button class="pay-btn twint" onclick="processPayment('twint')"><span>📱</span><span>Twint</span></button>
-                <button class="clear-btn" onclick="clearTicket()">🗑️ Vider le ticket</button>
+            <div class="payment-grid">
+                <button class="pay-btn cash" onclick="openCashModal()"><span>💵</span>Espèces</button>
+                <button class="pay-btn card" onclick="pay('card')"><span>💳</span>Carte</button>
+                <button class="pay-btn twint" onclick="pay('twint')"><span>📱</span>Twint</button>
+                <button class="clear-btn" onclick="clearCart()">🗑️ Vider</button>
             </div>
         </div>
     </div>
@@ -897,30 +815,32 @@
     <div class="modal-overlay" id="weightModal">
         <div class="modal">
             <div class="modal-header">
-                <div class="modal-title"><span>⚖️</span><span id="weight-article-name">Article</span></div>
-                <button class="modal-close" onclick="closeWeightModal()">×</button>
+                <div class="modal-title">⚖️ <span id="weightName">Article</span></div>
+                <button class="modal-close" onclick="closeWeight()">×</button>
             </div>
             <div class="weight-display">
-                <span class="weight-value" id="weight-value">0.000</span>
+                <span class="weight-value" id="weightVal">0.000</span>
                 <span class="weight-unit">kg</span>
             </div>
-            <div class="weight-info">Prix: <strong id="weight-price">0.00 CHF/kg</strong> = <strong id="weight-total">0.00 CHF</strong></div>
+            <div class="weight-info">
+                <span id="weightPrice">0.00 CHF/kg</span> = <strong id="weightTotal">0.00 CHF</strong>
+            </div>
             <div class="numpad">
-                <button class="numpad-btn" onclick="numpadInput('1')">1</button>
-                <button class="numpad-btn" onclick="numpadInput('2')">2</button>
-                <button class="numpad-btn" onclick="numpadInput('3')">3</button>
-                <button class="numpad-btn" onclick="numpadInput('4')">4</button>
-                <button class="numpad-btn" onclick="numpadInput('5')">5</button>
-                <button class="numpad-btn" onclick="numpadInput('6')">6</button>
-                <button class="numpad-btn" onclick="numpadInput('7')">7</button>
-                <button class="numpad-btn" onclick="numpadInput('8')">8</button>
-                <button class="numpad-btn" onclick="numpadInput('9')">9</button>
-                <button class="numpad-btn clear" onclick="numpadInput('C')">C</button>
-                <button class="numpad-btn" onclick="numpadInput('0')">0</button>
-                <button class="numpad-btn" onclick="numpadInput('.')">.</button>
+                <button class="numpad-btn" onclick="numpad('1')">1</button>
+                <button class="numpad-btn" onclick="numpad('2')">2</button>
+                <button class="numpad-btn" onclick="numpad('3')">3</button>
+                <button class="numpad-btn" onclick="numpad('4')">4</button>
+                <button class="numpad-btn" onclick="numpad('5')">5</button>
+                <button class="numpad-btn" onclick="numpad('6')">6</button>
+                <button class="numpad-btn" onclick="numpad('7')">7</button>
+                <button class="numpad-btn" onclick="numpad('8')">8</button>
+                <button class="numpad-btn" onclick="numpad('9')">9</button>
+                <button class="numpad-btn clear" onclick="numpad('C')">C</button>
+                <button class="numpad-btn" onclick="numpad('0')">0</button>
+                <button class="numpad-btn" onclick="numpad('.')">.</button>
             </div>
             <div class="modal-actions">
-                <button class="cancel" onclick="closeWeightModal()">Annuler</button>
+                <button class="cancel" onclick="closeWeight()">Annuler</button>
                 <button class="confirm" onclick="confirmWeight()">✓ Ajouter</button>
             </div>
         </div>
@@ -930,386 +850,334 @@
     <div class="modal-overlay" id="cashModal">
         <div class="modal">
             <div class="modal-header">
-                <div class="modal-title"><span>💵</span><span>Paiement espèces</span></div>
-                <button class="modal-close" onclick="closeCashModal()">×</button>
+                <div class="modal-title">💵 Espèces</div>
+                <button class="modal-close" onclick="closeCash()">×</button>
             </div>
-            <div class="cash-display">
+            <div class="cash-total-display">
                 <div class="cash-label">À payer</div>
-                <div class="cash-total" id="cashTotal">0.00 CHF</div>
+                <div class="cash-amount" id="cashTotal">0.00 CHF</div>
             </div>
             <div class="cash-bills">
-                <button class="cash-bill" onclick="selectCashBill(10)"><div class="cash-bill-value">10</div><div class="cash-bill-label">CHF</div></button>
-                <button class="cash-bill" onclick="selectCashBill(20)"><div class="cash-bill-value">20</div><div class="cash-bill-label">CHF</div></button>
-                <button class="cash-bill" onclick="selectCashBill(50)"><div class="cash-bill-value">50</div><div class="cash-bill-label">CHF</div></button>
-                <button class="cash-bill" onclick="selectCashBill(100)"><div class="cash-bill-value">100</div><div class="cash-bill-label">CHF</div></button>
-                <button class="cash-bill" onclick="selectCashBill(200)"><div class="cash-bill-value">200</div><div class="cash-bill-label">CHF</div></button>
-                <button class="cash-bill" onclick="selectExact()"><div class="cash-bill-value">✓</div><div class="cash-bill-label">Exact</div></button>
+                <button class="cash-bill" onclick="selectBill(10)"><div class="cash-bill-val">10</div><div class="cash-bill-label">CHF</div></button>
+                <button class="cash-bill" onclick="selectBill(20)"><div class="cash-bill-val">20</div><div class="cash-bill-label">CHF</div></button>
+                <button class="cash-bill" onclick="selectBill(50)"><div class="cash-bill-val">50</div><div class="cash-bill-label">CHF</div></button>
+                <button class="cash-bill" onclick="selectBill(100)"><div class="cash-bill-val">100</div><div class="cash-bill-label">CHF</div></button>
+                <button class="cash-bill" onclick="selectBill(200)"><div class="cash-bill-val">200</div><div class="cash-bill-label">CHF</div></button>
+                <button class="cash-bill" onclick="selectExact()"><div class="cash-bill-val">✓</div><div class="cash-bill-label">Exact</div></button>
             </div>
-            <div class="cash-custom">
-                <input type="number" id="cashReceived" placeholder="Montant reçu" step="0.05" oninput="calculateChange()">
-            </div>
+            <input type="number" class="cash-input" id="cashReceived" placeholder="Montant reçu" step="0.05" oninput="calcChange()">
             <div class="cash-change" id="cashChange">
                 <div class="cash-change-label">À rendre</div>
-                <div class="cash-change-amount" id="cashChangeAmount">0.00 CHF</div>
+                <div class="cash-change-val" id="cashChangeVal">0.00 CHF</div>
             </div>
             <div class="modal-actions">
-                <button class="cancel" onclick="closeCashModal()">Annuler</button>
-                <button class="confirm" onclick="confirmCashPayment()">✓ Valider</button>
+                <button class="cancel" onclick="closeCash()">Annuler</button>
+                <button class="confirm" onclick="confirmCash()">✓ Valider</button>
             </div>
         </div>
     </div>
     
     <!-- NOTIFICATION -->
-    <div class="notification" id="notification">
-        <span id="notificationIcon">✓</span>
-        <span id="notificationText">Message</span>
-    </div>
+    <div class="notif" id="notif"><span id="notifIcon">✓</span><span id="notifText">OK</span></div>
     
     <script>
-        const APP_VERSION = '5.3.0';
-        const TVA_RATE = 2.6;
-        
-        let articlesData = [];
-        let filteredArticles = [];
-        let currentCategory = '';
+        const TVA = 2.6;
+        let articles = [];
+        let filtered = [];
+        let currentCat = '';
         let cart = [];
-        let currentWeightArticle = null;
-        let weightInput = '';
-        let transactionCounter = parseInt(localStorage.getItem('trakio_tx_counter') || '0');
-        let cashModalTotal = 0;
+        let weightArticle = null;
+        let weightStr = '';
+        let cashToPay = 0;
+        let txCounter = parseInt(localStorage.getItem('trakio_tx_counter') || '0');
         
-        // ARTICLES PAR DÉFAUT
         const DEFAULT_ARTICLES = [
-            { id: 'a1', name: 'Saumon frais', category: 'poissons', price: 45.00, unit: 'kg', tva: 2.6, origin: 'Norvège', active: true, favorite: true },
-            { id: 'a2', name: 'Filet de perche', category: 'poissons', price: 58.00, unit: 'kg', tva: 2.6, origin: 'Lac Léman', active: true, favorite: true },
-            { id: 'a3', name: 'Truite entière', category: 'poissons', price: 28.00, unit: 'kg', tva: 2.6, origin: 'Suisse', active: true, favorite: false },
-            { id: 'a4', name: 'Filet de sole', category: 'poissons', price: 65.00, unit: 'kg', tva: 2.6, origin: 'Atlantique', active: true, favorite: false },
-            { id: 'a5', name: 'Dorade royale', category: 'poissons', price: 38.00, unit: 'kg', tva: 2.6, origin: 'Méditerranée', active: true, favorite: false },
-            { id: 'a6', name: 'Bar (Loup)', category: 'poissons', price: 42.00, unit: 'kg', tva: 2.6, origin: 'Atlantique', active: true, favorite: true },
-            { id: 'a7', name: 'Féra du Léman', category: 'poissons', price: 48.00, unit: 'kg', tva: 2.6, origin: 'Lac Léman', active: true, favorite: true },
-            { id: 'a8', name: 'Omble chevalier', category: 'poissons', price: 52.00, unit: 'kg', tva: 2.6, origin: 'Suisse', active: true, favorite: false },
-            { id: 'a9', name: 'Cabillaud', category: 'poissons', price: 35.00, unit: 'kg', tva: 2.6, origin: 'Islande', active: true, favorite: false },
-            { id: 'a10', name: 'Thon rouge', category: 'poissons', price: 85.00, unit: 'kg', tva: 2.6, origin: 'Méditerranée', active: true, favorite: false },
-            { id: 'b1', name: 'Crevettes roses', category: 'crustaces', price: 32.00, unit: 'kg', tva: 2.6, origin: 'Madagascar', active: true, favorite: true },
-            { id: 'b2', name: 'Gambas', category: 'crustaces', price: 45.00, unit: 'kg', tva: 2.6, origin: 'Argentine', active: true, favorite: false },
-            { id: 'b3', name: 'Homard breton', category: 'crustaces', price: 75.00, unit: 'kg', tva: 2.6, origin: 'Bretagne', active: true, favorite: false },
-            { id: 'b4', name: 'Langoustines', category: 'crustaces', price: 55.00, unit: 'kg', tva: 2.6, origin: 'Écosse', active: true, favorite: true },
-            { id: 'b5', name: 'Écrevisses', category: 'crustaces', price: 48.00, unit: 'kg', tva: 2.6, origin: 'Lac Léman', active: true, favorite: false },
-            { id: 'b6', name: 'Crabe tourteau', category: 'crustaces', price: 28.00, unit: 'kg', tva: 2.6, origin: 'Bretagne', active: true, favorite: false },
-            { id: 'c1', name: 'Huîtres (dz)', category: 'coquillages', price: 24.00, unit: 'pce', tva: 2.6, origin: 'Marennes', active: true, favorite: true },
-            { id: 'c2', name: 'Moules bouchot', category: 'coquillages', price: 8.50, unit: 'kg', tva: 2.6, origin: 'Bretagne', active: true, favorite: true },
-            { id: 'c3', name: 'Saint-Jacques', category: 'coquillages', price: 65.00, unit: 'kg', tva: 2.6, origin: 'Normandie', active: true, favorite: false },
-            { id: 'c4', name: 'Palourdes', category: 'coquillages', price: 28.00, unit: 'kg', tva: 2.6, origin: 'Bretagne', active: true, favorite: false },
-            { id: 'c5', name: 'Coques', category: 'coquillages', price: 12.00, unit: 'kg', tva: 2.6, origin: 'France', active: true, favorite: false },
-            { id: 'd1', name: 'Saumon fumé', category: 'fumes', price: 65.00, unit: 'kg', tva: 2.6, origin: 'Écosse', active: true, favorite: true },
-            { id: 'd2', name: 'Truite fumée', category: 'fumes', price: 55.00, unit: 'kg', tva: 2.6, origin: 'Suisse', active: true, favorite: false },
-            { id: 'd3', name: 'Haddock', category: 'fumes', price: 42.00, unit: 'kg', tva: 2.6, origin: 'Écosse', active: true, favorite: false },
-            { id: 'd4', name: 'Maquereau fumé', category: 'fumes', price: 28.00, unit: 'kg', tva: 2.6, origin: 'France', active: true, favorite: false },
-            { id: 'd5', name: 'Anguille fumée', category: 'fumes', price: 75.00, unit: 'kg', tva: 2.6, origin: 'Hollande', active: true, favorite: false },
-            { id: 'e1', name: 'Tarama maison', category: 'traiteur', price: 4.50, unit: 'pce', tva: 2.6, origin: '', active: true, favorite: true },
-            { id: 'e2', name: 'Rillettes saumon', category: 'traiteur', price: 5.50, unit: 'pce', tva: 2.6, origin: '', active: true, favorite: false },
-            { id: 'e3', name: 'Salade de la mer', category: 'traiteur', price: 28.00, unit: 'kg', tva: 2.6, origin: '', active: true, favorite: false },
-            { id: 'e4', name: 'Terrine poisson', category: 'traiteur', price: 6.00, unit: 'pce', tva: 2.6, origin: '', active: true, favorite: false },
-            { id: 'e5', name: 'Ceviche maison', category: 'traiteur', price: 8.50, unit: 'pce', tva: 2.6, origin: '', active: true, favorite: true },
-            { id: 'e6', name: 'Soupe poisson', category: 'traiteur', price: 12.00, unit: 'pce', tva: 2.6, origin: '', active: true, favorite: false },
-            { id: 'f1', name: 'Citrons (filet)', category: 'epicerie', price: 3.50, unit: 'pce', tva: 2.6, origin: '', active: true, favorite: false },
-            { id: 'f2', name: 'Sauce tartare', category: 'epicerie', price: 4.00, unit: 'pce', tva: 2.6, origin: '', active: true, favorite: false },
-            { id: 'f3', name: 'Mayonnaise', category: 'epicerie', price: 3.50, unit: 'pce', tva: 2.6, origin: '', active: true, favorite: false },
-            { id: 'f4', name: 'Vin blanc', category: 'epicerie', price: 12.00, unit: 'pce', tva: 2.6, origin: '', active: true, favorite: false },
-            { id: 'f5', name: 'Huile olive', category: 'epicerie', price: 18.00, unit: 'pce', tva: 2.6, origin: '', active: true, favorite: false },
-            { id: 'f6', name: 'Sac isotherme', category: 'epicerie', price: 5.00, unit: 'pce', tva: 2.6, origin: '', active: true, favorite: false }
+            { id: 'a1', name: 'Saumon frais', category: 'poissons', price: 45, unit: 'kg', origin: 'Norvège', favorite: true },
+            { id: 'a2', name: 'Filet perche', category: 'poissons', price: 58, unit: 'kg', origin: 'Lac Léman', favorite: true },
+            { id: 'a3', name: 'Truite', category: 'poissons', price: 28, unit: 'kg', origin: 'Suisse', favorite: false },
+            { id: 'a4', name: 'Filet sole', category: 'poissons', price: 65, unit: 'kg', origin: 'Atlantique', favorite: false },
+            { id: 'a5', name: 'Dorade', category: 'poissons', price: 38, unit: 'kg', origin: 'Méditerranée', favorite: false },
+            { id: 'a6', name: 'Bar/Loup', category: 'poissons', price: 42, unit: 'kg', origin: 'Atlantique', favorite: true },
+            { id: 'a7', name: 'Féra', category: 'poissons', price: 48, unit: 'kg', origin: 'Lac Léman', favorite: true },
+            { id: 'a8', name: 'Omble', category: 'poissons', price: 52, unit: 'kg', origin: 'Suisse', favorite: false },
+            { id: 'a9', name: 'Cabillaud', category: 'poissons', price: 35, unit: 'kg', origin: 'Islande', favorite: false },
+            { id: 'a10', name: 'Thon rouge', category: 'poissons', price: 85, unit: 'kg', origin: 'Méditerranée', favorite: false },
+            { id: 'b1', name: 'Crevettes', category: 'crustaces', price: 32, unit: 'kg', origin: 'Madagascar', favorite: true },
+            { id: 'b2', name: 'Gambas', category: 'crustaces', price: 45, unit: 'kg', origin: 'Argentine', favorite: false },
+            { id: 'b3', name: 'Homard', category: 'crustaces', price: 75, unit: 'kg', origin: 'Bretagne', favorite: false },
+            { id: 'b4', name: 'Langoustines', category: 'crustaces', price: 55, unit: 'kg', origin: 'Écosse', favorite: true },
+            { id: 'b5', name: 'Écrevisses', category: 'crustaces', price: 48, unit: 'kg', origin: 'Léman', favorite: false },
+            { id: 'b6', name: 'Tourteau', category: 'crustaces', price: 28, unit: 'kg', origin: 'Bretagne', favorite: false },
+            { id: 'c1', name: 'Huîtres dz', category: 'coquillages', price: 24, unit: 'pce', origin: 'Marennes', favorite: true },
+            { id: 'c2', name: 'Moules', category: 'coquillages', price: 8.5, unit: 'kg', origin: 'Bretagne', favorite: true },
+            { id: 'c3', name: 'St-Jacques', category: 'coquillages', price: 65, unit: 'kg', origin: 'Normandie', favorite: false },
+            { id: 'c4', name: 'Palourdes', category: 'coquillages', price: 28, unit: 'kg', origin: 'Bretagne', favorite: false },
+            { id: 'c5', name: 'Coques', category: 'coquillages', price: 12, unit: 'kg', origin: 'France', favorite: false },
+            { id: 'd1', name: 'Saumon fumé', category: 'fumes', price: 65, unit: 'kg', origin: 'Écosse', favorite: true },
+            { id: 'd2', name: 'Truite fumée', category: 'fumes', price: 55, unit: 'kg', origin: 'Suisse', favorite: false },
+            { id: 'd3', name: 'Haddock', category: 'fumes', price: 42, unit: 'kg', origin: 'Écosse', favorite: false },
+            { id: 'd4', name: 'Maquereau fumé', category: 'fumes', price: 28, unit: 'kg', origin: 'France', favorite: false },
+            { id: 'd5', name: 'Anguille fumée', category: 'fumes', price: 75, unit: 'kg', origin: 'Hollande', favorite: false },
+            { id: 'e1', name: 'Tarama', category: 'traiteur', price: 4.5, unit: 'pce', origin: '', favorite: true },
+            { id: 'e2', name: 'Rillettes', category: 'traiteur', price: 5.5, unit: 'pce', origin: '', favorite: false },
+            { id: 'e3', name: 'Salade mer', category: 'traiteur', price: 28, unit: 'kg', origin: '', favorite: false },
+            { id: 'e4', name: 'Terrine', category: 'traiteur', price: 6, unit: 'pce', origin: '', favorite: false },
+            { id: 'e5', name: 'Ceviche', category: 'traiteur', price: 8.5, unit: 'pce', origin: '', favorite: true },
+            { id: 'e6', name: 'Soupe', category: 'traiteur', price: 12, unit: 'pce', origin: '', favorite: false },
+            { id: 'f1', name: 'Citrons', category: 'epicerie', price: 3.5, unit: 'pce', origin: '', favorite: false },
+            { id: 'f2', name: 'Sauce tartare', category: 'epicerie', price: 4, unit: 'pce', origin: '', favorite: false },
+            { id: 'f3', name: 'Mayonnaise', category: 'epicerie', price: 3.5, unit: 'pce', origin: '', favorite: false },
+            { id: 'f4', name: 'Vin blanc', category: 'epicerie', price: 12, unit: 'pce', origin: '', favorite: false },
+            { id: 'f5', name: 'Huile olive', category: 'epicerie', price: 18, unit: 'pce', origin: '', favorite: false },
+            { id: 'f6', name: 'Sac isotherm', category: 'epicerie', price: 5, unit: 'pce', origin: '', favorite: false }
         ];
         
-        // INIT
         function init() {
-            loadArticles();
-            updateEventFromSelect();
-        }
-        
-        function loadArticles() {
             const stored = localStorage.getItem('trakio_caisse_articles');
-            if (stored) {
-                try { articlesData = JSON.parse(stored); }
-                catch (e) { articlesData = [...DEFAULT_ARTICLES]; }
-            } else {
-                articlesData = [...DEFAULT_ARTICLES];
-            }
-            articlesData = articlesData.filter(a => a.active !== false);
-            saveArticlesToStorage();
+            articles = stored ? JSON.parse(stored) : [...DEFAULT_ARTICLES];
+            localStorage.setItem('trakio_caisse_articles', JSON.stringify(articles));
+            document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('fr-CH');
             filterArticles();
         }
         
-        function saveArticlesToStorage() {
-            localStorage.setItem('trakio_caisse_articles', JSON.stringify(articlesData));
-        }
-        
         function filterArticles() {
-            const search = document.getElementById('searchArticle').value.toLowerCase();
-            filteredArticles = articlesData.filter(article => {
-                if (currentCategory === 'favoris') { if (!article.favorite) return false; }
-                else if (currentCategory) { if (article.category !== currentCategory) return false; }
-                return !search || article.name?.toLowerCase().includes(search) || article.origin?.toLowerCase().includes(search);
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            filtered = articles.filter(a => {
+                if (currentCat === 'favoris' && !a.favorite) return false;
+                if (currentCat && currentCat !== 'favoris' && a.category !== currentCat) return false;
+                return !search || a.name.toLowerCase().includes(search);
             });
             renderArticles();
         }
         
-        function selectCategory(cat) {
-            currentCategory = cat;
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.cat === cat);
-            });
+        function selectCat(cat) {
+            currentCat = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
             filterArticles();
         }
         
         function renderArticles() {
-            const grid = document.getElementById('articles-grid');
-            document.getElementById('articles-count').textContent = `(${filteredArticles.length})`;
-            
+            const grid = document.getElementById('articlesGrid');
             const icons = { poissons: '🐟', crustaces: '🦐', coquillages: '🦪', fumes: '🔥', traiteur: '🍽️', epicerie: '🛒' };
             const colors = { poissons: '#0ea5e9', crustaces: '#ef4444', coquillages: '#8b5cf6', fumes: '#f97316', traiteur: '#10b981', epicerie: '#6366f1' };
             
-            if (filteredArticles.length === 0) {
-                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--text-muted);"><div style="font-size:48px;margin-bottom:15px;opacity:0.3;">${currentCategory === 'favoris' ? '⭐' : '📦'}</div><p>${currentCategory === 'favoris' ? 'Aucun favori' : 'Aucun article trouvé'}</p></div>`;
+            if (!filtered.length) {
+                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--text-muted);font-size:12px;">Aucun article</div>';
                 return;
             }
             
-            grid.innerHTML = filteredArticles.map(a => `
-                <button class="article-btn" onclick="addToCart('${a.id}')" style="--cat-color:${colors[a.category] || '#64748b'}">
-                    ${a.favorite ? '<span class="article-favorite">⭐</span>' : ''}
-                    <div class="article-icon">${icons[a.category] || '📦'}</div>
+            grid.innerHTML = filtered.map(a => `
+                <div class="article-tile" onclick="addToCart('${a.id}')" style="--cat-color:${colors[a.category]||'#64748b'}">
+                    ${a.favorite ? '<span class="article-fav">⭐</span>' : ''}
+                    <div class="article-icon">${icons[a.category]||'📦'}</div>
                     <div class="article-name">${a.name}</div>
-                    ${a.origin ? `<div class="article-origin">📍 ${a.origin}</div>` : ''}
-                    <div class="article-price">${formatCHF(a.price || 0)}</div>
-                    <div class="article-unit">/${a.unit || 'kg'}</div>
-                </button>
+                    <div class="article-price">${fmt(a.price)}</div>
+                    <div class="article-unit">/${a.unit}</div>
+                </div>
             `).join('');
         }
         
-        // PANIER
-        function addToCart(articleId) {
-            const article = articlesData.find(a => a.id === articleId);
-            if (!article) return;
-            if (article.unit === 'kg') { openWeightModal(article); return; }
-            const existing = cart.find(item => item.articleId === articleId && !item.weight);
-            if (existing) { existing.qty++; }
-            else { cart.push({ id: generateId(), articleId: article.id, name: article.name, price: article.price || 0, tva: article.tva || TVA_RATE, unit: article.unit || 'pce', qty: 1, weight: false, discount: 0 }); }
+        function addToCart(id) {
+            const a = articles.find(x => x.id === id);
+            if (!a) return;
+            if (a.unit === 'kg') { openWeight(a); return; }
+            const existing = cart.find(x => x.articleId === id && !x.isWeight);
+            if (existing) existing.qty++;
+            else cart.push({ id: Date.now().toString(36), articleId: a.id, name: a.name, price: a.price, unit: a.unit, qty: 1, isWeight: false });
             renderCart();
-            showNotification(`${article.name} ajouté`, 'success', 1500);
+            notify(`${a.name} ajouté`, 'success', 1200);
         }
         
-        function updateQty(itemId, delta) {
-            const item = cart.find(i => i.id === itemId);
+        function updateQty(id, d) {
+            const item = cart.find(x => x.id === id);
             if (!item) return;
-            item.qty = Math.max(0.1, item.qty + delta);
-            if (item.qty < 0.05) { cart = cart.filter(i => i.id !== itemId); }
+            item.qty = Math.max(0.1, item.qty + d);
+            if (item.qty < 0.05) cart = cart.filter(x => x.id !== id);
             renderCart();
         }
         
-        function removeItem(itemId) { cart = cart.filter(i => i.id !== itemId); renderCart(); }
+        function removeItem(id) { cart = cart.filter(x => x.id !== id); renderCart(); }
         
-        function clearTicket() {
-            if (cart.length > 0 && !confirm('Vider le ticket ?')) return;
+        function clearCart() {
+            if (cart.length && !confirm('Vider le ticket ?')) return;
             cart = [];
-            document.getElementById('globalDiscount').value = 0;
+            document.getElementById('discountInput').value = 0;
             renderCart();
         }
         
         function renderCart() {
-            const container = document.getElementById('ticket-items');
-            const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-            document.getElementById('ticket-count').textContent = `${totalQty.toFixed(totalQty % 1 ? 2 : 0)} article${totalQty > 1 ? 's' : ''}`;
+            const container = document.getElementById('ticketItems');
+            const total = cart.reduce((s, i) => s + i.qty, 0);
+            document.getElementById('ticketCount').textContent = total.toFixed(total % 1 ? 1 : 0);
             
-            if (cart.length === 0) {
-                container.innerHTML = `<div class="empty-ticket"><div class="empty-ticket-icon">🛒</div><p>Ticket vide</p><p>Cliquez sur un article</p></div>`;
+            if (!cart.length) {
+                container.innerHTML = '<div class="empty-ticket"><span>🛒</span><span>Ticket vide</span></div>';
                 updateTotals();
                 return;
             }
             
-            container.innerHTML = cart.map(item => {
-                const lineTotal = item.price * item.qty;
-                return `<div class="ticket-item">
-                    <div class="ticket-item-info">
-                        <div class="ticket-item-name">${item.name}</div>
-                        <div class="ticket-item-details">${item.weight ? `${item.qty.toFixed(3)} kg × ${formatCHF(item.price)}/kg` : `${item.qty} × ${formatCHF(item.price)}`}</div>
+            container.innerHTML = cart.map(i => `
+                <div class="ticket-item">
+                    <div class="item-info">
+                        <div class="item-name">${i.name}</div>
+                        <div class="item-details">${i.isWeight ? i.qty.toFixed(3)+'kg' : i.qty} × ${fmt(i.price)}</div>
                     </div>
-                    <div class="qty-controls">
-                        <button class="qty-btn" onclick="updateQty('${item.id}', ${item.weight ? -0.1 : -1})">−</button>
-                        <span class="qty-value">${item.weight ? item.qty.toFixed(2) : item.qty}</span>
-                        <button class="qty-btn" onclick="updateQty('${item.id}', ${item.weight ? 0.1 : 1})">+</button>
+                    <div class="qty-btns">
+                        <button class="qty-btn" onclick="updateQty('${i.id}',${i.isWeight?-0.1:-1})">−</button>
+                        <span class="qty-val">${i.isWeight ? i.qty.toFixed(2) : i.qty}</span>
+                        <button class="qty-btn" onclick="updateQty('${i.id}',${i.isWeight?0.1:1})">+</button>
                     </div>
-                    <div class="ticket-item-price">${formatCHF(lineTotal)}</div>
-                    <button class="remove-btn" onclick="removeItem('${item.id}')">×</button>
-                </div>`;
-            }).join('');
+                    <div class="item-price">${fmt(i.price * i.qty)}</div>
+                    <button class="del-btn" onclick="removeItem('${i.id}')">×</button>
+                </div>
+            `).join('');
             updateTotals();
         }
         
         function updateTotals() {
-            const globalDiscount = parseFloat(document.getElementById('globalDiscount').value) || 0;
-            let subtotalTTC = 0;
-            cart.forEach(item => { subtotalTTC += item.price * item.qty - (item.discount || 0); });
-            const subtotalHT = subtotalTTC / (1 + TVA_RATE / 100);
-            const totalTVA = subtotalTTC - subtotalHT;
-            const total = swiss(subtotalTTC - globalDiscount);
-            document.getElementById('subtotal-ht').textContent = formatCHF(subtotalHT);
-            document.getElementById('total-tva').textContent = formatCHF(totalTVA);
-            document.getElementById('grand-total').textContent = formatCHF(Math.max(0, total));
-            const discountRow = document.getElementById('discount-row');
-            if (globalDiscount > 0) { discountRow.style.display = 'flex'; document.getElementById('total-discount').textContent = `-${formatCHF(globalDiscount)}`; }
-            else { discountRow.style.display = 'none'; }
+            const discount = parseFloat(document.getElementById('discountInput').value) || 0;
+            let ttc = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            const ht = ttc / (1 + TVA/100);
+            const tva = ttc - ht;
+            const total = swiss(ttc - discount);
+            document.getElementById('subtotalHT').textContent = fmt(ht);
+            document.getElementById('totalTVA').textContent = fmt(tva);
+            document.getElementById('grandTotal').textContent = fmt(Math.max(0, total));
         }
         
-        // MODAL PESÉE
-        function openWeightModal(article) {
-            currentWeightArticle = article;
-            weightInput = '';
-            document.getElementById('weight-article-name').textContent = article.name;
-            document.getElementById('weight-price').textContent = `${formatCHF(article.price)}/kg`;
-            document.getElementById('weight-value').textContent = '0.000';
-            document.getElementById('weight-total').textContent = '0.00 CHF';
+        // Weight modal
+        function openWeight(a) {
+            weightArticle = a;
+            weightStr = '';
+            document.getElementById('weightName').textContent = a.name;
+            document.getElementById('weightPrice').textContent = fmt(a.price) + '/kg';
+            document.getElementById('weightVal').textContent = '0.000';
+            document.getElementById('weightTotal').textContent = '0.00 CHF';
             document.getElementById('weightModal').classList.add('active');
         }
         
-        function closeWeightModal() { document.getElementById('weightModal').classList.remove('active'); currentWeightArticle = null; weightInput = ''; }
+        function closeWeight() { document.getElementById('weightModal').classList.remove('active'); }
         
-        function numpadInput(key) {
-            if (key === 'C') { weightInput = ''; }
-            else if (key === '.') { if (!weightInput.includes('.')) { weightInput += weightInput ? '.' : '0.'; } }
-            else { const parts = weightInput.split('.'); if (parts[1] && parts[1].length >= 3) return; weightInput += key; }
-            const weight = parseFloat(weightInput) || 0;
-            document.getElementById('weight-value').textContent = weight.toFixed(3);
-            if (currentWeightArticle) { document.getElementById('weight-total').textContent = formatCHF(weight * currentWeightArticle.price); }
+        function numpad(k) {
+            if (k === 'C') weightStr = '';
+            else if (k === '.') { if (!weightStr.includes('.')) weightStr += weightStr ? '.' : '0.'; }
+            else { const p = weightStr.split('.'); if (p[1]?.length >= 3) return; weightStr += k; }
+            const w = parseFloat(weightStr) || 0;
+            document.getElementById('weightVal').textContent = w.toFixed(3);
+            document.getElementById('weightTotal').textContent = fmt(w * (weightArticle?.price || 0));
         }
         
         function confirmWeight() {
-            const weight = parseFloat(weightInput) || 0;
-            if (weight <= 0 || !currentWeightArticle) { showNotification('Entrez un poids valide', 'warning'); return; }
-            cart.push({ id: generateId(), articleId: currentWeightArticle.id, name: currentWeightArticle.name, price: currentWeightArticle.price || 0, tva: currentWeightArticle.tva || TVA_RATE, unit: 'kg', qty: weight, weight: true, discount: 0 });
-            closeWeightModal();
+            const w = parseFloat(weightStr) || 0;
+            if (w <= 0) { notify('Entrez un poids', 'warning'); return; }
+            cart.push({ id: Date.now().toString(36), articleId: weightArticle.id, name: weightArticle.name, price: weightArticle.price, unit: 'kg', qty: w, isWeight: true });
+            closeWeight();
             renderCart();
-            showNotification(`${currentWeightArticle.name} (${weight.toFixed(3)} kg) ajouté`, 'success');
+            notify(`${weightArticle.name} (${w.toFixed(3)}kg)`, 'success');
         }
         
-        // MODAL ESPÈCES
+        // Cash modal
         function openCashModal() {
-            if (cart.length === 0) { showNotification('Le ticket est vide', 'warning'); return; }
-            const globalDiscount = parseFloat(document.getElementById('globalDiscount').value) || 0;
-            let subtotalTTC = 0;
-            cart.forEach(item => { subtotalTTC += item.price * item.qty - (item.discount || 0); });
-            cashModalTotal = swiss(subtotalTTC - globalDiscount);
-            document.getElementById('cashTotal').textContent = formatCHF(cashModalTotal);
+            if (!cart.length) { notify('Ticket vide', 'warning'); return; }
+            const discount = parseFloat(document.getElementById('discountInput').value) || 0;
+            cashToPay = swiss(cart.reduce((s, i) => s + i.price * i.qty, 0) - discount);
+            document.getElementById('cashTotal').textContent = fmt(cashToPay);
             document.getElementById('cashReceived').value = '';
             document.getElementById('cashChange').classList.remove('visible');
-            document.querySelectorAll('.cash-bill').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('.cash-bill').forEach(b => b.classList.remove('selected'));
             document.getElementById('cashModal').classList.add('active');
         }
         
-        function closeCashModal() { document.getElementById('cashModal').classList.remove('active'); }
+        function closeCash() { document.getElementById('cashModal').classList.remove('active'); }
         
-        function selectCashBill(amount) {
-            document.querySelectorAll('.cash-bill').forEach(btn => btn.classList.remove('selected'));
+        function selectBill(v) {
+            document.querySelectorAll('.cash-bill').forEach(b => b.classList.remove('selected'));
             event.target.closest('.cash-bill').classList.add('selected');
-            document.getElementById('cashReceived').value = amount;
-            calculateChange();
+            document.getElementById('cashReceived').value = v;
+            calcChange();
         }
         
         function selectExact() {
-            document.querySelectorAll('.cash-bill').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('.cash-bill').forEach(b => b.classList.remove('selected'));
             event.target.closest('.cash-bill').classList.add('selected');
-            document.getElementById('cashReceived').value = cashModalTotal;
-            calculateChange();
+            document.getElementById('cashReceived').value = cashToPay;
+            calcChange();
         }
         
-        function calculateChange() {
-            const received = parseFloat(document.getElementById('cashReceived').value) || 0;
-            const change = swiss(received - cashModalTotal);
-            document.getElementById('cashChangeAmount').textContent = formatCHF(Math.max(0, change));
-            if (received >= cashModalTotal) { document.getElementById('cashChange').classList.add('visible'); }
-            else { document.getElementById('cashChange').classList.remove('visible'); }
+        function calcChange() {
+            const r = parseFloat(document.getElementById('cashReceived').value) || 0;
+            const c = swiss(r - cashToPay);
+            document.getElementById('cashChangeVal').textContent = fmt(Math.max(0, c));
+            document.getElementById('cashChange').classList.toggle('visible', r >= cashToPay);
         }
         
-        function confirmCashPayment() {
-            const received = parseFloat(document.getElementById('cashReceived').value) || 0;
-            if (received < cashModalTotal) { showNotification('Montant insuffisant', 'warning'); return; }
-            closeCashModal();
-            processPayment('cash');
+        function confirmCash() {
+            const r = parseFloat(document.getElementById('cashReceived').value) || 0;
+            if (r < cashToPay) { notify('Montant insuffisant', 'warning'); return; }
+            closeCash();
+            pay('cash');
         }
         
-        // PAIEMENT
-        function processPayment(method) {
-            if (cart.length === 0) { showNotification('Le ticket est vide', 'warning'); return; }
-            const globalDiscount = parseFloat(document.getElementById('globalDiscount').value) || 0;
-            const event = document.getElementById('eventSelect').value;
-            let total = 0;
-            cart.forEach(item => { total += item.price * item.qty - (item.discount || 0); });
-            total = swiss(total - globalDiscount);
-            transactionCounter++;
-            localStorage.setItem('trakio_tx_counter', transactionCounter.toString());
-            const transaction = {
-                id: generateId(), num: transactionCounter,
+        // Payment
+        function pay(method) {
+            if (!cart.length) { notify('Ticket vide', 'warning'); return; }
+            const discount = parseFloat(document.getElementById('discountInput').value) || 0;
+            const total = swiss(cart.reduce((s, i) => s + i.price * i.qty, 0) - discount);
+            txCounter++;
+            localStorage.setItem('trakio_tx_counter', txCounter.toString());
+            
+            const tx = {
+                id: Date.now().toString(36),
+                num: txCounter,
                 date: new Date().toISOString().slice(0, 10),
                 time: new Date().toTimeString().slice(0, 5),
-                timestamp: Date.now(), event: event,
-                items: cart.map(item => ({ articleId: item.articleId, name: item.name, price: item.price, qty: item.qty, unit: item.unit, tva: item.tva, discount: item.discount || 0, total: item.price * item.qty - (item.discount || 0) })),
-                subtotal: total + globalDiscount, discount: globalDiscount, total: total,
-                totalHT: total / (1 + TVA_RATE / 100), totalTVA: total - (total / (1 + TVA_RATE / 100)),
-                method: method, cancelled: false, synced: false
+                event: document.getElementById('eventSelect').value,
+                items: cart.map(i => ({ name: i.name, price: i.price, qty: i.qty, unit: i.unit })),
+                discount, total, method
             };
-            saveTransaction(transaction);
-            const methodLabels = { cash: 'espèces', card: 'carte', twint: 'Twint' };
-            showNotification(`✅ Paiement ${methodLabels[method]}: ${formatCHF(total)}`, 'success');
+            
+            const txs = JSON.parse(localStorage.getItem('trakio_caisse_transactions') || '[]');
+            txs.push(tx);
+            localStorage.setItem('trakio_caisse_transactions', JSON.stringify(txs));
+            
+            const labels = { cash: 'espèces', card: 'carte', twint: 'Twint' };
+            notify(`✅ ${labels[method]}: ${fmt(total)}`, 'success');
             cart = [];
-            document.getElementById('globalDiscount').value = 0;
+            document.getElementById('discountInput').value = 0;
             renderCart();
         }
         
-        function saveTransaction(transaction) {
-            const stored = localStorage.getItem('trakio_caisse_transactions');
-            const transactions = stored ? JSON.parse(stored) : [];
-            transactions.push(transaction);
-            localStorage.setItem('trakio_caisse_transactions', JSON.stringify(transactions));
+        // Utils
+        function swiss(n) { return Math.round(n * 20) / 20; }
+        function fmt(n) { return (n || 0).toFixed(2) + ' CHF'; }
+        
+        function notify(msg, type = 'success', duration = 2500) {
+            const n = document.getElementById('notif');
+            document.getElementById('notifIcon').textContent = type === 'success' ? '✓' : '⚠';
+            document.getElementById('notifText').textContent = msg;
+            n.className = `notif ${type} show`;
+            setTimeout(() => n.classList.remove('show'), duration);
         }
         
-        // UTILITAIRES
-        function swiss(amount) { return Math.round(amount * 20) / 20; }
-        function formatCHF(amount) { if (amount === null || amount === undefined || isNaN(amount)) amount = 0; return new Intl.NumberFormat('fr-CH', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount) + ' CHF'; }
-        function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
-        
-        function showNotification(message, type = 'success', duration = 3000) {
-            const notif = document.getElementById('notification');
-            document.getElementById('notificationIcon').textContent = type === 'success' ? '✓' : type === 'warning' ? '⚠' : '✕';
-            document.getElementById('notificationText').textContent = message;
-            notif.className = `notification ${type} show`;
-            setTimeout(() => { notif.classList.remove('show'); }, duration);
+        function updateEvent() {
+            document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('fr-CH');
         }
         
-        function updateEventFromSelect() {
-            const labels = { 'magasin': 'Magasin', 'marche_nyon': 'Marché Nyon', 'marche_morges': 'Marché Morges', 'livraison': 'Livraison' };
-            document.getElementById('displayEventName').textContent = labels[document.getElementById('eventSelect').value] || 'Magasin';
-            document.getElementById('displayEventDate').textContent = new Date().toLocaleDateString('fr-CH');
+        function syncData() {
+            const stored = localStorage.getItem('trakio_caisse_articles');
+            articles = stored ? JSON.parse(stored) : [...DEFAULT_ARTICLES];
+            filterArticles();
+            notify('🔄 Actualisé', 'success', 1500);
         }
         
-        function openArticlesManager() { window.location.href = 'articles.html'; }
-        function openEventModal() { showNotification('Configuration événement - à venir', 'warning'); }
-        function openReportModal() { showNotification('Rapport des ventes - à venir', 'warning'); }
-        function syncData() { loadArticles(); showNotification('🔄 Données rechargées', 'success'); }
-        
-        // RACCOURCIS CLAVIER
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { closeWeightModal(); closeCashModal(); }
-            if (e.key === 'Enter') {
-                if (document.getElementById('weightModal').classList.contains('active')) { confirmWeight(); }
-                if (document.getElementById('cashModal').classList.contains('active')) { confirmCashPayment(); }
-            }
+        // Keyboard
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { closeWeight(); closeCash(); }
             if (document.getElementById('weightModal').classList.contains('active')) {
-                if (e.key >= '0' && e.key <= '9') { numpadInput(e.key); }
-                else if (e.key === '.' || e.key === ',') { numpadInput('.'); }
-                else if (e.key === 'Backspace') {
-                    weightInput = weightInput.slice(0, -1);
-                    const weight = parseFloat(weightInput) || 0;
-                    document.getElementById('weight-value').textContent = weight.toFixed(3);
-                    if (currentWeightArticle) { document.getElementById('weight-total').textContent = formatCHF(weight * currentWeightArticle.price); }
-                }
+                if (e.key >= '0' && e.key <= '9') numpad(e.key);
+                else if (e.key === '.' || e.key === ',') numpad('.');
+                else if (e.key === 'Enter') confirmWeight();
+                else if (e.key === 'Backspace') { weightStr = weightStr.slice(0, -1); numpad(''); }
             }
         });
         
