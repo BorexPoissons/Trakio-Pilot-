@@ -1262,6 +1262,14 @@
             setupDragDrop();
             renderAll();
             setDefaultDates();
+            
+            // Check URL parameter for order detail
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order');
+            if (orderId && ordersData[orderId]) {
+                showOrderDetail(orderId);
+                showTab('orders');
+            }
         });
 
         function checkAuth() {
