@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRAKIO Dashboard v5.1.0</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-card: #1e293b;
+            --bg-hover: #2d3a4f;
+            --border: #475569;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #06b6d4;
+            --accent-teal: #14b8a6;
+            --accent-primary: #0ea5e9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --purple: #8b5cf6;
+            --orange: #f97316;
+            --pink: #ec4899;
+            --gradient-header: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           HEADER UNIFIÉ v5.0.4
+           ═══════════════════════════════════════════════════════════ */
+        .unified-header {
+            height: 50px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-right: 16px;
+            border-right: 1px solid var(--border);
+        }
+
+        .logo-icon { font-size: 24px; }
+
+        .logo-text {
+            font-weight: 800;
+            font-size: 16px;
+            background: var(--gradient-header);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-version {
+            font-size: 9px;
+            background: var(--accent-cyan);
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-link.active {
+            background: var(--accent-cyan);
+            color: #000;
+        }
+
+        .nav-link .nav-icon { font-size: 16px; }
+        .nav-link .nav-text { display: inline; }
+
+        @media (max-width: 1200px) {
+            .nav-link .nav-text { display: none; }
+            .nav-link { padding: 8px 10px; }
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 20px;
+            font-size: 11px;
+        }
+
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .user-dropdown { position: relative; }
+
+        .user-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .user-btn:hover { border-color: var(--accent-cyan); }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: var(--gradient-header);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            color: #000;
+        }
+
+        .user-info { text-align: left; }
+        .user-name { font-size: 12px; font-weight: 600; }
+        .user-role { font-size: 10px; color: var(--text-muted); }
+        .dropdown-arrow { font-size: 10px; color: var(--text-muted); }
+
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            min-width: 200px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: none;
+            overflow: hidden;
+            z-index: 1001;
+        }
+
+        .user-menu.active { display: block; }
+
+        .menu-section {
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .menu-section:last-child { border-bottom: none; }
+
+        .menu-section-title {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            padding: 4px 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-primary);
+        }
+
+        .menu-item:hover { background: var(--bg-hover); }
+        .menu-item.danger:hover { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+
+        .hamburger-btn {
+            display: none;
+            width: 36px;
+            height: 36px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: fixed;
+                top: 50px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: var(--bg-secondary);
+                flex-direction: column;
+                padding: 20px;
+                gap: 8px;
+                overflow-y: auto;
+                z-index: 999;
+            }
+            .nav-links.mobile-open { display: flex; }
+            .nav-link { width: 100%; padding: 14px 16px; }
+            .nav-link .nav-text { display: inline; }
+            .hamburger-btn { display: flex; }
+            .sync-status { display: none; }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           WELCOME SECTION
+           ═══════════════════════════════════════════════════════════ */
+        .welcome-section {
+            padding: 30px 24px;
+            background: var(--gradient-header);
+        }
+
+        .welcome-content {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .welcome-greeting {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .welcome-date {
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           MAIN LAYOUT
+           ═══════════════════════════════════════════════════════════ */
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .stat-card.cyan::before { background: var(--accent-cyan); }
+        .stat-card.green::before { background: var(--success); }
+        .stat-card.orange::before { background: var(--warning); }
+        .stat-card.purple::before { background: var(--purple); }
+        .stat-card.pink::before { background: var(--pink); }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 800;
+        }
+
+        .stat-card.cyan .stat-value { color: var(--accent-cyan); }
+        .stat-card.green .stat-value { color: var(--success); }
+        .stat-card.orange .stat-value { color: var(--warning); }
+        .stat-card.purple .stat-value { color: var(--purple); }
+        .stat-card.pink .stat-value { color: var(--pink); }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 1100px) {
+            .content-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-action {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .card-action:hover {
+            text-decoration: underline;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Articles List (Dashboard) */
+        .articles-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .article-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+
+        .article-row:hover {
+            background: var(--bg-hover);
+            transform: translateX(4px);
+        }
+
+        .article-emoji {
+            font-size: 28px;
+            width: 44px;
+            height: 44px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .article-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .article-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .article-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .article-qty {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .article-orders {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            max-width: 200px;
+        }
+
+        .order-chip {
+            background: var(--bg-secondary);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: monospace;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .order-chip:hover {
+            background: var(--accent-cyan);
+            color: #000;
+        }
+
+        .order-chip.has-note {
+            border-left: 2px solid var(--warning);
+        }
+
+        /* Today's Deliveries */
+        .delivery-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .delivery-card:hover {
+            background: var(--bg-hover);
+            transform: translateX(4px);
+        }
+
+        .delivery-card.today {
+            border-left-color: var(--success);
+        }
+
+        .delivery-card.tomorrow {
+            border-left-color: var(--warning);
+        }
+
+        .delivery-card.upcoming {
+            border-left-color: var(--accent-cyan);
+        }
+
+        .delivery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .delivery-id {
+            font-weight: 700;
+            font-family: monospace;
+            color: var(--accent-cyan);
+        }
+
+        .delivery-date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .delivery-items {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .delivery-note {
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: rgba(245, 158, 11, 0.15);
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--warning);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .quick-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .quick-action:hover {
+            background: var(--bg-hover);
+            transform: translateY(-2px);
+        }
+
+        .quick-action-icon {
+            font-size: 28px;
+        }
+
+        .quick-action-text {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .status-badge.today { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .status-badge.tomorrow { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .status-badge.upcoming { background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan); }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .empty-action {
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-cyan);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 3000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.warning { border-left: 4px solid var(--warning); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title { font-size: 18px; font-weight: 700; }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-tertiary);
+            border: none;
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="unified-header">
+        <div class="header-left">
+            <button class="hamburger-btn" onclick="toggleMobileNav()">☰</button>
+            <div class="logo-section">
+                <span class="logo-icon">🐟</span>
+                <span class="logo-text">TRAKIO</span>
+                <span class="nav-version">v5.1.0</span>
+            </div>
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html" class="nav-link active"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
+                <a href="myfish.html" class="nav-link"><span class="nav-icon">🐟</span><span class="nav-text">MyFish</span></a>
+                <a href="commandes.html" class="nav-link"><span class="nav-icon">📋</span><span class="nav-text">Commandes</span></a>
+                <a href="clients.html" class="nav-link"><span class="nav-icon">👥</span><span class="nav-text">Clients</span></a>
+                <a href="caisse.html" class="nav-link"><span class="nav-icon">💵</span><span class="nav-text">Caisse</span></a>
+                <a href="articles.html" class="nav-link"><span class="nav-icon">📦</span><span class="nav-text">Articles</span></a>
+                <a href="tracabilite.html" class="nav-link"><span class="nav-icon">🏷️</span><span class="nav-text">Traçabilité</span></a>
+                <a href="compta.html" class="nav-link"><span class="nav-icon">📊</span><span class="nav-text">Compta</span></a>
+                <a href="shopify.html" class="nav-link"><span class="nav-icon">🛒</span><span class="nav-text">Shopify</span></a>
+                <a href="parametres.html" class="nav-link" id="navSettings" style="display: none;"><span class="nav-icon">⚙️</span><span class="nav-text">Paramètres</span></a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <div class="sync-status">
+                <span class="sync-dot" id="syncDot"></span>
+                <span id="syncText">Connecté</span>
+            </div>
+            <div class="user-dropdown">
+                <div class="user-btn" onclick="toggleUserMenu()">
+                    <div class="user-avatar" id="userAvatar">P</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Pascal</div>
+                        <div class="user-role" id="userRole">Admin</div>
+                    </div>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <div class="user-menu" id="userMenu">
+                    <div class="menu-section">
+                        <div class="menu-section-title">Changer d'utilisateur</div>
+                        <div id="usersList"></div>
+                    </div>
+                    <div class="menu-section">
+                        <div class="menu-item danger" onclick="logout()"><span>🚪</span><span>Déconnexion</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- WELCOME -->
+    <div class="welcome-section">
+        <div class="welcome-content">
+            <div class="welcome-greeting" id="welcomeGreeting">Bonjour Pascal 👋</div>
+            <div class="welcome-date" id="welcomeDate"></div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-container">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card cyan">
+                <div class="stat-icon">📦</div>
+                <div class="stat-value" id="statArticles">0</div>
+                <div class="stat-label">Articles à préparer</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-icon">📋</div>
+                <div class="stat-value" id="statCommandes">0</div>
+                <div class="stat-label">Commandes actives</div>
+            </div>
+            <div class="stat-card orange">
+                <div class="stat-icon">📅</div>
+                <div class="stat-value" id="statToday">0</div>
+                <div class="stat-label">Livraisons aujourd'hui</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-value" id="statNotes">0</div>
+                <div class="stat-label">Notes importantes</div>
+            </div>
+            <div class="stat-card pink">
+                <div class="stat-icon">📆</div>
+                <div class="stat-value" id="statTomorrow">0</div>
+                <div class="stat-label">Livraisons demain</div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content-grid">
+            <!-- Articles regroupés -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>📦</span>
+                        Articles à préparer
+                    </div>
+                    <a href="myfish.html" class="card-action">Voir tout →</a>
+                </div>
+                <div class="card-body">
+                    <div class="articles-list" id="articlesList">
+                        <!-- Articles rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Livraisons du jour -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span>🚚</span>
+                            Prochaines livraisons
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="deliveriesList">
+                            <!-- Deliveries rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <a href="myfish.html" class="quick-action">
+                        <div class="quick-action-icon">📄</div>
+                        <div class="quick-action-text">Import PDF</div>
+                    </a>
+                    <a href="caisse.html" class="quick-action">
+                        <div class="quick-action-icon">💵</div>
+                        <div class="quick-action-text">Ouvrir Caisse</div>
+                    </a>
+                    <a href="tracabilite.html" class="quick-action">
+                        <div class="quick-action-icon">🏷️</div>
+                        <div class="quick-action-text">Étiquettes</div>
+                    </a>
+                    <a href="articles.html" class="quick-action">
+                        <div class="quick-action-icon">📦</div>
+                        <div class="quick-action-text">Articles</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <span id="toastIcon">✅</span>
+        <span id="toastMessage">Message</span>
+    </div>
+
+    <!-- PIN Modal -->
+    <div class="modal-overlay" id="pinModal">
+        <div class="modal" style="max-width: 360px;">
+            <div class="modal-header">
+                <div class="modal-title">🔐 Entrez votre PIN</div>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p id="pinUserName" style="margin-bottom: 20px; color: var(--text-secondary);"></p>
+                <input type="password" id="pinInput" maxlength="4" placeholder="• • • •" style="width: 100%; padding: 16px; text-align: center; font-size: 24px; letter-spacing: 10px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 10px; color: var(--text-primary);">
+                <p id="pinError" style="color: var(--error); margin-top: 12px; display: none;">PIN incorrect</p>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn" style="background: var(--bg-tertiary); color: var(--text-primary);" onclick="closeModal('pinModal')">Annuler</button>
+                <button class="btn btn-primary" onclick="validatePin()">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        // CONFIGURATION
+        // ═══════════════════════════════════════════════════════════
+        const APP_VERSION = '5.1.0';
+        const STORAGE_KEYS = {
+            currentUser: 'trakio_current_user',
+            articles: 'myfish_articles',
+            orders: 'myfish_orders_v2'
+        };
+
+        // Default users
+        const DEFAULT_USERS = [
+            { id: 1, name: 'Pascal', pin: '1277', role: 'admin', avatar: 'P', color: '#06b6d4' },
+            { id: 2, name: 'Céline', pin: '1277', role: 'manager', avatar: 'C', color: '#8b5cf6' },
+            { id: 3, name: 'Hayat', pin: '1260', role: 'employee', avatar: 'H', color: '#10b981' }
+        ];
+
+        // State
+        let currentUser = null;
+        let articlesData = [];
+        let ordersData = {};
+        let pendingUserSwitch = null;
+
+        // ═══════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            loadData();
+            renderAll();
+            updateWelcome();
+        });
+
+        function checkAuth() {
+            const savedUser = localStorage.getItem(STORAGE_KEYS.currentUser);
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+            } else {
+                currentUser = DEFAULT_USERS[0];
+                localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(currentUser));
+            }
+            updateUserUI();
+        }
+
+        function updateUserUI() {
+            if (!currentUser) return;
+            document.getElementById('userAvatar').textContent = currentUser.avatar;
+            document.getElementById('userAvatar').style.background = currentUser.color;
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userRole').textContent = currentUser.role === 'admin' ? 'Administrateur' : currentUser.role === 'manager' ? 'Manager' : 'Employé';
+            
+            const settingsLink = document.getElementById('navSettings');
+            if (settingsLink) settingsLink.style.display = currentUser.role === 'admin' ? 'flex' : 'none';
+            
+            document.getElementById('welcomeGreeting').textContent = `Bonjour ${currentUser.name} 👋`;
+            renderUsersList();
+        }
+
+        function renderUsersList() {
+            const container = document.getElementById('usersList');
+            container.innerHTML = DEFAULT_USERS.map(user => `
+                <div class="menu-item ${user.id === currentUser?.id ? 'active' : ''}" onclick="switchUser(${user.id})">
+                    <div class="user-avatar" style="background: ${user.color}; width: 28px; height: 28px; font-size: 11px;">${user.avatar}</div>
+                    <span>${user.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function loadData() {
+            articlesData = JSON.parse(localStorage.getItem(STORAGE_KEYS.articles) || '[]');
+            ordersData = JSON.parse(localStorage.getItem(STORAGE_KEYS.orders) || '{}');
+        }
+
+        function updateWelcome() {
+            const now = new Date();
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const dateStr = now.toLocaleDateString('fr-CH', options);
+            document.getElementById('welcomeDate').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // RENDERING
+        // ═══════════════════════════════════════════════════════════
+        function renderAll() {
+            renderStats();
+            renderArticles();
+            renderDeliveries();
+        }
+
+        function renderStats() {
+            const today = new Date().toISOString().split('T')[0];
+            const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+            
+            const uniqueOrders = new Set();
+            let todayCount = 0;
+            let tomorrowCount = 0;
+            let notesCount = 0;
+
+            articlesData.forEach(a => {
+                a.orders.forEach(o => {
+                    uniqueOrders.add(o.orderId);
+                    if (o.note) notesCount++;
+                });
+                if (a.deliveryDate === today) todayCount++;
+                if (a.deliveryDate === tomorrow) tomorrowCount++;
+            });
+
+            document.getElementById('statArticles').textContent = articlesData.length;
+            document.getElementById('statCommandes').textContent = uniqueOrders.size;
+            document.getElementById('statToday').textContent = todayCount;
+            document.getElementById('statTomorrow').textContent = tomorrowCount;
+            document.getElementById('statNotes').textContent = notesCount;
+        }
+
+        function renderArticles() {
+            const container = document.getElementById('articlesList');
+            const today = new Date().toISOString().split('T')[0];
+            const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+            // Filter for today and upcoming, sort by date
+            let filtered = articlesData
+                .filter(a => a.deliveryDate >= today)
+                .sort((a, b) => a.deliveryDate.localeCompare(b.deliveryDate))
+                .slice(0, 15); // Limit to 15
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📄</div>
+                        <div class="empty-title">Aucun article</div>
+                        <p>Importez un PDF depuis MyFish pour voir les commandes</p>
+                        <div class="empty-action">
+                            <a href="myfish.html" class="btn btn-primary">📄 Import PDF</a>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(article => {
+                const emoji = getProductEmoji(article.name);
+                const badge = getDateBadge(article.deliveryDate, today, tomorrow);
+                
+                return `
+                    <div class="article-row">
+                        <div class="article-emoji">${emoji}</div>
+                        <div class="article-info">
+                            <div class="article-name">${article.name}</div>
+                            <div class="article-date">
+                                📅 ${article.deliveryDateDisplay}
+                                ${badge}
+                            </div>
+                        </div>
+                        <div class="article-qty">${article.totalQty}</div>
+                        <div class="article-orders">
+                            ${article.orders.slice(0, 4).map(o => `
+                                <a href="myfish.html?order=${o.orderId}" class="order-chip ${o.note ? 'has-note' : ''}" title="${o.note || `Commande #${o.orderId}`}">
+                                    #${o.orderId}
+                                </a>
+                            `).join('')}
+                            ${article.orders.length > 4 ? `<span class="order-chip">+${article.orders.length - 4}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderDeliveries() {
+            const container = document.getElementById('deliveriesList');
+            const today = new Date().toISOString().split('T')[0];
+            const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+            // Get unique orders with their dates
+            const ordersArray = Object.values(ordersData)
+                .filter(o => o.dates.some(d => d >= today))
+                .sort((a, b) => {
+                    const aDate = a.dates.find(d => d >= today) || a.dates[0];
+                    const bDate = b.dates.find(d => d >= today) || b.dates[0];
+                    return aDate.localeCompare(bDate);
+                })
+                .slice(0, 8);
+
+            if (ordersArray.length === 0) {
+                container.innerHTML = `
+                    <p style="color: var(--text-muted); text-align: center; padding: 20px;">
+                        Aucune livraison prévue
+                    </p>
+                `;
+                return;
+            }
+
+            container.innerHTML = ordersArray.map(order => {
+                const nextDate = order.dates.find(d => d >= today) || order.dates[0];
+                let cardClass = 'upcoming';
+                if (nextDate === today) cardClass = 'today';
+                else if (nextDate === tomorrow) cardClass = 'tomorrow';
+
+                return `
+                    <a href="myfish.html?order=${order.id}" class="delivery-card ${cardClass}" style="display: block; text-decoration: none; color: inherit;">
+                        <div class="delivery-header">
+                            <span class="delivery-id">#${order.id}</span>
+                            <span class="delivery-date">${formatDateDisplay(nextDate)}</span>
+                        </div>
+                        <div class="delivery-items">${order.items.length} article${order.items.length > 1 ? 's' : ''}</div>
+                        ${order.notes.length > 0 ? `
+                            <div class="delivery-note">⚠️ ${order.notes[0].substring(0, 50)}${order.notes[0].length > 50 ? '...' : ''}</div>
+                        ` : ''}
+                    </a>
+                `;
+            }).join('');
+        }
+
+        function getProductEmoji(name) {
+            const lower = name.toLowerCase();
+            if (lower.includes('saumon')) return '🐟';
+            if (lower.includes('crevette') || lower.includes('gambas')) return '🦐';
+            if (lower.includes('huitre') || lower.includes('huître')) return '🦪';
+            if (lower.includes('homard')) return '🦞';
+            if (lower.includes('crabe') || lower.includes('tourteau')) return '🦀';
+            if (lower.includes('caviar')) return '⚫';
+            if (lower.includes('foie gras')) return '🍖';
+            if (lower.includes('fondue')) return '🍲';
+            if (lower.includes('bateau') || lower.includes('plateau')) return '🚢';
+            if (lower.includes('terrine')) return '🥘';
+            if (lower.includes('blini')) return '🥞';
+            if (lower.includes('sauce')) return '🥣';
+            if (lower.includes('bulot')) return '🐚';
+            if (lower.includes('dorade') || lower.includes('bar') || lower.includes('lotte')) return '🐠';
+            if (lower.includes('perche') || lower.includes('limande')) return '🐟';
+            if (lower.includes('st-jacques') || lower.includes('saint-jacques') || lower.includes('noix')) return '🥟';
+            return '🐟';
+        }
+
+        function getDateBadge(dateStr, today, tomorrow) {
+            if (dateStr === today) return '<span class="status-badge today">Aujourd\'hui</span>';
+            if (dateStr === tomorrow) return '<span class="status-badge tomorrow">Demain</span>';
+            return '<span class="status-badge upcoming">À venir</span>';
+        }
+
+        function formatDateDisplay(dateStr) {
+            if (!dateStr) return '-';
+            const parts = dateStr.split('-');
+            return `${parts[2]}.${parts[1]}.${parts[0]}`;
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // USER MANAGEMENT
+        // ═══════════════════════════════════════════════════════════
+        function toggleUserMenu() {
+            document.getElementById('userMenu').classList.toggle('active');
+        }
+
+        function toggleMobileNav() {
+            document.getElementById('navLinks').classList.toggle('mobile-open');
+        }
+
+        function switchUser(userId) {
+            const user = DEFAULT_USERS.find(u => u.id === userId);
+            if (user && user.id !== currentUser?.id) {
+                pendingUserSwitch = user;
+                document.getElementById('pinUserName').textContent = `Connexion en tant que ${user.name}`;
+                document.getElementById('pinInput').value = '';
+                document.getElementById('pinError').style.display = 'none';
+                document.getElementById('pinModal').classList.add('active');
+                document.getElementById('pinInput').focus();
+            }
+            document.getElementById('userMenu').classList.remove('active');
+        }
+
+        function validatePin() {
+            const pin = document.getElementById('pinInput').value;
+            if (pendingUserSwitch && pin === pendingUserSwitch.pin) {
+                currentUser = pendingUserSwitch;
+                localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(currentUser));
+                updateUserUI();
+                closeModal('pinModal');
+                showToast('success', `Connecté en tant que ${currentUser.name}`);
+            } else {
+                document.getElementById('pinError').style.display = 'block';
+                document.getElementById('pinInput').value = '';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem(STORAGE_KEYS.currentUser);
+            location.reload();
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function showToast(type, message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastIcon').textContent = type === 'success' ? '✅' : '⚠️';
+            document.getElementById('toastMessage').textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // Close menus on outside click
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.user-dropdown')) {
+                document.getElementById('userMenu').classList.remove('active');
+            }
+        });
+
+        document.getElementById('pinInput').addEventListener('keyup', e => {
+            if (e.key === 'Enter') validatePin();
+        });
+    </script>
+</body>
+</html>
