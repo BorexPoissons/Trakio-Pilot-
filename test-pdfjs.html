@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test PDF.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e293b; color: #fff; }
+        .zone { border: 2px dashed #06b6d4; padding: 40px; text-align: center; margin: 20px 0; cursor: pointer; }
+        .zone:hover { background: rgba(6,182,212,0.1); }
+        pre { background: #0f172a; padding: 20px; overflow: auto; max-height: 500px; font-size: 12px; }
+        h2 { color: #06b6d4; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test PDF.js Extraction</h1>
+    
+    <div class="zone" onclick="document.getElementById('file').click()">
+        📄 Cliquez ou glissez votre PDF ici
+    </div>
+    <input type="file" id="file" accept=".pdf" style="display:none">
+    
+    <div id="output"></div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        document.getElementById('file').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>⏳ Lecture du PDF...</p>';
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                
+                let fullText = '';
+                let debugInfo = `<h2>📊 Infos PDF</h2><p>Pages: ${pdf.numPages}</p>`;
+                
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    
+                    // Méthode 1: Simple join
+                    const pageText = textContent.items.map(item => item.str).join('\n');
+                    fullText += pageText + '\n\n--- PAGE BREAK ---\n\n';
+                    
+                    if (i === 1) {
+                        debugInfo += `<h2>📝 Page 1 - Items bruts (${textContent.items.length} items)</h2>`;
+                        debugInfo += '<pre>' + JSON.stringify(textContent.items.slice(0, 50), null, 2) + '</pre>';
+                    }
+                }
+                
+                debugInfo += `<h2>📄 Texte extrait complet</h2><pre>${escapeHtml(fullText)}</pre>`;
+                
+                // Test du parser
+                debugInfo += `<h2>🔧 Test Parser</h2>`;
+                const { articles, orders } = parseMyFishPDF(fullText);
+                debugInfo += `<p>✅ Articles trouvés: <strong>${articles.length}</strong></p>`;
+                debugInfo += `<p>✅ Commandes trouvées: <strong>${Object.keys(orders).length}</strong></p>`;
+                
+                if (articles.length > 0) {
+                    debugInfo += `<h3>Premiers articles:</h3><pre>${JSON.stringify(articles.slice(0, 5), null, 2)}</pre>`;
+                }
+                
+                output.innerHTML = debugInfo;
+                
+            } catch (error) {
+                output.innerHTML = `<p style="color:red">❌ Erreur: ${error.message}</p><pre>${error.stack}</pre>`;
+            }
+        });
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function parseMyFishPDF(text) {
+            const articles = [];
+            const orders = {};
+
+            // ÉTAPE 1: Rejoindre les notes multilignes
+            const rawLines = text.split('\n');
+            const joinedLines = [];
+            let pending = '';
+
+            for (const rawLine of rawLines) {
+                const line = rawLine.trim();
+                if (!line) continue;
+
+                if (pending) {
+                    pending += ' ' + line;
+                    if (pending.includes('))')) {
+                        joinedLines.push(pending);
+                        pending = '';
+                    }
+                } else if (line.includes('((') && !line.includes('))')) {
+                    pending = line;
+                } else {
+                    joinedLines.push(line);
+                }
+            }
+            if (pending) joinedLines.push(pending);
+
+            console.log('Joined lines:', joinedLines.slice(0, 20));
+
+            // ÉTAPE 2: Filtrer headers/footers
+            const filteredLines = joinedLines.filter(l => 
+                !l.includes('about:blank') && 
+                !/^\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}/.test(l) &&
+                !l.includes('Liste des statistique') &&
+                !l.includes('Nom produit') &&
+                l !== 'Date de' &&
+                l !== 'livraison' &&
+                l !== 'Quantité Commande' &&
+                !/^\d+\/\d+$/.test(l)
+            );
+
+            console.log('Filtered lines:', filteredLines.slice(0, 20));
+
+            // ÉTAPE 3: Parser les lignes
+            let currentProduct = '';
+            let currentDate = '';
+            let currentQty = 0;
+            let currentOrders = [];
+
+            function convertDate(dateStr) {
+                const parts = dateStr.split('.');
+                if (parts.length === 3) {
+                    return parts[2] + '-' + parts[1] + '-' + parts[0];
+                }
+                return dateStr;
+            }
+
+            function cleanProductName(name) {
+                return name.replace(/\s+/g, ' ').trim();
+            }
+
+            function saveArticle() {
+                if (!currentProduct || !currentDate || currentOrders.length === 0) return;
+                
+                const deliveryDate = convertDate(currentDate);
+                const productName = cleanProductName(currentProduct);
+                
+                articles.push({
+                    id: productName.substring(0,30) + '-' + deliveryDate,
+                    name: productName,
+                    deliveryDate,
+                    deliveryDateDisplay: currentDate,
+                    totalQty: currentQty,
+                    orders: [...currentOrders]
+                });
+
+                currentOrders.forEach(order => {
+                    if (!orders[order.orderId]) {
+                        orders[order.orderId] = {
+                            id: order.orderId,
+                            items: [],
+                            notes: [],
+                            dates: new Set()
+                        };
+                    }
+                    orders[order.orderId].items.push({
+                        name: productName,
+                        qty: order.qty,
+                        deliveryDate,
+                        note: order.note
+                    });
+                    if (order.note) {
+                        orders[order.orderId].notes.push(order.note);
+                    }
+                    orders[order.orderId].dates.add(deliveryDate);
+                });
+                
+                currentProduct = '';
+            }
+
+            for (let i = 0; i < filteredLines.length; i++) {
+                const line = filteredLines[i];
+                
+                // Pattern: date DD.MM.YYYY + quantité + commande
+                const mainLineMatch = line.match(/^(\d{2}\.\d{2}\.\d{4})\s+([\d.]+)\s+(\d{4})\s*-\s*Qte:\s*([\d.]+)(?:\s*-\s*\(\(\s*(.+?)\s*\)\))?/);
+                
+                // Pattern: commande seule
+                const orderLineMatch = line.match(/^(\d{4})\s*-\s*Qte:\s*([\d.]+)(?:\s*-\s*\(\(\s*(.+?)\s*\)\))?$/);
+                
+                // Pattern: texte + date collés
+                const combinedMatch = line.match(/^(.+?)(\d{2}\.\d{2}\.\d{4})\s+([\d.]+)\s+(\d{4})\s*-\s*Qte:\s*([\d.]+)(?:\s*-\s*\(\(\s*(.+?)\s*\)\))?/);
+
+                if (mainLineMatch) {
+                    saveArticle();
+                    currentDate = mainLineMatch[1];
+                    currentQty = parseFloat(mainLineMatch[2]);
+                    currentOrders = [{
+                        orderId: mainLineMatch[3],
+                        qty: parseFloat(mainLineMatch[4]),
+                        note: mainLineMatch[5] ? mainLineMatch[5].trim() : null
+                    }];
+                } else if (combinedMatch) {
+                    saveArticle();
+                    currentProduct = (currentProduct + ' ' + combinedMatch[1]).trim();
+                    currentDate = combinedMatch[2];
+                    currentQty = parseFloat(combinedMatch[3]);
+                    currentOrders = [{
+                        orderId: combinedMatch[4],
+                        qty: parseFloat(combinedMatch[5]),
+                        note: combinedMatch[6] ? combinedMatch[6].trim() : null
+                    }];
+                } else if (orderLineMatch) {
+                    currentOrders.push({
+                        orderId: orderLineMatch[1],
+                        qty: parseFloat(orderLineMatch[2]),
+                        note: orderLineMatch[3] ? orderLineMatch[3].trim() : null
+                    });
+                } else {
+                    if (currentProduct && currentDate && currentOrders.length > 0) {
+                        saveArticle();
+                        currentProduct = line;
+                        currentDate = '';
+                        currentQty = 0;
+                        currentOrders = [];
+                    } else {
+                        currentProduct = (currentProduct + ' ' + line).trim();
+                    }
+                }
+            }
+            
+            saveArticle();
+
+            // Convert Sets to Arrays
+            Object.values(orders).forEach(order => {
+                order.dates = [...order.dates].sort();
+            });
+
+            return { articles, orders };
+        }
+    </script>
+</body>
+</html>
