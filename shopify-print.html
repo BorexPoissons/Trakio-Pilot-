@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopify Import → PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --border: #475569;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #95BF47;
+            --accent-dark: #5E8E3E;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+        .header h1 { font-size: 28px; color: #000; margin-bottom: 8px; }
+        .header p { color: rgba(0,0,0,0.7); }
+        
+        .import-zone {
+            background: var(--bg-secondary);
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 60px;
+            text-align: center;
+            margin-bottom: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .import-zone:hover, .import-zone.dragover {
+            border-color: var(--accent);
+            background: rgba(149, 191, 71, 0.1);
+        }
+        .import-zone .icon { font-size: 64px; margin-bottom: 16px; }
+        .import-zone h3 { font-size: 20px; margin-bottom: 8px; }
+        .import-zone p { color: var(--text-secondary); }
+        
+        #fileInput { display: none; }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-card .value { font-size: 32px; font-weight: 700; color: var(--accent); }
+        .stat-card .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+        
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: #000;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(149, 191, 71, 0.4); }
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .date-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .date-header {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: #000;
+            padding: 16px 20px;
+            font-weight: 700;
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .date-header .count {
+            background: rgba(0,0,0,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .location-group {
+            border-bottom: 1px solid var(--border);
+        }
+        .location-group:last-child { border-bottom: none; }
+        .location-header {
+            background: var(--bg-tertiary);
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .location-icon { font-size: 20px; }
+        
+        .order-card {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 16px;
+            align-items: start;
+        }
+        .order-card:last-child { border-bottom: none; }
+        .order-card:hover { background: var(--bg-tertiary); }
+        
+        .order-number {
+            background: var(--accent);
+            color: #000;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .order-info h4 { font-size: 16px; margin-bottom: 4px; }
+        .order-info .detail { font-size: 13px; color: var(--text-secondary); margin-bottom: 2px; }
+        .order-total {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+            text-align: right;
+        }
+        .order-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        #results { display: none; }
+        #results.visible { display: block; }
+        
+        @media print {
+            body { background: white; color: black; padding: 0; }
+            .header, .import-zone, .actions, .stats { display: none; }
+            .date-section { break-inside: avoid; border: 1px solid #ccc; }
+            .date-header { background: #95BF47 !important; -webkit-print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛍️ Shopify → PDF</h1>
+        <p>Import CSV et génération PDF par date</p>
+    </div>
+
+    <div class="import-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="icon">📄</div>
+        <h3>Importer le fichier CSV</h3>
+        <p>Glisser-déposer ou cliquer pour sélectionner</p>
+    </div>
+    <input type="file" id="fileInput" accept=".csv">
+
+    <div class="stats" id="statsSection" style="display: none;">
+        <div class="stat-card">
+            <div class="value" id="totalOrders">0</div>
+            <div class="label">Commandes</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="totalDates">0</div>
+            <div class="label">Dates</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="totalNyon">0</div>
+            <div class="label">Nyon</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="totalCoinsins">0</div>
+            <div class="label">Coinsins</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="totalShipping">0</div>
+            <div class="label">Livraison</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="totalAmount">0</div>
+            <div class="label">CHF Total</div>
+        </div>
+    </div>
+
+    <div class="actions" id="actionsSection" style="display: none;">
+        <button class="btn btn-primary" onclick="generatePDF()">📄 Générer PDF</button>
+        <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimer</button>
+        <button class="btn btn-secondary" onclick="resetAll()">🔄 Nouveau fichier</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        let ordersData = [];
+        
+        // Drag & Drop
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => {
+            dropZone.addEventListener(e, ev => ev.preventDefault());
+        });
+        dropZone.addEventListener('dragover', () => dropZone.classList.add('dragover'));
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', e => {
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) processFile(file);
+        });
+        fileInput.addEventListener('change', e => {
+            if (e.target.files[0]) processFile(e.target.files[0]);
+        });
+
+        function processFile(file) {
+            const reader = new FileReader();
+            reader.onload = e => parseCSV(e.target.result);
+            reader.readAsText(file);
+        }
+
+        function parseCSV(text) {
+            // Parser CSV robuste pour champs multilignes
+            const lines = [];
+            let currentLine = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                    currentLine += char;
+                } else if ((char === '\n' || char === '\r') && !inQuotes) {
+                    if (currentLine.trim()) lines.push(currentLine);
+                    currentLine = '';
+                    if (char === '\r' && text[i + 1] === '\n') i++;
+                } else {
+                    currentLine += char;
+                }
+            }
+            if (currentLine.trim()) lines.push(currentLine);
+
+            // Parse header
+            const headers = parseCSVLine(lines[0]);
+            ordersData = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]);
+                if (values.length < 5) continue;
+                
+                const order = {};
+                headers.forEach((h, idx) => order[h.trim()] = (values[idx] || '').trim());
+                
+                // Parse Due Date
+                const dueDate = order['Due Date'] || '';
+                order.parsedDate = parseDueDate(dueDate);
+                order.timeSlot = extractTimeSlot(dueDate);
+                
+                // Parse location
+                order.location = order['Order Location'] || 'N/A';
+                if (order.location === 'N/A' && order['Fulfillment Type']?.includes('Shipping')) {
+                    order.location = 'Livraison';
+                }
+                
+                // Parse total
+                order.amount = parseFloat((order['Total'] || '0').replace('CHF', '').trim()) || 0;
+                
+                // Parse address
+                order.address = (order['Ship To'] || '').replace(/\n/g, ', ').trim();
+                
+                ordersData.push(order);
+            }
+
+            displayResults();
+        }
+
+        function parseCSVLine(line) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    if (inQuotes && line[i + 1] === '"') {
+                        current += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            values.push(current);
+            return values;
+        }
+
+        function parseDueDate(str) {
+            // "Thu, 18 Dec 2025 11:00 AM - 12:00 PM" ou "Fri, 19 Dec 2025 "
+            const match = str.match(/(\w+),\s*(\d+)\s+(\w+)\s+(\d{4})/);
+            if (match) {
+                const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+                return new Date(parseInt(match[4]), months[match[3]], parseInt(match[2]));
+            }
+            return new Date();
+        }
+
+        function extractTimeSlot(str) {
+            const match = str.match(/(\d{1,2}:\d{2}\s*(?:AM|PM)?\s*-\s*\d{1,2}:\d{2}\s*(?:AM|PM)?)/i);
+            return match ? match[1] : '';
+        }
+
+        function formatDate(date) {
+            const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+            const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+            return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+        }
+
+        function displayResults() {
+            // Group by date
+            const byDate = {};
+            ordersData.forEach(order => {
+                const key = order.parsedDate.toISOString().split('T')[0];
+                if (!byDate[key]) byDate[key] = [];
+                byDate[key].push(order);
+            });
+
+            // Sort dates (recent first)
+            const sortedDates = Object.keys(byDate).sort((a, b) => new Date(a) - new Date(b));
+
+            // Stats
+            let totalAmount = 0;
+            let nyon = 0, coinsins = 0, shipping = 0;
+            ordersData.forEach(o => {
+                totalAmount += o.amount;
+                if (o.location.includes('Nyon')) nyon++;
+                else if (o.location.includes('Coinsins')) coinsins++;
+                else shipping++;
+            });
+
+            document.getElementById('totalOrders').textContent = ordersData.length;
+            document.getElementById('totalDates').textContent = sortedDates.length;
+            document.getElementById('totalNyon').textContent = nyon;
+            document.getElementById('totalCoinsins').textContent = coinsins;
+            document.getElementById('totalShipping').textContent = shipping;
+            document.getElementById('totalAmount').textContent = totalAmount.toFixed(0);
+            document.getElementById('statsSection').style.display = 'grid';
+            document.getElementById('actionsSection').style.display = 'flex';
+
+            // Render
+            let html = '';
+            sortedDates.forEach(dateKey => {
+                const orders = byDate[dateKey];
+                const date = new Date(dateKey);
+                
+                // Group by location
+                const byLocation = {};
+                orders.forEach(o => {
+                    const loc = o.location.includes('Nyon') ? 'Magasin de Nyon' :
+                                o.location.includes('Coinsins') ? 'Laboratoire de Coinsins' : 'Livraison';
+                    if (!byLocation[loc]) byLocation[loc] = [];
+                    byLocation[loc].push(o);
+                });
+
+                html += `<div class="date-section">
+                    <div class="date-header">
+                        <span>📅 ${formatDate(date)}</span>
+                        <span class="count">${orders.length} commande${orders.length > 1 ? 's' : ''}</span>
+                    </div>`;
+
+                const locationOrder = ['Magasin de Nyon', 'Laboratoire de Coinsins', 'Livraison'];
+                locationOrder.forEach(loc => {
+                    if (!byLocation[loc]) return;
+                    const locOrders = byLocation[loc].sort((a, b) => {
+                        if (a.timeSlot && b.timeSlot) return a.timeSlot.localeCompare(b.timeSlot);
+                        return 0;
+                    });
+                    
+                    const icon = loc.includes('Nyon') ? '🏪' : loc.includes('Coinsins') ? '🏭' : '🚚';
+                    
+                    html += `<div class="location-group">
+                        <div class="location-header">
+                            <span class="location-icon">${icon}</span>
+                            <span>${loc} (${locOrders.length})</span>
+                        </div>`;
+                    
+                    locOrders.forEach(order => {
+                        html += `<div class="order-card">
+                            <div class="order-number">${order['Order'] || 'N/A'}</div>
+                            <div class="order-info">
+                                <h4>${order['Customer Name'] || 'Client'}</h4>
+                                <div class="detail">📧 ${(order['Customer'] || '').split(/[+\d]/)[0]}</div>
+                                ${order['Phone No'] ? `<div class="detail">📱 ${order['Phone No']}</div>` : ''}
+                                ${order.address ? `<div class="detail">📍 ${order.address}</div>` : ''}
+                                ${order.timeSlot ? `<div class="detail">⏰ ${order.timeSlot}</div>` : ''}
+                            </div>
+                            <div>
+                                <div class="order-total">CHF ${order.amount.toFixed(2)}</div>
+                                ${order.timeSlot ? `<div class="order-time">${order.timeSlot}</div>` : ''}
+                            </div>
+                        </div>`;
+                    });
+                    
+                    html += '</div>';
+                });
+
+                html += '</div>';
+            });
+
+            document.getElementById('results').innerHTML = html;
+            document.getElementById('results').classList.add('visible');
+            document.getElementById('dropZone').style.display = 'none';
+        }
+
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = 210;
+            const pageHeight = 297;
+            const margin = 15;
+            let y = margin;
+
+            // Group by date
+            const byDate = {};
+            ordersData.forEach(order => {
+                const key = order.parsedDate.toISOString().split('T')[0];
+                if (!byDate[key]) byDate[key] = [];
+                byDate[key].push(order);
+            });
+            const sortedDates = Object.keys(byDate).sort((a, b) => new Date(a) - new Date(b));
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(18);
+            doc.setTextColor(0);
+            doc.text('Commandes Shopify - Borex Poissons', margin, y);
+            y += 10;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Généré le ${new Date().toLocaleDateString('fr-CH')} - ${ordersData.length} commandes`, margin, y);
+            y += 15;
+
+            sortedDates.forEach(dateKey => {
+                const orders = byDate[dateKey];
+                const date = new Date(dateKey);
+
+                // Check space
+                if (y > pageHeight - 60) {
+                    doc.addPage();
+                    y = margin;
+                }
+
+                // Date header
+                doc.setFillColor(149, 191, 71);
+                doc.rect(margin, y, pageWidth - 2 * margin, 10, 'F');
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(12);
+                doc.setTextColor(0);
+                doc.text(`📅 ${formatDate(date)} - ${orders.length} commande(s)`, margin + 3, y + 7);
+                y += 14;
+
+                // Group by location
+                const byLocation = {};
+                orders.forEach(o => {
+                    const loc = o.location.includes('Nyon') ? 'Nyon' :
+                                o.location.includes('Coinsins') ? 'Coinsins' : 'Livraison';
+                    if (!byLocation[loc]) byLocation[loc] = [];
+                    byLocation[loc].push(o);
+                });
+
+                ['Nyon', 'Coinsins', 'Livraison'].forEach(loc => {
+                    if (!byLocation[loc]) return;
+                    const locOrders = byLocation[loc].sort((a, b) => (a.timeSlot || '').localeCompare(b.timeSlot || ''));
+
+                    // Location header
+                    doc.setFillColor(51, 65, 85);
+                    doc.rect(margin, y, pageWidth - 2 * margin, 7, 'F');
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(10);
+                    doc.setTextColor(255);
+                    const icon = loc === 'Nyon' ? '🏪' : loc === 'Coinsins' ? '🏭' : '🚚';
+                    doc.text(`${icon} ${loc} (${locOrders.length})`, margin + 3, y + 5);
+                    y += 10;
+
+                    locOrders.forEach(order => {
+                        if (y > pageHeight - 30) {
+                            doc.addPage();
+                            y = margin;
+                        }
+
+                        doc.setTextColor(0);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setFontSize(10);
+                        doc.text(order['Order'] || '', margin, y + 4);
+                        doc.text(order['Customer Name'] || '', margin + 30, y + 4);
+                        doc.setFont('helvetica', 'normal');
+                        doc.setFontSize(9);
+                        doc.text(`CHF ${order.amount.toFixed(2)}`, pageWidth - margin - 25, y + 4);
+                        
+                        y += 5;
+                        doc.setTextColor(100);
+                        const details = [];
+                        if (order.timeSlot) details.push(`⏰ ${order.timeSlot}`);
+                        if (order['Phone No']) details.push(`📱 ${order['Phone No']}`);
+                        doc.text(details.join('  |  '), margin + 30, y + 3);
+                        
+                        y += 8;
+                        doc.setDrawColor(200);
+                        doc.line(margin, y, pageWidth - margin, y);
+                        y += 3;
+                    });
+
+                    y += 5;
+                });
+
+                y += 10;
+            });
+
+            doc.save(`Commandes_Shopify_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        function resetAll() {
+            ordersData = [];
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('results').classList.remove('visible');
+            document.getElementById('dropZone').style.display = 'block';
+            document.getElementById('statsSection').style.display = 'none';
+            document.getElementById('actionsSection').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+        }
+    </script>
+</body>
+</html>
