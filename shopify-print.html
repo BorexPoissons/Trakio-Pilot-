@@ -15,6 +15,12 @@
             --text-secondary: #94a3b8;
             --accent: #95BF47;
             --accent-dark: #5E8E3E;
+            --nyon: #ef4444;
+            --nyon-dark: #b91c1c;
+            --coinsins: #3b82f6;
+            --coinsins-dark: #1d4ed8;
+            --shipping: #f97316;
+            --shipping-dark: #c2410c;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -56,19 +62,23 @@
         
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
             margin-bottom: 24px;
         }
         .stat-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 20px;
+            padding: 16px;
             text-align: center;
         }
-        .stat-card .value { font-size: 32px; font-weight: 700; color: var(--accent); }
-        .stat-card .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+        .stat-card .value { font-size: 28px; font-weight: 700; }
+        .stat-card .label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+        .stat-card.nyon .value { color: var(--nyon); }
+        .stat-card.coinsins .value { color: var(--coinsins); }
+        .stat-card.shipping .value { color: var(--shipping); }
+        .stat-card.total .value { color: var(--accent); }
         
         .actions {
             display: flex;
@@ -108,8 +118,8 @@
             overflow: hidden;
         }
         .date-header {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
-            color: #000;
+            background: linear-gradient(135deg, #475569 0%, #334155 100%);
+            color: #fff;
             padding: 16px 20px;
             font-weight: 700;
             font-size: 18px;
@@ -117,106 +127,237 @@
             justify-content: space-between;
             align-items: center;
         }
-        .date-header .count {
-            background: rgba(0,0,0,0.2);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 14px;
+        .date-header .badges { display: flex; gap: 8px; }
+        .date-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
         }
+        .date-badge.nyon { background: var(--nyon); color: #fff; }
+        .date-badge.coinsins { background: var(--coinsins); color: #fff; }
+        .date-badge.shipping { background: var(--shipping); color: #fff; }
         
-        .location-group {
-            border-bottom: 1px solid var(--border);
-        }
+        .location-group { border-bottom: 1px solid var(--border); }
         .location-group:last-child { border-bottom: none; }
         .location-header {
-            background: var(--bg-tertiary);
             padding: 12px 20px;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 14px;
         }
-        .location-icon { font-size: 20px; }
+        .location-header.nyon { background: linear-gradient(135deg, var(--nyon) 0%, var(--nyon-dark) 100%); color: #fff; }
+        .location-header.coinsins { background: linear-gradient(135deg, var(--coinsins) 0%, var(--coinsins-dark) 100%); color: #fff; }
+        .location-header.shipping { background: linear-gradient(135deg, var(--shipping) 0%, var(--shipping-dark) 100%); color: #fff; }
         
         .order-card {
-            padding: 16px 20px;
+            padding: 14px 20px;
             border-bottom: 1px solid var(--border);
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 16px;
-            align-items: start;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s;
         }
         .order-card:last-child { border-bottom: none; }
         .order-card:hover { background: var(--bg-tertiary); }
         
         .order-number {
-            background: var(--accent);
-            color: #000;
             padding: 8px 12px;
             border-radius: 8px;
             font-weight: 700;
             font-family: monospace;
-            font-size: 14px;
+            font-size: 13px;
+            color: #fff;
+            min-width: 100px;
+            text-align: center;
         }
-        .order-info h4 { font-size: 16px; margin-bottom: 4px; }
-        .order-info .detail { font-size: 13px; color: var(--text-secondary); margin-bottom: 2px; }
+        .order-number.nyon { background: var(--nyon); }
+        .order-number.coinsins { background: var(--coinsins); }
+        .order-number.shipping { background: var(--shipping); }
+        
+        .order-info { flex: 1; min-width: 0; }
+        .order-info h4 { font-size: 15px; margin-bottom: 3px; }
+        .order-info .detail { font-size: 12px; color: var(--text-secondary); }
+        
         .order-total {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--accent);
             text-align: right;
+            min-width: 90px;
         }
-        .order-time {
+        .order-total .amount { font-size: 18px; font-weight: 700; color: var(--accent); }
+        .order-total .time { font-size: 11px; color: var(--text-secondary); }
+        
+        .btn-details {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: #000;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-details:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(149, 191, 71, 0.4);
+        }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header.nyon { background: linear-gradient(135deg, var(--nyon) 0%, var(--nyon-dark) 100%); }
+        .modal-header.coinsins { background: linear-gradient(135deg, var(--coinsins) 0%, var(--coinsins-dark) 100%); }
+        .modal-header.shipping { background: linear-gradient(135deg, var(--shipping) 0%, var(--shipping-dark) 100%); }
+        .modal-header h2 { font-size: 20px; color: #fff; }
+        .modal-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            color: #fff;
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.3); }
+        
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .modal-section { margin-bottom: 20px; }
+        .modal-section-title {
             font-size: 12px;
             color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
         }
+        .modal-client {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: 12px;
+        }
+        .modal-client h3 { font-size: 18px; margin-bottom: 8px; }
+        .modal-client .info { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+        
+        .product-list { display: flex; flex-direction: column; gap: 10px; }
+        .product-item {
+            background: var(--bg-tertiary);
+            padding: 14px 16px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .product-item .qty {
+            background: var(--accent);
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-right: 12px;
+        }
+        .product-item .name { flex: 1; font-size: 14px; }
+        .product-item .price { font-weight: 600; color: var(--accent); }
+        
+        .modal-total {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #000;
+        }
+        .modal-total .label { font-weight: 600; }
+        .modal-total .amount { font-size: 24px; font-weight: 800; }
         
         #results { display: none; }
         #results.visible { display: block; }
         
         @media print {
-            body { background: white; color: black; padding: 0; }
-            .header, .import-zone, .actions, .stats { display: none; }
-            .date-section { break-inside: avoid; border: 1px solid #ccc; }
-            .date-header { background: #95BF47 !important; -webkit-print-color-adjust: exact; }
+            body { background: white; color: black; padding: 10px; font-size: 11px; }
+            .header, .import-zone, .actions, .stats, .btn-details, .modal-overlay { display: none !important; }
+            .date-section { break-inside: avoid; border: 1px solid #ccc; margin-bottom: 10px; }
+            .date-header { background: #333 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 10px 15px; }
+            .location-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 8px 15px; }
+            .location-header.nyon { background: #ef4444 !important; }
+            .location-header.coinsins { background: #3b82f6 !important; }
+            .location-header.shipping { background: #f97316 !important; }
+            .order-card { padding: 8px 15px; }
+            .order-number { padding: 4px 8px; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .order-number.nyon { background: #ef4444 !important; color: white !important; }
+            .order-number.coinsins { background: #3b82f6 !important; color: white !important; }
+            .order-number.shipping { background: #f97316 !important; color: white !important; }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>🛍️ Shopify → PDF</h1>
-        <p>Import CSV et génération PDF par date</p>
+        <p>Import CSV complet avec détails produits</p>
     </div>
 
     <div class="import-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
         <div class="icon">📄</div>
         <h3>Importer le fichier CSV</h3>
-        <p>Glisser-déposer ou cliquer pour sélectionner</p>
+        <p>Glisser-déposer ou cliquer pour sélectionner (orders_export)</p>
     </div>
     <input type="file" id="fileInput" accept=".csv">
 
     <div class="stats" id="statsSection" style="display: none;">
-        <div class="stat-card">
+        <div class="stat-card total">
             <div class="value" id="totalOrders">0</div>
             <div class="label">Commandes</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card total">
             <div class="value" id="totalDates">0</div>
             <div class="label">Dates</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card nyon">
             <div class="value" id="totalNyon">0</div>
-            <div class="label">Nyon</div>
+            <div class="label">🏪 Nyon</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card coinsins">
             <div class="value" id="totalCoinsins">0</div>
-            <div class="label">Coinsins</div>
+            <div class="label">🏭 Coinsins</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card shipping">
             <div class="value" id="totalShipping">0</div>
-            <div class="label">Livraison</div>
+            <div class="label">🚚 Livraison</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card total">
             <div class="value" id="totalAmount">0</div>
             <div class="label">CHF Total</div>
         </div>
@@ -230,10 +371,19 @@
 
     <div id="results"></div>
 
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header" id="modalHeader">
+                <h2 id="modalTitle">Commande</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
     <script>
-        let ordersData = [];
+        let ordersData = {};
         
-        // Drag & Drop
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         
@@ -258,7 +408,6 @@
         }
 
         function parseCSV(text) {
-            // Parser CSV robuste pour champs multilignes
             const lines = [];
             let currentLine = '';
             let inQuotes = false;
@@ -278,35 +427,76 @@
             }
             if (currentLine.trim()) lines.push(currentLine);
 
-            // Parse header
             const headers = parseCSVLine(lines[0]);
-            ordersData = [];
+            ordersData = {};
 
             for (let i = 1; i < lines.length; i++) {
                 const values = parseCSVLine(lines[i]);
                 if (values.length < 5) continue;
                 
-                const order = {};
-                headers.forEach((h, idx) => order[h.trim()] = (values[idx] || '').trim());
+                const row = {};
+                headers.forEach((h, idx) => row[h.trim()] = (values[idx] || '').trim());
                 
-                // Parse Due Date
-                const dueDate = order['Due Date'] || '';
-                order.parsedDate = parseDueDate(dueDate);
-                order.timeSlot = extractTimeSlot(dueDate);
+                const orderName = row['Name'] || '';
+                if (!orderName || !orderName.includes('#')) continue;
                 
-                // Parse location
-                order.location = order['Order Location'] || 'N/A';
-                if (order.location === 'N/A' && order['Fulfillment Type']?.includes('Shipping')) {
-                    order.location = 'Livraison';
+                const fulfillment = (row['Fulfillment Status'] || '').toLowerCase();
+                if (fulfillment === 'fulfilled') continue;
+                
+                const product = {
+                    qty: parseInt(row['Lineitem quantity']) || 1,
+                    name: row['Lineitem name'] || 'Article',
+                    price: parseFloat(row['Lineitem price']) || 0,
+                    sku: row['Lineitem sku'] || ''
+                };
+                
+                if (!ordersData[orderName]) {
+                    const noteAttr = row['Note Attributes'] || '';
+                    const shippingMethod = row['Shipping Method'] || '';
+                    
+                    let location = 'shipping';
+                    if (noteAttr.includes('Magasin de Nyon') || noteAttr.includes('Nyon')) {
+                        location = 'nyon';
+                    } else if (noteAttr.includes('Laboratoire de Coinsins') || noteAttr.includes('Coinsins')) {
+                        location = 'coinsins';
+                    } else if (shippingMethod.includes('Swiss Post') || shippingMethod.includes('Shipping') || shippingMethod.includes('Forfait')) {
+                        location = 'shipping';
+                    } else if (noteAttr.includes('Store Pickup')) {
+                        location = 'coinsins';
+                    }
+                    
+                    const dueDateMatch = noteAttr.match(/Order Due Date:\s*(\w+),\s*(\d+)\s+(\w+)\s+(\d{4})/);
+                    let dueDate = new Date();
+                    if (dueDateMatch) {
+                        const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+                        dueDate = new Date(parseInt(dueDateMatch[4]), months[dueDateMatch[3]], parseInt(dueDateMatch[2]));
+                    }
+                    
+                    const timeMatch = noteAttr.match(/Order Due Time:\s*([^\n]+)/);
+                    const timeSlot = timeMatch ? timeMatch[1].trim() : '';
+                    
+                    ordersData[orderName] = {
+                        orderName: orderName,
+                        email: row['Email'] || '',
+                        customer: row['Billing Name'] || row['Shipping Name'] || 'Client',
+                        phone: row['Billing Phone'] || row['Shipping Phone'] || row['Phone'] || '',
+                        address: [
+                            row['Shipping Address1'] || row['Billing Address1'],
+                            row['Shipping City'] || row['Billing City'],
+                            (row['Shipping Zip'] || row['Billing Zip'] || '').replace("'", '')
+                        ].filter(Boolean).join(', '),
+                        total: parseFloat(row['Total']) || 0,
+                        location: location,
+                        dueDate: dueDate,
+                        timeSlot: timeSlot,
+                        products: [],
+                        notes: row['Notes'] || ''
+                    };
                 }
                 
-                // Parse total
-                order.amount = parseFloat((order['Total'] || '0').replace('CHF', '').trim()) || 0;
-                
-                // Parse address
-                order.address = (order['Ship To'] || '').replace(/\n/g, ', ').trim();
-                
-                ordersData.push(order);
+                if (product.name && product.name !== 'Article') {
+                    ordersData[orderName].products.push(product);
+                }
             }
 
             displayResults();
@@ -337,50 +527,34 @@
             return values;
         }
 
-        function parseDueDate(str) {
-            // "Thu, 18 Dec 2025 11:00 AM - 12:00 PM" ou "Fri, 19 Dec 2025 "
-            const match = str.match(/(\w+),\s*(\d+)\s+(\w+)\s+(\d{4})/);
-            if (match) {
-                const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-                return new Date(parseInt(match[4]), months[match[3]], parseInt(match[2]));
-            }
-            return new Date();
-        }
-
-        function extractTimeSlot(str) {
-            const match = str.match(/(\d{1,2}:\d{2}\s*(?:AM|PM)?\s*-\s*\d{1,2}:\d{2}\s*(?:AM|PM)?)/i);
-            return match ? match[1] : '';
-        }
-
         function formatDate(date) {
             const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
             const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-            return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+            return days[date.getDay()] + ' ' + date.getDate() + ' ' + months[date.getMonth()] + ' ' + date.getFullYear();
         }
 
         function displayResults() {
-            // Group by date
+            const orders = Object.values(ordersData);
+            
             const byDate = {};
-            ordersData.forEach(order => {
-                const key = order.parsedDate.toISOString().split('T')[0];
+            orders.forEach(order => {
+                const key = order.dueDate.toISOString().split('T')[0];
                 if (!byDate[key]) byDate[key] = [];
                 byDate[key].push(order);
             });
 
-            // Sort dates (recent first)
             const sortedDates = Object.keys(byDate).sort((a, b) => new Date(a) - new Date(b));
 
-            // Stats
             let totalAmount = 0;
             let nyon = 0, coinsins = 0, shipping = 0;
-            ordersData.forEach(o => {
-                totalAmount += o.amount;
-                if (o.location.includes('Nyon')) nyon++;
-                else if (o.location.includes('Coinsins')) coinsins++;
+            orders.forEach(o => {
+                totalAmount += o.total;
+                if (o.location === 'nyon') nyon++;
+                else if (o.location === 'coinsins') coinsins++;
                 else shipping++;
             });
 
-            document.getElementById('totalOrders').textContent = ordersData.length;
+            document.getElementById('totalOrders').textContent = orders.length;
             document.getElementById('totalDates').textContent = sortedDates.length;
             document.getElementById('totalNyon').textContent = nyon;
             document.getElementById('totalCoinsins').textContent = coinsins;
@@ -389,58 +563,41 @@
             document.getElementById('statsSection').style.display = 'grid';
             document.getElementById('actionsSection').style.display = 'flex';
 
-            // Render
             let html = '';
             sortedDates.forEach(dateKey => {
-                const orders = byDate[dateKey];
+                const dateOrders = byDate[dateKey];
                 const date = new Date(dateKey);
                 
-                // Group by location
-                const byLocation = {};
-                orders.forEach(o => {
-                    const loc = o.location.includes('Nyon') ? 'Magasin de Nyon' :
-                                o.location.includes('Coinsins') ? 'Laboratoire de Coinsins' : 'Livraison';
-                    if (!byLocation[loc]) byLocation[loc] = [];
-                    byLocation[loc].push(o);
-                });
+                const locCounts = { nyon: 0, coinsins: 0, shipping: 0 };
+                dateOrders.forEach(o => locCounts[o.location]++);
+                
+                const byLocation = { nyon: [], coinsins: [], shipping: [] };
+                dateOrders.forEach(o => byLocation[o.location].push(o));
 
-                html += `<div class="date-section">
-                    <div class="date-header">
-                        <span>📅 ${formatDate(date)}</span>
-                        <span class="count">${orders.length} commande${orders.length > 1 ? 's' : ''}</span>
-                    </div>`;
+                html += '<div class="date-section"><div class="date-header"><span>📅 ' + formatDate(date) + '</span><div class="badges">';
+                if (locCounts.nyon > 0) html += '<span class="date-badge nyon">🏪 ' + locCounts.nyon + '</span>';
+                if (locCounts.coinsins > 0) html += '<span class="date-badge coinsins">🏭 ' + locCounts.coinsins + '</span>';
+                if (locCounts.shipping > 0) html += '<span class="date-badge shipping">🚚 ' + locCounts.shipping + '</span>';
+                html += '</div></div>';
 
-                const locationOrder = ['Magasin de Nyon', 'Laboratoire de Coinsins', 'Livraison'];
-                locationOrder.forEach(loc => {
-                    if (!byLocation[loc]) return;
-                    const locOrders = byLocation[loc].sort((a, b) => {
-                        if (a.timeSlot && b.timeSlot) return a.timeSlot.localeCompare(b.timeSlot);
-                        return 0;
-                    });
+                ['nyon', 'coinsins', 'shipping'].forEach(loc => {
+                    if (byLocation[loc].length === 0) return;
                     
-                    const icon = loc.includes('Nyon') ? '🏪' : loc.includes('Coinsins') ? '🏭' : '🚚';
+                    const locOrders = byLocation[loc].sort((a, b) => (a.timeSlot || '').localeCompare(b.timeSlot || ''));
+                    const locName = loc === 'nyon' ? '🏪 Magasin de Nyon' : loc === 'coinsins' ? '🏭 Laboratoire de Coinsins' : '🚚 Livraison Postale';
                     
-                    html += `<div class="location-group">
-                        <div class="location-header">
-                            <span class="location-icon">${icon}</span>
-                            <span>${loc} (${locOrders.length})</span>
-                        </div>`;
+                    html += '<div class="location-group"><div class="location-header ' + loc + '"><span>' + locName + ' (' + locOrders.length + ')</span></div>';
                     
                     locOrders.forEach(order => {
-                        html += `<div class="order-card">
-                            <div class="order-number">${order['Order'] || 'N/A'}</div>
-                            <div class="order-info">
-                                <h4>${order['Customer Name'] || 'Client'}</h4>
-                                <div class="detail">📧 ${(order['Customer'] || '').split(/[+\d]/)[0]}</div>
-                                ${order['Phone No'] ? `<div class="detail">📱 ${order['Phone No']}</div>` : ''}
-                                ${order.address ? `<div class="detail">📍 ${order.address}</div>` : ''}
-                                ${order.timeSlot ? `<div class="detail">⏰ ${order.timeSlot}</div>` : ''}
-                            </div>
-                            <div>
-                                <div class="order-total">CHF ${order.amount.toFixed(2)}</div>
-                                ${order.timeSlot ? `<div class="order-time">${order.timeSlot}</div>` : ''}
-                            </div>
-                        </div>`;
+                        const productCount = order.products.reduce((sum, p) => sum + p.qty, 0);
+                        html += '<div class="order-card">';
+                        html += '<div class="order-number ' + loc + '">' + order.orderName + '</div>';
+                        html += '<div class="order-info"><h4>' + order.customer + '</h4>';
+                        html += '<div class="detail">' + (order.timeSlot || 'Pas d\'heure') + ' • ' + productCount + ' article' + (productCount > 1 ? 's' : '') + '</div></div>';
+                        html += '<div class="order-total"><div class="amount">CHF ' + order.total.toFixed(2) + '</div>';
+                        html += '<div class="time">' + (order.timeSlot || '') + '</div></div>';
+                        html += '<button class="btn-details" onclick="showDetails(\'' + order.orderName + '\')">📦 Détails</button>';
+                        html += '</div>';
                     });
                     
                     html += '</div>';
@@ -454,114 +611,159 @@
             document.getElementById('dropZone').style.display = 'none';
         }
 
+        function showDetails(orderName) {
+            const order = ordersData[orderName];
+            if (!order) return;
+            
+            const modal = document.getElementById('modalOverlay');
+            const header = document.getElementById('modalHeader');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+            
+            header.className = 'modal-header ' + order.location;
+            title.textContent = order.orderName + ' - ' + order.customer;
+            
+            let productsHtml = order.products.map(p => 
+                '<div class="product-item"><span class="qty">' + p.qty + 'x</span><span class="name">' + p.name + '</span><span class="price">CHF ' + (p.qty * p.price).toFixed(2) + '</span></div>'
+            ).join('');
+            
+            body.innerHTML = '<div class="modal-section"><div class="modal-section-title">Client</div><div class="modal-client"><h3>' + order.customer + '</h3>' +
+                (order.email ? '<div class="info">📧 ' + order.email + '</div>' : '') +
+                (order.phone ? '<div class="info">📱 ' + order.phone + '</div>' : '') +
+                (order.address ? '<div class="info">📍 ' + order.address + '</div>' : '') +
+                '<div class="info">📅 ' + formatDate(order.dueDate) + (order.timeSlot ? ' • ⏰ ' + order.timeSlot : '') + '</div></div></div>' +
+                '<div class="modal-section"><div class="modal-section-title">Produits (' + order.products.length + ')</div><div class="product-list">' + productsHtml + '</div></div>' +
+                '<div class="modal-total"><span class="label">TOTAL</span><span class="amount">CHF ' + order.total.toFixed(2) + '</span></div>';
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal(e) {
+            if (!e || e.target === document.getElementById('modalOverlay')) {
+                document.getElementById('modalOverlay').classList.remove('active');
+            }
+        }
+
         function generatePDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
             const pageWidth = 210;
             const pageHeight = 297;
-            const margin = 15;
+            const margin = 12;
             let y = margin;
 
-            // Group by date
+            const orders = Object.values(ordersData);
             const byDate = {};
-            ordersData.forEach(order => {
-                const key = order.parsedDate.toISOString().split('T')[0];
+            orders.forEach(order => {
+                const key = order.dueDate.toISOString().split('T')[0];
                 if (!byDate[key]) byDate[key] = [];
                 byDate[key].push(order);
             });
             const sortedDates = Object.keys(byDate).sort((a, b) => new Date(a) - new Date(b));
 
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(18);
-            doc.setTextColor(0);
+            doc.setFontSize(16);
             doc.text('Commandes Shopify - Borex Poissons', margin, y);
-            y += 10;
-            doc.setFontSize(10);
+            y += 7;
+            doc.setFontSize(9);
             doc.setFont('helvetica', 'normal');
-            doc.text(`Généré le ${new Date().toLocaleDateString('fr-CH')} - ${ordersData.length} commandes`, margin, y);
-            y += 15;
+            doc.text('Genere le ' + new Date().toLocaleDateString('fr-CH') + ' - ' + orders.length + ' commandes', margin, y);
+            y += 10;
 
             sortedDates.forEach(dateKey => {
-                const orders = byDate[dateKey];
+                const dateOrders = byDate[dateKey];
                 const date = new Date(dateKey);
 
-                // Check space
-                if (y > pageHeight - 60) {
+                if (y > pageHeight - 50) {
                     doc.addPage();
                     y = margin;
                 }
 
-                // Date header
-                doc.setFillColor(149, 191, 71);
-                doc.rect(margin, y, pageWidth - 2 * margin, 10, 'F');
+                doc.setFillColor(71, 85, 105);
+                doc.rect(margin, y, pageWidth - 2 * margin, 8, 'F');
                 doc.setFont('helvetica', 'bold');
-                doc.setFontSize(12);
-                doc.setTextColor(0);
-                doc.text(`📅 ${formatDate(date)} - ${orders.length} commande(s)`, margin + 3, y + 7);
-                y += 14;
+                doc.setFontSize(11);
+                doc.setTextColor(255);
+                doc.text(formatDate(date) + ' - ' + dateOrders.length + ' cmd', margin + 3, y + 5.5);
+                y += 11;
 
-                // Group by location
-                const byLocation = {};
-                orders.forEach(o => {
-                    const loc = o.location.includes('Nyon') ? 'Nyon' :
-                                o.location.includes('Coinsins') ? 'Coinsins' : 'Livraison';
-                    if (!byLocation[loc]) byLocation[loc] = [];
-                    byLocation[loc].push(o);
-                });
+                const byLocation = { nyon: [], coinsins: [], shipping: [] };
+                dateOrders.forEach(o => byLocation[o.location].push(o));
 
-                ['Nyon', 'Coinsins', 'Livraison'].forEach(loc => {
-                    if (!byLocation[loc]) return;
-                    const locOrders = byLocation[loc].sort((a, b) => (a.timeSlot || '').localeCompare(b.timeSlot || ''));
+                [
+                    { key: 'nyon', name: 'Nyon', color: [239, 68, 68] },
+                    { key: 'coinsins', name: 'Coinsins', color: [59, 130, 246] },
+                    { key: 'shipping', name: 'Livraison', color: [249, 115, 22] }
+                ].forEach(loc => {
+                    if (byLocation[loc.key].length === 0) return;
+                    const locOrders = byLocation[loc.key].sort((a, b) => (a.timeSlot || '').localeCompare(b.timeSlot || ''));
 
-                    // Location header
-                    doc.setFillColor(51, 65, 85);
-                    doc.rect(margin, y, pageWidth - 2 * margin, 7, 'F');
+                    if (y > pageHeight - 40) {
+                        doc.addPage();
+                        y = margin;
+                    }
+
+                    doc.setFillColor(loc.color[0], loc.color[1], loc.color[2]);
+                    doc.rect(margin, y, pageWidth - 2 * margin, 6, 'F');
                     doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(10);
+                    doc.setFontSize(9);
                     doc.setTextColor(255);
-                    const icon = loc === 'Nyon' ? '🏪' : loc === 'Coinsins' ? '🏭' : '🚚';
-                    doc.text(`${icon} ${loc} (${locOrders.length})`, margin + 3, y + 5);
-                    y += 10;
+                    doc.text(loc.name + ' (' + locOrders.length + ')', margin + 3, y + 4.2);
+                    y += 8;
 
                     locOrders.forEach(order => {
-                        if (y > pageHeight - 30) {
+                        const lineHeight = 5 + order.products.length * 4;
+                        if (y + lineHeight > pageHeight - 10) {
                             doc.addPage();
                             y = margin;
                         }
 
+                        doc.setFillColor(loc.color[0], loc.color[1], loc.color[2]);
+                        doc.roundedRect(margin, y, 22, 5, 1, 1, 'F');
+                        doc.setTextColor(255);
+                        doc.setFontSize(8);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(order.orderName.replace('Web ', ''), margin + 2, y + 3.5);
+                        
+                        doc.setTextColor(0);
+                        doc.setFontSize(9);
+                        doc.text(order.customer, margin + 26, y + 3.5);
+                        
+                        doc.setFont('helvetica', 'normal');
+                        doc.setTextColor(100);
+                        doc.setFontSize(8);
+                        doc.text(order.timeSlot || '', margin + 26, y + 7);
+                        
                         doc.setTextColor(0);
                         doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(10);
-                        doc.text(order['Order'] || '', margin, y + 4);
-                        doc.text(order['Customer Name'] || '', margin + 30, y + 4);
+                        doc.text('CHF ' + order.total.toFixed(2), pageWidth - margin - 22, y + 3.5);
+                        
+                        y += 9;
+
                         doc.setFont('helvetica', 'normal');
-                        doc.setFontSize(9);
-                        doc.text(`CHF ${order.amount.toFixed(2)}`, pageWidth - margin - 25, y + 4);
+                        doc.setFontSize(7);
+                        doc.setTextColor(60);
+                        order.products.forEach(p => {
+                            const prodText = '  ' + p.qty + 'x ' + p.name;
+                            const truncated = prodText.length > 80 ? prodText.substring(0, 77) + '...' : prodText;
+                            doc.text(truncated, margin + 26, y);
+                            y += 3.5;
+                        });
                         
-                        y += 5;
-                        doc.setTextColor(100);
-                        const details = [];
-                        if (order.timeSlot) details.push(`⏰ ${order.timeSlot}`);
-                        if (order['Phone No']) details.push(`📱 ${order['Phone No']}`);
-                        doc.text(details.join('  |  '), margin + 30, y + 3);
-                        
-                        y += 8;
-                        doc.setDrawColor(200);
-                        doc.line(margin, y, pageWidth - margin, y);
                         y += 3;
                     });
 
-                    y += 5;
+                    y += 3;
                 });
 
-                y += 10;
+                y += 5;
             });
 
-            doc.save(`Commandes_Shopify_${new Date().toISOString().split('T')[0]}.pdf`);
+            doc.save('Commandes_Shopify_' + new Date().toISOString().split('T')[0] + '.pdf');
         }
 
         function resetAll() {
-            ordersData = [];
+            ordersData = {};
             document.getElementById('results').innerHTML = '';
             document.getElementById('results').classList.remove('visible');
             document.getElementById('dropZone').style.display = 'block';
@@ -569,6 +771,10 @@
             document.getElementById('actionsSection').style.display = 'none';
             document.getElementById('fileInput').value = '';
         }
+        
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+        });
     </script>
 </body>
 </html>
